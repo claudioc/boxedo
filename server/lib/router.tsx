@@ -4,6 +4,7 @@ import { NotFoundPage } from '../views/NotFoundPage';
 import { ErrorPage } from '../views/ErrorPage';
 import { EditPage } from '../views/EditPage';
 import { CreatePage } from '../views/CreatePage';
+import { CreateIndex } from '../views/CreateIndex';
 import { ServerTime } from '../views/components/ServerTime';
 import { FromSchema } from 'json-schema-to-ts';
 
@@ -29,6 +30,11 @@ const PageBodySchema = {
   },
 } as const;
 
+const DEFAULT_HOMEPAGE = {
+  pageTitle: 'Welcome to Joongle!',
+  pageContent: '<p>Click on the "Create this page" link to get started</p>',
+};
+
 /**
  * Encapsulates the routes
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -36,7 +42,18 @@ const PageBodySchema = {
  */
 const router = async (app: FastifyInstance) => {
   app.get('/', async () => {
-    return <IndexPage title="The home page" />;
+    const page = await app.mongo.db
+      ?.collection('pages')
+      .findOne({ pageId: 'index' });
+
+    const isEmpty = page?.pageContent === undefined;
+    const content = isEmpty ? DEFAULT_HOMEPAGE.pageContent : page.pageContent;
+    const title = page?.pageTitle || DEFAULT_HOMEPAGE.pageTitle;
+    return <IndexPage title={title} content={content} isEmpty />;
+  });
+
+  app.get('/create-index', async () => {
+    return <CreateIndex title={DEFAULT_HOMEPAGE.pageTitle} />;
   });
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
@@ -67,6 +84,24 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, res) => {
       const { pageId } = req.params;
+
+      const page = await app.mongo.db?.collection('pages').findOne({ pageId });
+
+      if (!page) {
+        // TODO: handle error
+        return res.redirect(303, '/');
+      }
+
+      // Update the page in mongodb
+      // await app.mongo.db?.collection('pages').updateOne(
+      //   { _id: app.mongo.ObjectId(pageId) },
+      //   {
+      //     $set: {
+      //       pageTitle: req.body.pageTitle,
+      //       pageContent: req.body.pageContent,
+      //     },
+      //   }
+      // );
 
       console.log('pageId', pageId);
       console.log('Content', req.body.pageTitle, req.body.pageContent);

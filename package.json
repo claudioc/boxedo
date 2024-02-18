@@ -11,7 +11,7 @@
   "scripts": {
     "dev:build": "npm run clean && tsc -b ./client ./server",
     "dev:watch": "tsc -b ./client ./server --preserveWatchOutput -w",
-    "dev:start": "node --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
+    "dev:start": "node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
     "dev:esbuild": "esbuild ./client/app.ts --bundle --analyze --outdir=./dist/client --watch --entry-names=[dir]/[name]-[hash] --metafile=./dist/client-meta.json --sourcemap",
     "dev": "npm run dev:build && conc -r -k 'npm:dev:start' 'npm:dev:watch' 'npm:dev:esbuild'",
     "clean": "rm -rf ./dist",
@@ -19,7 +19,9 @@
     "postinstall": "npm run build",
     "lint": "eslint . --ext .ts",
     "prestart": "NODE_ENV=production npm run build",
-    "start": "NODE_ENV=production node ./dist/server/app.js"
+    "start": "NODE_ENV=production node ./dist/server/app.js",
+    "mongo:start": "docker run --rm -d -p 27017:27017 --name mongo-joongle mongo:7",
+    "mongo:stop": "docker stop mongo-joongle"
   },
   "prettier": {
     "printWidth": 80,
@@ -61,8 +63,10 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
+    "@fastify/env": "^4.3.0",
     "@fastify/formbody": "^7.4.0",
     "@fastify/helmet": "^11.1.1",
+    "@fastify/mongodb": "^8.0.0",
     "@fastify/static": "^6.12.0",
     "@tiptap/core": "^2.1.16",
     "@tiptap/extension-document": "^2.1.16",
