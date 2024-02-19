@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import staticServe from '@fastify/static';
@@ -12,7 +13,21 @@ import { NodeEnv } from '../types';
 import fastifyEnv from '@fastify/env';
 import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
-import { config } from 'process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Fix thread-stream error due to __dirname in pino
+// @ts-ignore
+globalThis.__bundlerPathsOverrides = {
+  'thread-stream-worker': path.join(
+    // @ts-ignore
+    path.dirname(createRequire(import.meta.url).resolve('thread-stream')),
+    'lib',
+    'worker.js'
+  ),
+};
 
 const ConfigEnvSchema = {
   type: 'object',
@@ -31,6 +46,7 @@ declare module 'fastify' {
     config: FromSchema<typeof ConfigEnvSchema>;
   }
 }
+
 const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
   development: {
     transport: {

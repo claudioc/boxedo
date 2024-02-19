@@ -3,22 +3,23 @@
   "version": "0.1.0",
   "description": "",
   "main": "./dist/app.js",
+  "type": "module",
   "author": "",
   "license": "ISC",
   "engines": {
     "node": ">=20.6.0"
   },
   "scripts": {
-    "dev:build": "npm run clean && tsc -b ./client ./server",
     "dev:watch": "tsc -b ./client ./server --preserveWatchOutput -w",
-    "dev:start": "node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
-    "dev:esbuild": "esbuild ./client/app.ts --bundle --analyze --outdir=./dist/client --watch --entry-names=[dir]/[name]-[hash] --metafile=./dist/client-meta.json --sourcemap",
-    "dev": "npm run dev:build && conc -r -k 'npm:dev:start' 'npm:dev:watch' 'npm:dev:esbuild'",
+    "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
+    "dev:build:client": "esbuild ./client/app.ts --bundle --analyze --outdir=./dist/client --watch --entry-names=[dir]/[name]-[hash] --metafile=./dist/client-meta.json --sourcemap",
+    "dev:build:server": "esbuild ./server/app.ts --banner:js='import { createRequire } from \"module\";const require = createRequire(import.meta.url);' --bundle --platform=node --outdir=./dist/server --format=esm --watch",
+    "dev": "npm run clean && conc -r -k 'npm:dev:*'",
     "clean": "rm -rf ./dist",
     "build": "npm run lint && npm run dev:build",
     "postinstall": "npm run build",
     "lint": "eslint . --ext .ts",
-    "prestart": "NODE_ENV=production npm run build",
+    "prestart": "NODE_ENV=production npm --env-file=.env run build",
     "start": "NODE_ENV=production node ./dist/server/app.js",
     "mongo:start": "docker run --rm -d -p 27017:27017 --name mongo-joongle mongo:7",
     "mongo:stop": "docker stop mongo-joongle"
@@ -60,7 +61,8 @@
     "eslint": "^8.55.0",
     "eslint-plugin-import": "^2.29.0",
     "json-schema-to-ts": "^3.0.0",
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.2",
+    "wait-on": "^7.2.0"
   },
   "dependencies": {
     "@fastify/env": "^4.3.0",

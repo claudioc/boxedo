@@ -1,5 +1,6 @@
 import { Layout } from './Layout';
 import { PageProps } from '../types';
+// import styles from './CreateIndex.module.css';
 
 export const CreateIndex = ({ title }: PageProps) => (
   <Layout title={`Creating the home page`}>

@@ -6,14 +6,16 @@ import {
 } from './constants.js';
 import * as fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/style.css?_=${CACHE_BUSTER}`;
 
 export const getJsBundleName = (): string => {
   // Read the client-meta.json file
-  const buffer = fs.readFileSync(
-    path.join(__dirname, '../../client-meta.json')
-  );
+  const buffer = fs.readFileSync(path.join(__dirname, '../client-meta.json'));
 
   if (!buffer) {
     return '';
