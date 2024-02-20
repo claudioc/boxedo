@@ -4,7 +4,7 @@ import styles from './CreateIndex.module.css';
 
 export const CreateIndex = ({ title }: PageProps) => (
   <Layout title={`Creating the home page`}>
-    <form action="" method="post" className={styles.test}>
+    <form action="" method="post" className={styles.asd}>
       <button class="button primary" type="submit">
         Save and close!!!
       </button>

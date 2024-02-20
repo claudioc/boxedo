@@ -1,10 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
+  "include": ["**/*.ts", "**/*.tsx", "types.d.ts"],
   "compilerOptions": {
     "lib": ["es2022"],
     "target": "es2022",
     "resolveJsonModule": true,
-
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "noEmit": true,
