@@ -14,6 +14,8 @@ import fastifyEnv from '@fastify/env';
 import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
+import methodOverridePlugin from './methodOverride';
+import fastifyUUID from 'fastify-uuid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,6 +66,9 @@ const app = Fastify({
   logger:
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
+
+app.register(methodOverridePlugin);
+app.register(fastifyUUID);
 
 app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
