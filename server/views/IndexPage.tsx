@@ -16,6 +16,9 @@ export const IndexPage = ({ title, content, isEmpty }: IndexPageProps) => (
       <li>
         <a href={`/create/${INDEX_PAGE_ID}`}>Create subpage</a>
       </li>
+      <li>
+        <a href="/pages">List all pages</a>
+      </li>
     </ul>
     <div>
       <h1>{title}</h1>

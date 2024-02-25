@@ -8,8 +8,9 @@ import { CreatePage } from '../views/CreatePage';
 import { CreateIndex } from '../views/CreateIndex';
 import { ServerTime } from '../views/components/ServerTime';
 import { FromSchema } from 'json-schema-to-ts';
+import { PagesPage } from '../views/PagesPage';
 import { INDEX_PAGE_ID } from '../constants';
-import { ObjectId } from 'mongodb';
+import { PageModel, PageWithoutContentModel } from '../types';
 
 const pageIdSchema = {
   oneOf: [
@@ -43,14 +44,6 @@ const PageBodySchema = {
   },
 } as const;
 
-interface PageModel {
-  _id: ObjectId;
-  pageId: string;
-  pageParentId: string;
-  pageTitle: string;
-  pageContent: string;
-}
-
 const DEFAULT_HOMEPAGE: Partial<PageModel> = {
   pageTitle: 'Welcome to Joongle!',
   pageContent: '<p>Click on the "Create this page" link to get started</p>',
@@ -75,8 +68,26 @@ const router = async (app: FastifyInstance) => {
     return <IndexPage title={title} content={content} isEmpty={isEmpty} />;
   });
 
+  // List all pages
+  app.get('/pages', async () => {
+    const pages = await app.mongo.db
+      ?.collection<PageWithoutContentModel>('pages')
+      .find(
+        {},
+        {
+          projection: {
+            pageId: 1,
+            pageTitle: 1,
+          },
+        }
+      )
+      .toArray();
+
+    return <PagesPage pages={pages || []} />;
+  });
+
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
-    '/read/:pageId',
+    '/page/:pageId',
     {
       schema: {
         params: PageParamsSchema,
