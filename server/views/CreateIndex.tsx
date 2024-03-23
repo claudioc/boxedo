@@ -1,8 +1,11 @@
 import { Layout } from './Layout';
-import { PageProps } from '../types';
 import styles from './CreateIndex.module.css';
 
-export const CreateIndex = ({ title }: PageProps) => (
+interface CreateIndexProps {
+  title: string;
+}
+
+export const CreateIndex = ({ title }: CreateIndexProps) => (
   <Layout title={`Creating the home page`}>
     <form action="" method="post" className={styles.asd}>
       <button class="button primary" type="submit">

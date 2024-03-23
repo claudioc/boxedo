@@ -1,7 +1,7 @@
 import { Layout } from './Layout';
-import { PageProps } from '../types';
 
-interface ErrorPageProps extends PageProps {
+interface ErrorPageProps {
+  title: string;
   error: Error | string;
 }
 

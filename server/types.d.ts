@@ -1,18 +1,18 @@
-import { ObjectId } from 'mongodb';
-
-export interface PageProps {
-  title: string;
-  content?: string | null;
-}
+// import { WithoutId } from 'mongodb';
 
 export type NodeEnv = 'development' | 'production';
 
 export interface PageModel {
-  _id: ObjectId;
   pageId: string;
-  pageParentId: string;
+  parentPageId?: string;
   pageTitle: string;
   pageContent: string;
+}
+
+export interface NavItem {
+  title: string;
+  link: string;
+  children: NavItem[];
 }
 
 export type PageWithoutContentModel = Omit<PageModel, 'pageContent'>;

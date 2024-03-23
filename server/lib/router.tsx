@@ -1,16 +1,16 @@
 import { FastifyInstance } from 'fastify';
-import { IndexPage } from '../views/IndexPage';
 import { ReadPage } from '../views/ReadPage';
 import { NotFoundPage } from '../views/NotFoundPage';
 import { ErrorPage } from '../views/ErrorPage';
 import { EditPage } from '../views/EditPage';
 import { CreatePage } from '../views/CreatePage';
 import { CreateIndex } from '../views/CreateIndex';
-import { ServerTime } from '../views/components/ServerTime';
+import { Nav } from '../views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
 import { PagesPage } from '../views/PagesPage';
 import { INDEX_PAGE_ID } from '../constants';
-import { PageModel, PageWithoutContentModel } from '../types';
+import { PageModel, PageWithoutContentModel, NavItem } from '../types';
+import { Db } from 'mongodb';
 
 const pageIdSchema = {
   oneOf: [
@@ -44,7 +44,8 @@ const PageBodySchema = {
   },
 } as const;
 
-const DEFAULT_HOMEPAGE: Partial<PageModel> = {
+const DEFAULT_HOMEPAGE: PageModel = {
+  pageId: INDEX_PAGE_ID,
   pageTitle: 'Welcome to Joongle!',
   pageContent: '<p>Click on the "Create this page" link to get started</p>',
 };
@@ -58,14 +59,46 @@ const router = async (app: FastifyInstance) => {
   // The home page, folks
   app.get('/', async () => {
     const page = await app.mongo.db
-      ?.collection('pages')
+      ?.collection<PageModel>('pages')
       .findOne({ pageId: INDEX_PAGE_ID });
 
-    const isEmpty = page?.pageContent === undefined;
-    const content = isEmpty ? DEFAULT_HOMEPAGE.pageContent : page.pageContent;
-    const title = page?.pageTitle || DEFAULT_HOMEPAGE.pageTitle;
+    return <ReadPage page={page || DEFAULT_HOMEPAGE} />;
+  });
 
-    return <IndexPage title={title} content={content} isEmpty={isEmpty} />;
+  app.get('/parts/pages', async () => {
+    const root = await app.mongo.db
+      ?.collection<PageModel>('pages')
+      .findOne({ pageId: INDEX_PAGE_ID });
+
+    if (!root) {
+      return 'No root pages found';
+    }
+
+    const tree: NavItem = {
+      title: root.pageTitle, // Assuming a title property exists
+      link: `/page/${root.pageId}`, // Assuming a link format for pages
+      children: await buildMenuTree(app.mongo.db, root.pageId),
+    };
+
+    const pages = await app.mongo.db
+      ?.collection<PageWithoutContentModel>('pages')
+      .find(
+        {},
+        {
+          projection: {
+            pageId: 1,
+            pageTitle: 1,
+            parentPageId: 1,
+          },
+        }
+      )
+      .toArray();
+
+    if (!pages) {
+      return 'No pages found';
+    }
+
+    return <Nav tree={tree} />;
   });
 
   // List all pages
@@ -96,13 +129,15 @@ const router = async (app: FastifyInstance) => {
     async (req) => {
       const { pageId } = req.params;
 
-      const page = await app.mongo.db?.collection('pages').findOne({ pageId });
+      const page = await app.mongo.db
+        ?.collection<PageModel>('pages')
+        .findOne({ pageId });
 
       if (!page) {
         return <NotFoundPage title="Page not found" />;
       }
 
-      return <ReadPage title={page.pageTitle} content={page.pageContent} />;
+      return <ReadPage page={page} />;
     }
   );
 
@@ -202,7 +237,7 @@ const router = async (app: FastifyInstance) => {
         return res.redirect(303, '/?error=5');
       }
 
-      return res.redirect(303, '/');
+      return res.redirect(303, pathForRead(pageId));
     }
   );
 
@@ -254,9 +289,10 @@ const router = async (app: FastifyInstance) => {
         return res.redirect(303, '/?error=8');
       }
 
+      const pageId = app.uuid.v4();
       try {
         await app.mongo.db?.collection('pages').insertOne({
-          pageId: app.uuid.v4(),
+          pageId,
           parentPageId,
           pageTitle: req.body.pageTitle,
           pageContent: req.body.pageContent,
@@ -266,7 +302,7 @@ const router = async (app: FastifyInstance) => {
         return res.redirect(303, '/?error=9');
       }
 
-      return res.redirect(303, '/');
+      return res.redirect(303, pathForRead(pageId));
     }
   );
 
@@ -280,11 +316,49 @@ const router = async (app: FastifyInstance) => {
     if (req.headers['hx-request']) {
       // If the request is a HTMX request, we send the error message as
       // a normal partial response.
-      return <ServerTime error="An unexpected error occurred" />;
+      return 'An unexpected error occurred';
     } else {
       return <ErrorPage title="Unhandled error" error={err} />;
     }
   });
 };
+
+const pathForRead = (pageId: string) => `/page/${pageId}`;
+
+async function buildMenuTree(
+  db: Db | undefined,
+  parentId: string
+): Promise<NavItem[]> {
+  if (!db) {
+    return [];
+  }
+
+  const pages = await db
+    .collection<PageWithoutContentModel>('pages')
+    .find(
+      { parentPageId: parentId },
+      {
+        projection: {
+          pageId: 1,
+          pageTitle: 1,
+          parentPageId: 1,
+        },
+      }
+    )
+    .toArray();
+
+  const menuTree = [];
+  for (const page of pages) {
+    const menuItem: NavItem = {
+      title: page.pageTitle,
+      link: pathForRead(page.pageId),
+      children: await buildMenuTree(db, page.pageId),
+    };
+
+    menuTree.push(menuItem);
+  }
+
+  return menuTree;
+}
 
 export default router;

@@ -1,7 +1,11 @@
 import { Layout } from './Layout';
-import { PageProps } from '../types';
 
-export const EditPage = ({ title, content }: PageProps) => (
+export interface EditPageProps {
+  title: string;
+  content: string;
+}
+
+export const EditPage = ({ title, content }: EditPageProps) => (
   <Layout title={`Editing ${title}`}>
     <form action="" method="post">
       <button class="button primary" type="submit">

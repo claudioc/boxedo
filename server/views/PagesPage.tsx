@@ -6,7 +6,7 @@ interface PagesPageProps {
 }
 
 export const PagesPage = ({ pages }: PagesPageProps) => (
-  <Layout title="All pages" isIndex>
+  <Layout title="All pages">
     <h1>All pages</h1>
     <ul>
       {pages.map((page) => (
