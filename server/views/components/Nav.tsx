@@ -1,4 +1,5 @@
 import { NavItem } from '../../types';
+import clsx from 'clsx';
 import styles from './Nav.module.css';
 
 interface NavProps {
@@ -11,10 +12,10 @@ let pageId = '';
 export const Nav = ({ tree, currentPageId }: NavProps) => {
   pageId = currentPageId;
   return (
-    <nav className={styles.Nav}>
+    <nav className={clsx(styles.Nav, 'nav')}>
       <a
         href={tree.link}
-        className={tree.pageId === pageId ? styles.active : ''}
+        className={tree.pageId === pageId ? clsx(styles.active, 'active') : ''}
       >
         {tree.title}
       </a>
@@ -32,7 +33,9 @@ const NavTree = ({ items }: NavTreeProps) => (
     {items.map((item: NavItem) => (
       <li key={item.link}>
         <a
-          className={item.pageId === pageId ? styles.active : ''}
+          className={
+            item.pageId === pageId ? clsx(styles.active, 'active') : ''
+          }
           href={item.link}
         >
           {item.title}

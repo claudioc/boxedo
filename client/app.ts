@@ -2,6 +2,7 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
+import Typography from '@tiptap/extension-typography';
 import { generateHTML } from '@tiptap/html';
 
 import Alpine, { Alpine as AlpineType } from 'alpinejs';
@@ -21,6 +22,7 @@ declare global {
 window.Alpine = Alpine;
 
 const extensions = [
+  Typography,
   Document.extend({
     content: 'heading block*',
   }),

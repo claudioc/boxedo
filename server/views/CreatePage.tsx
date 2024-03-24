@@ -1,5 +1,4 @@
 import { Layout } from './Layout';
-import styles from './CreatePage.module.css';
 import { PageModel } from '../types';
 
 export interface CreatePageProps {
@@ -13,7 +12,7 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
     pageId={parentPage.pageId}
   >
     <h1>Creating a new page</h1>
-    <form action="" method="post" className={styles.form}>
+    <form action="" method="post">
       <nav class="nav">
         <div class="nav-right">
           <button class="button primary" type="submit">
@@ -25,8 +24,11 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
         </div>
       </nav>
       <div id="editor-placeholder"></div>
-      <input type="text" name="pageTitle" />
-      <textarea name="pageContent"></textarea>
+      <details>
+        <summary>Debug</summary>
+        <input type="text" name="pageTitle" />
+        <textarea name="pageContent"></textarea>
+      </details>
     </form>
     <script defer>App.enableEditor()</script>
   </Layout>

@@ -1,10 +1,18 @@
+.Nav {
+  flex-direction: column;
+}
+
 .Nav ul {
   margin: 0;
   padding: 0;
   list-style-type: square;
-  margin-left: 1.5rem;
+  margin-left: 1.6rem;
 }
 
 .Nav a.active {
   text-decoration: underline;
+}
+
+.Nav a {
+  padding: 0.5rem 0;
 }

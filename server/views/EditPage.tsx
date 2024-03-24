@@ -28,8 +28,11 @@ export const EditPage = ({ page }: EditPageProps) => (
         <h1>{page.pageTitle}</h1>
         {page.pageContent}
       </div>
-      <input type="text" name="pageTitle" value={page.pageTitle} />
-      <textarea name="pageContent">{page.pageContent}</textarea>
+      <details>
+        <summary>Debug</summary>
+        <input type="text" name="pageTitle" value={page.pageTitle} />
+        <textarea name="pageContent">{page.pageContent}</textarea>
+      </details>
     </form>
     <script defer>App.enableEditor()</script>
   </Layout>
