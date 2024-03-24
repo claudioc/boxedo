@@ -7,10 +7,16 @@ import { INDEX_PAGE_ID } from '../constants';
 interface LayoutProps {
   title: string;
   pageId?: string;
+  hasMenu?: boolean;
   children: string | JSX.Element[] | JSX.Element;
 }
 
-export const Layout = ({ title, pageId, children }: LayoutProps) => {
+export const Layout = ({
+  title,
+  pageId,
+  hasMenu = true,
+  children,
+}: LayoutProps) => {
   const isIndex = pageId === INDEX_PAGE_ID;
 
   return (
@@ -28,9 +34,15 @@ export const Layout = ({ title, pageId, children }: LayoutProps) => {
         <header>
           This is it {!isIndex ? <a href="/">Go home now</a> : ''}
         </header>
-        <Menu pageId={pageId} />
+        {hasMenu && <Menu pageId={pageId} />}
         <main class="row">
-          <div class="col-3" hx-get="/parts/pages" hx-trigger="load"></div>
+          {pageId && (
+            <div
+              class="col-3"
+              hx-get={`/parts/nav/${pageId}`}
+              hx-trigger="load"
+            ></div>
+          )}
           <div class="col">{children}</div>
         </main>
       </body>

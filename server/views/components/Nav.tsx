@@ -3,28 +3,42 @@ import styles from './Nav.module.css';
 
 interface NavProps {
   tree: NavItem;
+  currentPageId: string;
 }
 
-export const Nav = ({ tree }: NavProps) => {
+let pageId = '';
+
+export const Nav = ({ tree, currentPageId }: NavProps) => {
+  pageId = currentPageId;
   return (
     <nav className={styles.Nav}>
-      <ul>
-        <li>
-          <a href={tree.link}>{tree.title}</a>
-          <NavItem items={tree.children} />
-        </li>
-      </ul>
+      <a
+        href={tree.link}
+        className={tree.pageId === pageId ? styles.active : ''}
+      >
+        {tree.title}
+      </a>
+      <NavTree items={tree.children} />
     </nav>
   );
 };
 
-const NavItem = ({ items }: { items: NavItem[] }) => (
+interface NavTreeProps {
+  items: NavItem[];
+}
+
+const NavTree = ({ items }: NavTreeProps) => (
   <ul>
     {items.map((item: NavItem) => (
       <li key={item.link}>
-        <a href={item.link}>{item.title}</a>
+        <a
+          className={item.pageId === pageId ? styles.active : ''}
+          href={item.link}
+        >
+          {item.title}
+        </a>
         {item.children && item.children.length ? (
-          <NavItem items={item.children} />
+          <NavTree items={item.children} />
         ) : null}
       </li>
     ))}

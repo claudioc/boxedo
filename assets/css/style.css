@@ -31,3 +31,7 @@ body > header {
 #editor-data {
   display: none;
 }
+
+h1 {
+  margin-top: 0;
+}

@@ -50,6 +50,14 @@ const DEFAULT_HOMEPAGE: PageModel = {
   pageContent: '<p>Click on the "Create this page" link to get started</p>',
 };
 
+const PageWithoutContentProjection = {
+  projection: {
+    pageId: 1,
+    pageTitle: 1,
+    parentPageId: 1,
+  },
+} as const;
+
 /**
  * Encapsulates the routes
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -58,66 +66,36 @@ const DEFAULT_HOMEPAGE: PageModel = {
 const router = async (app: FastifyInstance) => {
   // The home page, folks
   app.get('/', async () => {
-    const page = await app.mongo.db
-      ?.collection<PageModel>('pages')
-      .findOne({ pageId: INDEX_PAGE_ID });
-
-    return <ReadPage page={page || DEFAULT_HOMEPAGE} />;
+    const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
+    return <ReadPage page={root || DEFAULT_HOMEPAGE} />;
   });
 
-  app.get('/parts/pages', async () => {
-    const root = await app.mongo.db
-      ?.collection<PageModel>('pages')
-      .findOne({ pageId: INDEX_PAGE_ID });
+  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+    '/parts/nav/:pageId',
+    {
+      schema: {
+        params: PageParamsSchema,
+      },
+    },
+    async (req) => {
+      const { pageId } = req.params;
 
-    if (!root) {
-      return 'No root pages found';
+      const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
+
+      if (!root) {
+        return 'No root page found';
+      }
+
+      const tree: NavItem = {
+        pageId: root.pageId,
+        title: root.pageTitle,
+        link: '/',
+        children: await buildMenuTree(app.mongo.db, root.pageId),
+      };
+
+      return <Nav tree={tree} currentPageId={pageId} />;
     }
-
-    const tree: NavItem = {
-      title: root.pageTitle, // Assuming a title property exists
-      link: `/page/${root.pageId}`, // Assuming a link format for pages
-      children: await buildMenuTree(app.mongo.db, root.pageId),
-    };
-
-    const pages = await app.mongo.db
-      ?.collection<PageWithoutContentModel>('pages')
-      .find(
-        {},
-        {
-          projection: {
-            pageId: 1,
-            pageTitle: 1,
-            parentPageId: 1,
-          },
-        }
-      )
-      .toArray();
-
-    if (!pages) {
-      return 'No pages found';
-    }
-
-    return <Nav tree={tree} />;
-  });
-
-  // List all pages
-  app.get('/pages', async () => {
-    const pages = await app.mongo.db
-      ?.collection<PageWithoutContentModel>('pages')
-      .find(
-        {},
-        {
-          projection: {
-            pageId: 1,
-            pageTitle: 1,
-          },
-        }
-      )
-      .toArray();
-
-    return <PagesPage pages={pages || []} />;
-  });
+  );
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
     '/page/:pageId',
@@ -129,9 +107,7 @@ const router = async (app: FastifyInstance) => {
     async (req) => {
       const { pageId } = req.params;
 
-      const page = await app.mongo.db
-        ?.collection<PageModel>('pages')
-        .findOne({ pageId });
+      const page = await getPageById(app.mongo.db, pageId);
 
       if (!page) {
         return <NotFoundPage title="Page not found" />;
@@ -150,11 +126,9 @@ const router = async (app: FastifyInstance) => {
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
   }>('/create-index', async (req, res) => {
-    const page = await app.mongo.db
-      ?.collection('pages')
-      .findOne({ pageId: INDEX_PAGE_ID });
+    const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
 
-    if (page) {
+    if (root) {
       app.log.error('Index page already exists');
       return res.redirect(303, '/?error=1');
     }
@@ -187,16 +161,14 @@ const router = async (app: FastifyInstance) => {
     async (req, res) => {
       const { pageId } = req.params;
 
-      const page = await app.mongo.db
-        ?.collection<PageModel>('pages')
-        .findOne({ pageId });
+      const page = await getPageById(app.mongo.db, pageId);
 
       if (!page) {
         // TODO: handle error
         return res.redirect(303, '/error=3');
       }
 
-      return <EditPage title={page.pageTitle} content={page.pageContent} />;
+      return <EditPage page={page} />;
     }
   );
 
@@ -215,8 +187,7 @@ const router = async (app: FastifyInstance) => {
     async (req, res) => {
       const { pageId } = req.params;
 
-      const page = await app.mongo.db?.collection('pages').findOne({ pageId });
-
+      const page = await getPageById(app.mongo.db, pageId);
       if (!page) {
         // TODO: handle error
         return res.redirect(303, '/error=4');
@@ -254,15 +225,13 @@ const router = async (app: FastifyInstance) => {
     async (req, res) => {
       const { parentPageId } = req.params;
 
-      const parentPage = await app.mongo.db
-        ?.collection('pages')
-        .findOne({ pageId: parentPageId });
+      const parentPage = await getPageById(app.mongo.db, parentPageId);
 
       if (!parentPage) {
         return res.redirect(303, '/?error=10');
       }
 
-      return <CreatePage />;
+      return <CreatePage parentPage={parentPage} />;
     }
   );
 
@@ -281,9 +250,7 @@ const router = async (app: FastifyInstance) => {
     async (req, res) => {
       const { parentPageId } = req.params;
 
-      const parentPage = await app.mongo.db
-        ?.collection('pages')
-        .findOne({ pageId: parentPageId });
+      const parentPage = await getPageById(app.mongo.db, parentPageId);
 
       if (!parentPage) {
         return res.redirect(303, '/?error=8');
@@ -306,19 +273,39 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
+  // List all pages
+  app.get('/pages', async () => {
+    const pages =
+      (await app.mongo.db
+        ?.collection<PageWithoutContentModel>('pages')
+        .find({}, PageWithoutContentProjection)
+        .toArray()) || [];
+
+    return <PagesPage pages={pages} />;
+  });
+
   app.setNotFoundHandler(() => {
     return <NotFoundPage title="Page not found" />;
   });
 
-  app.setErrorHandler((err, req) => {
+  app.setErrorHandler((err, req, reply) => {
     app.log.error(err);
+
     // Fastify will lowercase the header name
     if (req.headers['hx-request']) {
       // If the request is a HTMX request, we send the error message as
       // a normal partial response.
       return 'An unexpected error occurred';
     } else {
-      return <ErrorPage title="Unhandled error" error={err} />;
+      if (err.validation) {
+        reply.code(400);
+        return (
+          <ErrorPage title="Request parameters are not valid." error={err} />
+        );
+      } else {
+        reply.code(500);
+        return <ErrorPage title="Unhandled error" error={err} />;
+      }
     }
   });
 };
@@ -335,21 +322,13 @@ async function buildMenuTree(
 
   const pages = await db
     .collection<PageWithoutContentModel>('pages')
-    .find(
-      { parentPageId: parentId },
-      {
-        projection: {
-          pageId: 1,
-          pageTitle: 1,
-          parentPageId: 1,
-        },
-      }
-    )
+    .find({ parentPageId: parentId }, PageWithoutContentProjection)
     .toArray();
 
   const menuTree = [];
   for (const page of pages) {
     const menuItem: NavItem = {
+      pageId: page.pageId,
       title: page.pageTitle,
       link: pathForRead(page.pageId),
       children: await buildMenuTree(db, page.pageId),
@@ -360,5 +339,9 @@ async function buildMenuTree(
 
   return menuTree;
 }
+
+const getPageById = async (db: Db | undefined, pageId: string) => {
+  return await db?.collection<PageModel>('pages').findOne({ pageId });
+};
 
 export default router;

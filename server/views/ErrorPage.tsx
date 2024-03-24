@@ -7,8 +7,8 @@ interface ErrorPageProps {
 
 export const ErrorPage = ({ title, error }: ErrorPageProps) => (
   <Layout title={title}>
-    <h2>Unhandled error</h2>
-    <p>An unexpected error occurred.</p>
+    <h2>{title}</h2>
+    <p>The request cannot be fullfilled.</p>
     <code>{error}</code>
   </Layout>
 );

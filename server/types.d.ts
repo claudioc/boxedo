@@ -10,6 +10,7 @@ export interface PageModel {
 }
 
 export interface NavItem {
+  pageId: string;
   title: string;
   link: string;
   children: NavItem[];
