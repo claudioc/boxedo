@@ -25,7 +25,7 @@ export const Menu = ({ pageId }: MenuProps) => {
 
 const MenuItem = ({ href, children }: { href: string; children: string }) => (
   <li>
-    <a class="button outline" href={href}>
+    <a class="button secondary outline" href={href}>
       {children}
     </a>
   </li>

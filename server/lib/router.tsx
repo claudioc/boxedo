@@ -12,7 +12,7 @@ import { INDEX_PAGE_ID } from '../constants';
 import { PageModel, PageWithoutContentModel, NavItem } from '../types';
 import { Db } from 'mongodb';
 
-const pageIdSchema = {
+const PageIdFormat = {
   oneOf: [
     { type: 'string', format: 'uuid' },
     { type: 'string', enum: [INDEX_PAGE_ID] },
@@ -23,15 +23,17 @@ const PageParamsSchema = {
   type: 'object',
   required: ['pageId'],
   properties: {
-    pageId: pageIdSchema,
+    pageId: PageIdFormat,
   },
 } as const;
+
+const PageIdSchema = PageParamsSchema;
 
 const SubpageParamsSchema = {
   type: 'object',
   required: ['parentPageId'],
   properties: {
-    parentPageId: pageIdSchema,
+    parentPageId: PageIdFormat,
   },
 } as const;
 
@@ -209,6 +211,55 @@ const router = async (app: FastifyInstance) => {
       }
 
       return res.redirect(303, pathForRead(pageId));
+    }
+  );
+
+  app.post<{
+    Body: FromSchema<typeof PageIdSchema>;
+  }>(
+    '/delete',
+    {
+      schema: {
+        body: PageIdSchema,
+      },
+    },
+
+    async (req, res) => {
+      const { pageId } = req.body;
+
+      // Cannot delete the index page
+      if (pageId === INDEX_PAGE_ID) {
+        return res.redirect(303, '/?error=7');
+      }
+
+      const page = await getPageById(app.mongo.db, pageId);
+
+      if (!page) {
+        // TODO: handle error
+        return res.redirect(303, '/error=3');
+      }
+
+      const parentId = page.parentPageId;
+
+      if (!parentId) {
+        // Cannot delete a page without a parent
+        return res.redirect(303, '/?error=8');
+      }
+
+      try {
+        await app.mongo.db?.collection('pages').deleteOne({ pageId });
+        await app.mongo.db
+          ?.collection('pages')
+          .updateMany(
+            { parentPageId: pageId },
+            { $set: { parentPageId: parentId } }
+          );
+      } catch (error) {
+        app.log.error('Error deleting page:', error);
+        return res.redirect(303, '/?error=6');
+      }
+
+      return res.redirect(303, '/?success=1');
     }
   );
 

@@ -13,22 +13,35 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
   >
     <h1>Creating a new page</h1>
     <form action="" method="post">
-      <nav class="nav">
-        <div class="nav-right">
+      <div class="row">
+        <menu class="col is-right">
           <button class="button primary" type="submit">
             Save and close
           </button>
-          <a href={`/page/${parentPage.pageId}`} class="button outline">
+          <a
+            href={`/page/${parentPage.pageId}`}
+            class="button secondary outline"
+          >
             Cancel
           </a>
+        </menu>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <div id="editor-placeholder"></div>
         </div>
-      </nav>
-      <div id="editor-placeholder"></div>
-      <details>
-        <summary>Debug</summary>
-        <input type="text" name="pageTitle" />
-        <textarea name="pageContent"></textarea>
-      </details>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <details>
+            <summary>Debug</summary>
+            <input type="text" name="pageTitle" />
+            <textarea name="pageContent"></textarea>
+          </details>
+        </div>
+      </div>
     </form>
     <script defer>App.enableEditor()</script>
   </Layout>
