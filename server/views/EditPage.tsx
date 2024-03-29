@@ -1,5 +1,8 @@
 import { Layout } from './Layout';
 import { PageModel } from '../types';
+import { PageMenu } from './components/PageMenu';
+import { DebugInfo } from './components/DebugInfo';
+import { EditorEnabler } from './components/EditorEnabler';
 
 export interface EditPageProps {
   page: PageModel;
@@ -15,14 +18,7 @@ export const EditPage = ({ page }: EditPageProps) => (
       <h1>Editing a page</h1>
       <form action="" method="post">
         <div class="row">
-          <menu class="col is-right">
-            <button class="button primary" type="submit">
-              Save and close
-            </button>
-            <a href={`/page/${page.pageId}`} class="button secondary outline">
-              Cancel
-            </a>
-          </menu>
+          <PageMenu cancelUrl={`/page/${page.pageId}`} />
         </div>
 
         <div class="row">
@@ -35,13 +31,7 @@ export const EditPage = ({ page }: EditPageProps) => (
         </div>
 
         <div class="row">
-          <div class="col">
-            <details>
-              <summary>Debug</summary>
-              <input type="text" name="pageTitle" value={page.pageTitle} />
-              <textarea name="pageContent">{page.pageContent}</textarea>
-            </details>
-          </div>
+          <DebugInfo page={page} />
         </div>
       </form>
 
@@ -83,6 +73,7 @@ export const EditPage = ({ page }: EditPageProps) => (
         <input type="hidden" name="pageId" value={page.pageId} />
       </form>
     </div>
-    <script defer>App.enableEditor();</script>
+
+    <EditorEnabler />
   </Layout>
 );
