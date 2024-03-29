@@ -1,5 +1,3 @@
-// import { WithoutId } from 'mongodb';
-
 export type NodeEnv = 'development' | 'production';
 
 export interface PageModel {
@@ -17,3 +15,8 @@ export interface NavItem {
 }
 
 export type PageWithoutContentModel = Omit<PageModel, 'pageContent'>;
+
+interface Feedback {
+  code: number;
+  message: string;
+}

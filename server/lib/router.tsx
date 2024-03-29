@@ -10,6 +10,7 @@ import { FromSchema } from 'json-schema-to-ts';
 import { PagesPage } from '../views/PagesPage';
 import { INDEX_PAGE_ID } from '../constants';
 import { PageModel, PageWithoutContentModel, NavItem } from '../types';
+import { Feedbacks } from './feedbacks';
 import { Db } from 'mongodb';
 
 const PageIdFormat = {
@@ -24,6 +25,13 @@ const PageParamsSchema = {
   required: ['pageId'],
   properties: {
     pageId: PageIdFormat,
+  },
+} as const;
+
+const PageQuerySchema = {
+  type: 'object',
+  properties: {
+    f: { type: 'number' },
   },
 } as const;
 
@@ -67,10 +75,22 @@ const PageWithoutContentProjection = {
  */
 const router = async (app: FastifyInstance) => {
   // The home page, folks
-  app.get('/', async () => {
-    const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
-    return <ReadPage page={root || DEFAULT_HOMEPAGE} />;
-  });
+  app.get<{ Querystring: FromSchema<typeof PageQuerySchema> }>(
+    '/',
+    {
+      schema: {
+        querystring: PageQuerySchema,
+      },
+    },
+    async (req) => {
+      const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
+      const { f: feedbackCode } = req.query;
+
+      return (
+        <ReadPage page={root || DEFAULT_HOMEPAGE} feedbackCode={feedbackCode} />
+      );
+    }
+  );
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
     '/parts/nav/:pageId',
@@ -99,23 +119,30 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+  app.get<{
+    Params: FromSchema<typeof PageParamsSchema>;
+    Querystring: FromSchema<typeof PageQuerySchema>;
+  }>(
     '/page/:pageId',
     {
       schema: {
         params: PageParamsSchema,
+        querystring: PageQuerySchema,
       },
     },
     async (req) => {
       const { pageId } = req.params;
+      const { f: feedbackCode } = req.query;
 
       const page = await getPageById(app.mongo.db, pageId);
 
       if (!page) {
+        const fb = Feedbacks.E_MISSING_PAGE;
+        app.log.error(fb.message);
         return <NotFoundPage title="Page not found" />;
       }
 
-      return <ReadPage page={page} />;
+      return <ReadPage page={page} feedbackCode={feedbackCode} />;
     }
   );
 
@@ -131,8 +158,9 @@ const router = async (app: FastifyInstance) => {
     const root = await getPageById(app.mongo.db, INDEX_PAGE_ID);
 
     if (root) {
-      app.log.error('Index page already exists');
-      return res.redirect(303, '/?error=1');
+      const fb = Feedbacks.E_INDEX_ALREADY_EXISTS;
+      app.log.error(fb.message);
+      return res.redirect(303, pathForRead('/', fb.code));
     }
 
     const newPage = {
@@ -145,14 +173,14 @@ const router = async (app: FastifyInstance) => {
     try {
       await app.mongo.db?.collection('pages').insertOne(newPage);
     } catch (error) {
-      app.log.error('Error creating index page:', error);
-      return res.redirect(303, '/?error=2');
+      const fb = Feedbacks.E_CREATING_INDEX;
+      app.log.error(fb.message, error);
+      return res.redirect(303, pathForRead('/', fb.code));
     }
 
-    return res.redirect(303, '/');
+    return res.redirect(303, pathForRead('/', Feedbacks.S_PAGE_CREATED.code));
   });
 
-  // Edit a page form
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
     '/edit/:pageId',
     {
@@ -166,15 +194,15 @@ const router = async (app: FastifyInstance) => {
       const page = await getPageById(app.mongo.db, pageId);
 
       if (!page) {
-        // TODO: handle error
-        return res.redirect(303, '/error=3');
+        const fb = Feedbacks.E_MISSING_PAGE;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       return <EditPage page={page} />;
     }
   );
 
-  // Update a page
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
     Params: FromSchema<typeof PageParamsSchema>;
@@ -191,8 +219,9 @@ const router = async (app: FastifyInstance) => {
 
       const page = await getPageById(app.mongo.db, pageId);
       if (!page) {
-        // TODO: handle error
-        return res.redirect(303, '/error=4');
+        const fb = Feedbacks.E_MISSING_PAGE;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       try {
@@ -206,11 +235,15 @@ const router = async (app: FastifyInstance) => {
           }
         );
       } catch (error) {
-        app.log.error('Error updating page:', error);
-        return res.redirect(303, '/?error=5');
+        const fb = Feedbacks.E_UPDATING_PAGE;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
-      return res.redirect(303, pathForRead(pageId));
+      return res.redirect(
+        303,
+        pathForRead(pageId, Feedbacks.S_PAGE_UPDATED.code)
+      );
     }
   );
 
@@ -227,23 +260,26 @@ const router = async (app: FastifyInstance) => {
     async (req, res) => {
       const { pageId } = req.body;
 
-      // Cannot delete the index page
       if (pageId === INDEX_PAGE_ID) {
-        return res.redirect(303, '/?error=7');
+        const fb = Feedbacks.E_CANNOT_DELETE_INDEX;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       const page = await getPageById(app.mongo.db, pageId);
 
       if (!page) {
-        // TODO: handle error
-        return res.redirect(303, '/error=3');
+        const fb = Feedbacks.E_MISSING_PAGE;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       const parentId = page.parentPageId;
 
       if (!parentId) {
-        // Cannot delete a page without a parent
-        return res.redirect(303, '/?error=8');
+        const fb = Feedbacks.E_MISSING_PARENT;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       try {
@@ -255,11 +291,12 @@ const router = async (app: FastifyInstance) => {
             { $set: { parentPageId: parentId } }
           );
       } catch (error) {
-        app.log.error('Error deleting page:', error);
-        return res.redirect(303, '/?error=6');
+        const fb = Feedbacks.E_DELETING_PAGE;
+        app.log.error(fb.message, error);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
-      return res.redirect(303, '/?success=1');
+      return res.redirect(303, pathForRead('/', Feedbacks.S_PAGE_DELETED.code));
     }
   );
 
@@ -279,7 +316,9 @@ const router = async (app: FastifyInstance) => {
       const parentPage = await getPageById(app.mongo.db, parentPageId);
 
       if (!parentPage) {
-        return res.redirect(303, '/?error=10');
+        const fb = Feedbacks.E_MISSING_PARENT;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       return <CreatePage parentPage={parentPage} />;
@@ -304,7 +343,9 @@ const router = async (app: FastifyInstance) => {
       const parentPage = await getPageById(app.mongo.db, parentPageId);
 
       if (!parentPage) {
-        return res.redirect(303, '/?error=8');
+        const fb = Feedbacks.E_MISSING_PARENT;
+        app.log.error(fb.message);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
       const pageId = app.uuid.v4();
@@ -316,11 +357,15 @@ const router = async (app: FastifyInstance) => {
           pageContent: req.body.pageContent,
         });
       } catch (error) {
-        app.log.error('Error creating page:', error);
-        return res.redirect(303, '/?error=9');
+        const fb = Feedbacks.E_CREATING_PAGE;
+        app.log.error(fb.message, error);
+        return res.redirect(303, pathForRead('/', fb.code));
       }
 
-      return res.redirect(303, pathForRead(pageId));
+      return res.redirect(
+        303,
+        pathForRead(pageId, Feedbacks.S_PAGE_CREATED.code)
+      );
     }
   );
 
@@ -361,7 +406,21 @@ const router = async (app: FastifyInstance) => {
   });
 };
 
-const pathForRead = (pageId: string) => `/page/${pageId}`;
+const pathForRead = (pageId: string, feedbackId?: number) => {
+  let path;
+
+  if (pageId === INDEX_PAGE_ID || pageId === '/') {
+    path = '/';
+  } else {
+    path = `/page/${pageId}`;
+  }
+
+  if (feedbackId) {
+    path += `?f=${feedbackId}`;
+  }
+
+  return path;
+};
 
 async function buildMenuTree(
   db: Db | undefined,

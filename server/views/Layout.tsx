@@ -2,12 +2,15 @@ import { getJsBundleName } from '../lib/assets';
 import { JSX } from 'preact';
 import { cssFile } from '../lib/assets';
 import { Menu } from './components/Menu';
+import { Feedback } from './components/Feedback';
 import { INDEX_PAGE_ID } from '../constants';
+import { getFeedback } from '../lib/feedbacks';
 
 interface LayoutProps {
   title: string;
   pageId?: string;
   hasMenu?: boolean;
+  feedbackCode?: number;
   children: string | JSX.Element[] | JSX.Element;
 }
 
@@ -15,9 +18,15 @@ export const Layout = ({
   title,
   pageId,
   hasMenu = true,
+  feedbackCode,
   children,
 }: LayoutProps) => {
   const isIndex = pageId === INDEX_PAGE_ID;
+
+  let feedback;
+  if (feedbackCode) {
+    feedback = getFeedback(feedbackCode);
+  }
 
   return (
     <html lang="en">
@@ -34,7 +43,9 @@ export const Layout = ({
         <header>
           This is it {!isIndex ? <a href="/">Go home now</a> : ''}
         </header>
+        {feedback && <Feedback feedback={feedback} />}
         {hasMenu && <Menu pageId={pageId} />}
+
         <main class="row">
           {pageId && (
             <div
