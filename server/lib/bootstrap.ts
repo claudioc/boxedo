@@ -15,6 +15,7 @@ import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
 import fastifyUUID from 'fastify-uuid';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,11 @@ if (process.env.NODE_ENV !== 'test') {
       'worker.js'
     ),
   };
+}
+
+let mongodbServerUri: string | undefined;
+if (process.env.NODE_ENV === 'test') {
+  mongodbServerUri = (await MongoMemoryServer.create()).getUri();
 }
 
 const ConfigEnvSchema = {
@@ -61,6 +67,7 @@ const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
     },
   },
   production: true,
+  test: false,
 };
 
 const app = Fastify({
@@ -74,7 +81,7 @@ app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
     .register(mongodb, {
       forceClose: true,
-      url: app.config.MONGO_URL,
+      url: mongodbServerUri ?? app.config.MONGO_URL,
     })
     .register(fastifyFavicon, {
       path: './assets',

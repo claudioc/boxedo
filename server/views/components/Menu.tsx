@@ -12,12 +12,8 @@ export const Menu = ({ pageId }: MenuProps) => {
   return (
     <div className={styles.Menu}>
       <menu>
-        <li>
-          <MenuItem href={`/edit/${pageId}`}>Edit this page</MenuItem>
-        </li>
-        <li>
-          <MenuItem href={`/create/${pageId}`}>Create a subpage</MenuItem>
-        </li>
+        <MenuItem href={`/edit/${pageId}`}>Edit this page</MenuItem>
+        <MenuItem href={`/create/${pageId}`}>Create a subpage</MenuItem>
       </menu>
     </div>
   );

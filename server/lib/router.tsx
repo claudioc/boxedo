@@ -57,7 +57,8 @@ const PageBodySchema = {
 const DEFAULT_HOMEPAGE: PageModel = {
   pageId: INDEX_PAGE_ID,
   pageTitle: 'Welcome to Joongle!',
-  pageContent: '<p>Click on the "Create this page" link to get started</p>',
+  pageContent:
+    '<p class="empty-index-placeholder">Click on the "Create this page" link to get started</p>',
 };
 
 const PageWithoutContentProjection = {

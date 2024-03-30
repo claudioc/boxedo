@@ -1,4 +1,4 @@
-export type NodeEnv = 'development' | 'production';
+export type NodeEnv = 'development' | 'production' | 'test';
 
 export interface PageModel {
   pageId: string;
