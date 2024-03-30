@@ -7,7 +7,7 @@ import fastifyFavicon from 'fastify-favicon';
 import mongodb from '@fastify/mongodb';
 import path from 'path';
 import router from './router';
-import { ASSETS_MOUNT_POINT, ASSETS_PATH } from './constants.js';
+import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '../constants';
 import { PinoLoggerOptions } from 'fastify/types/logger';
 import { NodeEnv } from '../types';
 import fastifyEnv from '@fastify/env';
@@ -20,15 +20,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Fix thread-stream error due to __dirname in pino
-// @ts-ignore
-globalThis.__bundlerPathsOverrides = {
-  'thread-stream-worker': path.join(
-    // @ts-ignore
-    path.dirname(createRequire(import.meta.url).resolve('thread-stream')),
-    'lib',
-    'worker.js'
-  ),
-};
+if (process.env.NODE_ENV !== 'test') {
+  // @ts-ignore
+  globalThis.__bundlerPathsOverrides = {
+    'thread-stream-worker': path.join(
+      // @ts-ignore
+      path.dirname(createRequire(import.meta.url).resolve('thread-stream')),
+      'lib',
+      'worker.js'
+    ),
+  };
+}
 
 const ConfigEnvSchema = {
   type: 'object',
