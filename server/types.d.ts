@@ -4,6 +4,8 @@ export interface PageModel {
   pageId: string;
   parentPageId?: string;
   pageTitle: string;
+  pageSlug: string;
+  pageSlugs: string[];
   pageContent: string;
 }
 

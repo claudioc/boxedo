@@ -8,7 +8,8 @@ type ErrorCodes =
   | 'E_CANNOT_DELETE_INDEX'
   | 'E_MISSING_PARENT'
   | 'E_DELETING_PAGE'
-  | 'E_CREATING_PAGE';
+  | 'E_CREATING_PAGE'
+  | 'E_MISSING_DB';
 
 type SuccessCodes = 'S_PAGE_CREATED' | 'S_PAGE_UPDATED' | 'S_PAGE_DELETED';
 
@@ -56,6 +57,10 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_CREATING_PAGE: {
     code: 107,
     message: 'Error creating page',
+  },
+  E_MISSING_DB: {
+    code: 108,
+    message: 'Database not connected or collection not found',
   },
 } as const;
 

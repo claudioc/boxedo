@@ -92,6 +92,7 @@
     "htmx.org": "^1.9.9",
     "pino-pretty": "^10.3.0",
     "preact": "^10.19.3",
-    "preact-render-to-string": "^6.3.1"
+    "preact-render-to-string": "^6.3.1",
+    "slugify": "^1.6.6"
   }
 }
