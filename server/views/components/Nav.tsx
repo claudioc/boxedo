@@ -31,7 +31,10 @@ interface NavTreeProps {
 const NavTree = ({ items }: NavTreeProps) => (
   <ul>
     {items.map((item: NavItem) => (
-      <li key={item.link}>
+      <li
+        key={item.link}
+        class={item.pageId === pageId ? 'active' : 'text-dark'}
+      >
         <a
           className={
             item.pageId === pageId ? clsx(styles.active, 'active') : ''

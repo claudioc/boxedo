@@ -1,16 +1,18 @@
 import { FastifyInstance } from 'fastify';
 import { ReadPage } from '../views/ReadPage';
-import { NotFoundPage } from '../views/NotFoundPage';
-import { ErrorPage } from '../views/ErrorPage';
+import { NotFound } from '../views/NotFound';
+import { Error } from '../views/Error';
 import { EditPage } from '../views/EditPage';
 import { CreatePage } from '../views/CreatePage';
 import { CreateIndex } from '../views/CreateIndex';
 import { Nav } from '../views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
-import { PagesPage } from '../views/PagesPage';
+import { Pages } from '../views/Pages';
+import { SearchResults } from '../views/SearchResults';
 import { INDEX_PAGE_ID } from '../constants';
 import { PageModel, PageWithoutContentModel, NavItem } from '../types';
 import { Feedbacks } from './feedbacks';
+import cheerio from 'cheerio';
 import { Db } from 'mongodb';
 
 const PageIdFormat = {
@@ -32,6 +34,14 @@ const PageQuerySchema = {
   type: 'object',
   properties: {
     f: { type: 'number' },
+  },
+} as const;
+
+const SearchQuerySchema = {
+  type: 'object',
+  required: ['q'],
+  properties: {
+    q: { type: 'string' },
   },
 } as const;
 
@@ -140,7 +150,7 @@ const router = async (app: FastifyInstance) => {
       if (!page) {
         const fb = Feedbacks.E_MISSING_PAGE;
         app.log.error(fb.message);
-        return <NotFoundPage title="Page not found" />;
+        return <NotFound title="Page not found" />;
       }
 
       return <ReadPage page={page} feedbackCode={feedbackCode} />;
@@ -370,7 +380,6 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  // List all pages
   app.get('/pages', async () => {
     const pages =
       (await app.mongo.db
@@ -378,11 +387,67 @@ const router = async (app: FastifyInstance) => {
         .find({}, PageWithoutContentProjection)
         .toArray()) || [];
 
-    return <PagesPage pages={pages} />;
+    return <Pages pages={pages} />;
+  });
+
+  app.get<{
+    Querystring: FromSchema<typeof SearchQuerySchema>;
+  }>(
+    '/search',
+    {
+      schema: {
+        querystring: SearchQuerySchema,
+      },
+    },
+
+    async (req) => {
+      const { q } = req.query;
+
+      const results = await app.mongo.db
+        ?.collection<PageModel>('pages')
+        .find({ $text: { $search: q } })
+        .sort({ score: { $meta: 'textScore' } })
+        .limit(25)
+        .toArray();
+
+      if (results) {
+        const snippetSize = 200;
+        results.forEach((result) => {
+          const textContent = cheerio.load(result.pageContent).text();
+          const matchIndex = textContent.indexOf(q);
+          if (matchIndex >= 0) {
+            let start = matchIndex - snippetSize / 2;
+            let end = matchIndex + snippetSize / 2 + q.length;
+            start = start < 0 ? 0 : start;
+            end = end > textContent.length ? textContent.length : end;
+            result.pageContent =
+              textContent.substring(start, end) +
+              (end < textContent.length ? '…' : '');
+          }
+        });
+      }
+
+      return <SearchResults query={q} results={results} />;
+    }
+  );
+
+  app.get('/admin/text-index', async () => {
+    try {
+      app.mongo.db
+        ?.collection('pages')
+        .createIndex(
+          { pageTitle: 'text', pageContent: 'text' },
+          { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
+        );
+    } catch (err) {
+      return err;
+    }
+
+    return 'OK';
   });
 
   app.setNotFoundHandler(() => {
-    return <NotFoundPage title="Page not found" />;
+    return <NotFound title="Page not found" />;
   });
 
   app.setErrorHandler((err, req, reply) => {
@@ -396,12 +461,10 @@ const router = async (app: FastifyInstance) => {
     } else {
       if (err.validation) {
         reply.code(400);
-        return (
-          <ErrorPage title="Request parameters are not valid." error={err} />
-        );
+        return <Error title="Request parameters are not valid." error={err} />;
       } else {
         reply.code(500);
-        return <ErrorPage title="Unhandled error" error={err} />;
+        return <Error title="Unhandled error" error={err} />;
       }
     }
   });

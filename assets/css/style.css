@@ -11,14 +11,6 @@
   --color-darkGrey: #777;
 }
 
-body > header {
-  background-color: var(--bg-secondary-color);
-  color: var(--font-color);
-  margin-bottom: 2rem;
-  text-transform: uppercase;
-  padding: 2rem;
-}
-
 /* Placeholder (on every new line) */
 .tiptap .is-empty::before {
   content: attr(data-placeholder);

@@ -1,11 +1,11 @@
 import { Layout } from './Layout';
 import { PageWithoutContentModel } from '../types';
 
-interface PagesPageProps {
+interface PagesProps {
   pages: PageWithoutContentModel[];
 }
 
-export const PagesPage = ({ pages }: PagesPageProps) => (
+export const Pages = ({ pages }: PagesProps) => (
   <Layout title="All pages">
     <h1>All pages</h1>
     <ul>

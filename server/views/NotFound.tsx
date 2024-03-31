@@ -1,10 +1,10 @@
 import { Layout } from './Layout';
 
-interface NotFoundPageProps {
+interface NotFoundProps {
   title: string;
 }
 
-export const NotFoundPage = ({ title }: NotFoundPageProps) => (
+export const NotFound = ({ title }: NotFoundProps) => (
   <Layout title={title}>
     <h2>Page not found</h2>
     <p>The requested page was not found.</p>
