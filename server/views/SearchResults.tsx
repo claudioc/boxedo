@@ -1,5 +1,6 @@
 import { Layout } from './Layout';
 import { PageModel } from '../types';
+import { pageUrl } from '../lib/helpers';
 
 interface SearchResultsProps {
   query: string;
@@ -17,7 +18,7 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
         <ul>
           {results.map((result) => (
             <li key={result.pageId}>
-              <a href={`/page/${result.pageId}`}>{result.pageTitle}</a>
+              <a href={pageUrl(result.pageSlug)}>{result.pageTitle}</a>
               <p>
                 <blockquote>{result.pageContent}</blockquote>
               </p>

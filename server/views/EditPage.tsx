@@ -3,6 +3,7 @@ import { PageModel } from '../types';
 import { PageMenu } from './components/PageMenu';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
+import { pageUrl } from '../lib/helpers';
 
 export interface EditPageProps {
   page: PageModel;
@@ -18,7 +19,7 @@ export const EditPage = ({ page }: EditPageProps) => (
       <h1>Editing a page</h1>
       <form action="" method="post">
         <div class="row">
-          <PageMenu cancelUrl={`/page/${page.pageId}`} />
+          <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
         </div>
 
         <div class="row">

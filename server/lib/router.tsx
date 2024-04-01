@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { ReadPage } from '../views/ReadPage';
 import { NotFound } from '../views/NotFound';
 import { Error } from '../views/Error';
@@ -7,10 +7,10 @@ import { CreatePage } from '../views/CreatePage';
 import { CreateIndex } from '../views/CreateIndex';
 import { Nav } from '../views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
-import { Pages } from '../views/Pages';
 import { SearchResults } from '../views/SearchResults';
 import { INDEX_PAGE_ID } from '../constants';
-import { PageModel, PageWithoutContentModel, NavItem } from '../types';
+import { pageUrl, pathWithFeedback } from './helpers';
+import { Feedback, PageModel, NavItem } from '../types';
 import { Feedbacks } from './feedbacks';
 import cheerio from 'cheerio';
 import slugify from 'slugify';
@@ -86,6 +86,7 @@ const PageWithoutContentProjection = {
   projection: {
     pageId: 1,
     pageTitle: 1,
+    pageSlug: 1,
     parentPageId: 1,
   },
 } as const;
@@ -104,10 +105,10 @@ const router = async (app: FastifyInstance) => {
         querystring: PageQuerySchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const root = await getPageById(collection!, INDEX_PAGE_ID);
@@ -151,55 +152,23 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Params: FromSchema<typeof PageParamsSchema>;
-    Querystring: FromSchema<typeof PageQuerySchema>;
-  }>(
-    '/page/:pageId',
-    {
-      schema: {
-        params: PageParamsSchema,
-        querystring: PageQuerySchema,
-      },
-    },
-    async (req, res) => {
-      const { pageId } = req.params;
-      const { f: feedbackCode } = req.query;
-
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
-      }
-
-      const page = await getPageById(collection!, pageId);
-
-      if (!page) {
-        const fb = Feedbacks.E_MISSING_PAGE;
-        app.log.error(fb.message);
-        return <NotFound title="Page not found" />;
-      }
-
-      return <ReadPage page={page} feedbackCode={feedbackCode} />;
-    }
-  );
-
-  app.get<{
     Params: FromSchema<typeof PageSlugParamsSchema>;
     Querystring: FromSchema<typeof PageQuerySchema>;
   }>(
-    '/slug/:slug',
+    '/page/:slug',
     {
       schema: {
         params: PageSlugParamsSchema,
         querystring: PageQuerySchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const { slug } = req.params;
       const { f: feedbackCode } = req.query;
 
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const page = await collection!.findOne({ pageSlug: slug });
@@ -212,11 +181,11 @@ const router = async (app: FastifyInstance) => {
 
         if (oldPage) {
           // Redirect to the current slug
-          return res.redirect(301, `/slug/${oldPage.pageSlug}`);
+          app.log.error(`Using old slug ${slug} for page ${oldPage.pageId}`);
+          return rep.redirect(301, pageUrl(oldPage.pageSlug));
         }
 
-        const fb = Feedbacks.E_MISSING_PAGE;
-        app.log.error(fb.message);
+        app.log.error(Feedbacks.E_MISSING_PAGE.message);
         return <NotFound title="Page not found" />;
       }
 
@@ -232,18 +201,16 @@ const router = async (app: FastifyInstance) => {
   // Create the index page
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
-  }>('/create-index', async (req, res) => {
+  }>('/create-index', async (req, rep) => {
     const collection = app.mongo.db?.collection<PageModel>('pages');
     if (!assertCollection(collection, app)) {
-      return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+      return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
     }
 
     const root = await getPageById(collection!, INDEX_PAGE_ID);
 
     if (root) {
-      const fb = Feedbacks.E_INDEX_ALREADY_EXISTS;
-      app.log.error(fb.message);
-      return res.redirect(303, pathForRead('/', fb.code));
+      return redirectHome(rep, Feedbacks.E_INDEX_ALREADY_EXISTS, app);
     }
 
     const newPage = {
@@ -255,14 +222,12 @@ const router = async (app: FastifyInstance) => {
     };
 
     try {
-      await app.mongo.db?.collection('pages').insertOne(newPage);
+      await (collection as unknown as Collection).insertOne(newPage);
     } catch (error) {
-      const fb = Feedbacks.E_CREATING_INDEX;
-      app.log.error(fb.message, error);
-      return res.redirect(303, pathForRead('/', fb.code));
+      return redirectHome(rep, Feedbacks.E_CREATING_INDEX, app);
     }
 
-    return res.redirect(303, pathForRead('/', Feedbacks.S_PAGE_CREATED.code));
+    return redirectHome(rep, Feedbacks.S_PAGE_CREATED, app);
   });
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
@@ -272,20 +237,18 @@ const router = async (app: FastifyInstance) => {
         params: PageParamsSchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const { pageId } = req.params;
 
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const page = await getPageById(collection!, pageId);
 
       if (!page) {
-        const fb = Feedbacks.E_MISSING_PAGE;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
       }
 
       return <EditPage page={page} />;
@@ -303,19 +266,17 @@ const router = async (app: FastifyInstance) => {
         params: PageParamsSchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const { pageId } = req.params;
 
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const page = await getPageById(collection!, pageId);
       if (!page) {
-        const fb = Feedbacks.E_MISSING_PAGE;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
       }
 
       const newSlug = await generateUniqueSlug(req.body.pageTitle, collection!);
@@ -333,18 +294,14 @@ const router = async (app: FastifyInstance) => {
       }
 
       try {
-        await app.mongo.db
-          ?.collection('pages')
-          .updateOne({ _id: page._id }, options);
+        await collection!.updateOne({ _id: page._id }, options);
       } catch (error) {
-        const fb = Feedbacks.E_UPDATING_PAGE;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_UPDATING_PAGE, app);
       }
 
-      return res.redirect(
+      return rep.redirect(
         303,
-        pathForRead(pageId, Feedbacks.S_PAGE_UPDATED.code)
+        pathWithFeedback(pageUrl(newSlug), Feedbacks.S_PAGE_UPDATED)
       );
     }
   );
@@ -359,51 +316,41 @@ const router = async (app: FastifyInstance) => {
       },
     },
 
-    async (req, res) => {
+    async (req, rep) => {
       const { pageId } = req.body;
 
       if (pageId === INDEX_PAGE_ID) {
-        const fb = Feedbacks.E_CANNOT_DELETE_INDEX;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_CANNOT_DELETE_INDEX, app);
       }
 
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const page = await getPageById(collection!, pageId);
 
       if (!page) {
-        const fb = Feedbacks.E_MISSING_PAGE;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
       }
 
       const parentId = page.parentPageId;
 
       if (!parentId) {
-        const fb = Feedbacks.E_MISSING_PARENT;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
       }
 
       try {
-        await app.mongo.db?.collection('pages').deleteOne({ pageId });
-        await app.mongo.db
-          ?.collection('pages')
-          .updateMany(
-            { parentPageId: pageId },
-            { $set: { parentPageId: parentId } }
-          );
+        await collection!.deleteOne({ pageId });
+        await collection!.updateMany(
+          { parentPageId: pageId },
+          { $set: { parentPageId: parentId } }
+        );
       } catch (error) {
-        const fb = Feedbacks.E_DELETING_PAGE;
-        app.log.error(fb.message, error);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_DELETING_PAGE, app);
       }
 
-      return res.redirect(303, pathForRead('/', Feedbacks.S_PAGE_DELETED.code));
+      return redirectHome(rep, Feedbacks.S_PAGE_DELETED, app);
     }
   );
 
@@ -417,20 +364,18 @@ const router = async (app: FastifyInstance) => {
         params: SubpageParamsSchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const { parentPageId } = req.params;
 
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const parentPage = await getPageById(collection!, parentPageId);
 
       if (!parentPage) {
-        const fb = Feedbacks.E_MISSING_PARENT;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
       }
 
       return <CreatePage parentPage={parentPage} />;
@@ -449,25 +394,23 @@ const router = async (app: FastifyInstance) => {
         params: SubpageParamsSchema,
       },
     },
-    async (req, res) => {
+    async (req, rep) => {
       const { parentPageId } = req.params;
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
-        return res.redirect(303, pathForRead('/', Feedbacks.E_MISSING_DB.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
       }
 
       const parentPage = await getPageById(collection!, parentPageId);
 
       if (!parentPage) {
-        const fb = Feedbacks.E_MISSING_PARENT;
-        app.log.error(fb.message);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
       }
 
       const slug = await generateUniqueSlug(req.body.pageTitle, collection!);
       const pageId = app.uuid.v4();
       try {
-        await app.mongo.db?.collection('pages').insertOne({
+        await (collection as unknown as Collection).insertOne({
           pageId,
           parentPageId,
           pageTitle: req.body.pageTitle,
@@ -475,27 +418,15 @@ const router = async (app: FastifyInstance) => {
           pageSlug: slug,
         });
       } catch (error) {
-        const fb = Feedbacks.E_CREATING_PAGE;
-        app.log.error(fb.message, error);
-        return res.redirect(303, pathForRead('/', fb.code));
+        return redirectHome(rep, Feedbacks.E_CREATING_PAGE, app);
       }
 
-      return res.redirect(
+      return rep.redirect(
         303,
-        pathForRead(pageId, Feedbacks.S_PAGE_CREATED.code)
+        pathWithFeedback(pageUrl(slug), Feedbacks.S_PAGE_CREATED)
       );
     }
   );
-
-  app.get('/pages', async () => {
-    const pages =
-      (await app.mongo.db
-        ?.collection<PageWithoutContentModel>('pages')
-        .find({}, PageWithoutContentProjection)
-        .toArray()) || [];
-
-    return <Pages pages={pages} />;
-  });
 
   app.get<{
     Querystring: FromSchema<typeof SearchQuerySchema>;
@@ -507,11 +438,15 @@ const router = async (app: FastifyInstance) => {
       },
     },
 
-    async (req) => {
+    async (req, rep) => {
       const { q } = req.query;
 
-      const results = await app.mongo.db
-        ?.collection<PageModel>('pages')
+      const collection = app.mongo.db?.collection<PageModel>('pages');
+      if (!assertCollection(collection, app)) {
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      }
+
+      const results = await collection!
         .find({ $text: { $search: q } })
         .sort({ score: { $meta: 'textScore' } })
         .limit(25)
@@ -625,20 +560,15 @@ const generateUniqueSlug = async (
   return slug;
 };
 
-const pathForRead = (pageId: string, feedbackId?: number) => {
-  let path;
-
-  if (pageId === INDEX_PAGE_ID || pageId === '/') {
-    path = '/';
-  } else {
-    path = `/page/${pageId}`;
+const redirectHome = (
+  res: FastifyReply,
+  feedback: Feedback,
+  app?: FastifyInstance
+) => {
+  if (app) {
+    app.log.error(feedback.message);
   }
-
-  if (feedbackId) {
-    path += `?f=${feedbackId}`;
-  }
-
-  return path;
+  return res.redirect(303, pathWithFeedback('/', feedback));
 };
 
 async function buildMenuTree(
@@ -654,7 +584,7 @@ async function buildMenuTree(
     const menuItem: NavItem = {
       pageId: page.pageId,
       title: page.pageTitle,
-      link: pathForRead(page.pageId),
+      link: pageUrl(page.pageSlug),
       children: await buildMenuTree(collection, page.pageId),
     };
 
