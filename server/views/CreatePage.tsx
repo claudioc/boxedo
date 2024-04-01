@@ -15,23 +15,24 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
     title="Creating a new page"
     pageId={parentPage.pageId}
   >
-    <h1>Creating a new page</h1>
-    <form action="" method="post">
-      <div class="row">
-        <PageMenu cancelUrl={pageUrl(parentPage.pageSlug)} />
-      </div>
-
-      <div class="row">
-        <div class="col">
-          <div id="editor-placeholder"></div>
+    <div x-data x-init="window.onbeforeunload=function() { return true };">
+      <h1>Creating a new page</h1>
+      <form action="" method="post">
+        <div class="row">
+          <PageMenu cancelUrl={pageUrl(parentPage.pageSlug)} />
         </div>
-      </div>
 
-      <div class="row">
-        <DebugInfo />
-      </div>
-    </form>
+        <div class="row">
+          <div class="col">
+            <div id="editor-placeholder"></div>
+          </div>
+        </div>
 
+        <div class="row">
+          <DebugInfo />
+        </div>
+      </form>
+    </div>
     <EditorEnabler />
   </Layout>
 );

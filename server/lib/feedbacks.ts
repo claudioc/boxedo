@@ -9,7 +9,9 @@ type ErrorCodes =
   | 'E_MISSING_PARENT'
   | 'E_DELETING_PAGE'
   | 'E_CREATING_PAGE'
-  | 'E_MISSING_DB';
+  | 'E_MISSING_DB'
+  | 'E_EMPTY_TITLE'
+  | 'E_EMPTY_CONTENT';
 
 type SuccessCodes = 'S_PAGE_CREATED' | 'S_PAGE_UPDATED' | 'S_PAGE_DELETED';
 
@@ -61,6 +63,14 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_MISSING_DB: {
     code: 108,
     message: 'Database not connected or collection not found',
+  },
+  E_EMPTY_TITLE: {
+    code: 109,
+    message: 'Title cannot be empty',
+  },
+  E_EMPTY_CONTENT: {
+    code: 110,
+    message: 'Content cannot be empty',
   },
 } as const;
 

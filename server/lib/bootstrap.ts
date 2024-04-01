@@ -91,6 +91,9 @@ app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
     .register(fastifyFormbody)
     .register(jsxRenderer)
     .register(helmet, {
+      referrerPolicy: {
+        policy: 'same-origin',
+      },
       contentSecurityPolicy: {
         // If you get stuck in CSP, try this: crossOriginEmbedderPolicy: false,
         directives: {

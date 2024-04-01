@@ -396,6 +396,17 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { parentPageId } = req.params;
+      const { pageTitle, pageContent } = req.body;
+
+      // TODO: validation should also be done on the client side
+      if (pageTitle.trim() === '') {
+        return redirectHome(rep, Feedbacks.E_EMPTY_TITLE, app);
+      }
+
+      if (pageContent.trim() === '') {
+        return redirectHome(rep, Feedbacks.E_EMPTY_CONTENT, app);
+      }
+
       const collection = app.mongo.db?.collection<PageModel>('pages');
       if (!assertCollection(collection, app)) {
         return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
@@ -407,14 +418,14 @@ const router = async (app: FastifyInstance) => {
         return redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
       }
 
-      const slug = await generateUniqueSlug(req.body.pageTitle, collection!);
+      const slug = await generateUniqueSlug(pageTitle, collection!);
       const pageId = app.uuid.v4();
       try {
         await (collection as unknown as Collection).insertOne({
           pageId,
           parentPageId,
-          pageTitle: req.body.pageTitle,
-          pageContent: req.body.pageContent,
+          pageTitle,
+          pageContent,
           pageSlug: slug,
         });
       } catch (error) {

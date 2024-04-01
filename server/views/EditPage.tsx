@@ -15,7 +15,7 @@ export const EditPage = ({ page }: EditPageProps) => (
     title={`Editing ${page.pageTitle}`}
     pageId={page.pageId}
   >
-    <div x-data>
+    <div x-data x-init="window.onbeforeunload=function() { return true };">
       <h1>Editing a page</h1>
       <form action="" method="post">
         <div class="row">
@@ -59,7 +59,7 @@ export const EditPage = ({ page }: EditPageProps) => (
             <button
               class="button primary"
               value="default"
-              x-on:click="$refs.deleteForm.submit()"
+              x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
             >
               Yes, delete
             </button>
