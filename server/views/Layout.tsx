@@ -7,6 +7,7 @@ import { Search } from './components/Search';
 import { INDEX_PAGE_ID } from '../constants';
 import { getFeedback } from '../lib/feedbacks';
 import styles from './Layout.module.css';
+import clsx from 'clsx';
 
 interface LayoutProps {
   title: string;
@@ -42,28 +43,27 @@ export const Layout = ({
       </head>
       <body class="container">
         <script src={getJsBundleName()}></script>
-        <header class={styles.header}>
-          <div class="row">
-            <div class="col">
-              <div>Joongle {!isIndex ? <a href="/">Home</a> : ''}</div>
-            </div>
-            <div class="col">
-              <Search />
-            </div>
+        <header class={clsx(styles.header, 'level')}>
+          <div class="level-left">
+            <div>Joongle {!isIndex ? <a href="/">Home</a> : ''}</div>
+          </div>
+          <div class="level-right">
+            <Search />
           </div>
         </header>
+
         {feedback && <Feedback feedback={feedback} />}
         {hasMenu && <Menu pageId={pageId} />}
 
-        <main class="row">
+        <main class="columns">
           {pageId && (
             <div
-              class="col-3"
+              class="column is-4"
               hx-get={`/parts/nav/${pageId}`}
               hx-trigger="load"
             ></div>
           )}
-          <div class="col">{children}</div>
+          <div class="column">{children}</div>
         </main>
       </body>
     </html>

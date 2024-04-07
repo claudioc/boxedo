@@ -16,19 +16,13 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
     pageId={parentPage.pageId}
   >
     <div x-data x-init="window.onbeforeunload=function() { return true };">
-      <h1>Creating a new page</h1>
+      <h1 class="subtitle">Creating a new page</h1>
       <form action="" method="post">
-        <div class="row">
-          <PageMenu cancelUrl={pageUrl(parentPage.pageSlug)} />
-        </div>
+        <PageMenu cancelUrl={pageUrl(parentPage.pageSlug)} />
 
-        <div class="row">
-          <div class="col">
-            <div id="editor-placeholder"></div>
-          </div>
-        </div>
+        <div id="editor-placeholder" class="block content"></div>
 
-        <div class="row">
+        <div class="block">
           <DebugInfo />
         </div>
       </form>

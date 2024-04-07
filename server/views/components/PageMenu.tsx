@@ -3,20 +3,22 @@ interface PageMenuProps {
 }
 
 export const PageMenu = ({ cancelUrl }: PageMenuProps) => (
-  <menu class="col is-right">
-    <button
-      class="button primary"
-      type="submit"
-      x-on:click="window.onbeforeunload=null"
-    >
-      Save and close
-    </button>
-    <a
-      href={cancelUrl}
-      class="button secondary outline"
-      x-on:click="window.onbeforeunload=null"
-    >
-      Cancel
-    </a>
-  </menu>
+  <div class="level">
+    <menu class="level-right level-item">
+      <button
+        class="button"
+        type="submit"
+        x-on:click="window.onbeforeunload=null"
+      >
+        Save and close
+      </button>
+      <a
+        href={cancelUrl}
+        class="button"
+        x-on:click="window.onbeforeunload=null"
+      >
+        Cancel
+      </a>
+    </menu>
+  </div>
 );

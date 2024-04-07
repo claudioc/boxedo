@@ -9,24 +9,15 @@ interface CreateIndexProps {
 
 export const CreateIndex = ({ title }: CreateIndexProps) => (
   <Layout title={`Creating the home page`} hasMenu={false}>
-    <h1>Creating the home page</h1>
+    <h1 class="subtitle">Creating the home page</h1>
     <form action="" method="post">
-      <div class="row">
-        <PageMenu cancelUrl="/" />
-      </div>
+      <PageMenu cancelUrl="/" />
 
-      <div id="editor-placeholder">
+      <div id="editor-placeholder content block">
         <h1>{title}</h1>
       </div>
 
-      <div class="row">
-        <div class="col">
-          <input type="text" name="pageTitle" value={title} />
-          <textarea name="pageContent"></textarea>
-        </div>
-      </div>
-
-      <div class="row">
+      <div class="block">
         <DebugInfo />
       </div>
     </form>

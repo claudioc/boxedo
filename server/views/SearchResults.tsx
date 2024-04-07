@@ -12,16 +12,14 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
 
   return (
     <Layout title="Search Results">
-      <h1>Search Results</h1>
-      <p>Results for query: {query}</p>
+      <h1 class="title">Search Results</h1>
+      <h2 class="subtitle">Results for query: {query}</h2>
       {hasResults ? (
         <ul>
           {results.map((result) => (
-            <li key={result.pageId}>
+            <li key={result.pageId} class="content">
               <a href={pageUrl(result.pageSlug)}>{result.pageTitle}</a>
-              <p>
-                <blockquote>{result.pageContent}</blockquote>
-              </p>
+              <blockquote class="ml-4">{result.pageContent}</blockquote>
             </li>
           ))}
         </ul>

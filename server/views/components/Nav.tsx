@@ -12,15 +12,19 @@ let pageId = '';
 export const Nav = ({ tree, currentPageId }: NavProps) => {
   pageId = currentPageId;
   return (
-    <nav className={clsx(styles.Nav, 'nav')}>
+    <aside className={clsx(styles.Nav, 'menu')}>
       <a
         href={tree.link}
-        className={tree.pageId === pageId ? clsx(styles.active, 'active') : ''}
+        className={
+          tree.pageId === pageId
+            ? clsx(styles.active, 'is-active')
+            : 'menu-label'
+        }
       >
         {tree.title}
       </a>
       <NavTree items={tree.children} />
-    </nav>
+    </aside>
   );
 };
 
@@ -29,15 +33,12 @@ interface NavTreeProps {
 }
 
 const NavTree = ({ items }: NavTreeProps) => (
-  <ul>
+  <ul class="menu-list">
     {items.map((item: NavItem) => (
-      <li
-        key={item.link}
-        class={item.pageId === pageId ? 'active' : 'text-dark'}
-      >
+      <li key={item.link} class={item.pageId === pageId ? '' : ''}>
         <a
           className={
-            item.pageId === pageId ? clsx(styles.active, 'active') : ''
+            item.pageId === pageId ? clsx(styles.active, 'is-active') : ''
           }
           href={item.link}
         >

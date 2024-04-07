@@ -7,7 +7,7 @@ interface ErrorProps {
 
 export const Error = ({ title, error }: ErrorProps) => (
   <Layout title={title}>
-    <h2>{title}</h2>
+    <h1 class="title">{title}</h1>
     <p>The request cannot be fullfilled.</p>
     <code>{error}</code>
   </Layout>

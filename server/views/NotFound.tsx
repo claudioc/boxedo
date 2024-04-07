@@ -6,7 +6,7 @@ interface NotFoundProps {
 
 export const NotFound = ({ title }: NotFoundProps) => (
   <Layout title={title}>
-    <h2>Page not found</h2>
+    <h1 class="title">Page not found</h1>
     <p>The requested page was not found.</p>
   </Layout>
 );

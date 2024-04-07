@@ -16,30 +16,24 @@ export const EditPage = ({ page }: EditPageProps) => (
     pageId={page.pageId}
   >
     <div x-data x-init="window.onbeforeunload=function() { return true };">
-      <h1>Editing a page</h1>
+      <h1 class="subtitle">Editing a page</h1>
       <form action="" method="post">
-        <div class="row">
-          <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
+        <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
+
+        <div id="editor-placeholder" class="block content">
+          <h1>{page.pageTitle}</h1>
+          {page.pageContent}
         </div>
 
-        <div class="row">
-          <div class="col">
-            <div id="editor-placeholder">
-              <h1>{page.pageTitle}</h1>
-              {page.pageContent}
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
+        <div class="block">
           <DebugInfo page={page} />
         </div>
       </form>
 
-      <div class="row">
-        <div class="col is-right">
+      <div class="level">
+        <div class="level-item level-right">
           <button
-            class="button error"
+            class="button is-danger is-light"
             id="delete-page-button"
             x-on:click="$refs.dialog.showModal()"
           >
@@ -48,25 +42,27 @@ export const EditPage = ({ page }: EditPageProps) => (
         </div>
       </div>
 
-      <dialog x-ref="dialog">
+      <dialog x-ref="dialog" class="card m-auto">
         <form method="dialog">
-          <h1>Delete this page?</h1>
+          <h2 class="title is-2">Delete this page?</h2>
           <p>
             Are you sure you want to delete this page? All its children pages
             will be moved to this page's parent.
           </p>
-          <menu class="is-right">
-            <button
-              class="button primary"
-              value="default"
-              x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
-            >
-              Yes, delete
-            </button>
-            <button class="button secondary" value="cancel">
-              No, cancel!
-            </button>
-          </menu>
+          <div class="level">
+            <menu class="level-item level-right">
+              <button
+                class="button"
+                value="default"
+                x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
+              >
+                Yes, delete
+              </button>
+              <button class="button" value="cancel">
+                No, cancel!
+              </button>
+            </menu>
+          </div>
         </form>
       </dialog>
 

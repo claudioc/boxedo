@@ -1,12 +1,2 @@
-.Menu {
-  display: flex;
-  justify-content: end;
-}
-
 .Menu menu {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 1rem;
-  list-style: none;
 }

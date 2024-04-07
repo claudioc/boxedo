@@ -14,8 +14,11 @@ export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
     feedbackCode={feedbackCode}
   >
     <div className={styles.ReadPage}>
-      <h1>{page.pageTitle}</h1>
-      <div dangerouslySetInnerHTML={{ __html: page.pageContent || '' }}></div>
+      <h1 class="title">{page.pageTitle}</h1>
+      <div
+        class="content"
+        dangerouslySetInnerHTML={{ __html: page.pageContent || '' }}
+      ></div>
     </div>
   </Layout>
 );
