@@ -1,3 +1,7 @@
 .header {
   text-transform: uppercase;
 }
+
+.nav {
+  background-color: var(--color-primary);
+}

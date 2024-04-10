@@ -7,7 +7,9 @@ interface DebugInfoProps {
 export const DebugInfo = ({ page }: DebugInfoProps) => (
   <details>
     <summary>Debug</summary>
-    <input type="text" name="pageTitle" value={page?.pageTitle} />
+    <div class="block">
+      <input type="text" name="pageTitle" value={page?.pageTitle} />
+    </div>
     <textarea name="pageContent">{page?.pageContent}</textarea>
   </details>
 );

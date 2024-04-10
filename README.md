@@ -1,2 +1,2 @@
-# Joongle is the best CMS on hearth
+# Joongle is the best CMS on Earth
 

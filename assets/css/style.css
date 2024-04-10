@@ -16,6 +16,12 @@
   height: 0;
 }
 
+.tiptap.ProseMirror-focused {
+  outline: 0;
+  padding: 0.5rem;
+  background-color: #222;
+}
+
 #editor-data {
   display: none;
 }

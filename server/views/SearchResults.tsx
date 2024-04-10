@@ -19,7 +19,9 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
           {results.map((result) => (
             <li key={result.pageId} class="content">
               <a href={pageUrl(result.pageSlug)}>{result.pageTitle}</a>
-              <blockquote class="ml-4">{result.pageContent}</blockquote>
+              {result.pageContent && (
+                <blockquote class="ml-4">{result.pageContent}</blockquote>
+              )}
             </li>
           ))}
         </ul>

@@ -12,7 +12,9 @@ let pageId = '';
 export const Nav = ({ tree, currentPageId }: NavProps) => {
   pageId = currentPageId;
   return (
-    <aside className={clsx(styles.Nav, 'menu')}>
+    <aside
+      className={clsx(styles.nav, 'menu', 'p-4', 'has-background-info-dark')}
+    >
       <a
         href={tree.link}
         className={
@@ -33,12 +35,14 @@ interface NavTreeProps {
 }
 
 const NavTree = ({ items }: NavTreeProps) => (
-  <ul class="menu-list">
+  <ul class={clsx('menu-list')}>
     {items.map((item: NavItem) => (
-      <li key={item.link} class={item.pageId === pageId ? '' : ''}>
+      <li key={item.link}>
         <a
           className={
-            item.pageId === pageId ? clsx(styles.active, 'is-active') : ''
+            item.pageId === pageId
+              ? clsx(styles.active, 'is-active')
+              : 'has-background-info-dark'
           }
           href={item.link}
         >

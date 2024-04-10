@@ -17,7 +17,7 @@ export const EditPage = ({ page }: EditPageProps) => (
   >
     <div x-data x-init="window.onbeforeunload=function() { return true };">
       <h1 class="subtitle">Editing a page</h1>
-      <form action="" method="post">
+      <form action="" method="post" class="block">
         <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
 
         <div id="editor-placeholder" class="block content">
