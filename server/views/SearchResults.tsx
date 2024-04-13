@@ -1,6 +1,6 @@
 import { Layout } from './Layout';
-import { PageModel } from '../types';
-import { pageUrl } from '../lib/helpers';
+import { PageModel } from '~/types';
+import { pageUrl } from '~/lib/helpers';
 
 interface SearchResultsProps {
   query: string;

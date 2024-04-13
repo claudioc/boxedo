@@ -5,16 +5,17 @@ import staticServe from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyFavicon from 'fastify-favicon';
 import mongodb from '@fastify/mongodb';
+import { PinoLoggerOptions } from 'fastify/types/logger';
+import fastifyEnv from '@fastify/env';
+import fastifyUUID from 'fastify-uuid';
+
 import path from 'path';
 import router from './router';
-import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '../constants';
-import { PinoLoggerOptions } from 'fastify/types/logger';
-import { NodeEnv } from '../types';
-import fastifyEnv from '@fastify/env';
+import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
+import { NodeEnv } from '~/types';
 import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
-import fastifyUUID from 'fastify-uuid';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -1,5 +1,5 @@
-import { Feedback as FeedbackType } from '../../types';
-import { Feedbacks, isFeedbackError } from '../../lib/feedbacks';
+import { Feedback as FeedbackType } from '~/types';
+import { Feedbacks, isFeedbackError } from '~/lib/feedbacks';
 import clsx from 'clsx';
 
 interface FeedbackProps {

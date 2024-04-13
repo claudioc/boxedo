@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { ValidationErrors } from '../components/ValidationErrors';
+import { ValidationErrors } from '~/views/components/ValidationErrors';
 
 interface PageFormWrapperProps {
   title: string;

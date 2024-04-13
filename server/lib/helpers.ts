@@ -1,4 +1,4 @@
-import { Feedback } from '../types';
+import { Feedback } from '~/types';
 
 export const pageUrl = (pageSlug: string) => `/page/${pageSlug}`;
 

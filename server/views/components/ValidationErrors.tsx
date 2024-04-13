@@ -1,4 +1,4 @@
-import { Feedback, Feedbacks } from '../components/Feedback';
+import { Feedback, Feedbacks } from '~/views/components/Feedback';
 
 export const ValidationErrors = () => (
   <div>

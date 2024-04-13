@@ -3,7 +3,7 @@ import {
   ASSETS_MOUNT_POINT,
   CACHE_BUSTER,
   CLIENT_ENTRY_POINT,
-} from '../constants';
+} from '~/constants';
 import * as fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

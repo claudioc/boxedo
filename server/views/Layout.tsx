@@ -1,11 +1,10 @@
-import { getJsBundleName } from '../lib/assets';
+import { getJsBundleName, cssFile } from '~/lib/assets';
 import { JSX } from 'preact';
-import { cssFile } from '../lib/assets';
 import { Menu } from './components/Menu';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
-import { INDEX_PAGE_ID } from '../constants';
-import { getFeedback } from '../lib/feedbacks';
+import { INDEX_PAGE_ID } from '~/constants';
+import { getFeedback } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
 

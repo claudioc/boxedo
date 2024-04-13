@@ -1,9 +1,9 @@
 import { Layout } from './Layout';
-import { PageModel } from '../types';
+import { PageModel } from '~/types';
 import { PageMenu } from './components/PageMenu';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
-import { pageUrl } from '../lib/helpers';
+import { pageUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface EditPageProps {

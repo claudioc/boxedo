@@ -1,4 +1,4 @@
-import { NavItem } from '../../types';
+import { NavItem } from '~/types';
 import clsx from 'clsx';
 import styles from './Nav.module.css';
 

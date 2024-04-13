@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '../types';
+import { PageModel } from '~/types';
 import styles from './ReadPage.module.css';
 
 export interface ReadPageProps {
