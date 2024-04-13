@@ -7,11 +7,6 @@ import { generateHTML } from '@tiptap/html';
 
 import Alpine, { Alpine as AlpineType } from 'alpinejs';
 
-interface App {
-  editor: Editor | null;
-  enableEditor: () => void;
-}
-
 declare global {
   interface Window {
     Alpine: AlpineType;
@@ -46,8 +41,32 @@ const editorOptions = {
   extensions,
 };
 
+interface App {
+  editor: Editor | null;
+  enableEditor: () => void;
+  validate: (event: Event) => void;
+}
+
 const App: App = {
   editor: null,
+  validate: (event) => {
+    const form = event.target as HTMLFormElement;
+    const data = new FormData(form);
+    const error: Record<string, boolean> = {};
+
+    for (const [key, value] of data.entries()) {
+      error[key] = (value as string).trim() === '';
+    }
+
+    if (Object.values(error).some((v) => v)) {
+      form._x_model.set(error);
+      event.preventDefault();
+      return;
+    }
+
+    window.onbeforeunload = null;
+  },
+
   enableEditor: () => {
     const placeHolder = document.getElementById('editor-placeholder')!;
     const pageContent = document.querySelector(

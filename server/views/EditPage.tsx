@@ -4,6 +4,7 @@ import { PageMenu } from './components/PageMenu';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { pageUrl } from '../lib/helpers';
+import { Feedback, Feedbacks } from './components/Feedback';
 
 export interface EditPageProps {
   page: PageModel;
@@ -15,9 +16,29 @@ export const EditPage = ({ page }: EditPageProps) => (
     title={`Editing ${page.pageTitle}`}
     pageId={page.pageId}
   >
-    <div x-data x-init="window.onbeforeunload=function() { return true };">
+    <div
+      x-data="{error: { pageTitle: false, pageContent: false }}"
+      x-init="window.onbeforeunload=function() { return true };"
+    >
       <h1 class="subtitle">Editing a page</h1>
-      <form action="" method="post" class="block">
+
+      <div>
+        <div x-show="error && error.pageTitle" class="block">
+          <Feedback feedback={Feedbacks.E_EMPTY_TITLE} />
+        </div>
+
+        <div x-show="error && error.pageContent" class="block">
+          <Feedback feedback={Feedbacks.E_EMPTY_CONTENT} />
+        </div>
+      </div>
+
+      <form
+        action=""
+        method="post"
+        class="block"
+        x-on:submit="App.validate"
+        x-model="error"
+      >
         <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
 
         <div id="editor-placeholder" class="block content">

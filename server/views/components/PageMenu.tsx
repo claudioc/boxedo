@@ -5,11 +5,7 @@ interface PageMenuProps {
 export const PageMenu = ({ cancelUrl }: PageMenuProps) => (
   <div class="level">
     <menu class="level-right level-item">
-      <button
-        class="button"
-        type="submit"
-        x-on:click="window.onbeforeunload=null"
-      >
+      <button class="button" type="submit">
         Save and close
       </button>
       <a

@@ -5,7 +5,7 @@
     "target": "es6",
     /* You still need to use the '.js' extension in your import statements */
     "module": "commonjs",
-    "lib": ["dom", "es6"],
+    "lib": ["DOM", "ES2022", "DOM.Iterable"],
     "outDir": "../dist/client"
   }
 }

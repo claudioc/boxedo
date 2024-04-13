@@ -1,5 +1,5 @@
 import { Feedback as FeedbackType } from '../../types';
-import { isFeedbackError } from '../../lib/feedbacks';
+import { Feedbacks, isFeedbackError } from '../../lib/feedbacks';
 import clsx from 'clsx';
 
 interface FeedbackProps {
@@ -9,6 +9,7 @@ interface FeedbackProps {
 export const Feedback = ({ feedback }: FeedbackProps) => (
   <div
     class={clsx(
+      'block',
       'notification',
       'is-light',
       isFeedbackError(feedback) ? 'is-danger' : 'is-success'
@@ -18,3 +19,5 @@ export const Feedback = ({ feedback }: FeedbackProps) => (
     {feedback.message}
   </div>
 );
+
+export { Feedbacks };
