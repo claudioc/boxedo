@@ -1,6 +1,6 @@
 import { Layout } from './Layout';
 import { PageModel } from '~/types';
-import { PageMenu } from './components/PageMenu';
+import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { pageUrl } from '~/lib/helpers';
@@ -24,7 +24,7 @@ export const EditPage = ({ page }: EditPageProps) => (
         x-on:submit="App.validate"
         x-model="error"
       >
-        <PageMenu cancelUrl={pageUrl(page.pageSlug)} />
+        <PageActions cancelUrl={pageUrl(page.pageSlug)} />
 
         <div id="editor-placeholder" class="block content">
           <h1>{page.pageTitle}</h1>

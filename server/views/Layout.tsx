@@ -1,6 +1,6 @@
 import { getJsBundleName, cssFile } from '~/lib/assets';
 import { JSX } from 'preact';
-import { Menu } from './components/Menu';
+import { PageMenu } from './components/PageMenu';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
 import { INDEX_PAGE_ID } from '~/constants';
@@ -52,7 +52,7 @@ export const Layout = ({
         </header>
 
         {feedback && <Feedback feedback={feedback} />}
-        {hasMenu && <Menu pageId={pageId} />}
+        {hasMenu && <PageMenu pageId={pageId} />}
 
         <main class="columns">
           {pageId && (

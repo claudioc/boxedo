@@ -1,7 +1,7 @@
 import { Layout } from './Layout';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
-import { PageMenu } from './components/PageMenu';
+import { PageActions } from './components/PageActions';
 import { PageFormWrapper } from './components/PageFormWrapper';
 
 interface CreateIndexProps {
@@ -18,7 +18,7 @@ export const CreateIndex = ({ title }: CreateIndexProps) => (
         x-on:submit="App.validate"
         x-model="error"
       >
-        <PageMenu cancelUrl="/" />
+        <PageActions cancelUrl="/" />
 
         <div id="editor-placeholder content block">
           <h1>{title}</h1>

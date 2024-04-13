@@ -5,6 +5,7 @@ import { Error } from '~/views/Error';
 import { EditPage } from '~/views/EditPage';
 import { CreatePage } from '~/views/CreatePage';
 import { CreateIndex } from '~/views/CreateIndex';
+import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
 import { SearchResults } from '~/views/SearchResults';
@@ -116,6 +117,46 @@ const router = async (app: FastifyInstance) => {
 
       return (
         <ReadPage page={root || DEFAULT_HOMEPAGE} feedbackCode={feedbackCode} />
+      );
+    }
+  );
+
+  app.get<{
+    Querystring: FromSchema<typeof SearchQuerySchema>;
+  }>(
+    '/parts/titles',
+    {
+      schema: {
+        querystring: SearchQuerySchema,
+      },
+    },
+    async (req, rep) => {
+      const { q } = req.query;
+
+      if (q.length < 3) {
+        return '';
+      }
+
+      const collection = app.mongo.db?.collection<PageModel>('pages');
+      if (!assertCollection(collection, app)) {
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      }
+
+      const results = await collection!
+        .find({ pageTitle: { $regex: q, $options: 'i' } })
+        .limit(25)
+        .toArray();
+
+      return (
+        <>
+          {results.map((result) => (
+            <li>
+              <a href="#" data-page-id={result.pageId}>
+                {result.pageTitle}
+              </a>
+            </li>
+          ))}
+        </>
       );
     }
   );
@@ -303,6 +344,37 @@ const router = async (app: FastifyInstance) => {
         303,
         pathWithFeedback(pageUrl(newSlug), Feedbacks.S_PAGE_UPDATED)
       );
+    }
+  );
+
+  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+    '/move/:pageId',
+    {
+      schema: {
+        params: PageParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const { pageId } = req.params;
+
+      const collection = app.mongo.db?.collection<PageModel>('pages');
+      if (!assertCollection(collection, app)) {
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      }
+
+      const page = await getPageById(collection!, pageId);
+
+      if (!page) {
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+      }
+
+      const parent = await getPageById(collection!, page.parentPageId!);
+
+      if (!parent) {
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+      }
+
+      return <MovePage page={page} parent={parent} />;
     }
   );
 
