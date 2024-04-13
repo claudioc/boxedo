@@ -4,7 +4,7 @@ import { PageMenu } from './components/PageMenu';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { pageUrl } from '../lib/helpers';
-import { Feedback, Feedbacks } from './components/Feedback';
+import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface EditPageProps {
   page: PageModel;
@@ -16,22 +16,7 @@ export const EditPage = ({ page }: EditPageProps) => (
     title={`Editing ${page.pageTitle}`}
     pageId={page.pageId}
   >
-    <div
-      x-data="{error: { pageTitle: false, pageContent: false }}"
-      x-init="window.onbeforeunload=function() { return true };"
-    >
-      <h1 class="subtitle">Editing a page</h1>
-
-      <div>
-        <div x-show="error && error.pageTitle" class="block">
-          <Feedback feedback={Feedbacks.E_EMPTY_TITLE} />
-        </div>
-
-        <div x-show="error && error.pageContent" class="block">
-          <Feedback feedback={Feedbacks.E_EMPTY_CONTENT} />
-        </div>
-      </div>
-
+    <PageFormWrapper title="Editing a page">
       <form
         action=""
         method="post"
@@ -90,7 +75,7 @@ export const EditPage = ({ page }: EditPageProps) => (
       <form x-ref="deleteForm" action="/delete" method="post">
         <input type="hidden" name="pageId" value={page.pageId} />
       </form>
-    </div>
+    </PageFormWrapper>
 
     <EditorEnabler />
   </Layout>

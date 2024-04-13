@@ -4,7 +4,7 @@ import { PageMenu } from './components/PageMenu';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { pageUrl } from '../lib/helpers';
-import { Feedback, Feedbacks } from './components/Feedback';
+import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface CreatePageProps {
   parentPage: PageModel;
@@ -16,22 +16,7 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
     title="Creating a new page"
     pageId={parentPage.pageId}
   >
-    <div
-      x-data="{error: { pageTitle: false, pageContent: false }}"
-      x-init="window.onbeforeunload=function() { return true };"
-    >
-      <h1 class="subtitle">Creating a new page</h1>
-
-      <div>
-        <div x-show="error && error.pageTitle" class="block">
-          <Feedback feedback={Feedbacks.E_EMPTY_TITLE} />
-        </div>
-
-        <div x-show="error && error.pageContent" class="block">
-          <Feedback feedback={Feedbacks.E_EMPTY_CONTENT} />
-        </div>
-      </div>
-
+    <PageFormWrapper title="Creating a new page">
       <form
         action=""
         method="post"
@@ -47,7 +32,7 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
           <DebugInfo />
         </div>
       </form>
-    </div>
+    </PageFormWrapper>
     <EditorEnabler />
   </Layout>
 );
