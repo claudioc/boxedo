@@ -52,7 +52,6 @@ export const Layout = ({
         </header>
 
         {feedback && <Feedback feedback={feedback} />}
-        {hasMenu && <PageMenu pageId={pageId} />}
 
         <main class="columns">
           {pageId && (
@@ -62,7 +61,11 @@ export const Layout = ({
               hx-trigger="load"
             ></div>
           )}
-          <div class="column">{children}</div>
+          <div class="column">
+            {hasMenu && <PageMenu pageId={pageId} />}
+
+            {children}
+          </div>
         </main>
       </body>
     </html>
