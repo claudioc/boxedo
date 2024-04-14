@@ -9,3 +9,10 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
 
   return `${path}?f=${feedback.code}`;
 };
+
+export const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('en-UK', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date);
+};

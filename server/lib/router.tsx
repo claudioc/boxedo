@@ -90,6 +90,8 @@ const DEFAULT_HOMEPAGE: PageModel = {
     '<p class="empty-index-placeholder">Click on the "Create this page" link to get started</p>',
   pageSlug: '',
   pageSlugs: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 const PageWithoutContentProjection = {
@@ -98,6 +100,8 @@ const PageWithoutContentProjection = {
     pageTitle: 1,
     pageSlug: 1,
     parentPageId: 1,
+    createdAt: 1,
+    updatedAt: 1,
   },
 } as const;
 
@@ -238,7 +242,6 @@ const router = async (app: FastifyInstance) => {
         app.log.error(Feedbacks.E_MISSING_PAGE.message);
         return <NotFound title="Page not found" />;
       }
-
       return <ReadPage page={page} feedbackCode={feedbackCode} />;
     }
   );
@@ -335,6 +338,7 @@ const router = async (app: FastifyInstance) => {
         $set: {
           pageTitle: req.body.pageTitle,
           pageContent: req.body.pageContent,
+          updatedAt: new Date(),
         },
       };
 
@@ -554,6 +558,7 @@ const router = async (app: FastifyInstance) => {
 
       const slug = await generateUniqueSlug(pageTitle, collection!);
       const pageId = app.uuid.v4();
+      const now = new Date();
       try {
         await (collection as unknown as Collection).insertOne({
           pageId,
@@ -561,6 +566,8 @@ const router = async (app: FastifyInstance) => {
           pageTitle,
           pageContent,
           pageSlug: slug,
+          updatedAt: now,
+          createdAt: now,
         });
       } catch (error) {
         return redirectHome(rep, Feedbacks.E_CREATING_PAGE, app);
@@ -650,6 +657,29 @@ const router = async (app: FastifyInstance) => {
         await collection.updateOne(
           { _id: page._id },
           { $set: { pageSlug: slug, pageSlugs: [] } }
+        );
+      }
+    }
+
+    return 'Slugs generated for all pages';
+  });
+
+  app.get('/admin/schema/add-created-at', async () => {
+    const collection = app.mongo.db?.collection<PageModel>('pages');
+    if (!collection) {
+      return 'No collection found.';
+    }
+
+    const pages = await collection.find().toArray();
+    if (!pages) {
+      return 'No pages found.';
+    }
+
+    for (const page of pages) {
+      if (!page.createdAt) {
+        await collection.updateOne(
+          { _id: page._id },
+          { $set: { createdAt: new Date(), updatedAt: new Date() } }
         );
       }
     }
@@ -756,7 +786,7 @@ const getPageById = async (
   collection: Collection<PageModel>,
   pageId: string
 ) => {
-  return await collection.findOne({ pageId });
+  return await collection.findOne<PageModel>({ pageId });
 };
 
 export default router;
