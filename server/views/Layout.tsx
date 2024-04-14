@@ -3,7 +3,6 @@ import { JSX } from 'preact';
 import { PageMenu } from './components/PageMenu';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
-import { INDEX_PAGE_ID } from '~/constants';
 import { getFeedback } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
@@ -23,8 +22,6 @@ export const Layout = ({
   feedbackCode,
   children,
 }: LayoutProps) => {
-  const isIndex = pageId === INDEX_PAGE_ID;
-
   let feedback;
   if (feedbackCode) {
     feedback = getFeedback(feedbackCode);
@@ -42,9 +39,13 @@ export const Layout = ({
       </head>
       <body class="container">
         <script src={getJsBundleName()}></script>
-        <header class={clsx(styles.header, 'level')}>
+        <header class={clsx(styles.header, 'level', 'py-3')}>
           <div class="level-left">
-            <div>Joongle {!isIndex ? <a href="/">Home</a> : ''}</div>
+            <div class="title">
+              <a href="/" class="has-text-warning">
+                Joongle
+              </a>
+            </div>
           </div>
           <div class="level-right">
             <Search />

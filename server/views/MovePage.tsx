@@ -15,8 +15,6 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
     title={`Move ${page.pageTitle} to another parent`}
     pageId={page.pageId}
   >
-    <h1 class="title">{page.pageTitle}</h1>
-
     <div x-data="{newParentId: '', newParentTitle: 'n/a', error: {newParentId: false}}">
       <div x-show="error && error.newParentId" class="block">
         <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
@@ -33,6 +31,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
           actions={['save', 'cancel']}
           cancelUrl={pageUrl(page.pageSlug)}
         />
+        <h1 class="title">{page.pageTitle}</h1>
 
         <p class="block">Current parent is "{parent.pageTitle}"</p>
 
