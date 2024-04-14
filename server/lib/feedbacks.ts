@@ -11,9 +11,15 @@ type ErrorCodes =
   | 'E_CREATING_PAGE'
   | 'E_MISSING_DB'
   | 'E_EMPTY_TITLE'
-  | 'E_EMPTY_CONTENT';
+  | 'E_EMPTY_CONTENT'
+  | 'E_WRONG_PARENT_PAGE'
+  | 'E_INVALID_PARENT_PAGE';
 
-type SuccessCodes = 'S_PAGE_CREATED' | 'S_PAGE_UPDATED' | 'S_PAGE_DELETED';
+type SuccessCodes =
+  | 'S_PAGE_CREATED'
+  | 'S_PAGE_UPDATED'
+  | 'S_PAGE_DELETED'
+  | 'S_PAGE_MOVED';
 
 export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   S_PAGE_CREATED: {
@@ -27,6 +33,10 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   S_PAGE_DELETED: {
     code: 3,
     message: 'Page deleted',
+  },
+  S_PAGE_MOVED: {
+    code: 4,
+    message: 'Page moved to a new parent',
   },
   E_INDEX_ALREADY_EXISTS: {
     code: 100,
@@ -71,6 +81,14 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_EMPTY_CONTENT: {
     code: 110,
     message: 'Content cannot be empty',
+  },
+  E_WRONG_PARENT_PAGE: {
+    code: 111,
+    message: 'Parent page is invalid or not found',
+  },
+  E_INVALID_PARENT_PAGE: {
+    code: 112,
+    message: 'Parent page is missing or invalid',
   },
 } as const;
 

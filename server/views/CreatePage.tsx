@@ -21,10 +21,14 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
         action=""
         method="post"
         class="block"
+        name="createPage"
         x-on:submit="App.validate"
         x-model="error"
       >
-        <PageActions cancelUrl={pageUrl(parentPage.pageSlug)} />
+        <PageActions
+          actions={['save', 'cancel']}
+          cancelUrl={pageUrl(parentPage.pageSlug)}
+        />
 
         <div id="editor-placeholder" class="block content"></div>
 

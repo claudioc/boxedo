@@ -1,5 +1,8 @@
 import { Layout } from './Layout';
 import { PageModel } from '~/types';
+import { PageActions } from './components/PageActions';
+import { pageUrl } from '~/lib/helpers';
+import { Feedback, Feedbacks } from './components/Feedback';
 
 export interface MovePageProps {
   page: PageModel;
@@ -13,10 +16,34 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
     pageId={page.pageId}
   >
     <h1 class="title">{page.pageTitle}</h1>
-    <p class="block">Current parent is "{parent.pageTitle}"</p>
 
-    <form x-data="{newParentId: ''}">
-      <input type="hidden" name="newParentId" x-model="newParentId" />
+    <div x-data="{newParentId: '', newParentTitle: 'n/a', error: {newParentId: false}}">
+      <div x-show="error && error.newParentId" class="block">
+        <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
+      </div>
+
+      <form
+        action=""
+        method="post"
+        name="movePage"
+        x-model="error"
+        x-on:submit="App.validate"
+      >
+        <PageActions
+          actions={['save', 'cancel']}
+          cancelUrl={pageUrl(page.pageSlug)}
+        />
+
+        <p class="block">Current parent is "{parent.pageTitle}"</p>
+
+        <p class="block">
+          New parent is "<span x-text="newParentTitle"></span>"
+        </p>
+
+        <input type="hidden" name="newParentId" x-model="newParentId" />
+        <input type="hidden" name="oldParentId" value={page.parentPageId} />
+      </form>
+
       <div class="block">
         <div class="field">
           <label class="label" for="search">
@@ -38,7 +65,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
         </div>
       </div>
 
-      <ul x-on:click="newParentId = $event.target.dataset.pageId;"></ul>
-    </form>
+      <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.innerText"></ul>
+    </div>
   </Layout>
 );

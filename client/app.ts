@@ -54,14 +54,28 @@ const App: App = {
     const data = new FormData(form);
     const error: Record<string, boolean> = {};
 
-    for (const [key, value] of data.entries()) {
-      error[key] = (value as string).trim() === '';
+    if (form.name === 'editPage' || form.name === 'createPage') {
+      for (const [key, value] of data.entries()) {
+        error[key] = (value as string).trim() === '';
+      }
+
+      if (Object.values(error).some((v) => v)) {
+        form._x_model.set(error);
+        event.preventDefault();
+        return;
+      }
     }
 
-    if (Object.values(error).some((v) => v)) {
-      form._x_model.set(error);
-      event.preventDefault();
-      return;
+    if (form.name === 'movePage') {
+      if (
+        data.get('newParentId') === '' ||
+        data.get('newParentId') === data.get('oldParentId')
+      ) {
+        error.newParentId = true;
+        form._x_model.set(error);
+        event.preventDefault();
+        return;
+      }
     }
 
     window.onbeforeunload = null;

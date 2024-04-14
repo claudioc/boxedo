@@ -21,10 +21,14 @@ export const EditPage = ({ page }: EditPageProps) => (
         action=""
         method="post"
         class="block"
+        name="editPage"
         x-on:submit="App.validate"
         x-model="error"
       >
-        <PageActions cancelUrl={pageUrl(page.pageSlug)} />
+        <PageActions
+          actions={['save', 'cancel']}
+          cancelUrl={pageUrl(page.pageSlug)}
+        />
 
         <div id="editor-placeholder" class="block content">
           <h1>{page.pageTitle}</h1>

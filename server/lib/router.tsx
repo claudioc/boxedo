@@ -74,6 +74,15 @@ const PageBodySchema = {
   },
 } as const;
 
+const MovePageBodySchema = {
+  type: 'object',
+  required: ['newParentId', 'oldParentId'],
+  properties: {
+    newParentId: PageIdFormat,
+    oldParentId: PageIdFormat,
+  },
+} as const;
+
 const DEFAULT_HOMEPAGE: PageModel = {
   pageId: INDEX_PAGE_ID,
   pageTitle: 'Welcome to Joongle!',
@@ -375,6 +384,59 @@ const router = async (app: FastifyInstance) => {
       }
 
       return <MovePage page={page} parent={parent} />;
+    }
+  );
+
+  app.post<{
+    Body: FromSchema<typeof MovePageBodySchema>;
+    Params: FromSchema<typeof PageParamsSchema>;
+  }>(
+    '/move/:pageId',
+    {
+      schema: {
+        body: MovePageBodySchema,
+        params: PageParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const { pageId } = req.params;
+      const { newParentId } = req.body;
+
+      if (newParentId === pageId) {
+        return redirectHome(rep, Feedbacks.E_WRONG_PARENT_PAGE, app);
+      }
+
+      const collection = app.mongo.db?.collection<PageModel>('pages');
+      if (!assertCollection(collection, app)) {
+        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      }
+
+      const page = await getPageById(collection!, pageId);
+      if (!page) {
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+      }
+
+      const newParentpage = await getPageById(collection!, newParentId);
+      if (!newParentpage) {
+        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+      }
+
+      const options: UpdateFilter<PageModel> = {
+        $set: {
+          parentPageId: newParentId,
+        },
+      };
+
+      try {
+        await collection!.updateOne({ _id: page._id }, options);
+      } catch (error) {
+        return redirectHome(rep, Feedbacks.E_UPDATING_PAGE, app);
+      }
+
+      return rep.redirect(
+        303,
+        pathWithFeedback(pageUrl(page.pageSlug), Feedbacks.S_PAGE_MOVED)
+      );
     }
   );
 

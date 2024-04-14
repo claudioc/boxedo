@@ -18,7 +18,7 @@ export const CreateIndex = ({ title }: CreateIndexProps) => (
         x-on:submit="App.validate"
         x-model="error"
       >
-        <PageActions cancelUrl="/" />
+        <PageActions actions={['save', 'cancel']} cancelUrl="/" />
 
         <div id="editor-placeholder content block">
           <h1>{title}</h1>
