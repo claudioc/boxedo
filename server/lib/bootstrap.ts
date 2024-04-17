@@ -94,7 +94,13 @@ app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
       contentSecurityPolicy: {
         // If you get stuck in CSP, try this: crossOriginEmbedderPolicy: false,
         directives: {
-          'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          'script-src': [
+            'http://localhost:35729/',
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+          ],
+          'default-src': ["'self'", 'ws:'],
         },
       },
       hsts: app.config.NODE_ENV === 'production',

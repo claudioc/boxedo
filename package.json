@@ -10,8 +10,8 @@
     "node": ">=20.6.0"
   },
   "scripts": {
-    "devo:watch": "tsc -b ./client ./server --preserveWatchOutput -w",
     "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
+    "dev:livereload": "livereload ./dist/server --wait 1000",
     "dev:build:client": "esbuild ./client/app.ts --bundle --analyze --outdir=./dist/client --watch --entry-names=[dir]/[name]-[hash] --metafile=./dist/client-meta.json --sourcemap",
     "dev:build:server": "esbuild ./server/app.ts --banner:js='import { createRequire } from \"module\";const require = createRequire(import.meta.url);' --metafile=./dist/server-meta.json --bundle --platform=node --outdir=./dist/server --format=esm --watch",
     "dev": "npm run clean && conc -r -k 'npm:dev:*'",
