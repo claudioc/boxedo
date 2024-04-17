@@ -1,21 +1,27 @@
+import { isIndexPage, isIndexPlaceholderPage } from '~/lib/helpers';
 import styles from './Menu.module.css';
 import clsx from 'clsx';
+import { PageModel } from '~/types';
 
 interface PageMenuProps {
-  pageId?: string;
+  page?: PageModel;
 }
 
-export const PageMenu = ({ pageId }: PageMenuProps) => {
-  if (!pageId) {
+export const PageMenu = ({ page }: PageMenuProps) => {
+  if (!page) {
     return null;
   }
 
   return (
     <div className={clsx(styles.Menu, 'level')}>
       <menu className="level-right level-item m-0">
-        <MenuItem href={`/edit/${pageId}`}>Edit this page</MenuItem>
-        <MenuItem href={`/move/${pageId}`}>Move this page</MenuItem>
-        <MenuItem href={`/create/${pageId}`}>Create a subpage</MenuItem>
+        <MenuItem href={`/edit/${page.pageId}`}>Edit this page</MenuItem>
+        {!isIndexPage(page) && (
+          <MenuItem href={`/move/${page.pageId}`}>Move this page</MenuItem>
+        )}
+        {!isIndexPlaceholderPage(page) && (
+          <MenuItem href={`/create/${page.pageId}`}>Create a subpage</MenuItem>
+        )}
       </menu>
     </div>
   );

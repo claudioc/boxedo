@@ -13,7 +13,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
   <Layout
     hasMenu={false}
     title={`Move ${page.pageTitle} to another parent`}
-    pageId={page.pageId}
+    page={page}
   >
     <div x-data="{newParentId: '', newParentTitle: 'n/a', error: {newParentId: false}}">
       <div x-show="error && error.newParentId" class="block">

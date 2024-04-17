@@ -6,10 +6,11 @@ import { Search } from './components/Search';
 import { getFeedback } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
+import { PageModel } from '~/types';
 
 interface LayoutProps {
   title: string;
-  pageId?: string;
+  page?: PageModel;
   hasMenu?: boolean;
   feedbackCode?: number;
   children: string | JSX.Element[] | JSX.Element;
@@ -17,7 +18,7 @@ interface LayoutProps {
 
 export const Layout = ({
   title,
-  pageId,
+  page,
   hasMenu = true,
   feedbackCode,
   children,
@@ -55,16 +56,15 @@ export const Layout = ({
         {feedback && <Feedback feedback={feedback} />}
 
         <main class="columns">
-          {pageId && (
+          {page && (
             <div
               class="column is-4"
-              hx-get={`/parts/nav/${pageId}`}
+              hx-get={`/parts/nav/${page.pageId}`}
               hx-trigger="load"
             ></div>
           )}
           <div class="column">
-            {hasMenu && <PageMenu pageId={pageId} />}
-
+            {hasMenu && <PageMenu page={page} />}
             {children}
           </div>
         </main>

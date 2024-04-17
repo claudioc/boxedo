@@ -1,4 +1,5 @@
-import { Feedback } from '~/types';
+import { Feedback, PageModel } from '~/types';
+import { INDEX_PAGE_ID } from '~/constants';
 
 export const pageUrl = (pageSlug: string) => `/page/${pageSlug}`;
 
@@ -16,3 +17,8 @@ export const formatDate = (date: Date) => {
     timeStyle: 'short',
   }).format(date);
 };
+
+export const isIndexPage = (page: PageModel) => page.pageId === INDEX_PAGE_ID;
+
+export const isIndexPlaceholderPage = (page: PageModel) =>
+  isIndexPage(page) && page.pageSlug === '';

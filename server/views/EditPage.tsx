@@ -11,11 +11,7 @@ export interface EditPageProps {
 }
 
 export const EditPage = ({ page }: EditPageProps) => (
-  <Layout
-    hasMenu={false}
-    title={`Editing ${page.pageTitle}`}
-    pageId={page.pageId}
-  >
+  <Layout hasMenu={false} title={`Editing ${page.pageTitle}`} page={page}>
     <PageFormWrapper title="Editing a page">
       <form
         action=""

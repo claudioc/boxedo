@@ -60,11 +60,7 @@ declare module 'fastify' {
 const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
   development: {
     transport: {
-      target: 'pino-pretty',
-      options: {
-        ignore:
-          'pid,res,responseTime,req.remoteAddress,req.remotePort,req.hostname',
-      },
+      target: '@fastify/one-line-logger',
     },
   },
   production: true,
