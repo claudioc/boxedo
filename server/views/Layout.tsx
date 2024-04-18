@@ -37,7 +37,9 @@ export const Layout = ({
         <meta name="description" content="Joongle is the ultimate CMS" />
         <link rel="stylesheet" href={cssFile} />
         <script src="/a/vendor/htmx.min.js"></script>
-        <script src="http://localhost:35729/livereload.js?snipver=1"></script>
+        {process.env.NODE_ENV === 'development' && (
+          <script src="http://localhost:35729/livereload.js?snipver=1"></script>
+        )}
       </head>
       <body class="container">
         <script src={getJsBundleName()}></script>

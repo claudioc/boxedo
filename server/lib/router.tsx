@@ -523,7 +523,6 @@ const router = async (app: FastifyInstance) => {
       const { parentPageId } = req.params;
       const { pageTitle, pageContent } = req.body;
 
-      // TODO: validation should also be done on the client side
       if (pageTitle.trim() === '') {
         return redirectHome(rep, Feedbacks.E_EMPTY_TITLE, app);
       }
