@@ -25,6 +25,10 @@ export function dbService(mongo?: FastifyMongoObject) {
   if (!pagesCollection)
     throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_COLLECTION);
 
+  const pageHistoryCollection = db.collection('pageHistory');
+  if (!pageHistoryCollection)
+    throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_HISTORY_COLLECTION);
+
   return {
     getPageById(pageId: string) {
       return pagesCollection.findOne<PageModel>({ pageId });
@@ -67,6 +71,14 @@ export function dbService(mongo?: FastifyMongoObject) {
       try {
         await session.withTransaction(async () => {
           await pagesCollection.insertOne(page, { session });
+          // Insert the first page in the history collection
+          await pageHistoryCollection.insertOne(
+            {
+              pageId: page.pageId,
+              history: [],
+            },
+            { session }
+          );
         });
       } catch (error) {
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
@@ -111,6 +123,8 @@ export function dbService(mongo?: FastifyMongoObject) {
     },
 
     async updatePage(page: PageModel, newPage: Partial<PageModel>) {
+      const session = await mongo.client.startSession();
+
       const options: UpdateFilter<PageModel> = {
         $set: {
           pageTitle: newPage.pageTitle,
@@ -126,9 +140,27 @@ export function dbService(mongo?: FastifyMongoObject) {
       }
 
       try {
-        await pagesCollection.updateOne({ _id: page!._id }, options);
+        await session.withTransaction(async () => {
+          await pagesCollection.updateOne({ _id: page!._id }, options);
+          await pageHistoryCollection.updateOne(
+            { pageId: page.pageId },
+            {
+              $push: {
+                history: {
+                  pageTitle: page.pageTitle,
+                  pageContent: page.pageContent,
+                  updateAt: page.updatedAt,
+                  timestamp: new Date(),
+                },
+              },
+            },
+            { session }
+          );
+        });
       } catch (error) {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
+      } finally {
+        await session.endSession();
       }
     },
 
@@ -151,6 +183,10 @@ export function dbService(mongo?: FastifyMongoObject) {
           await pagesCollection.updateMany(
             { parentPageId: page.pageId },
             { $set: { parentPageId: page.parentPageId } }
+          );
+          await pageHistoryCollection.deleteOne(
+            { pageId: page.pageId },
+            { session }
           );
         });
       } catch (error) {

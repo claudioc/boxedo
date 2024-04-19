@@ -15,6 +15,7 @@ type ErrorCodes =
   | 'E_WRONG_PARENT_PAGE'
   | 'E_INVALID_PARENT_PAGE'
   | 'E_MISSING_PAGES_COLLECTION'
+  | 'E_MISSING_PAGES_HISTORY_COLLECTION'
   | 'E_UNKNOWN_ERROR';
 
 type SuccessCodes =
@@ -99,6 +100,10 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_UNKNOWN_ERROR: {
     code: 114,
     message: 'An unknown error occurred',
+  },
+  E_MISSING_PAGES_HISTORY_COLLECTION: {
+    code: 115,
+    message: 'Collection "PagesHistory" not found',
   },
 } as const;
 

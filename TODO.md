@@ -1,9 +1,7 @@
 Doing
-- refactor the router creating services
+- Show history of pages
 
 Todo
-- Save the history of a page
-- delete should also remove the history
 - Rolling window for history?
 - duplicate page
 - make the name of the database configurable
@@ -19,6 +17,9 @@ Todo
 
 
 Done
+- Save the history of a page
 - Move a page to another parent
 - Add the date of creation and update
 - consider starting mongodb with a replicaset to enable transactions
+- refactor the router creating services
+- delete should also remove the history

@@ -289,6 +289,7 @@ const router = async (app: FastifyInstance) => {
           newSlug = isIndex
             ? newSlug
             : await dbs.generateUniqueSlug(req.body.pageTitle);
+
           await dbs.updatePage(page!, {
             pageTitle: req.body.pageTitle,
             pageContent: req.body.pageContent,
