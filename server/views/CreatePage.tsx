@@ -3,7 +3,7 @@ import { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
-import { pageUrl } from '~/lib/helpers';
+import { slugUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface CreatePageProps {
@@ -23,7 +23,7 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
       >
         <PageActions
           actions={['save', 'cancel']}
-          cancelUrl={pageUrl(parentPage.pageSlug)}
+          cancelUrl={slugUrl(parentPage.pageSlug)}
         />
 
         <div id="editor-placeholder" class="block content"></div>

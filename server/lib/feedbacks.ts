@@ -13,7 +13,9 @@ type ErrorCodes =
   | 'E_EMPTY_TITLE'
   | 'E_EMPTY_CONTENT'
   | 'E_WRONG_PARENT_PAGE'
-  | 'E_INVALID_PARENT_PAGE';
+  | 'E_INVALID_PARENT_PAGE'
+  | 'E_MISSING_PAGES_COLLECTION'
+  | 'E_UNKNOWN_ERROR';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -72,7 +74,7 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   },
   E_MISSING_DB: {
     code: 108,
-    message: 'Database not connected or collection not found',
+    message: 'Database not connected or connection invalid',
   },
   E_EMPTY_TITLE: {
     code: 109,
@@ -89,6 +91,14 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_INVALID_PARENT_PAGE: {
     code: 112,
     message: 'Parent page is missing or invalid',
+  },
+  E_MISSING_PAGES_COLLECTION: {
+    code: 113,
+    message: 'Collection "Pages" not found',
+  },
+  E_UNKNOWN_ERROR: {
+    code: 114,
+    message: 'An unknown error occurred',
   },
 } as const;
 

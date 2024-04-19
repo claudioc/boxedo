@@ -1,7 +1,7 @@
 import { Layout } from './Layout';
 import { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
-import { pageUrl } from '~/lib/helpers';
+import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
 
 export interface MovePageProps {
@@ -29,7 +29,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
       >
         <PageActions
           actions={['save', 'cancel']}
-          cancelUrl={pageUrl(page.pageSlug)}
+          cancelUrl={slugUrl(page.pageSlug)}
         />
         <h1 class="title">{page.pageTitle}</h1>
 

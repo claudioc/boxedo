@@ -21,8 +21,11 @@
     "lint": "eslint . --ext .ts",
     "prestart": "NODE_ENV=production npm --env-file=.env run build",
     "start": "NODE_ENV=production node ./dist/server/app.js",
-    "mongo:start": "docker run --rm -d -p 27017:27017 --name mongo-joongle mongo:7",
-    "mongo:stop": "docker stop mongo-joongle",
+    "mongo:start": "docker compose up -d",
+    "mongo:stop": "docker compose down",
+    "mongo:reset": "docker compose down && docker volume rm joongle_joongle_data",
+    "was:mongo:start": "docker run --rm -d -p 27017:27017 --name mongo-joongle mongo:7",
+    "was:mongo:stop": "docker stop mongo-joongle",
     "server:test": "vitest"
   },
   "prettier": {
@@ -31,6 +34,7 @@
   },
   "eslintConfig": {
     "ignorePatterns": [
+      "**/*/*.js",
       "**/*/*.json",
       "tasks/*.mjs"
     ],

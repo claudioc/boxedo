@@ -1,17 +1,24 @@
 Doing
-- delete should also remove the history
+- refactor the router creating services
 
 Todo
 - Save the history of a page
+- delete should also remove the history
 - Rolling window for history?
 - duplicate page
 - make the name of the database configurable
 - make the port for livereload a constant (for the CSP)
-- consider access implications to history of docs
+- consider access implications to the history of docs
 - collection of actions for audit purposes (log)
 - when we catch an error, we should log what it is
-- consider starting mongodb with a replicaset to enable transactions
+- consider creating an esbuild.js and simplify packages.json
+- mongodb must be configured to run in production
+- we are always using 303 to redirect - check it
+- TODO: needs also to check for uniqueness in the pageSlugs array
+- We need to generate the text index when the collection is created
+
 
 Done
 - Move a page to another parent
 - Add the date of creation and update
+- consider starting mongodb with a replicaset to enable transactions

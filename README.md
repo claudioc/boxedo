@@ -3,7 +3,7 @@
 Don't take this project too seriously, and don't install it.
 
 
-
+- Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
 
 
 

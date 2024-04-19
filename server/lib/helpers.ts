@@ -1,7 +1,7 @@
 import { Feedback, PageModel } from '~/types';
 import { INDEX_PAGE_ID } from '~/constants';
 
-export const pageUrl = (pageSlug: string) => `/page/${pageSlug}`;
+export const slugUrl = (slug: string) => (slug === '/' ? '/' : `/page/${slug}`);
 
 export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   if (!feedback) {

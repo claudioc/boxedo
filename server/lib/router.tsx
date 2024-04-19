@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { ReadPage } from '~/views/ReadPage';
 import { NotFound } from '~/views/NotFound';
 import { Error } from '~/views/Error';
@@ -9,12 +9,13 @@ import { Nav } from '~/views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
 import { SearchResults } from '~/views/SearchResults';
 import { INDEX_PAGE_ID } from '~/constants';
-import { pageUrl, pathWithFeedback } from './helpers';
-import { Feedback, PageModel, NavItem } from '~/types';
+import { slugUrl } from './helpers';
+import { PageModel, NavItem } from '~/types';
 import { Feedbacks } from './feedbacks';
 import cheerio from 'cheerio';
-import slugify from 'slugify';
-import { Collection, UpdateFilter } from 'mongodb';
+import { dbService } from '~/services/dbService';
+import { redirectService } from '~/services/redirectService';
+import { ErrorWithFeedback } from './errors';
 
 const PageIdFormat = {
   oneOf: [
@@ -93,17 +94,6 @@ const DEFAULT_HOMEPAGE: PageModel = {
   updatedAt: new Date(),
 };
 
-const PageWithoutContentProjection = {
-  projection: {
-    pageId: 1,
-    pageTitle: 1,
-    pageSlug: 1,
-    parentPageId: 1,
-    createdAt: 1,
-    updatedAt: 1,
-  },
-} as const;
-
 /**
  * Encapsulates the routes
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -118,14 +108,22 @@ const router = async (app: FastifyInstance) => {
         querystring: PageQuerySchema,
       },
     },
-    async (req, rep) => {
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+    async (req) => {
+      const dbs = dbService(app.mongo);
+
+      let root;
+      let feedbackCode;
+      try {
+        root = await dbs.getPageById(INDEX_PAGE_ID);
+      } catch (error) {
+        if (error instanceof ErrorWithFeedback) {
+          feedbackCode = error.feedback.code;
+        }
       }
 
-      const root = await getPageById(collection!, INDEX_PAGE_ID);
-      const { f: feedbackCode } = req.query;
+      if (!feedbackCode) {
+        feedbackCode = req.query.f;
+      }
 
       return (
         <ReadPage page={root || DEFAULT_HOMEPAGE} feedbackCode={feedbackCode} />
@@ -142,22 +140,16 @@ const router = async (app: FastifyInstance) => {
         querystring: SearchQuerySchema,
       },
     },
-    async (req, rep) => {
+    async (req) => {
       const { q } = req.query;
 
       if (q.length < 3) {
         return '';
       }
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
+      const dbs = dbService(app.mongo);
 
-      const results = await collection!
-        .find({ pageTitle: { $regex: q, $options: 'i' } })
-        .limit(25)
-        .toArray();
+      const results = await dbs.search(q);
 
       return (
         <>
@@ -182,22 +174,24 @@ const router = async (app: FastifyInstance) => {
     },
     async (req) => {
       const { pageId } = req.params;
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return Feedbacks.E_MISSING_DB.message;
-      }
+      const dbs = dbService(app.mongo);
 
-      const root = await getPageById(collection!, INDEX_PAGE_ID);
+      let root;
+      try {
+        root = await dbs.getPageById(INDEX_PAGE_ID);
+      } catch (error) {
+        return 'There are no pages';
+      }
 
       if (!root) {
         return 'There are no pages';
       }
 
       const tree: NavItem = {
-        pageId: root.pageId,
-        title: root.pageTitle,
+        pageId: root!.pageId,
+        title: root!.pageTitle,
         link: '/',
-        children: await buildMenuTree(collection!, root.pageId),
+        children: await dbs.buildMenuTree(root!.pageId),
       };
 
       return <Nav tree={tree} currentPageId={pageId} />;
@@ -218,30 +212,24 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { slug } = req.params;
       const { f: feedbackCode } = req.query;
+      const dbs = dbService(app.mongo);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      const page = await dbs.getPageBySlug(slug);
+
+      if (page) {
+        return <ReadPage page={page} feedbackCode={feedbackCode} />;
       }
 
-      const page = await collection!.findOne({ pageSlug: slug });
+      const oldPage = await dbs.lookupPageBySlug(slug);
 
-      if (!page) {
-        // Check if the slug is in the pageSlugs of any document
-        const oldPage = await collection!.findOne({
-          pageSlugs: { $in: [slug] },
-        });
-
-        if (oldPage) {
-          // Redirect to the current slug
-          app.log.error(`Using old slug ${slug} for page ${oldPage.pageId}`);
-          return rep.redirect(301, pageUrl(oldPage.pageSlug));
-        }
-
-        app.log.error(Feedbacks.E_MISSING_PAGE.message);
-        return <NotFound title="Page not found" />;
+      if (oldPage) {
+        // Redirect to the current slug
+        app.log.error(`Using old slug ${slug} for page ${oldPage.pageId}`);
+        return rep.redirect(301, slugUrl(oldPage.pageSlug));
       }
-      return <ReadPage page={page} feedbackCode={feedbackCode} />;
+
+      app.log.error(Feedbacks.E_MISSING_PAGE.message);
+      return <NotFound title="Page not found" />;
     }
   );
 
@@ -254,19 +242,16 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      let page = await getPageById(collection!, pageId);
+      let page = await dbs.getPageById(pageId);
       if (!page && pageId === INDEX_PAGE_ID) {
         page = DEFAULT_HOMEPAGE;
       }
 
       if (!page) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
       return <EditPage page={page} />;
@@ -287,63 +272,53 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const isIndex = pageId === INDEX_PAGE_ID;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const page = await getPageById(collection!, pageId);
+      const page = await dbs.getPageById(pageId);
 
       if (!page && !isIndex) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
       const isNewIndex = !page && isIndex;
-      let newSlug = '';
+      let newSlug = '/';
       try {
+        // Updating an old index page or any other page
         if (!isNewIndex) {
-          const options: UpdateFilter<PageModel> = {
-            $set: {
-              pageTitle: req.body.pageTitle,
-              pageContent: req.body.pageContent,
-              updatedAt: new Date(),
-            },
-          };
-
-          // No need to update the slug if it's the index page
-          if (!isIndex) {
-            newSlug = await generateUniqueSlug(req.body.pageTitle, collection!);
-
-            if (page!.pageSlug !== newSlug) {
-              options.$push = { pageSlugs: page!.pageSlug };
-              options.$set = { ...options.$set, pageSlug: newSlug };
-            }
-          }
-
-          await collection!.updateOne({ _id: page!._id }, options);
+          newSlug = isIndex
+            ? newSlug
+            : await dbs.generateUniqueSlug(req.body.pageTitle);
+          await dbs.updatePage(page!, {
+            pageTitle: req.body.pageTitle,
+            pageContent: req.body.pageContent,
+            pageSlug: newSlug,
+            updatedAt: new Date(),
+          });
         } else {
+          // Inserting the index page for the first time
           const newPage = {
             parentPageId: null,
             pageId: INDEX_PAGE_ID,
             pageTitle: req.body.pageTitle,
             pageContent: req.body.pageContent,
-            pageSlug: 'home',
+            pageSlug: newSlug,
             pageSlugs: [],
             createdAt: new Date(),
             updatedAt: new Date(),
           };
 
-          await (collection as unknown as Collection).insertOne(newPage);
+          await dbs.insertPage(newPage);
+
+          // Since this is the first page, we also generate
+          // the index for the full text search
+          await dbs.createTextIndex();
         }
       } catch (error) {
-        return redirectHome(rep, Feedbacks.E_UPDATING_PAGE, app);
+        return rs.homeWithError(error);
       }
 
-      return rep.redirect(
-        303,
-        pathWithFeedback(isIndex ? '/' : newSlug, Feedbacks.S_PAGE_UPDATED)
-      );
+      return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
     }
   );
 
@@ -356,22 +331,19 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const page = await getPageById(collection!, pageId);
+      const page = await dbs.getPageById(pageId);
 
       if (!page) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const parent = await getPageById(collection!, page.parentPageId!);
+      const parent = await dbs.getPageById(page.parentPageId!);
 
       if (!parent) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
       return <MovePage page={page} parent={parent} />;
@@ -392,42 +364,30 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { newParentId } = req.body;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
 
       if (newParentId === pageId) {
-        return redirectHome(rep, Feedbacks.E_WRONG_PARENT_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
       }
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const page = await getPageById(collection!, pageId);
+      const page = await dbs.getPageById(pageId);
       if (!page) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const newParentpage = await getPageById(collection!, newParentId);
+      const newParentpage = await dbs.getPageById(newParentId);
       if (!newParentpage) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
-
-      const options: UpdateFilter<PageModel> = {
-        $set: {
-          parentPageId: newParentId,
-        },
-      };
 
       try {
-        await collection!.updateOne({ _id: page._id }, options);
+        await dbs.updatePageParent(page, newParentId);
       } catch (error) {
-        return redirectHome(rep, Feedbacks.E_UPDATING_PAGE, app);
+        return rs.homeWithError(error);
       }
 
-      return rep.redirect(
-        303,
-        pathWithFeedback(pageUrl(page.pageSlug), Feedbacks.S_PAGE_MOVED)
-      );
+      rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_MOVED);
     }
   );
 
@@ -443,39 +403,30 @@ const router = async (app: FastifyInstance) => {
 
     async (req, rep) => {
       const { pageId } = req.body;
+      const rs = redirectService(app, rep);
+      const dbs = dbService(app.mongo);
 
       if (pageId === INDEX_PAGE_ID) {
-        return redirectHome(rep, Feedbacks.E_CANNOT_DELETE_INDEX, app);
+        return rs.homeWithFeedback(Feedbacks.E_CANNOT_DELETE_INDEX);
       }
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const page = await getPageById(collection!, pageId);
+      const page = await dbs.getPageById(pageId);
 
       if (!page) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PAGE, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const parentId = page.parentPageId;
-
-      if (!parentId) {
-        redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
+      if (!page.parentPageId) {
+        rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
       }
 
       try {
-        await collection!.deleteOne({ pageId });
-        await collection!.updateMany(
-          { parentPageId: pageId },
-          { $set: { parentPageId: parentId } }
-        );
+        await dbs.deletePage(page);
       } catch (error) {
-        return redirectHome(rep, Feedbacks.E_DELETING_PAGE, app);
+        return rs.homeWithError(error);
       }
 
-      return redirectHome(rep, Feedbacks.S_PAGE_DELETED, app);
+      return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
   );
 
@@ -491,23 +442,21 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { parentPageId } = req.params;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const parentPage = await getPageById(collection!, parentPageId);
+      const parentPage = await dbs.getPageById(parentPageId);
 
       if (!parentPage) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
       }
 
       return <CreatePage parentPage={parentPage} />;
     }
   );
 
-  // Creates a page
+  // Creates a subpage. The home page is created as a special
+  // case for the edit page route
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
     Params: FromSchema<typeof SubpageParamsSchema>;
@@ -522,47 +471,48 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { parentPageId } = req.params;
       const { pageTitle, pageContent } = req.body;
+      const rs = redirectService(app, rep);
+      const dbs = dbService(app.mongo);
 
       if (pageTitle.trim() === '') {
-        return redirectHome(rep, Feedbacks.E_EMPTY_TITLE, app);
+        return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
       }
 
       if (pageContent.trim() === '') {
-        return redirectHome(rep, Feedbacks.E_EMPTY_CONTENT, app);
+        return rs.homeWithFeedback(Feedbacks.E_EMPTY_CONTENT);
       }
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
+      let parentPage: PageModel | null = null;
+      try {
+        parentPage = await dbs.getPageById(parentPageId);
+      } catch (error) {
+        return rs.homeWithError(error);
       }
-
-      const parentPage = await getPageById(collection!, parentPageId);
 
       if (!parentPage) {
-        return redirectHome(rep, Feedbacks.E_MISSING_PARENT, app);
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
       }
 
-      const slug = await generateUniqueSlug(pageTitle, collection!);
+      const slug = await dbs.generateUniqueSlug(pageTitle);
       const pageId = app.uuid.v4();
       const now = new Date();
+
       try {
-        await (collection as unknown as Collection).insertOne({
+        await dbs.insertPage({
           pageId,
           parentPageId,
           pageTitle,
           pageContent,
           pageSlug: slug,
+          pageSlugs: [],
           updatedAt: now,
           createdAt: now,
         });
       } catch (error) {
-        return redirectHome(rep, Feedbacks.E_CREATING_PAGE, app);
+        return rs.homeWithError(error);
       }
 
-      return rep.redirect(
-        303,
-        pathWithFeedback(pageUrl(slug), Feedbacks.S_PAGE_CREATED)
-      );
+      return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
     }
   );
 
@@ -576,19 +526,11 @@ const router = async (app: FastifyInstance) => {
       },
     },
 
-    async (req, rep) => {
+    async (req) => {
       const { q } = req.query;
+      const dbs = dbService(app.mongo);
 
-      const collection = app.mongo.db?.collection<PageModel>('pages');
-      if (!assertCollection(collection, app)) {
-        return redirectHome(rep, Feedbacks.E_MISSING_DB, app);
-      }
-
-      const results = await collection!
-        .find({ $text: { $search: q } })
-        .sort({ score: { $meta: 'textScore' } })
-        .limit(25)
-        .toArray();
+      const results = await dbs.searchText(q);
 
       if (results) {
         const snippetSize = 200;
@@ -611,67 +553,67 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get('/admin/text-index', async () => {
-    try {
-      app.mongo.db
-        ?.collection('pages')
-        .createIndex(
-          { pageTitle: 'text', pageContent: 'text' },
-          { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
-        );
-    } catch (err) {
-      return err;
-    }
+  // app.get('/admin/text-index', async () => {
+  //   try {
+  //     app.mongo.db
+  //       ?.collection('pages')
+  //       .createIndex(
+  //         { pageTitle: 'text', pageContent: 'text' },
+  //         { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
+  //       );
+  //   } catch (err) {
+  //     return err;
+  //   }
 
-    return 'Text index generated';
-  });
+  //   return 'Text index generated';
+  // });
 
-  app.get('/admin/generate-slugs', async () => {
-    const collection = app.mongo.db?.collection<PageModel>('pages');
-    if (!collection) {
-      return 'No collection found.';
-    }
+  // app.get('/admin/generate-slugs', async () => {
+  //   const collection = app.mongo.db?.collection<PageModel>('pages');
+  //   if (!collection) {
+  //     return 'No collection found.';
+  //   }
 
-    const pages = await collection.find().toArray();
-    if (!pages) {
-      return 'No pages found.';
-    }
+  //   const pages = await collection.find().toArray();
+  //   if (!pages) {
+  //     return 'No pages found.';
+  //   }
 
-    for (const page of pages) {
-      if (!page.pageSlug) {
-        const slug = await generateUniqueSlug(page.pageTitle, collection);
-        await collection.updateOne(
-          { _id: page._id },
-          { $set: { pageSlug: slug, pageSlugs: [] } }
-        );
-      }
-    }
+  //   for (const page of pages) {
+  //     if (!page.pageSlug) {
+  //       const slug = await generateUniqueSlug(page.pageTitle, collection);
+  //       await collection.updateOne(
+  //         { _id: page._id },
+  //         { $set: { pageSlug: slug, pageSlugs: [] } }
+  //       );
+  //     }
+  //   }
 
-    return 'Slugs generated for all pages';
-  });
+  //   return 'Slugs generated for all pages';
+  // });
 
-  app.get('/admin/schema/add-created-at', async () => {
-    const collection = app.mongo.db?.collection<PageModel>('pages');
-    if (!collection) {
-      return 'No collection found.';
-    }
+  // app.get('/admin/schema/add-created-at', async () => {
+  //   const collection = app.mongo.db?.collection<PageModel>('pages');
+  //   if (!collection) {
+  //     return 'No collection found.';
+  //   }
 
-    const pages = await collection.find().toArray();
-    if (!pages) {
-      return 'No pages found.';
-    }
+  //   const pages = await collection.find().toArray();
+  //   if (!pages) {
+  //     return 'No pages found.';
+  //   }
 
-    for (const page of pages) {
-      if (!page.createdAt) {
-        await collection.updateOne(
-          { _id: page._id },
-          { $set: { createdAt: new Date(), updatedAt: new Date() } }
-        );
-      }
-    }
+  //   for (const page of pages) {
+  //     if (!page.createdAt) {
+  //       await collection.updateOne(
+  //         { _id: page._id },
+  //         { $set: { createdAt: new Date(), updatedAt: new Date() } }
+  //       );
+  //     }
+  //   }
 
-    return 'Slugs generated for all pages';
-  });
+  //   return 'Slugs generated for all pages';
+  // });
 
   app.setNotFoundHandler(() => {
     return <NotFound title="Page not found" />;
@@ -695,84 +637,6 @@ const router = async (app: FastifyInstance) => {
       }
     }
   });
-};
-
-const generateUniqueSlug = async (
-  pageTitle: string,
-  collection: Collection<PageModel>
-) => {
-  // Check if the slug doesn't already exist
-  let slug = slugify(pageTitle, { lower: true });
-  let uniqueSlugFound = false;
-  let counter = 1;
-
-  // TODO: needs also to check for uniqueness in the pageSlugs array
-  while (!uniqueSlugFound) {
-    const existingPageWithSlug = await collection.findOne({ pageSlug: slug });
-    if (existingPageWithSlug) {
-      // If there's a conflict, append a number to the slug
-      slug = `${slugify(pageTitle, { lower: true })}-${counter}`;
-      counter++;
-    } else {
-      uniqueSlugFound = true;
-    }
-  }
-
-  return slug;
-};
-
-const redirectHome = (
-  res: FastifyReply,
-  feedback: Feedback,
-  app?: FastifyInstance
-) => {
-  if (app) {
-    app.log.error(feedback.message);
-  }
-  return res.redirect(303, pathWithFeedback('/', feedback));
-};
-
-async function buildMenuTree(
-  collection: Collection<PageModel>,
-  parentId: string
-): Promise<NavItem[]> {
-  const pages = await collection
-    .find({ parentPageId: parentId }, PageWithoutContentProjection)
-    .toArray();
-
-  const menuTree = [];
-  for (const page of pages) {
-    const menuItem: NavItem = {
-      pageId: page.pageId,
-      title: page.pageTitle,
-      link: pageUrl(page.pageSlug),
-      children: await buildMenuTree(collection, page.pageId),
-    };
-
-    menuTree.push(menuItem);
-  }
-
-  return menuTree;
-}
-
-const assertCollection = (
-  collection: Collection<PageModel> | undefined,
-  app: FastifyInstance
-) => {
-  if (collection) {
-    return true;
-  }
-
-  const fb = Feedbacks.E_MISSING_DB;
-  app.log.error(fb.message);
-  return false;
-};
-
-const getPageById = async (
-  collection: Collection<PageModel>,
-  pageId: string
-) => {
-  return await collection.findOne<PageModel>({ pageId });
 };
 
 export default router;

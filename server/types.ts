@@ -3,7 +3,7 @@ export type NodeEnv = 'development' | 'production' | 'test';
 export interface PageModel {
   _id?: string;
   pageId: string;
-  parentPageId?: string;
+  parentPageId?: string | null;
   pageTitle: string;
   pageSlug: string;
   pageSlugs: string[];
@@ -21,7 +21,7 @@ export interface NavItem {
 
 export type PageWithoutContentModel = Omit<PageModel, 'pageContent'>;
 
-interface Feedback {
+export interface Feedback {
   code: number;
   message: string;
 }
