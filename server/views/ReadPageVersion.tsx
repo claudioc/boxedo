@@ -29,6 +29,14 @@ export const ReadPageVersion = ({
           </a>
           , or you can go back to the{' '}
           <a href={`../${page.pageId}`}>list of all its versions</a>.
+          <details>
+            <summary>More …</summary>
+            <p>
+              The history only reports changes to the page content and title.
+              Change on the page's authorship or hierarchy are not tracked at
+              this time.
+            </p>
+          </details>
         </div>
       </div>
       <PageBody page={item} />
