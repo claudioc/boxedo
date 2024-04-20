@@ -11,7 +11,10 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
   const len = history.length;
   return (
     <Layout title="Page history" page={page}>
-      <h1 class="title">Changes in: {page.pageTitle}</h1>
+      <h1 class="title">
+        <span class="has-text-grey is-size-4">History of:</span>{' '}
+        {page.pageTitle}
+      </h1>
       {len === 0 ? (
         <p>No changes have been made to this page yet.</p>
       ) : (
@@ -35,7 +38,7 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
                 <td>
                   <a
                     href={`/history/${page.pageId}/${index}`}
-                    class="button is-small is-static"
+                    class="button is-small"
                   >
                     View
                   </a>

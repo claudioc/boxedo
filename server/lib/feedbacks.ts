@@ -107,7 +107,7 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   },
 } as const;
 
-export const getFeedback = (code: number) =>
-  Object.values(Feedbacks).find((f) => f.code === code);
+export const getFeedback = (code?: number) =>
+  code ? Object.values(Feedbacks).find((f) => f.code === code) : undefined;
 
 export const isFeedbackError = (feedback: Feedback) => feedback.code >= 100;

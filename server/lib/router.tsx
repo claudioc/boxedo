@@ -11,6 +11,7 @@ import { ErrorWithFeedback } from './errors';
 
 import { SearchResults } from '~/views/SearchResults';
 import { ReadPage } from '~/views/ReadPage';
+import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { NotFound } from '~/views/NotFound';
 import { Error } from '~/views/Error';
 import { EditPage } from '~/views/EditPage';
@@ -39,6 +40,15 @@ const PageParamsSchema = {
   required: ['pageId'],
   properties: {
     pageId: PageIdFormat,
+  },
+} as const;
+
+const PageWithVersionParamsSchema = {
+  type: 'object',
+  required: ['pageId', 'version'],
+  properties: {
+    pageId: PageIdFormat,
+    version: { type: 'number' },
   },
 } as const;
 
@@ -589,6 +599,37 @@ const router = async (app: FastifyInstance) => {
       const history = await dbs.getPageHistory(pageId);
 
       return <PageHistory page={page} history={history.reverse()} />;
+    }
+  );
+
+  app.get<{ Params: FromSchema<typeof PageWithVersionParamsSchema> }>(
+    '/history/:pageId/:version',
+    {
+      schema: {
+        params: PageWithVersionParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const { pageId, version } = req.params;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
+
+      const page = await dbs.getPageById(pageId);
+      if (!page) {
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      }
+
+      const historyItem = await dbs.getPageHistoryItem(pageId, version);
+
+      if (!historyItem) {
+        app.log.error(Feedbacks.E_MISSING_PAGE.message);
+        return <NotFound title="Page not found" />;
+      }
+
+      console.log(historyItem);
+      return (
+        <ReadPageVersion page={page} item={historyItem} version={version} />
+      );
     }
   );
 

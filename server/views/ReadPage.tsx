@@ -2,6 +2,7 @@ import { Layout } from './Layout';
 import { PageModel } from '~/types';
 import { formatDate } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
+import { PageBody } from './components/PageBody';
 
 import styles from './ReadPage.module.css';
 
@@ -19,11 +20,7 @@ export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
           ` (${formatDate(page.updatedAt)})`}
         <PageMenu page={page} />
       </div>
-      <h1 class="title">{page.pageTitle}</h1>
-      <div
-        class="content"
-        dangerouslySetInnerHTML={{ __html: page.pageContent || '' }}
-      ></div>
+      <PageBody page={page} />
     </div>
   </Layout>
 );

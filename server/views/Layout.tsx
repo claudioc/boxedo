@@ -20,11 +20,6 @@ export const Layout = ({
   feedbackCode,
   children,
 }: LayoutProps) => {
-  let feedback;
-  if (feedbackCode) {
-    feedback = getFeedback(feedbackCode);
-  }
-
   return (
     <html lang="en">
       <head>
@@ -53,7 +48,7 @@ export const Layout = ({
           </div>
         </header>
 
-        {feedback && <Feedback feedback={feedback} />}
+        <Feedback feedback={getFeedback(feedbackCode)} />
 
         <main class="columns">
           {page && (

@@ -1,4 +1,4 @@
-import { PageModel, NavItem } from '~/types';
+import { PageModel, NavItem, PageHistoryItem, PageHistoryModel } from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
@@ -26,7 +26,7 @@ export function dbService(mongo?: FastifyMongoObject) {
   if (!pagesCollection)
     throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_COLLECTION);
 
-  const pageHistoryCollection = db.collection('pageHistory');
+  const pageHistoryCollection = db.collection<PageHistoryModel>('pageHistory');
   if (!pageHistoryCollection)
     throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_HISTORY_COLLECTION);
 
@@ -209,6 +209,15 @@ export function dbService(mongo?: FastifyMongoObject) {
       return pageHistoryCollection
         .findOne({ pageId })
         .then((result) => result?.history);
+    },
+
+    async getPageHistoryItem(pageId: string, version: number) {
+      const item = await pageHistoryCollection.findOne(
+        { pageId },
+        { projection: { history: { $slice: [version - 1, 1] } } }
+      );
+
+      return item?.history[0];
     },
   };
 }
