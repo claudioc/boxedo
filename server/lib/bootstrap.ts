@@ -8,7 +8,6 @@ import mongodb from '@fastify/mongodb';
 import { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import fastifyUUID from 'fastify-uuid';
-
 import path from 'path';
 import router from './router';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';

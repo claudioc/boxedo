@@ -143,7 +143,7 @@ const router = async (app: FastifyInstance) => {
     async (req) => {
       const { q } = req.query;
 
-      if (q.length < 3) {
+      if (q.length < 3 || q.length > 50) {
         return '';
       }
 
@@ -272,13 +272,26 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const isIndex = pageId === INDEX_PAGE_ID;
+      const { pageTitle, pageContent } = req.body;
       const dbs = dbService(app.mongo);
       const rs = redirectService(app, rep);
+
+      if (pageTitle.trim() === '') {
+        return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
+      }
+
+      if (pageContent.trim() === '') {
+        return rs.homeWithFeedback(Feedbacks.E_EMPTY_CONTENT);
+      }
 
       const page = await dbs.getPageById(pageId);
 
       if (!page && !isIndex) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      }
+
+      if (pageTitle === page!.pageTitle && pageContent === page!.pageContent) {
+        return rs.slugWithFeedback(page!.pageSlug, Feedbacks.S_PAGE_UPDATED);
       }
 
       const isNewIndex = !page && isIndex;

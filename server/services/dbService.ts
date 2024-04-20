@@ -5,6 +5,7 @@ import slugify from 'slugify';
 import { FastifyMongoObject } from '@fastify/mongodb';
 import { slugUrl } from '~/lib/helpers';
 import { UpdateFilter } from 'mongodb';
+import sanitize from 'mongo-sanitize';
 
 const PageWithoutContentProjection = {
   projection: {
@@ -88,15 +89,16 @@ export function dbService(mongo?: FastifyMongoObject) {
     },
 
     search(q: string) {
+      const query = sanitize(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       return pagesCollection
-        .find({ pageTitle: { $regex: q, $options: 'i' } })
+        .find({ pageTitle: { $regex: query, $options: 'i' } })
         .limit(25)
         .toArray();
     },
 
     searchText(q: string) {
       return pagesCollection
-        .find({ $text: { $search: q } })
+        .find({ $text: { $search: sanitize(q) } })
         .sort({ score: { $meta: 'textScore' } })
         .limit(25)
         .toArray();

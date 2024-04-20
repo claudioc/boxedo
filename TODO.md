@@ -1,9 +1,12 @@
 Doing
-- Show history of pages
+- move the page buttons to a dropdown
 
 Todo
+- Show history of pages
 - Rolling window for history?
 - duplicate page
+- uses CSRF
+- user user input sanitizer
 - make the name of the database configurable
 - make the port for livereload a constant (for the CSP)
 - consider access implications to the history of docs
@@ -14,6 +17,7 @@ Todo
 - we are always using 303 to redirect - check it
 - TODO: needs also to check for uniqueness in the pageSlugs array
 - We need to generate the text index when the collection is created
+- bug: feedback shows differently from alpine and normal render
 
 
 Done
@@ -23,3 +27,4 @@ Done
 - consider starting mongodb with a replicaset to enable transactions
 - refactor the router creating services
 - delete should also remove the history
+- uses mongodb sanitizer
