@@ -1,7 +1,8 @@
 Doing
+- show single history item
 
 Todo
-- Show history of pages
+- do we need a "Rever to this version" for the history?
 - Rolling window for history?
 - duplicate page
 - add a icon library (the chevron in pageMenu for example)
@@ -16,7 +17,6 @@ Todo
 - mongodb must be configured to run in production
 - we are always using 303 to redirect - check it
 - TODO: needs also to check for uniqueness in the pageSlugs array
-- We need to generate the text index when the collection is created
 - bug: feedback shows differently from alpine and normal render
 
 
@@ -29,3 +29,4 @@ Done
 - delete should also remove the history
 - uses mongodb sanitizer
 - move the page buttons to a dropdown
+- Show history of pages

@@ -12,6 +12,18 @@ export interface PageModel {
   updatedAt: Date;
 }
 
+export interface PageHistoryItem {
+  pageTitle: string;
+  pageContent: string;
+  updateAt: Date;
+  timestamp: Date;
+}
+
+export interface PageHistoryModel {
+  pageId: string;
+  history: PageHistoryItem[];
+}
+
 export interface NavItem {
   pageId: string;
   title: string;

@@ -11,7 +11,9 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   return `${path}?f=${feedback.code}`;
 };
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date, def: string = '') => {
+  if (!date) return def;
+
   return new Intl.DateTimeFormat('en-UK', {
     dateStyle: 'short',
     timeStyle: 'short',

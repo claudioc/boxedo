@@ -29,16 +29,19 @@ export const PageMenu = ({ page }: PageMenuProps) => {
             <a href={`/edit/${page.pageId}`} class="dropdown-item">
               Edit this page
             </a>
-            {!isIndexPage(page) && (
-              <a href={`/move/${page.pageId}`} class="dropdown-item">
-                Move this page
-              </a>
-            )}
             {!isIndexPlaceholderPage(page) && (
               <a href={`/create/${page.pageId}`} class="dropdown-item">
                 Create a subpage
               </a>
             )}
+            {!isIndexPage(page) && (
+              <a href={`/move/${page.pageId}`} class="dropdown-item">
+                Move this page
+              </a>
+            )}
+            <a href={`/history/${page.pageId}`} class="dropdown-item">
+              Page history
+            </a>
           </div>
         </div>
       </div>

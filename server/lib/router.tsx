@@ -1,13 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { ReadPage } from '~/views/ReadPage';
-import { NotFound } from '~/views/NotFound';
-import { Error } from '~/views/Error';
-import { EditPage } from '~/views/EditPage';
-import { CreatePage } from '~/views/CreatePage';
-import { MovePage } from '~/views/MovePage';
-import { Nav } from '~/views/components/Nav';
 import { FromSchema } from 'json-schema-to-ts';
-import { SearchResults } from '~/views/SearchResults';
 import { INDEX_PAGE_ID } from '~/constants';
 import { slugUrl } from './helpers';
 import { PageModel, NavItem } from '~/types';
@@ -16,6 +8,16 @@ import cheerio from 'cheerio';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
 import { ErrorWithFeedback } from './errors';
+
+import { SearchResults } from '~/views/SearchResults';
+import { ReadPage } from '~/views/ReadPage';
+import { NotFound } from '~/views/NotFound';
+import { Error } from '~/views/Error';
+import { EditPage } from '~/views/EditPage';
+import { CreatePage } from '~/views/CreatePage';
+import { MovePage } from '~/views/MovePage';
+import { Nav } from '~/views/components/Nav';
+import { PageHistory } from '~/views/PageHistory';
 
 const PageIdFormat = {
   oneOf: [
@@ -564,6 +566,29 @@ const router = async (app: FastifyInstance) => {
       }
 
       return <SearchResults query={q} results={results} />;
+    }
+  );
+
+  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+    '/history/:pageId',
+    {
+      schema: {
+        params: PageParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const { pageId } = req.params;
+      const dbs = dbService(app.mongo);
+      const rs = redirectService(app, rep);
+
+      const page = await dbs.getPageById(pageId);
+      if (!page) {
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      }
+
+      const history = await dbs.getPageHistory(pageId);
+
+      return <PageHistory page={page} history={history.reverse()} />;
     }
   );
 

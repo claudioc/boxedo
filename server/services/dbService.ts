@@ -204,5 +204,11 @@ export function dbService(mongo?: FastifyMongoObject) {
         { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
       );
     },
+
+    getPageHistory(pageId: string) {
+      return pageHistoryCollection
+        .findOne({ pageId })
+        .then((result) => result?.history);
+    },
   };
 }
