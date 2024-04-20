@@ -1,4 +1,4 @@
-import { PageModel, NavItem, PageHistoryItem, PageHistoryModel } from '~/types';
+import { PageModel, NavItem, PageHistoryModel } from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
@@ -6,6 +6,13 @@ import { FastifyMongoObject } from '@fastify/mongodb';
 import { slugUrl } from '~/lib/helpers';
 import { UpdateFilter } from 'mongodb';
 import sanitize from 'mongo-sanitize';
+import sanitizeHtml from 'sanitize-html';
+
+// https://github.com/apostrophecms/sanitize-html
+const safeHtml = (str: string) =>
+  sanitizeHtml(str, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+  });
 
 const PageWithoutContentProjection = {
   projection: {
@@ -68,6 +75,9 @@ export function dbService(mongo?: FastifyMongoObject) {
     },
 
     async insertPage(page: PageModel) {
+      page.pageContent = safeHtml(page.pageContent);
+      page.pageTitle = safeHtml(page.pageTitle);
+
       const session = await mongo.client.startSession();
       try {
         await session.withTransaction(async () => {
@@ -129,8 +139,8 @@ export function dbService(mongo?: FastifyMongoObject) {
 
       const options: UpdateFilter<PageModel> = {
         $set: {
-          pageTitle: newPage.pageTitle,
-          pageContent: newPage.pageContent,
+          pageTitle: safeHtml(newPage.pageTitle!),
+          pageContent: safeHtml(newPage.pageContent!),
           updatedAt: newPage.updatedAt,
           pageSlug: newPage.pageSlug,
         },
@@ -198,6 +208,7 @@ export function dbService(mongo?: FastifyMongoObject) {
       }
     },
 
+    // This is run only once, as soon as the user creates the home page
     createTextIndex() {
       return pagesCollection.createIndex(
         { pageTitle: 'text', pageContent: 'text' },

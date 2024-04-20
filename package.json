@@ -61,6 +61,7 @@
     "@types/alpinejs": "^3.13.6",
     "@types/mongo-sanitize": "^1.0.3",
     "@types/node": "^20.10.2",
+    "@types/sanitize-html": "^2.11.0",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "concurrently": "^8.2.2",
@@ -99,6 +100,7 @@
     "mongo-sanitize": "^1.1.0",
     "preact": "^10.19.3",
     "preact-render-to-string": "^6.3.1",
+    "sanitize-html": "^2.13.0",
     "slugify": "^1.6.6"
   }
 }
