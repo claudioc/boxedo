@@ -16,10 +16,8 @@ export const ReadPageVersion = ({
 }: ReadPageVersionProps) => (
   <Layout title={item.pageTitle} page={page}>
     <div>
-      <div class="message is-info">
-        <div class="message-header">
-          <p>Viewing an older version</p>
-        </div>
+      <div class="message is-info" role="alert">
+        <p class="message-header">Viewing an older version</p>
         <div class="message-body">
           This is an older version (#{version}) of this page. This version was
           made obsolete on <strong>{formatDate(item.timestamp)}</strong>. You
