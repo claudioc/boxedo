@@ -1,10 +1,10 @@
 Doing
-- move the page buttons to a dropdown
 
 Todo
 - Show history of pages
 - Rolling window for history?
 - duplicate page
+- add a icon library (the chevron in pageMenu for example)
 - uses CSRF
 - user user input sanitizer
 - make the name of the database configurable
@@ -28,3 +28,4 @@ Done
 - refactor the router creating services
 - delete should also remove the history
 - uses mongodb sanitizer
+- move the page buttons to a dropdown

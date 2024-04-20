@@ -13,24 +13,35 @@ export const PageMenu = ({ page }: PageMenuProps) => {
   }
 
   return (
-    <div className={clsx(styles.Menu, 'level')}>
-      <menu className="level-right level-item m-0">
-        <MenuItem href={`/edit/${page.pageId}`}>Edit this page</MenuItem>
-        {!isIndexPage(page) && (
-          <MenuItem href={`/move/${page.pageId}`}>Move this page</MenuItem>
-        )}
-        {!isIndexPlaceholderPage(page) && (
-          <MenuItem href={`/create/${page.pageId}`}>Create a subpage</MenuItem>
-        )}
-      </menu>
+    <div className={clsx(styles.Menu)}>
+      <div class="dropdown is-right is-hoverable">
+        <div class="dropdown-trigger">
+          <button
+            class="button"
+            aria-haspopup="true"
+            aria-controls="dropdown-menu"
+          >
+            <span>Actions …</span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a href={`/edit/${page.pageId}`} class="dropdown-item">
+              Edit this page
+            </a>
+            {!isIndexPage(page) && (
+              <a href={`/move/${page.pageId}`} class="dropdown-item">
+                Move this page
+              </a>
+            )}
+            {!isIndexPlaceholderPage(page) && (
+              <a href={`/create/${page.pageId}`} class="dropdown-item">
+                Create a subpage
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-const MenuItem = ({ href, children }: { href: string; children: string }) => (
-  <li className="level-item">
-    <a class="button" href={href}>
-      {children}
-    </a>
-  </li>
-);

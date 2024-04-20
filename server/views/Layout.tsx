@@ -1,6 +1,5 @@
 import { getJsBundleName, cssFile } from '~/lib/assets';
 import { JSX } from 'preact';
-import { PageMenu } from './components/PageMenu';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
 import { getFeedback } from '~/lib/feedbacks';
@@ -11,7 +10,6 @@ import { PageModel } from '~/types';
 interface LayoutProps {
   title: string;
   page?: PageModel;
-  hasMenu?: boolean;
   feedbackCode?: number;
   children: string | JSX.Element[] | JSX.Element;
 }
@@ -19,7 +17,6 @@ interface LayoutProps {
 export const Layout = ({
   title,
   page,
-  hasMenu = true,
   feedbackCode,
   children,
 }: LayoutProps) => {
@@ -66,10 +63,7 @@ export const Layout = ({
               hx-trigger="load"
             ></div>
           )}
-          <div class="column">
-            {hasMenu && <PageMenu page={page} />}
-            {children}
-          </div>
+          <div class="column">{children}</div>
         </main>
       </body>
     </html>

@@ -10,11 +10,7 @@ export interface MovePageProps {
 }
 
 export const MovePage = ({ page, parent }: MovePageProps) => (
-  <Layout
-    hasMenu={false}
-    title={`Move ${page.pageTitle} to another parent`}
-    page={page}
-  >
+  <Layout title={`Move ${page.pageTitle} to another parent`} page={page}>
     <div x-data="{newParentId: '', newParentTitle: 'n/a', error: {newParentId: false}}">
       <div x-show="error && error.newParentId" class="block">
         <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
@@ -40,7 +36,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
         </p>
 
         <input type="hidden" name="newParentId" x-model="newParentId" />
-        <input type="hidden" name="oldParentId" value={page.parentPageId} />
+        <input type="hidden" name="oldParentId" value={page.parentPageId!} />
       </form>
 
       <div class="block">

@@ -11,7 +11,7 @@ export interface CreatePageProps {
 }
 
 export const CreatePage = ({ parentPage }: CreatePageProps) => (
-  <Layout hasMenu={false} title="Creating a new page" page={parentPage}>
+  <Layout title="Creating a new page" page={parentPage}>
     <PageFormWrapper title="Creating a new page">
       <form
         action=""

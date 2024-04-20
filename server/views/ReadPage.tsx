@@ -1,6 +1,8 @@
 import { Layout } from './Layout';
 import { PageModel } from '~/types';
 import { formatDate } from '~/lib/helpers';
+import { PageMenu } from './components/PageMenu';
+
 import styles from './ReadPage.module.css';
 
 export interface ReadPageProps {
@@ -15,6 +17,7 @@ export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
         Created on {formatDate(page.createdAt)}
         {page.updatedAt.toISOString() !== page.createdAt.toISOString() &&
           ` (${formatDate(page.updatedAt)})`}
+        <PageMenu page={page} />
       </div>
       <h1 class="title">{page.pageTitle}</h1>
       <div
