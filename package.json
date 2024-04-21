@@ -24,7 +24,8 @@
     "mongo:start": "docker compose up -d",
     "mongo:stop": "docker compose down",
     "mongo:reset": "docker compose down && docker volume rm joongle_joongle_data",
-    "server:test": "vitest"
+    "server:test": "vitest",
+    "bulk-load": "npm run mongo:reset && npm run mongo:start && tsc server/bulkLoad.ts && mv server/bulkLoad.js server/bulkLoad.cjs && node server/bulkLoad.cjs"
   },
   "prettier": {
     "printWidth": 80,
@@ -56,8 +57,10 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@fastify/one-line-logger": "^1.3.0",
     "@types/alpinejs": "^3.13.6",
+    "@types/faker": "^6.6.9",
     "@types/mongo-sanitize": "^1.0.3",
     "@types/node": "^20.10.2",
     "@types/sanitize-html": "^2.11.0",
