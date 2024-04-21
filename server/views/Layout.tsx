@@ -36,19 +36,21 @@ export const Layout = ({
       <body class="container">
         <script src={getJsBundleName()}></script>
         <header class={clsx(styles.header, 'level', 'py-3')}>
-          <div class="level-left">
+          <div class="level-item level-left">
             <div class="title">
               <a href="/" class="has-text-warning">
                 Joongle
               </a>
             </div>
           </div>
-          <div class="level-right">
+          <div class="level-item level-right">
             <Search />
           </div>
         </header>
 
-        <Feedback feedback={getFeedback(feedbackCode)} />
+        <div class="block">
+          <Feedback feedback={getFeedback(feedbackCode)} />
+        </div>
 
         <main class="columns">
           {page && (

@@ -2,8 +2,7 @@
   width: 50%;
   z-index: 99999;
   position: fixed;
-  /* Needed because of the transform */
-  bottom: -2rem;
+  bottom: 0;
   margin: 0;
   left: 50%;
   transform: translate(-50%, -50%);

@@ -2,7 +2,7 @@
 
 Don't take this project too seriously, and don't install it.
 
-
+- a cookie is used for csrf protection
 - Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
 
 

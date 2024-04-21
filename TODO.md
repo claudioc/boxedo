@@ -3,12 +3,11 @@ Doing
 Todo
 
   HIGH
-  - bug: feedback shows differently from alpine and normal render
   - unit tests for the dbService would be good.
 
   MEDIUM
-  - duplicate page
-  - add a icon library (the chevron in pageMenu for example)
+  - duplicate page (needs to specify parent?)
+  - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
   - consider creating an esbuild.js and simplify packages.json
   - TODO: needs also to check for uniqueness in the pageSlugs array
@@ -38,3 +37,4 @@ Done
 - show single history item
 - user user input sanitizer
 - uses CSRF for create and edit page
+- bug: feedback shows differently from alpine and normal render
