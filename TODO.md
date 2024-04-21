@@ -4,21 +4,20 @@ Doing
 Todo
 
   HIGH
+  - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
 
   MEDIUM
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
   - consider creating an esbuild.js and simplify packages.json
-  - TODO: needs also to check for uniqueness in the pageSlugs array
-  - Consider Alpine global store for the state of the notifications
 
   LOW (before live)
+  - Consider Alpine global store for the state of the notifications
   - Rolling window for history?
   - make the port for livereload a constant (for the CSP)
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
-  - when we catch an error, we should log what it is
   - mongodb must be configured to run in production
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
@@ -38,3 +37,4 @@ Done
 - user user input sanitizer
 - uses CSRF for create and edit page
 - bug: feedback shows differently from alpine and normal render
+- needs also to check for uniqueness in the pageSlugs array

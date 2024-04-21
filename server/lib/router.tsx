@@ -159,9 +159,7 @@ const router = async (app: FastifyInstance) => {
         return '';
       }
 
-      const dbs = dbService(app.mongo);
-
-      const results = await dbs.search(q);
+      const results = await dbService(app.mongo).search(q);
 
       return (
         <>
@@ -304,8 +302,13 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      if (pageTitle === page!.pageTitle && pageContent === page!.pageContent) {
-        return rs.slugWithFeedback(page!.pageSlug, Feedbacks.S_PAGE_UPDATED);
+      if (page) {
+        if (
+          pageTitle === page!.pageTitle &&
+          pageContent === page!.pageContent
+        ) {
+          return rs.slugWithFeedback(page!.pageSlug, Feedbacks.S_PAGE_UPDATED);
+        }
       }
 
       const isNewIndex = !page && isIndex;
@@ -704,6 +707,10 @@ const router = async (app: FastifyInstance) => {
 
   app.setErrorHandler((err, req, reply) => {
     app.log.error(err);
+
+    if (process.env.NODE_ENV === 'test') {
+      console.error(err);
+    }
 
     // Fastify will lowercase the header name
     if (req.headers['hx-request']) {

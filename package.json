@@ -24,8 +24,6 @@
     "mongo:start": "docker compose up -d",
     "mongo:stop": "docker compose down",
     "mongo:reset": "docker compose down && docker volume rm joongle_joongle_data",
-    "was:mongo:start": "docker run --rm -d -p 27017:27017 --name mongo-joongle mongo:7",
-    "was:mongo:stop": "docker stop mongo-joongle",
     "server:test": "vitest"
   },
   "prettier": {
@@ -36,7 +34,8 @@
     "ignorePatterns": [
       "**/*/*.js",
       "**/*/*.json",
-      "tasks/*.mjs"
+      "tasks/*.mjs",
+      "vite.config.ts"
     ],
     "extends": [
       "eslint:recommended",
@@ -73,6 +72,7 @@
     "mongodb-memory-server": "^9.1.8",
     "typescript": "^5.3.2",
     "typescript-plugin-css-modules": "^5.1.0",
+    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.4.0",
     "wait-on": "^7.2.0"
   },

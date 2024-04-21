@@ -10,14 +10,14 @@ import fastifyEnv from '@fastify/env';
 import fastifyUUID from 'fastify-uuid';
 import path from 'path';
 import router from './router';
-import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import { NodeEnv } from '~/types';
 import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
+import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +37,15 @@ if (process.env.NODE_ENV !== 'test') {
 
 let mongodbServerUri: string | undefined;
 if (process.env.NODE_ENV === 'test') {
-  mongodbServerUri = (await MongoMemoryServer.create()).getUri();
+  mongodbServerUri = (
+    await MongoMemoryReplSet.create({
+      replSet: { count: 1 },
+    })
+  )
+    .getUri()
+    // There seems to be a bug in mongodb-memory-server where
+    // the dbName in the options is not used to build the URI
+    .replace('?', 'joongle?');
 }
 
 const ConfigEnvSchema = {
@@ -75,7 +83,8 @@ const app = Fastify({
 
 app.register(fastifyUUID);
 app.register(fastifyCookie);
-await app.register(csrfProtection);
+
+if (process.env.NODE_ENV !== 'test') await app.register(csrfProtection);
 
 app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app

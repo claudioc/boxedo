@@ -60,10 +60,11 @@ export function dbService(mongo?: FastifyMongoObject) {
       let counter = 1;
 
       while (!uniqueSlugFound) {
-        const existingPageWithSlug = await pagesCollection.findOne({
-          pageSlug: slug,
-        });
-        if (existingPageWithSlug) {
+        const slugAlreadyInUse = !!(await pagesCollection.findOne({
+          $or: [{ pageSlug: slug }, { pageSlugs: { $in: [slug] } }],
+        }));
+
+        if (slugAlreadyInUse) {
           slug = `${slugify(title, { lower: true })}-${counter}`;
           counter++;
         } else {
@@ -92,6 +93,7 @@ export function dbService(mongo?: FastifyMongoObject) {
           );
         });
       } catch (error) {
+        console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
       } finally {
         await session.endSession();

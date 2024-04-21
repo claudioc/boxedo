@@ -1,5 +1,5 @@
 {
-  "exclude": ["node_modules", "dist"],
+  "exclude": ["node_modules", "dist", "vite.config.ts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
     /* Setting it to true, would create a tsconfig.tsbuildinfo file */
