@@ -1,5 +1,4 @@
 Doing
-- uses CSRF
 
 Todo
 
@@ -23,6 +22,7 @@ Todo
   - mongodb must be configured to run in production
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
+  - uses CSRF for delete and move page? (probably not)
 
 
 Done
@@ -37,3 +37,4 @@ Done
 - Show history of pages
 - show single history item
 - user user input sanitizer
+- uses CSRF for create and edit page

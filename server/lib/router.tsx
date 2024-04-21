@@ -256,6 +256,7 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const dbs = dbService(app.mongo);
       const rs = redirectService(app, rep);
+      const token = await rep.generateCsrf();
 
       let page = await dbs.getPageById(pageId);
       if (!page && pageId === INDEX_PAGE_ID) {
@@ -266,7 +267,7 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      return <EditPage page={page} />;
+      return <EditPage page={page} token={token} />;
     }
   );
 
@@ -280,6 +281,7 @@ const router = async (app: FastifyInstance) => {
         body: PageBodySchema,
         params: PageParamsSchema,
       },
+      preHandler: app.csrfProtection,
     },
     async (req, rep) => {
       const { pageId } = req.params;
@@ -470,6 +472,7 @@ const router = async (app: FastifyInstance) => {
       const { parentPageId } = req.params;
       const dbs = dbService(app.mongo);
       const rs = redirectService(app, rep);
+      const token = await rep.generateCsrf();
 
       const parentPage = await dbs.getPageById(parentPageId);
 
@@ -477,7 +480,7 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
       }
 
-      return <CreatePage parentPage={parentPage} />;
+      return <CreatePage parentPage={parentPage} token={token} />;
     }
   );
 
@@ -493,6 +496,7 @@ const router = async (app: FastifyInstance) => {
         body: PageBodySchema,
         params: SubpageParamsSchema,
       },
+      preHandler: app.csrfProtection,
     },
     async (req, rep) => {
       const { parentPageId } = req.params;
@@ -626,7 +630,6 @@ const router = async (app: FastifyInstance) => {
         return <NotFound title="Page not found" />;
       }
 
-      console.log(historyItem);
       return (
         <ReadPageVersion page={page} item={historyItem} version={version} />
       );

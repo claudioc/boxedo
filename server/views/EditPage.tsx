@@ -8,9 +8,10 @@ import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface EditPageProps {
   page: PageModel;
+  token: string;
 }
 
-export const EditPage = ({ page }: EditPageProps) => (
+export const EditPage = ({ page, token }: EditPageProps) => (
   <Layout title={`Editing ${page.pageTitle}`} page={page}>
     <PageFormWrapper title="Editing a page">
       <form
@@ -21,6 +22,8 @@ export const EditPage = ({ page }: EditPageProps) => (
         x-on:submit="App.validate"
         x-model="error"
       >
+        <input type="hidden" name="_csrf" value={token} />
+
         <PageActions
           actions={['save', 'cancel']}
           cancelUrl={slugUrl(page.pageSlug)}

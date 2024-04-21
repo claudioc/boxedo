@@ -77,6 +77,8 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
+    "@fastify/cookie": "^9.3.1",
+    "@fastify/csrf-protection": "^6.4.1",
     "@fastify/env": "^4.3.0",
     "@fastify/formbody": "^7.4.0",
     "@fastify/helmet": "^11.1.1",
@@ -97,7 +99,9 @@
     "fastify-plugin": "^4.5.1",
     "fastify-uuid": "^1.0.1",
     "htmx.org": "^1.9.9",
+    "i": "^0.3.7",
     "mongo-sanitize": "^1.1.0",
+    "npm": "^10.5.2",
     "preact": "^10.19.3",
     "preact-render-to-string": "^6.3.1",
     "sanitize-html": "^2.13.0",

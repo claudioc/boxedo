@@ -16,6 +16,8 @@ import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import csrfProtection from '@fastify/csrf-protection';
+import fastifyCookie from '@fastify/cookie';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +74,8 @@ const app = Fastify({
 });
 
 app.register(fastifyUUID);
+app.register(fastifyCookie);
+await app.register(csrfProtection);
 
 app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app

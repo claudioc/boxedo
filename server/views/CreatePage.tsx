@@ -8,9 +8,10 @@ import { PageFormWrapper } from './components/PageFormWrapper';
 
 export interface CreatePageProps {
   parentPage: PageModel;
+  token: string;
 }
 
-export const CreatePage = ({ parentPage }: CreatePageProps) => (
+export const CreatePage = ({ parentPage, token }: CreatePageProps) => (
   <Layout title="Creating a new page" page={parentPage}>
     <PageFormWrapper title="Creating a new page">
       <form
@@ -21,6 +22,8 @@ export const CreatePage = ({ parentPage }: CreatePageProps) => (
         x-on:submit="App.validate"
         x-model="error"
       >
+        <input type="hidden" name="_csrf" value={token} />
+
         <PageActions
           actions={['save', 'cancel']}
           cancelUrl={slugUrl(parentPage.pageSlug)}

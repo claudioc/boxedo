@@ -216,10 +216,12 @@ export function dbService(mongo?: FastifyMongoObject) {
       );
     },
 
-    getPageHistory(pageId: string) {
-      return pageHistoryCollection
-        .findOne({ pageId })
-        .then((result) => result?.history);
+    async getPageHistory(pageId: string) {
+      return (
+        (await pageHistoryCollection
+          .findOne({ pageId })
+          .then((result) => result?.history)) || []
+      );
     },
 
     async getPageHistoryItem(pageId: string, version: number) {
