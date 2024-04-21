@@ -1,9 +1,9 @@
 Doing
+- unit tests for the dbService would be good.
 
 Todo
 
   HIGH
-  - unit tests for the dbService would be good.
 
   MEDIUM
   - duplicate page (needs to specify parent?)
@@ -23,7 +23,6 @@ Todo
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
-
 
 Done
 - Save the history of a page

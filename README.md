@@ -4,7 +4,7 @@ Don't take this project too seriously for now, and don't install it (there are n
 
 ## End goal
 
-To release a modern alternative to systems like Atlassian Confluence for writing internal documentation especially in regulated company with need of audits and access control (IAM). Joongle is not supposed to create general websites (like WordPress), but documentation in a hierarchy, with a good look, theming, good search and easy to hack and, maybe most importantly, Free Software.
+Joongle aims to provide a modern alternative to systems like Atlassian Confluence, specifically designed for writing internal documentation in regulated companies that require audit trails and access control (IAM). Unlike general website creation tools such as WordPress, Joongle focuses on organizing documentation hierarchically, offering an "OK" appearance, theming options, robust search capabilities, and ease of customization. Additionally, and perhaps most importantly, Joongle is committed to being Free Software.
 
 ## Current status
 
@@ -16,10 +16,12 @@ Unreleased.
 - Authorization
 - Configurability
 - Instructions for deployment
+- More tests
 
 ## Tech stack
 - Fastify
 - Mongodb (with transactions)
+- TipTap WYSIWYG editor
 - Server side JSX (via Preact)
 - Alpinejs
 - HTMX
@@ -27,7 +29,7 @@ Unreleased.
 - esbuild
 
 ## Random info
-- a cookie is used for csrf protection
+- A cookie is used for csrf protection
 - Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
 - Alpine "dot" discussion https://github.com/alpinejs/alpine/discussions/4164
 
