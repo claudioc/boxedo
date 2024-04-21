@@ -11,6 +11,7 @@ Todo
   - make the name of the database configurable
   - consider creating an esbuild.js and simplify packages.json
   - TODO: needs also to check for uniqueness in the pageSlugs array
+  - Consider Alpine global store for the state of the notifications
 
   LOW (before live)
   - Rolling window for history?

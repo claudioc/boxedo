@@ -5,7 +5,7 @@
   "main": "./dist/app.js",
   "type": "module",
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "engines": {
     "node": ">=20.6.0"
   },
