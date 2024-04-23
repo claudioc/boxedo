@@ -20,8 +20,6 @@ export const Feedback = ({ feedback }: FeedbackProps) => {
    */
   return (
     <div
-      x-data="{ info: true }"
-      x-show="info || error"
       class={clsx(
         styles.Feedback,
         'block',
@@ -31,7 +29,7 @@ export const Feedback = ({ feedback }: FeedbackProps) => {
       )}
       role={isFeedbackError(feedback) ? 'alert' : 'status'}
     >
-      <button class="delete" x-on:click="info = false; error = false"></button>
+      <button class="delete" x-on:click="$store.has.none()"></button>
       {feedback.message}
     </div>
   );

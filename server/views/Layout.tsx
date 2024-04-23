@@ -20,6 +20,10 @@ export const Layout = ({
   feedbackCode,
   children,
 }: LayoutProps) => {
+  const onKeypress = {
+    '@keyup.escape': '$store.has.none()',
+  };
+
   return (
     <html lang="en">
       <head>
@@ -33,7 +37,7 @@ export const Layout = ({
           <script src="http://localhost:35729/livereload.js?snipver=1"></script>
         )}
       </head>
-      <body class="container">
+      <body x-data class="container" {...onKeypress}>
         <script src={getJsBundleName()}></script>
         <header class={clsx(styles.header, 'level', 'py-3')}>
           <div class="level-item level-left">
@@ -48,7 +52,7 @@ export const Layout = ({
           </div>
         </header>
 
-        <div class="block">
+        <div class="block" x-show="$store.has.some()">
           <Feedback feedback={getFeedback(feedbackCode)} />
         </div>
 

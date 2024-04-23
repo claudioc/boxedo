@@ -7,10 +7,7 @@ interface PageFormWrapperProps {
 }
 
 export const PageFormWrapper = ({ title, children }: PageFormWrapperProps) => (
-  <div
-    x-data="{error: { pageTitle: false, pageContent: false }}"
-    x-init="window.onbeforeunload=function() { return true };"
-  >
+  <div x-init="window.onbeforeunload=function() { return true };">
     <h1 class="subtitle">{title}</h1>
     <ValidationErrors />
     {children}

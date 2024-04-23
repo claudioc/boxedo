@@ -16,13 +16,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
         <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
       </div>
 
-      <form
-        action=""
-        method="post"
-        name="movePage"
-        x-model="error"
-        x-on:submit="App.validate"
-      >
+      <form action="" method="post" name="movePage" x-on:submit="App.validate">
         <PageActions
           actions={['save', 'cancel']}
           cancelUrl={slugUrl(page.pageSlug)}

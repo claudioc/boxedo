@@ -20,7 +20,6 @@ export const EditPage = ({ page, token }: EditPageProps) => (
         class="block"
         name="editPage"
         x-on:submit="App.validate"
-        x-model="error"
       >
         <input type="hidden" name="_csrf" value={token} />
 

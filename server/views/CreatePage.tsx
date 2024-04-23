@@ -20,7 +20,6 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => (
         class="block"
         name="createPage"
         x-on:submit="App.validate"
-        x-model="error"
       >
         <input type="hidden" name="_csrf" value={token} />
 

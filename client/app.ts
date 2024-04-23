@@ -14,6 +14,29 @@ declare global {
   }
 }
 
+interface AppStore {
+  error: Record<string, boolean>;
+  info: boolean;
+  errorOn(key: string): boolean;
+  some(): boolean;
+  none(): void;
+}
+
+Alpine.store('has', {
+  error: {},
+  info: true,
+  errorOn(key: string) {
+    return !!this.error[key];
+  },
+  some() {
+    return this.info || (this.error && Object.keys(this.error).length > 0);
+  },
+  none() {
+    this.error = {};
+    this.info = false;
+  },
+} as AppStore);
+
 window.Alpine = Alpine;
 
 const extensions = [
@@ -58,12 +81,6 @@ const App: App = {
       for (const [key, value] of data.entries()) {
         error[key] = (value as string).trim() === '';
       }
-
-      if (Object.values(error).some((v) => v)) {
-        form._x_model.set(error);
-        event.preventDefault();
-        return;
-      }
     }
 
     if (form.name === 'movePage') {
@@ -72,10 +89,14 @@ const App: App = {
         data.get('newParentId') === data.get('oldParentId')
       ) {
         error.newParentId = true;
-        form._x_model.set(error);
-        event.preventDefault();
-        return;
       }
+    }
+
+    (Alpine.store('has') as AppStore).error = error;
+
+    if (Object.values(error).some((v) => v)) {
+      event.preventDefault();
+      return;
     }
 
     window.onbeforeunload = null;
