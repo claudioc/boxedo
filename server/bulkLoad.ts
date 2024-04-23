@@ -13,9 +13,10 @@ async function generatePages(numPages: number): Promise<any> {
 
   for (let i = 0; i < numPages; i++) {
     const pageTitle = faker.lorem.sentence(4);
-    const pageContent = faker.lorem.paragraphs(
-      Math.floor(Math.random() * 15) + 1
-    );
+    const pageContent =
+      '<p>' +
+      faker.lorem.paragraphs(Math.floor(Math.random() * 15) + 1) +
+      '</p>';
 
     let parentPageId: string | null = null;
     let pageId = INDEX_PAGE_ID;
@@ -51,7 +52,7 @@ async function generatePages(numPages: number): Promise<any> {
   return client;
 }
 
-generatePages(1000).then((client) => {
+generatePages(100).then((client) => {
   console.log('Pages generated successfully');
   client.close();
 });

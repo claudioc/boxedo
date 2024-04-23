@@ -12,20 +12,20 @@ let pageId = '';
 export const Nav = ({ tree, currentPageId }: NavProps) => {
   pageId = currentPageId;
   return (
-    <aside
-      className={clsx(styles.nav, 'menu', 'p-4', 'has-background-info-dark')}
-    >
-      <a
-        href={tree.link}
-        className={
-          tree.pageId === pageId
-            ? clsx(styles.active, 'is-active')
-            : 'menu-label'
-        }
-      >
-        {tree.title}
-      </a>
-      <NavTree items={tree.children} />
+    <aside class={clsx(styles.nav, 'menu', 'p-4', 'has-background-info-dark')}>
+      <div class={styles.tree}>
+        <a
+          href={tree.link}
+          class={
+            tree.pageId === pageId
+              ? clsx(styles.active, 'is-active')
+              : 'menu-label'
+          }
+        >
+          {tree.title}
+        </a>
+        <NavTree items={tree.children} />
+      </div>
     </aside>
   );
 };
@@ -39,7 +39,7 @@ const NavTree = ({ items }: NavTreeProps) => (
     {items.map((item: NavItem) => (
       <li key={item.link}>
         <a
-          className={
+          class={
             item.pageId === pageId
               ? clsx(styles.active, 'is-active')
               : 'has-background-info-dark'

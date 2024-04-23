@@ -7,6 +7,7 @@ Todo
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
 
   MEDIUM
+  - find a way to not move the menu when we change page (load page with HTMX?)
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable

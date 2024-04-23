@@ -13,7 +13,7 @@ export interface ReadPageProps {
 
 export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
   <Layout title={page.pageTitle} page={page} feedbackCode={feedbackCode}>
-    <div className={styles.ReadPage}>
+    <div class={styles.ReadPage}>
       <div class="level level-right has-text-grey">
         Created on {formatDate(page.createdAt)}
         {page.updatedAt.toISOString() !== page.createdAt.toISOString() &&

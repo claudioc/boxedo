@@ -13,7 +13,7 @@ export const PageMenu = ({ page }: PageMenuProps) => {
   }
 
   return (
-    <div className={clsx(styles.Menu)}>
+    <div class={clsx(styles.Menu)}>
       <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
           <button

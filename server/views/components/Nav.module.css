@@ -1,14 +1,8 @@
-/* .Nav {
-  flex-direction: column;
-}
-
-.Nav ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: square;
-  margin-left: 1.6rem;
-} */
-
 .nav {
   height: 100vh;
+  overflow: auto;
+}
+
+.tree {
+  width: 150%;
 }
