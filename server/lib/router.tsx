@@ -189,8 +189,8 @@ const router = async (app: FastifyInstance) => {
       let root;
       try {
         root = await dbs.getPageById(INDEX_PAGE_ID);
-      } catch (error) {
-        return 'There are no pages';
+      } catch {
+        /* ignore */
       }
 
       if (!root) {
