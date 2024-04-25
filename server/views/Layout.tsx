@@ -37,7 +37,7 @@ export const Layout = ({
           <script src="http://localhost:35729/livereload.js?snipver=1"></script>
         )}
       </head>
-      <body x-data class="container" {...onKeypress}>
+      <body x-data class="container is-widescreen" {...onKeypress}>
         <script src={getJsBundleName()}></script>
         <header class={clsx(styles.header, 'level', 'py-3')}>
           <div class="level-item level-left">
