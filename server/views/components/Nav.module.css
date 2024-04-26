@@ -6,3 +6,7 @@
 .tree {
   width: 150%;
 }
+
+.nav a:not(:global(.is-active)) {
+  background-color: transparent;
+}

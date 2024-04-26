@@ -122,6 +122,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req) => {
       const dbs = dbService(app.mongo);
+      const isHtmx = req.headers['hx-request'];
 
       let root;
       let feedbackCode;
@@ -138,7 +139,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       return (
-        <ReadPage page={root || DEFAULT_HOMEPAGE} feedbackCode={feedbackCode} />
+        <ReadPage
+          isFull={!isHtmx}
+          page={root || DEFAULT_HOMEPAGE}
+          feedbackCode={feedbackCode}
+        />
       );
     }
   );
@@ -223,11 +228,14 @@ const router = async (app: FastifyInstance) => {
       const { slug } = req.params;
       const { f: feedbackCode } = req.query;
       const dbs = dbService(app.mongo);
+      const isHtmx = req.headers['hx-request'];
 
       const page = await dbs.getPageBySlug(slug);
 
       if (page) {
-        return <ReadPage page={page} feedbackCode={feedbackCode} />;
+        return (
+          <ReadPage isFull={!isHtmx} page={page} feedbackCode={feedbackCode} />
+        );
       }
 
       const oldPage = await dbs.lookupPageBySlug(slug);

@@ -16,11 +16,12 @@ export const Nav = ({ tree, currentPageId }: NavProps) => {
       <div class={styles.tree}>
         <a
           href={tree.link}
-          class={
-            tree.pageId === pageId
-              ? clsx(styles.active, 'is-active')
-              : 'menu-label'
-          }
+          hx-get={tree.link}
+          hx-target=".column.right"
+          hx-push-url="true"
+          hx-ext="activate"
+          data-activate="aside/is-active"
+          class={tree.pageId === pageId ? 'is-active menu-label' : 'menu-label'}
         >
           {tree.title}
         </a>
@@ -39,12 +40,13 @@ const NavTree = ({ items }: NavTreeProps) => (
     {items.map((item: NavItem) => (
       <li key={item.link}>
         <a
-          class={
-            item.pageId === pageId
-              ? clsx(styles.active, 'is-active')
-              : 'has-background-info-dark'
-          }
           href={item.link}
+          hx-get={item.link}
+          hx-target=".column.right"
+          hx-push-url="true"
+          hx-ext="activate"
+          data-activate="aside/is-active"
+          class={item.pageId === pageId ? 'is-active' : ''}
         >
           {item.title}
         </a>

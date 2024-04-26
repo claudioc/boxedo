@@ -9,10 +9,16 @@ import styles from './ReadPage.module.css';
 export interface ReadPageProps {
   page: PageModel;
   feedbackCode?: number;
+  // Whether to show the full page or just the body
+  isFull?: boolean;
 }
 
-export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
-  <Layout title={page.pageTitle} page={page} feedbackCode={feedbackCode}>
+export const ReadPage = ({
+  page,
+  feedbackCode,
+  isFull = true,
+}: ReadPageProps) => {
+  const content = (
     <div class={styles.ReadPage}>
       <div class="level level-right has-text-grey">
         Created on {formatDate(page.createdAt)}
@@ -22,5 +28,13 @@ export const ReadPage = ({ page, feedbackCode }: ReadPageProps) => (
       </div>
       <PageBody page={page} />
     </div>
-  </Layout>
-);
+  );
+
+  return isFull ? (
+    <Layout title={page.pageTitle} page={page} feedbackCode={feedbackCode}>
+      {content}
+    </Layout>
+  ) : (
+    content
+  );
+};
