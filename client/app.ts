@@ -141,10 +141,11 @@ const App: App = {
       '[name="pageTitle"]'
     )! as HTMLTextAreaElement;
     const placeHolderContent = (placeHolder.textContent || '').trim();
-
     if (placeHolder) {
       placeHolder.textContent = '';
     }
+
+    // console.log('placeHolderContent:', placeHolderContent);
 
     App.editor = new Editor({
       ...editorOptions,
