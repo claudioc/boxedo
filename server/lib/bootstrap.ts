@@ -112,6 +112,7 @@ app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
             "'unsafe-inline'",
             "'unsafe-eval'",
           ],
+          'img-src': ['https:', 'data:', 'blob:'],
           'default-src': ["'self'", 'ws:'],
         },
       },

@@ -7,7 +7,7 @@ Todo
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
 
   MEDIUM
-  - find a way to not move the menu when we change page (load page with HTMX?)
+  - back and forth navigation works in a weird way with XHR
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
@@ -23,6 +23,7 @@ Todo
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
+  - hey, what about sqlite?
 
 Done
 - Save the history of a page
@@ -39,3 +40,4 @@ Done
 - uses CSRF for create and edit page
 - bug: feedback shows differently from alpine and normal render
 - needs also to check for uniqueness in the pageSlugs array
+- find a way to not move the menu when we change page (load page with HTMX?)

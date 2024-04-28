@@ -28,6 +28,9 @@ export const EditPage = ({ page, token }: EditPageProps) => (
           cancelUrl={slugUrl(page.pageSlug)}
         />
 
+        <button class="button is-small" x-on:click="App.addImage">
+          Add image
+        </button>
         <div id="editor-placeholder" class="block content">
           <h1>{page.pageTitle}</h1>
           {page.pageContent}

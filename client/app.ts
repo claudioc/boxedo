@@ -2,6 +2,7 @@ import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
+import Image from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import { generateHTML } from '@tiptap/html';
 
@@ -47,6 +48,7 @@ window.Alpine = Alpine;
 
 const extensions = [
   Typography,
+  Image,
   Document.extend({
     content: 'heading block*',
   }),
@@ -74,6 +76,7 @@ interface App {
   editor: Editor | null;
   enableEditor: () => void;
   validate: (event: Event) => void;
+  addImage: (event: Event) => void;
 }
 
 const App: App = {
@@ -106,6 +109,27 @@ const App: App = {
     }
 
     window.onbeforeunload = null;
+  },
+
+  addImage: (event: Event) => {
+    event.preventDefault();
+    const editor = App.editor;
+    if (!editor) {
+      return;
+    }
+
+    const imgUrl = 'https://source.unsplash.com/random/320x200';
+
+    editor
+      .chain()
+      .focus()
+      .setImage({
+        src: imgUrl,
+        alt: 'Random image from unsplash',
+      })
+      .run();
+    // Not sure what's the difference.
+    // editor.commands.insertContent(image);
   },
 
   enableEditor: () => {

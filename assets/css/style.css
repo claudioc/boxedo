@@ -16,7 +16,7 @@
   height: 0;
 }
 
-.tiptap.ProseMirror-focused {
+.tiptap.ProseMirror {
   outline: 0;
   padding: 0.5rem;
   background-color: #222;
