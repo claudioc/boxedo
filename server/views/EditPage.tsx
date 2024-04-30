@@ -32,8 +32,8 @@ export const EditPage = ({ page, token }: EditPageProps) => (
           Add image
         </button>
         <div id="editor-placeholder" class="block content">
-          <h1>[!{page.pageTitle}!]</h1>
-          [!{page.pageContent}!]
+          <h1>{page.pageTitle}</h1>
+          {page.pageContent}
         </div>
 
         <div class="block">

@@ -20,7 +20,7 @@ async function generatePages(numPages: number): Promise<any> {
 
   const html = fs.readFileSync('data/roman-empire.html', 'utf-8');
   const $ = cheerio.load(html);
-  const pElements = $('p')
+  const pElements = $('p:not(.foot)')
     .filter(function () {
       return $(this).text().length > 100;
     })
@@ -38,15 +38,20 @@ async function generatePages(numPages: number): Promise<any> {
       .text()
       .replaceAll('.', '')
       .trim()
-      .replaceAll('\n', '');
-    // pageContent is made of 3 to 10 random paragraphs
+      .replaceAll('\n', '')
+      .replace(/Chapter .*:\s/, '')
+      .replace(/—Part .*$/g, ' ');
+
     const pageContent = Array.from({
       length: Math.floor(Math.random() * 18) + 8,
     })
-      .map(() =>
-        $(getRandomElement(pElements)).text().trim().replaceAll('\n', '')
+      .map(
+        () =>
+          '<p>' +
+          $(getRandomElement(pElements)).text().trim().replaceAll('\n', '') +
+          '</p>'
       )
-      .join('<p>');
+      .join('');
 
     let parentPageId: string | null = null;
     let pageId = INDEX_PAGE_ID;
