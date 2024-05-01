@@ -11,12 +11,11 @@
   },
   "scripts": {
     "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
-    "dev:livereload": "livereload ./dist/server --wait 1000",
-    "dev:build:client": "esbuild ./client/app.ts --bundle --analyze --outdir=./dist/client --watch --entry-names=[dir]/[name]-[hash] --metafile=./dist/client-meta.json --sourcemap",
-    "dev:build:server": "esbuild ./server/app.ts --banner:js='import { createRequire } from \"module\";const require = createRequire(import.meta.url);' --metafile=./dist/server-meta.json --bundle --platform=node --outdir=./dist/server --format=esm --watch",
+    "dev:livereload": "livereload './dist/server, ./dist/client' --wait 1000",
+    "dev:build": "node esbuild.mjs",
+    "build": "npm run lint && npm run dev:build",
     "dev": "npm run clean && conc -r -k 'npm:dev:*'",
     "clean": "rm -rf ./dist",
-    "build": "npm run lint && npm run dev:build",
     "postinstall": "npm run build",
     "lint": "eslint . --ext .ts",
     "prestart": "NODE_ENV=production npm --env-file=.env run build",
@@ -37,7 +36,8 @@
       "**/*/*.js",
       "**/*/*.json",
       "tasks/*.mjs",
-      "vite.config.ts"
+      "vite.config.ts",
+      "esbuild.mjs"
     ],
     "extends": [
       "eslint:recommended",

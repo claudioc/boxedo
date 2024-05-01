@@ -11,7 +11,7 @@ function getRandomElement<T>(arr: T[]): T {
   return arr[index];
 }
 
-async function generatePages(numPages: number): Promise<any> {
+async function generatePages(numPages: number): Promise<MongoClient> {
   const client = await MongoClient.connect('mongodb://localhost:27017/joongle');
   const pagesCollection = client.db('joongle').collection<PageModel>('pages');
 

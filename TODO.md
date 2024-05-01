@@ -4,6 +4,7 @@ Doing
 Todo
 
   HIGH
+  - A long PRE breaks the layout
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
 
   MEDIUM
@@ -11,10 +12,8 @@ Todo
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
-  - consider creating an esbuild.js and simplify packages.json
 
   LOW (before live)
-  - Consider Alpine global store for the state of the notifications
   - Rolling window for history?
   - make the port for livereload a constant (for the CSP)
   - consider access implications to the history of docs
@@ -41,3 +40,5 @@ Done
 - bug: feedback shows differently from alpine and normal render
 - needs also to check for uniqueness in the pageSlugs array
 - find a way to not move the menu when we change page (load page with HTMX?)
+- Consider Alpine global store for the state of the notifications
+- consider creating an esbuild.js and simplify packages.json

@@ -1,38 +1,39 @@
-// Last 5 digits of the current timestamp are used to bust the cache
 import {
   ASSETS_MOUNT_POINT,
   CACHE_BUSTER,
-  CLIENT_ENTRY_POINT,
+  CLIENT_BUNDLE_PREFIX,
+  CLIENT_BUNDLE_LOCATION,
 } from '~/constants';
-import * as fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readdirSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/style.css?_=${CACHE_BUSTER}`;
+const jsFile = '';
 
 export const getJsBundleName = (): string => {
-  // Read the client-meta.json file. Note that __dirname is relative to the dist directory
-  let meta;
+  // In production, we know the name of the JS bundle as we start
+  // and we don't need to read the directory again and again
+  if (process.env.NODE_ENV === 'production' && jsFile !== '') {
+    return jsFile;
+  }
 
   try {
-    const buffer = fs.readFileSync(path.join(__dirname, '../client-meta.json'));
+    const files = readdirSync(
+      path.join(__dirname, CLIENT_BUNDLE_LOCATION)
+    ).filter(
+      (file) => file.startsWith(CLIENT_BUNDLE_PREFIX) && file.endsWith('.js')
+    );
 
-    if (!buffer) {
-      return '';
+    if (files.length === 1) {
+      return `/${ASSETS_MOUNT_POINT}/js/${files[0]}`;
     }
-    meta = JSON.parse(buffer.toString());
-  } catch {
+
+    return '';
+  } catch (err) {
     return '';
   }
-
-  for (const key in meta.outputs) {
-    if (meta.outputs[key].entryPoint === CLIENT_ENTRY_POINT) {
-      return `/${ASSETS_MOUNT_POINT}/js/${key}`.replace('dist/client/', '');
-    }
-  }
-
-  return '';
 };
