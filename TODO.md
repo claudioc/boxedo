@@ -13,6 +13,7 @@ Todo
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
   - how do we load the editor only when needed?
+  - use a fastify proxy for the livereload to 8001 and 8000
 
   LOW (before live)
   - Rolling window for history?
