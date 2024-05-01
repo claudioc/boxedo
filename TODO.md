@@ -12,6 +12,7 @@ Todo
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
+  - how do we load the editor only when needed?
 
   LOW (before live)
   - Rolling window for history?

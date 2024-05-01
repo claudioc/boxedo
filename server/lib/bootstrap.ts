@@ -113,6 +113,7 @@ app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
             "'unsafe-eval'",
           ],
           'img-src': ['https:', 'data:', 'blob:'],
+          'connect-src': ['http:', "'self'", 'ws:'],
           'default-src': ["'self'", 'ws:'],
         },
       },

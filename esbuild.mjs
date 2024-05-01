@@ -5,7 +5,9 @@ const ctxClient = await esbuild.context({
   bundle: true,
   sourcemap: true,
   logLevel: 'info',
+  platform: 'browser',
   entryNames: '[dir]/[name]-[hash]',
+  minify: process.env.NODE_ENV === 'production',
   outdir: './dist/client',
 });
 
@@ -21,5 +23,18 @@ const ctxServer = await esbuild.context({
   },
 });
 
+if (process.env.NODE_ENV === 'production') {
+  process.exit(0);
+}
+
 await Promise.all([ctxClient.watch(), ctxServer.watch()]);
-console.log('Watching…');
+
+await ctxClient.serve({
+  host: 'localhost',
+  port: 8000,
+});
+
+await ctxServer.serve({
+  host: 'localhost',
+  port: 8001,
+});

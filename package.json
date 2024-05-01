@@ -11,9 +11,8 @@
   },
   "scripts": {
     "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
-    "dev:livereload": "livereload './dist/server, ./dist/client' --wait 1000",
     "dev:build": "node esbuild.mjs",
-    "build": "npm run lint && npm run dev:build",
+    "build": "npm run lint && NODE_ENV=production npm run dev:build",
     "dev": "npm run clean && conc -r -k 'npm:dev:*'",
     "clean": "rm -rf ./dist",
     "postinstall": "npm run build",
@@ -70,7 +69,6 @@
     "eslint": "^8.55.0",
     "eslint-plugin-import": "^2.29.0",
     "json-schema-to-ts": "^3.0.0",
-    "livereload": "^0.9.3",
     "mongodb-memory-server": "^9.1.8",
     "typescript": "^5.3.2",
     "typescript-plugin-css-modules": "^5.1.0",
