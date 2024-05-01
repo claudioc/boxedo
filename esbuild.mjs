@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild';
 const ctxClient = await esbuild.context({
   entryPoints: ['./client/app.ts'],
   bundle: true,
-  sourcemap: true,
+  sourcemap: process.env.NODE_ENV !== 'production',
   logLevel: 'info',
   platform: 'browser',
   entryNames: '[dir]/[name]-[hash]',
@@ -18,6 +18,7 @@ const ctxServer = await esbuild.context({
   format: 'esm',
   logLevel: 'info',
   outdir: './dist/server',
+  // This banner is required for a workaround in __dirname/__filename and fastify
   banner: {
     js: 'import { createRequire } from "module";const require = createRequire(import.meta.url);',
   },
