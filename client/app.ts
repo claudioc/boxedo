@@ -60,14 +60,11 @@ class App {
   }
 
   livereload() {
-    new EventSource('http://localhost:8000/esbuild').addEventListener(
-      'change',
+    new EventSource('http://localhost:8007/updates').addEventListener(
+      'message',
       () => location.reload()
-    );
-    new EventSource('http://localhost:8001/esbuild').addEventListener(
-      'change',
-      () => setTimeout(() => location.reload(), 1000)
     );
   }
 }
+
 window.App = new App();

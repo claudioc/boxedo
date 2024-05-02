@@ -17,7 +17,6 @@ Todo
 
   LOW (before live)
   - Rolling window for history?
-  - make the port for livereload a constant (for the CSP)
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - mongodb must be configured to run in production
@@ -44,3 +43,4 @@ Done
 - find a way to not move the menu when we change page (load page with HTMX?)
 - Consider Alpine global store for the state of the notifications
 - consider creating an esbuild.js and simplify packages.json
+- make the port for livereload a constant (for the CSP)
