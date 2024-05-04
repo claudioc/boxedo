@@ -3,8 +3,8 @@ import { createServer } from 'http';
 
 let { LIVERELOAD_PORT, LIVERELOAD_ADDRESS } = process.env;
 
-LIVERELOAD_ADDRESS = LIVERELOAD_ADDRESS.trim();
-LIVERELOAD_PORT = parseInt(LIVERELOAD_PORT.trim(), 10);
+LIVERELOAD_ADDRESS = LIVERELOAD_ADDRESS?.trim();
+LIVERELOAD_PORT = parseInt(LIVERELOAD_PORT?.trim(), 10);
 
 const hasLiveReload = LIVERELOAD_ADDRESS && LIVERELOAD_PORT;
 const LIVERELOAD_URL = hasLiveReload
