@@ -60,9 +60,12 @@ class App {
   }
 
   livereload() {
-    new EventSource('http://localhost:8007/updates').addEventListener(
-      'message',
-      () => location.reload()
+    if (!LIVERELOAD_URL) {
+      return;
+    }
+
+    new EventSource(LIVERELOAD_URL).addEventListener('message', () =>
+      location.reload()
     );
   }
 }

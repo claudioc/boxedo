@@ -13,7 +13,6 @@ Todo
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
   - how do we load the editor only when needed?
-  - use a fastify proxy for the livereload to 8001 and 8000
 
   LOW (before live)
   - Rolling window for history?
@@ -44,3 +43,4 @@ Done
 - Consider Alpine global store for the state of the notifications
 - consider creating an esbuild.js and simplify packages.json
 - make the port for livereload a constant (for the CSP)
+- use a fastify proxy for the livereload to 8001 and 8000
