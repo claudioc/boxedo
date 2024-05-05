@@ -1,12 +1,24 @@
 services:
-  mongodb:
-    container_name: mongo-joogle
-    image: mongo:latest
-    command: ["--replSet", "rs0"]
+  couchdb:
+    container_name: couchdb-joogle
+    image: couchdb:latest
     volumes:
-      - ./scripts/mongodb/:/docker-entrypoint-initdb.d
-      - joongle_data:/data/db
+      - joongle_data:/data/db-couchdb
+      - ./scripts/couchdb/local.ini:/opt/couchdb/etc/local.ini
     ports:
-      - '27017:27017'
+      - '5984:5984'
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+
+  # mongodb:
+  #   container_name: mongo-joogle
+  #   image: mongo:latest
+  #   command: ["--replSet", "rs0"]
+  #   volumes:
+  #     - ./scripts/mongodb/:/docker-entrypoint-initdb.d
+  #     - joongle_data:/data/db
+  #   ports:
+  #     - '27017:27017'
 volumes:
   joongle_data:

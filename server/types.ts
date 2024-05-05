@@ -1,28 +1,28 @@
+import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
+
 export type NodeEnv = 'development' | 'production' | 'test';
 
 export interface PageModel {
-  _id?: string;
-  pageId: string;
-  parentPageId?: string | null;
+  _id: string;
+  _rev: string;
+  parentId?: string | null;
   pageTitle: string;
   pageSlug: string;
   pageSlugs: string[];
   pageContent: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface PageHistoryItem {
-  pageTitle: string;
-  pageContent: string;
-  updateAt: Date;
-  timestamp: Date;
-}
+export type PageModelWithoutId = Omit<PageModel, '_id' | '_rev'>;
 
-export interface PageHistoryModel {
-  pageId: string;
-  history: PageHistoryItem[];
-}
+export type PageSelector = {
+  [K in MangoOperator | keyof PageModel]:
+    | MangoSelector
+    | MangoSelector[]
+    | MangoValue
+    | MangoValue[];
+};
 
 export interface NavItem {
   pageId: string;

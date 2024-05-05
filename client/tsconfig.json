@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
     "target": "es6",
     /* You still need to use the '.js' extension in your import statements */
     "module": "commonjs",

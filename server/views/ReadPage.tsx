@@ -22,7 +22,7 @@ export const ReadPage = ({
     <div class={styles.ReadPage}>
       <div class="level level-right has-text-grey">
         Created on {formatDate(page.createdAt)}
-        {page.updatedAt.toISOString() !== page.createdAt.toISOString() &&
+        {page.updatedAt !== page.createdAt &&
           ` (${formatDate(page.updatedAt)})`}
         <PageMenu page={page} />
       </div>

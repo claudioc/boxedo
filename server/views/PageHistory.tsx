@@ -1,10 +1,10 @@
-import { PageHistoryItem, PageModel } from '~/types';
+import { PageModel } from '~/types';
 import { Layout } from './Layout';
-import { formatDate } from '~/lib/helpers';
+// import { formatDate } from '~/lib/helpers';
 
 interface PageHistoryProps {
   page: PageModel;
-  history: PageHistoryItem[];
+  history: PageModel[];
 }
 
 export const PageHistory = ({ page, history }: PageHistoryProps) => {
@@ -32,12 +32,12 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
             {history.map((item, index) => (
               <tr key={index}>
                 <td>{len - index}</td>
-                <td>{formatDate(item.timestamp)}</td>
-                <td>{formatDate(item.updateAt, 'N/A')}</td>
+                {/* <td>{formatDate(item.timestamp)}</td>
+                <td>{formatDate(item.updateAt, 'N/A')}</td> */}
                 <td>{item.pageTitle}</td>
                 <td>
                   <a
-                    href={`/history/${page.pageId}/${index}`}
+                    href={`/history/${page._id}/${index}`}
                     class="button is-small"
                   >
                     View

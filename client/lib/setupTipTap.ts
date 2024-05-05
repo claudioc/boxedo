@@ -36,10 +36,10 @@ export const enableEditor = () => {
   const placeHolder = document.getElementById('editor-placeholder')!;
   const pageContent = document.querySelector(
     '[name="pageContent"]'
-  )! as HTMLTextAreaElement;
+  ) as HTMLTextAreaElement;
   const pageTitle = document.querySelector(
     '[name="pageTitle"]'
-  )! as HTMLTextAreaElement;
+  ) as HTMLTextAreaElement;
   const placeHolderContent = (placeHolder.textContent || '').trim();
   if (placeHolder) {
     placeHolder.textContent = '';

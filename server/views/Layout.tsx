@@ -60,7 +60,7 @@ export const Layout = ({
           {page && (
             <div
               class="column is-4"
-              hx-get={`/parts/nav/${page.pageId}`}
+              hx-get={`/parts/nav/${page._id}`}
               hx-trigger="load"
             ></div>
           )}

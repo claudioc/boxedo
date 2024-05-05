@@ -30,7 +30,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => (
         </p>
 
         <input type="hidden" name="newParentId" x-model="newParentId" />
-        <input type="hidden" name="oldParentId" value={page.parentPageId!} />
+        <input type="hidden" name="oldParentId" value={page.parentId!} />
       </form>
 
       <div class="block">

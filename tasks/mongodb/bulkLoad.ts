@@ -1,10 +1,12 @@
-import { PageModel } from '../server/types';
+import { PageModel } from '../../server/types';
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import cheerio from 'cheerio';
 import fs from 'fs';
 
 const INDEX_PAGE_ID = '__index__';
+
+process.exit(0);
 
 function getRandomElement<T>(arr: T[]): T {
   const index = Math.floor(Math.random() * arr.length);

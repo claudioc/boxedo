@@ -12,13 +12,14 @@ import plugin from 'fastify-plugin';
  * We use this to turn React components into an object with a ___jsx key
  * that has the serialized HTML.
  */
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 const preSerialization: preSerializationHookHandler<unknown> = async (
   _request,
   reply,
   payload: unknown
 ) => {
   if (isValidElement(payload)) {
-    reply.header('Content-Type', 'text/html; charset=utf8');
+    void reply.header('Content-Type', 'text/html; charset=utf8');
     return {
       ___jsx: '<!DOCTYPE html>\n' + render(payload as JSX.Element),
     };
@@ -31,12 +32,14 @@ const preSerialization: preSerializationHookHandler<unknown> = async (
  * The onSendHookHandler lets us transform the response body (as a string)
  * We detect the ___jsx key and unwrap the HTML.
  */
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 const onSend: onSendHookHandler<unknown> = async (
   _request,
   _reply,
   payload: unknown
 ) => {
   if (typeof payload === 'string' && payload.startsWith('{"___jsx":"')) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return JSON.parse(payload).___jsx;
   }
   return payload;

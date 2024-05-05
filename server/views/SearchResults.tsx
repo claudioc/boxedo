@@ -17,7 +17,7 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
       {hasResults ? (
         <ul>
           {results.map((result) => (
-            <li key={result.pageId} class="content">
+            <li key={result._id} class="content">
               <a href={slugUrl(result.pageSlug)}>{result.pageTitle}</a>
               {result.pageContent && (
                 <blockquote class="ml-4">{result.pageContent}</blockquote>

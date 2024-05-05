@@ -1,7 +1,7 @@
-import { PageModel, PageHistoryItem } from '~/types';
+import { PageModel } from '~/types';
 
 interface PageBodyProps {
-  page: PageModel | PageHistoryItem;
+  page: PageModel;
 }
 
 export const PageBody = ({ page }: PageBodyProps) => (

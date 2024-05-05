@@ -1,11 +1,9 @@
-import { PageModel, NavItem, PageHistoryModel } from '~/types';
+import { PageModel, PageSelector, NavItem, PageModelWithoutId } from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
-import { FastifyMongoObject } from '@fastify/mongodb';
+import nano, { DocumentScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
-import { UpdateFilter } from 'mongodb';
-import sanitize from 'mongo-sanitize';
 import sanitizeHtml from 'sanitize-html';
 
 // https://github.com/apostrophecms/sanitize-html
@@ -14,44 +12,67 @@ const safeHtml = (str: string) =>
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
   });
 
-const PageWithoutContentProjection = {
-  projection: {
-    pageId: 1,
-    pageTitle: 1,
-    pageSlug: 1,
-    parentPageId: 1,
-    createdAt: 1,
-    updatedAt: 1,
-  },
-} as const;
+const safeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export function dbService(mongo?: FastifyMongoObject) {
-  if (!mongo || !mongo.db) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
-  const db = mongo.db;
+export function dbService(client?: nano.ServerScope) {
+  if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
 
-  const pagesCollection = db.collection<PageModel>('pages');
-  if (!pagesCollection)
+  const pagesDb: DocumentScope<PageModel> = client.db.use('pages');
+  if (!pagesDb)
     throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_COLLECTION);
 
-  const pageHistoryCollection = db.collection<PageHistoryModel>('pageHistory');
-  if (!pageHistoryCollection)
-    throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_HISTORY_COLLECTION);
+  // Cache the root page
+  let rootPage: PageModel | null = null;
 
   return {
-    getPageById(pageId: string) {
-      return pagesCollection.findOne<PageModel>({ pageId });
-    },
+    async getRootPage(): Promise<PageModel | null> {
+      if (rootPage) return rootPage;
 
-    getPageBySlug(slug: string) {
-      return pagesCollection.findOne({ pageSlug: slug });
-    },
-
-    lookupPageBySlug(slug: string) {
-      // Check if the slug is in the pageSlugs of any document
-      // and in case, return the document
-      return pagesCollection.findOne({
-        pageSlugs: { $in: [slug] },
+      const result = await pagesDb.find({
+        selector: {
+          parentId: null,
+        } as PageSelector,
+        limit: 1,
       });
+
+      if (result.docs.length > 0) {
+        rootPage = result.docs[0];
+      }
+
+      return rootPage;
+    },
+
+    async getPageById(pageId: string): Promise<PageModel | null> {
+      const result = await pagesDb.find({
+        selector: {
+          _id: pageId,
+        } as PageSelector,
+        limit: 1,
+      });
+
+      return result.docs.length > 0 ? result.docs[0] : null;
+    },
+
+    async getPageBySlug(slug: string) {
+      const result = await pagesDb.find({
+        selector: { pageSlug: slug } as PageSelector,
+        limit: 1,
+      });
+
+      return result.docs.length > 0 ? result.docs[0] : null;
+    },
+
+    async lookupPageBySlug(slug: string) {
+      const result = await pagesDb.find({
+        selector: {
+          pageSlugs: {
+            $in: [slug],
+          },
+        } as PageSelector,
+        limit: 1,
+      });
+
+      return result.docs.length > 0 ? result.docs[0] : null;
     },
 
     async generateUniqueSlug(title: string) {
@@ -60,9 +81,14 @@ export function dbService(mongo?: FastifyMongoObject) {
       let counter = 1;
 
       while (!uniqueSlugFound) {
-        const slugAlreadyInUse = !!(await pagesCollection.findOne({
-          $or: [{ pageSlug: slug }, { pageSlugs: { $in: [slug] } }],
-        }));
+        const result = await pagesDb.find({
+          selector: {
+            $or: [{ pageSlug: slug }, { pageSlugs: { $in: [slug] } }],
+          } as PageSelector,
+          limit: 1,
+        });
+
+        const slugAlreadyInUse = result.docs.length > 0;
 
         if (slugAlreadyInUse) {
           slug = `${slugify(title, { lower: true })}-${counter}`;
@@ -75,59 +101,75 @@ export function dbService(mongo?: FastifyMongoObject) {
       return slug;
     },
 
-    async insertPage(page: PageModel) {
+    async insertPage(page: PageModelWithoutId) {
       page.pageContent = safeHtml(page.pageContent);
       page.pageTitle = safeHtml(page.pageTitle);
 
-      const session = await mongo.client.startSession();
       try {
-        await session.withTransaction(async () => {
-          await pagesCollection.insertOne(page, { session });
-          // Insert the first page in the history collection
-          await pageHistoryCollection.insertOne(
-            {
-              pageId: page.pageId,
-              history: [],
-            },
-            { session }
-          );
-        });
+        await pagesDb.insert(page as PageModel);
       } catch (error) {
         console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
-      } finally {
-        await session.endSession();
       }
     },
 
-    search(q: string) {
-      const query = sanitize(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-      return pagesCollection
-        .find({ pageTitle: { $regex: query, $options: 'i' } })
-        .limit(25)
-        .toArray();
+    async search(q: string) {
+      const query = safeRegExp(q);
+
+      const result = await pagesDb.find({
+        selector: {
+          pageTitle: {
+            $regex: `(?i)${query}`,
+          },
+        },
+        limit: 25,
+      });
+
+      return result.docs;
     },
 
-    searchText(q: string) {
-      return pagesCollection
-        .find({ $text: { $search: sanitize(q) } })
-        .sort({ score: { $meta: 'textScore' } })
-        .limit(25)
-        .toArray();
+    // Couchdb doesn't support full-text search without Lucene
+    async searchText(q: string) {
+      const query = safeRegExp(q);
+
+      const result = await pagesDb.find({
+        selector: {
+          $or: [
+            {
+              pageTitle: {
+                $regex: `(?i)${query}`,
+              },
+            },
+            {
+              pageContent: {
+                $regex: `(?i)${query}`,
+              },
+            },
+          ],
+        },
+        limit: 25,
+      });
+
+      return result.docs;
     },
 
     async buildMenuTree(parentId: string): Promise<NavItem[]> {
-      const pages = await pagesCollection
-        .find({ parentPageId: parentId }, PageWithoutContentProjection)
-        .toArray();
+      const result = await pagesDb.find({
+        selector: {
+          parentId,
+        } as PageSelector,
+        // FIXME: Ensure that the field array contains only
+        // valid fields from the PageModel type
+        fields: ['_id', 'pageTitle', 'pageSlug'],
+      });
 
       const menuTree = [];
-      for (const page of pages) {
+      for (const page of result.docs) {
         const menuItem: NavItem = {
-          pageId: page.pageId,
+          pageId: page._id,
           title: page.pageTitle,
           link: slugUrl(page.pageSlug),
-          children: await this.buildMenuTree(page.pageId),
+          children: await this.buildMenuTree(page._id),
         };
 
         menuTree.push(menuItem);
@@ -137,102 +179,114 @@ export function dbService(mongo?: FastifyMongoObject) {
     },
 
     async updatePage(page: PageModel, newPage: Partial<PageModel>) {
-      const session = await mongo.client.startSession();
-
-      const options: UpdateFilter<PageModel> = {
-        $set: {
-          pageTitle: safeHtml(newPage.pageTitle!),
-          pageContent: safeHtml(newPage.pageContent!),
-          updatedAt: newPage.updatedAt,
-          pageSlug: newPage.pageSlug,
-        },
+      const updatedPage: PageModel = {
+        ...page,
+        ...newPage,
+        pageTitle: safeHtml(newPage.pageTitle!),
+        pageContent: safeHtml(newPage.pageContent!),
+        updatedAt: newPage.updatedAt!,
       };
 
       if (page.pageSlug !== newPage.pageSlug) {
-        options.$push = { pageSlugs: page.pageSlug };
-        options.$set = { ...options.$set, pageSlug: newPage.pageSlug };
+        updatedPage.pageSlugs = [...page.pageSlugs, page.pageSlug];
       }
 
       try {
-        await session.withTransaction(async () => {
-          await pagesCollection.updateOne({ _id: page!._id }, options);
-          await pageHistoryCollection.updateOne(
-            { pageId: page.pageId },
-            {
-              $push: {
-                history: {
-                  pageTitle: page.pageTitle,
-                  pageContent: page.pageContent,
-                  updateAt: page.updatedAt,
-                  timestamp: new Date(),
-                },
-              },
-            },
-            { session }
-          );
-        });
+        await pagesDb.insert(updatedPage);
       } catch (error) {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
-      } finally {
-        await session.endSession();
       }
     },
 
     async updatePageParent(page: PageModel, newParentId: string) {
+      const updatedPage: PageModel = {
+        ...page,
+        parentId: newParentId,
+      };
       try {
-        await pagesCollection.updateOne(
-          { _id: page._id },
-          { $set: { parentPageId: newParentId } }
-        );
+        await pagesDb.insert(updatedPage);
       } catch (error) {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
     },
 
     async deletePage(page: PageModel) {
-      const session = await mongo.client.startSession();
       try {
-        await session.withTransaction(async () => {
-          await pagesCollection.deleteOne({ _id: page._id }, { session });
-          await pagesCollection.updateMany(
-            { parentPageId: page.pageId },
-            { $set: { parentPageId: page.parentPageId } }
-          );
-          await pageHistoryCollection.deleteOne(
-            { pageId: page.pageId },
-            { session }
-          );
+        await pagesDb.destroy(page._id, page._rev);
+
+        // Update child pages
+        const childPages = await pagesDb.find({
+          selector: { parentId: page._id } as PageSelector,
         });
+
+        for (const childPage of childPages.docs) {
+          childPage.parentId = page.parentId;
+          await pagesDb.insert(childPage);
+        }
       } catch (error) {
         throw new ErrorWithFeedback(Feedbacks.E_DELETING_PAGE);
-      } finally {
-        await session.endSession();
       }
     },
 
-    // This is run only once, as soon as the user creates the home page
-    createTextIndex() {
-      return pagesCollection.createIndex(
-        { pageTitle: 'text', pageContent: 'text' },
-        { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
-      );
-    },
-
     async getPageHistory(pageId: string) {
-      return (
-        (await pageHistoryCollection
-          .findOne({ pageId })
-          .then((result) => result?.history)) || []
+      const doc = await pagesDb.get(pageId, { revs_info: true });
+
+      const history = await Promise.all(
+        doc._revs_info!.map(async (rev) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          const revisionDoc = await pagesDb.get(pageId, { rev: rev.rev });
+          return {
+            pageTitle: revisionDoc.pageTitle,
+            pageContent: revisionDoc.pageContent,
+            updatedAt: revisionDoc.updatedAt,
+            _rev: revisionDoc._rev,
+          };
+        })
       );
+
+      return history;
     },
 
     async getPageHistoryItem(pageId: string, version: number) {
-      const item = await pageHistoryCollection.findOne(
-        { pageId },
-        { projection: { history: { $slice: [version - 1, 1] } } }
-      );
+      const doc = await pagesDb.get(pageId, { revs_info: true });
 
-      return item?.history[0];
+      // Check if the specified version exists
+      if (version <= 0 || version > doc._revs_info!.length) {
+        throw new ErrorWithFeedback(Feedbacks.E_INVALID_VERSION);
+      }
+
+      // Get the specific revision based on the version index
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const targetRev = doc._revs_info![version - 1].rev;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const revisionDoc = await pagesDb.get(pageId, { rev: targetRev });
+
+      return {
+        pageTitle: revisionDoc.pageTitle,
+        pageContent: revisionDoc.pageContent,
+        updatedAt: revisionDoc.updatedAt,
+        _rev: revisionDoc._rev,
+      };
     },
   };
 }
+
+dbService.init = async () => {
+  const couchdb = nano({
+    url: process.env.COUCHDB_URL || '',
+    requestDefaults: {
+      auth: {
+        username: process.env.DB_USER || '',
+        password: process.env.DB_PASSWORD || '',
+      },
+    },
+  });
+
+  try {
+    await couchdb.db.get('pages');
+  } catch (error) {
+    await couchdb.db.create('pages');
+  }
+
+  return couchdb;
+};

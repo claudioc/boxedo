@@ -7,7 +7,6 @@
     "resolveJsonModule": true,
     "moduleResolution": "Bundler",
     "module": "ESNext",
-    "noEmit": true,
     "downlevelIteration": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",

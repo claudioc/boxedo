@@ -3,21 +3,20 @@ import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import staticServe from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
+import nano from 'nano';
 import fastifyFavicon from 'fastify-favicon';
-import mongodb from '@fastify/mongodb';
 import { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
-import fastifyUUID from 'fastify-uuid';
 import path from 'path';
 import router from './router';
 import { NodeEnv } from '~/types';
 import jsxRenderer from './jsxRenderer';
 import { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'url';
-import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
+import { dbService } from '~/services/dbService';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,24 +27,12 @@ if (process.env.NODE_ENV !== 'test') {
   globalThis.__bundlerPathsOverrides = {
     'thread-stream-worker': path.join(
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       path.dirname(createRequire(import.meta.url).resolve('thread-stream')),
       'lib',
       'worker.js'
     ),
   };
-}
-
-let mongodbServerUri: string | undefined;
-if (process.env.NODE_ENV === 'test') {
-  mongodbServerUri = (
-    await MongoMemoryReplSet.create({
-      replSet: { count: 1 },
-    })
-  )
-    .getUri()
-    // There seems to be a bug in mongodb-memory-server where
-    // the dbName in the options is not used to build the URI
-    .replace('?', 'joongle?');
 }
 
 const ConfigEnvSchema = {
@@ -63,6 +50,7 @@ const ConfigEnvSchema = {
 declare module 'fastify' {
   interface FastifyInstance {
     config: FromSchema<typeof ConfigEnvSchema>;
+    dbClient: nano.ServerScope;
   }
 }
 
@@ -81,17 +69,13 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
-app.register(fastifyUUID);
-app.register(fastifyCookie);
+app.decorate('dbClient', await dbService.init());
+await app.register(fastifyCookie);
 
 if (process.env.NODE_ENV !== 'test') await app.register(csrfProtection);
 
-app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
+await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
-    .register(mongodb, {
-      forceClose: true,
-      url: mongodbServerUri ?? app.config.MONGO_URL,
-    })
     .register(fastifyFavicon, {
       path: './assets',
       name: 'favicon.ico',

@@ -78,7 +78,7 @@ export const EditPage = ({ page, token }: EditPageProps) => (
       </dialog>
 
       <form x-ref="deleteForm" action="/delete" method="post">
-        <input type="hidden" name="pageId" value={page.pageId} />
+        <input type="hidden" name="pageId" value={page._id} />
       </form>
     </PageFormWrapper>
 

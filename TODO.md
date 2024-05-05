@@ -1,13 +1,16 @@
 Doing
-- unit tests for the dbService would be good.
 
 Todo
 
   HIGH
   - A long PRE breaks the layout
+  - Check what happens if we cannot connect to the db on bootstrap
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
+  - there are several db access in the dbservice not protected by try catch
 
   MEDIUM
+  - consider just removing the need of pageId and use the _id field
+  - Some feedback errors must be renamed a bit because they are very mongo-like
   - back and forth navigation works in a weird way with XHR
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
@@ -23,6 +26,7 @@ Todo
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
   - hey, what about sqlite?
+  - unit tests for the dbService would be good.
 
 Done
 - Save the history of a page

@@ -5,6 +5,7 @@
     /* Setting it to true, would create a tsconfig.tsbuildinfo file */
     "incremental": false,
     "removeComments": true,
+    "noEmit": true,
 
     "strict": true,
     "noImplicitAny": true,
