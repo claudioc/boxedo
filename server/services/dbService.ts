@@ -1,4 +1,10 @@
-import { PageModel, PageSelector, NavItem, PageModelWithoutId } from '~/types';
+import {
+  PageModel,
+  PageSelector,
+  NavItem,
+  PageModelWithoutId,
+  PageRevInfo,
+} from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
@@ -76,7 +82,7 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async generateUniqueSlug(title: string) {
-      let slug = slugify(title, { lower: true });
+      let slug = slugify(title.trim(), { lower: true });
       let uniqueSlugFound = false;
       let counter = 1;
 
@@ -91,8 +97,7 @@ export function dbService(client?: nano.ServerScope) {
         const slugAlreadyInUse = result.docs.length > 0;
 
         if (slugAlreadyInUse) {
-          slug = `${slugify(title, { lower: true })}-${counter}`;
-          counter++;
+          slug = `${slugify(title.trim(), { lower: true })}-${counter++}`;
         } else {
           uniqueSlugFound = true;
         }
@@ -228,21 +233,25 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
-    async getPageHistory(pageId: string) {
-      const doc = await pagesDb.get(pageId, { revs_info: true });
+    async getPageHistory(page: PageModel): Promise<PageModel[]> {
+      const doc = await pagesDb.get(page._id, { revs_info: true });
 
-      const history = await Promise.all(
-        doc._revs_info!.map(async (rev) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const revisionDoc = await pagesDb.get(pageId, { rev: rev.rev });
-          return {
-            pageTitle: revisionDoc.pageTitle,
-            pageContent: revisionDoc.pageContent,
-            updatedAt: revisionDoc.updatedAt,
-            _rev: revisionDoc._rev,
-          };
-        })
-      );
+      if (!doc._revs_info) return [];
+
+      const history = (
+        (await Promise.all(
+          (doc._revs_info as PageRevInfo[]).map(async (rev) => {
+            if (rev.status !== 'available') return null;
+            if (rev.rev === doc._rev) return null;
+            const revisionDoc = await pagesDb.get(page._id, { rev: rev.rev });
+            return {
+              pageTitle: revisionDoc.pageTitle,
+              updatedAt: revisionDoc.updatedAt,
+              _rev: revisionDoc._rev,
+            };
+          })
+        )) as PageModel[]
+      ).filter((item) => item !== null);
 
       return history;
     },

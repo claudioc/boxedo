@@ -25,7 +25,7 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
 
     slugWithFeedback(slug: string, feedback: Feedback) {
       if (app) {
-        app.log.error(feedback.message);
+        app.log.info(feedback.message);
       }
 
       return rep.redirect(303, pathWithFeedback(slugUrl(slug), feedback));

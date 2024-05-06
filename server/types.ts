@@ -15,6 +15,7 @@ export interface PageModel {
 }
 
 export type PageModelWithoutId = Omit<PageModel, '_id' | '_rev'>;
+export type PageModelWithoutRev = Omit<PageModel, '_rev'>;
 
 export type PageSelector = {
   [K in MangoOperator | keyof PageModel]:
@@ -22,6 +23,11 @@ export type PageSelector = {
     | MangoSelector[]
     | MangoValue
     | MangoValue[];
+};
+
+export type PageRevInfo = {
+  rev: string;
+  status: 'available' | 'missing' | 'deleted' | 'unknown';
 };
 
 export interface NavItem {

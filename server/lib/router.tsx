@@ -304,7 +304,6 @@ const router = async (app: FastifyInstance) => {
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
       const root = await dbs.getRootPage();
-
       if (!root) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
@@ -618,9 +617,9 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      // const history = await dbs.getPageHistory(pageId);
+      const history = await dbs.getPageHistory(page);
 
-      return <PageHistory page={page} history={[]} />;
+      return <PageHistory page={page} history={history} />;
     }
   );
 

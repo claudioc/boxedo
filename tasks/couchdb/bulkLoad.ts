@@ -1,12 +1,42 @@
-import { PageModel, PageModelWithoutId } from '../../server/types';
+import { PageModel, PageModelWithoutRev } from '../../server/types';
 import nano, { DocumentScope, DocumentBulkResponse } from 'nano';
 import cheerio from 'cheerio';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import slugify from 'slugify';
+
+type ExistingPage = {
+  _id: string;
+  pageSlug: string;
+};
+
+const pages: PageModelWithoutRev[] = [];
+const existingPages: ExistingPage[] = [];
 
 function getRandomElement<T>(arr: T[]): T {
   const index = Math.floor(Math.random() * arr.length);
   return arr[index];
 }
+
+const generateUniqueSlug = (title: string) => {
+  let slug = slugify(title.trim(), { lower: true });
+  let uniqueSlugFound = false;
+  let counter = 1;
+
+  while (!uniqueSlugFound) {
+    const slugAlreadyInUse = existingPages.find(
+      (page) => page.pageSlug === slug
+    );
+
+    if (slugAlreadyInUse) {
+      slug = `${slugify(title.trim(), { lower: true })}-${counter++}`;
+    } else {
+      uniqueSlugFound = true;
+    }
+  }
+
+  return slug;
+};
 
 async function generatePages(numPages: number): Promise<nano.ServerScope> {
   const client = nano({
@@ -27,9 +57,6 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
   }
 
   const pagesDb: DocumentScope<PageModel> = client.db.use('pages');
-
-  const pages: PageModelWithoutId[] = [];
-  const existingPages: string[] = []; // Keep track of created page IDs
 
   const html = fs.readFileSync('data/roman-empire.html', 'utf-8');
   const $ = cheerio.load(html);
@@ -68,11 +95,15 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
 
     let parentId: string | null = null;
     let slug = 'home';
-    const randomIndex = Math.floor(Math.random() * existingPages.length);
-    parentId = existingPages[randomIndex];
-    slug = pageTitle.toLowerCase().replace(/\s/g, '-');
+    if (existingPages.length > 0) {
+      const randomIndex = Math.floor(Math.random() * existingPages.length);
+      parentId = existingPages[randomIndex]._id;
+      slug = generateUniqueSlug(pageTitle);
+    }
 
+    const pageId: string = uuidv4();
     pages.push({
+      _id: pageId,
       pageTitle,
       pageContent,
       parentId,
@@ -82,7 +113,7 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
       updatedAt: new Date().toISOString(),
     });
 
-    existingPages.push(pageId);
+    existingPages.push({ _id: pageId, pageSlug: slug });
   }
 
   const response: DocumentBulkResponse[] = await pagesDb.bulk({

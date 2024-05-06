@@ -1,6 +1,6 @@
 import { PageModel } from '~/types';
 import { Layout } from './Layout';
-// import { formatDate } from '~/lib/helpers';
+import { formatDate } from '~/lib/helpers';
 
 interface PageHistoryProps {
   page: PageModel;
@@ -22,8 +22,7 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
           <thead>
             <tr>
               <th>Version</th>
-              <th>Saved at</th>
-              <th>Updated at</th>
+              <th>Last updated</th>
               <th>Title</th>
               <th>Actions</th>
             </tr>
@@ -31,9 +30,10 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
           <tbody>
             {history.map((item, index) => (
               <tr key={index}>
-                <td>{len - index}</td>
-                {/* <td>{formatDate(item.timestamp)}</td>
-                <td>{formatDate(item.updateAt, 'N/A')}</td> */}
+                <td>
+                  {len - index} {item._rev}
+                </td>
+                <td>{formatDate(item.updatedAt, 'N/A')}</td>
                 <td>{item.pageTitle}</td>
                 <td>
                   <a
