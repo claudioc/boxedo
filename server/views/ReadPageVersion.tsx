@@ -2,11 +2,12 @@ import { Layout } from './Layout';
 import { PageModel } from '~/types';
 import { slugUrl } from '~/lib/helpers';
 import { PageBody } from './components/PageBody';
+import { formatDate } from '~/lib/helpers';
 
 export interface ReadPageVersionProps {
   page: PageModel;
   item: PageModel;
-  version: number;
+  version: string;
 }
 
 export const ReadPageVersion = ({
@@ -17,11 +18,14 @@ export const ReadPageVersion = ({
   <Layout title={item.pageTitle} page={page}>
     <div>
       <div class="message is-info" role="alert">
-        <p class="message-header">Viewing an older version</p>
+        <p class="message-header">
+          This is an older version (#{version.split('-')[0]}) of this page
+        </p>
         <div class="message-body">
-          This is an older version (#{version}) of this page. This version was
-          {/* made obsolete on <strong>{formatDate(item.timestamp)}</strong>. You */}
-          can view the current version following{' '}
+          This version was last saved on{' '}
+          <strong>{formatDate(item.updatedAt)}</strong> while the newest version
+          is from <strong>{formatDate(page.updatedAt)}</strong>. You can view
+          the current version following{' '}
           <a class="is-link" href={slugUrl(page.pageSlug)}>
             this link
           </a>

@@ -54,7 +54,7 @@ const PageWithVersionParamsSchema = {
   required: ['pageId', 'version'],
   properties: {
     pageId: PageIdFormat,
-    version: { type: 'number' },
+    version: { type: 'string', pattern: '^[0-9]+-[a-f0-9]+$' },
   },
 } as const;
 
@@ -640,14 +640,11 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const historyItem = (await dbs.getPageHistoryItem(
-        pageId,
-        version
-      )) as PageModel;
-
-      if (!historyItem) {
-        app.log.error(Feedbacks.E_MISSING_PAGE.message);
-        return <NotFound title="Page not found" />;
+      let historyItem;
+      try {
+        historyItem = await dbs.getPageHistoryItem(page, version);
+      } catch (error) {
+        return rs.slugWithFeedback(page.pageSlug, Feedbacks.E_INVALID_VERSION);
       }
 
       return (

@@ -30,14 +30,12 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
           <tbody>
             {history.map((item, index) => (
               <tr key={index}>
-                <td>
-                  {len - index} {item._rev}
-                </td>
+                <td>{item._rev.split('-')[0]}</td>
                 <td>{formatDate(item.updatedAt, 'N/A')}</td>
                 <td>{item.pageTitle}</td>
                 <td>
                   <a
-                    href={`/history/${page._id}/${index}`}
+                    href={`/history/${page._id}/${item._rev}`}
                     class="button is-small"
                   >
                     View

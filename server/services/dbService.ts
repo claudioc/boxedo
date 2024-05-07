@@ -256,26 +256,18 @@ export function dbService(client?: nano.ServerScope) {
       return history;
     },
 
-    async getPageHistoryItem(pageId: string, version: number) {
-      const doc = await pagesDb.get(pageId, { revs_info: true });
-
-      // Check if the specified version exists
-      if (version <= 0 || version > doc._revs_info!.length) {
-        throw new ErrorWithFeedback(Feedbacks.E_INVALID_VERSION);
-      }
-
-      // Get the specific revision based on the version index
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const targetRev = doc._revs_info![version - 1].rev;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const revisionDoc = await pagesDb.get(pageId, { rev: targetRev });
+    async getPageHistoryItem(
+      page: PageModel,
+      version: string
+    ): Promise<PageModel> {
+      const revisionDoc = await pagesDb.get(page._id, { rev: version });
 
       return {
         pageTitle: revisionDoc.pageTitle,
         pageContent: revisionDoc.pageContent,
         updatedAt: revisionDoc.updatedAt,
         _rev: revisionDoc._rev,
-      };
+      } as PageModel;
     },
   };
 }
