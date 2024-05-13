@@ -2,7 +2,7 @@ import { PageModel, PageModelWithoutRev } from '../../server/types';
 import nano, { DocumentScope, DocumentBulkResponse } from 'nano';
 import cheerio from 'cheerio';
 import fs from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+import { createId } from '@paralleldrive/cuid2';
 import slugify from 'slugify';
 
 type ExistingPage = {
@@ -101,7 +101,7 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
       slug = generateUniqueSlug(pageTitle);
     }
 
-    const pageId: string = uuidv4();
+    const pageId: string = `page:${createId()}`;
     pages.push({
       _id: pageId,
       pageTitle,

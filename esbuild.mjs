@@ -78,7 +78,7 @@ if (hasLiveReload) {
       res.writeHead(404);
       res.end();
     }
-    console.log('New client connected');
+
     const clientId = Date.now();
     const newClient = { id: clientId, response: res };
     clients.push(newClient);

@@ -2,8 +2,8 @@ import {
   PageModel,
   PageSelector,
   NavItem,
-  PageModelWithoutId,
   PageRevInfo,
+  PageModelWithRev,
 } from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
@@ -11,6 +11,7 @@ import slugify from 'slugify';
 import nano, { DocumentScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
+import { createId } from '@paralleldrive/cuid2';
 
 // https://github.com/apostrophecms/sanitize-html
 const safeHtml = (str: string) =>
@@ -106,12 +107,12 @@ export function dbService(client?: nano.ServerScope) {
       return slug;
     },
 
-    async insertPage(page: PageModelWithoutId) {
+    async insertPage(page: PageModel) {
       page.pageContent = safeHtml(page.pageContent);
       page.pageTitle = safeHtml(page.pageTitle);
 
       try {
-        await pagesDb.insert(page as PageModel);
+        await pagesDb.insert(page);
       } catch (error) {
         console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
@@ -215,7 +216,7 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
-    async deletePage(page: PageModel) {
+    async deletePage(page: PageModelWithRev) {
       try {
         await pagesDb.destroy(page._id, page._rev);
 
@@ -271,6 +272,9 @@ export function dbService(client?: nano.ServerScope) {
     },
   };
 }
+
+// bulk-load uses the same logic
+dbService.generateId = () => `page:${createId()}`;
 
 dbService.init = async () => {
   const couchdb = nano({

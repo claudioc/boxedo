@@ -4,7 +4,7 @@ export type NodeEnv = 'development' | 'production' | 'test';
 
 export interface PageModel {
   _id: string;
-  _rev: string;
+  _rev?: string;
   parentId?: string | null;
   pageTitle: string;
   pageSlug: string;
@@ -12,6 +12,10 @@ export interface PageModel {
   pageContent: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PageModelWithRev extends PageModel {
+  _rev: string;
 }
 
 export type PageModelWithoutId = Omit<PageModel, '_id' | '_rev'>;

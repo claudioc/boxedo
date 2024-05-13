@@ -30,7 +30,7 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
           <tbody>
             {history.map((item, index) => (
               <tr key={index}>
-                <td>{item._rev.split('-')[0]}</td>
+                <td>{item._rev?.split('-')[0]}</td>
                 <td>{formatDate(item.updatedAt, 'N/A')}</td>
                 <td>{item.pageTitle}</td>
                 <td>

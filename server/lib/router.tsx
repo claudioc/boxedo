@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import { PageModel, NavItem } from '~/types';
+import { PageModel, NavItem, PageModelWithRev } from '~/types';
 import { Feedbacks } from './feedbacks';
 import cheerio from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -21,7 +21,7 @@ import { PageHistory } from '~/views/PageHistory';
 
 const PageIdFormat = {
   type: 'string',
-  format: 'uuid',
+  pattern: '^page:[0-9a-z]{2,32}$',
 } as const;
 
 const PageSlugParamsSchema = {
@@ -102,7 +102,7 @@ const MovePageBodySchema = {
 } as const;
 
 const DEFAULT_HOMEPAGE: PageModel = {
-  _id: '',
+  _id: 'page:joongle', // anything that's a valid cuid2
   _rev: '',
   pageTitle: 'Welcome to Joongle!',
   pageContent:
@@ -141,6 +141,7 @@ const router = async (app: FastifyInstance) => {
           feedbackCode = error.feedback.code;
         }
       }
+
       if (!feedbackCode) {
         feedbackCode = req.query.f;
       }
@@ -272,9 +273,9 @@ const router = async (app: FastifyInstance) => {
       const token = rep.generateCsrf();
       const root = await dbs.getRootPage();
 
-      let page = await dbs.getPageById(pageId);
-      if (!page && pageId === root!._id) {
-        page = DEFAULT_HOMEPAGE;
+      let page: PageModel | null = DEFAULT_HOMEPAGE;
+      if (root) {
+        page = await dbs.getPageById(pageId);
       }
 
       if (!page) {
@@ -303,12 +304,6 @@ const router = async (app: FastifyInstance) => {
       const { pageTitle, pageContent } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
-      const root = await dbs.getRootPage();
-      if (!root) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
-      }
-
-      const isIndex = pageId === root._id;
 
       if (pageTitle.trim() === '') {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
@@ -318,10 +313,14 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_CONTENT);
       }
 
-      const page = await dbs.getPageById(pageId);
+      const root = await dbs.getRootPage();
 
-      if (!page && !isIndex) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      let page = root;
+      if (root && root._id !== pageId) {
+        page = await dbs.getPageById(pageId);
+        if (!page) {
+          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+        }
       }
 
       if (page) {
@@ -330,25 +329,14 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      const isNewIndex = !page && isIndex;
-      let newSlug = '/';
-      try {
-        // Updating an old index page or any other page
-        if (!isNewIndex) {
-          newSlug = isIndex
-            ? newSlug
-            : await dbs.generateUniqueSlug(req.body.pageTitle);
+      const newSlug = await maybeNewSlug();
 
-          await dbs.updatePage(page!, {
-            pageTitle: req.body.pageTitle,
-            pageContent: req.body.pageContent,
-            pageSlug: newSlug,
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
+      try {
+        if (!page) {
           // Inserting the index page for the first time
-          const newPage = {
-            parentPageId: null,
+          const newPage: PageModel = {
+            _id: dbService.generateId(),
+            parentId: null,
             pageTitle: req.body.pageTitle,
             pageContent: req.body.pageContent,
             pageSlug: newSlug,
@@ -356,14 +344,36 @@ const router = async (app: FastifyInstance) => {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-
           await dbs.insertPage(newPage);
+        } else {
+          // Updating an old index page or any other page
+          await dbs.updatePage(page, {
+            pageTitle: req.body.pageTitle,
+            pageContent: req.body.pageContent,
+            pageSlug: newSlug,
+            updatedAt: new Date().toISOString(),
+          });
         }
       } catch (error) {
         return rs.homeWithError(error);
       }
 
       return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
+
+      // The root page has always "/" as slug
+      // If the title is the same as the current page, we keep the slug
+      // Otherwise, we generate a new one
+      async function maybeNewSlug() {
+        if (!page || page.pageSlug === '/') {
+          return '/';
+        }
+
+        if (pageTitle === page.pageTitle) {
+          return page.pageSlug;
+        }
+
+        return await dbs.generateUniqueSlug(pageTitle);
+      }
     }
   );
 
@@ -421,8 +431,8 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const newParentpage = await dbs.getPageById(newParentId);
-      if (!newParentpage) {
+      const newParentPage = await dbs.getPageById(newParentId);
+      if (!newParentPage) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
@@ -467,7 +477,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       try {
-        await dbs.deletePage(page);
+        await dbs.deletePage(page as PageModelWithRev);
       } catch (error) {
         return rs.homeWithError(error);
       }
@@ -547,6 +557,7 @@ const router = async (app: FastifyInstance) => {
 
       try {
         await dbs.insertPage({
+          _id: dbService.generateId(),
           parentId: parentPageId,
           pageTitle,
           pageContent,

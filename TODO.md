@@ -9,6 +9,7 @@ Todo
   - there are several db access in the dbservice not protected by try catch
 
   MEDIUM
+  - a simple lock system should be in place
   - consider just removing the need of pageId and use the _id field
   - Some feedback errors must be renamed a bit because they are very mongo-like
   - back and forth navigation works in a weird way with XHR
