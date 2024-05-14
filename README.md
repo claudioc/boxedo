@@ -20,7 +20,7 @@ Unreleased.
 
 ## Tech stack
 - Fastify
-- Mongodb (with transactions)
+- Couchdb
 - TipTap WYSIWYG editor
 - Server side JSX (via Preact)
 - Alpinejs
@@ -37,5 +37,5 @@ Unreleased.
 - uses Hamlet
 - uses schema validation
 - uses CSRF
-- uses mongodb sanitizer
+- uses query sanitizer
 - user user input sanitizer

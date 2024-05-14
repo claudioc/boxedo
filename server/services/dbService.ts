@@ -8,7 +8,7 @@ import {
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
-import nano, { DocumentScope } from 'nano';
+import nano, { DocumentScope, ServerScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
@@ -20,6 +20,8 @@ const safeHtml = (str: string) =>
   });
 
 const safeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export type { ServerScope as DbClient };
 
 export function dbService(client?: nano.ServerScope) {
   if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);

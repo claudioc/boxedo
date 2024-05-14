@@ -3,7 +3,6 @@ import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import staticServe from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
-import nano from 'nano';
 import fastifyFavicon from 'fastify-favicon';
 import { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
@@ -16,7 +15,7 @@ import { fileURLToPath } from 'url';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
-import { dbService } from '~/services/dbService';
+import { dbService, DbClient } from '~/services/dbService';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,9 +39,9 @@ const ConfigEnvSchema = {
   properties: {
     PORT: { type: 'integer', default: 3000 },
     NODE_ENV: { type: 'string', default: 'development' },
-    MONGO_URL: {
+    COUCHDB_URL: {
       type: 'string',
-      default: 'mongodb://localhost:27017/joongle',
+      default: 'http://localhost:5984',
     },
   },
 } as const;
@@ -50,7 +49,7 @@ const ConfigEnvSchema = {
 declare module 'fastify' {
   interface FastifyInstance {
     config: FromSchema<typeof ConfigEnvSchema>;
-    dbClient: nano.ServerScope;
+    dbClient: DbClient;
   }
 }
 
