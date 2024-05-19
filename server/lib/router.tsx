@@ -316,6 +316,7 @@ const router = async (app: FastifyInstance) => {
       const root = await dbs.getRootPage();
 
       let page = root;
+      console.log(pageId, root?._id);
       if (root && root._id !== pageId) {
         page = await dbs.getPageById(pageId);
         if (!page) {

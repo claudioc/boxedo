@@ -68,7 +68,15 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
-app.decorate('dbClient', await dbService.init());
+app.decorate(
+  'dbClient',
+  await dbService.init({
+    serverUrl: process.env.COUCHDB_URL || '',
+    username: process.env.DB_USER || '',
+    password: process.env.DB_PASSWORD || '',
+    env: process.env.NODE_ENV as NodeEnv,
+  })
+);
 await app.register(fastifyCookie);
 
 if (process.env.NODE_ENV !== 'test') await app.register(csrfProtection);
@@ -112,4 +120,16 @@ await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
     });
 });
 
-export default () => app;
+export default (isTestRun = false) => {
+  // At the moment we use the same server for testing purposes
+  // so we need to really be sure that we are not mixing up the environments
+  if (
+    (isTestRun && app.config.NODE_ENV !== 'test') ||
+    (!isTestRun && app.config.NODE_ENV === 'test')
+  ) {
+    app.log.error('Test run is not set correctly');
+    process.exit(1);
+  }
+
+  return app;
+};

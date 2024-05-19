@@ -4,6 +4,7 @@ import {
   NavItem,
   PageRevInfo,
   PageModelWithRev,
+  NodeEnv,
 } from '~/types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
@@ -12,6 +13,19 @@ import nano, { DocumentScope, ServerScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
+
+interface DbServiceInitParams {
+  serverUrl: string;
+  username: string;
+  password: string;
+  env: NodeEnv;
+}
+
+let isTestRun = false;
+
+const dbn = (name: 'pages') => {
+  return isTestRun ? `${name}-test` : name;
+};
 
 // https://github.com/apostrophecms/sanitize-html
 const safeHtml = (str: string) =>
@@ -26,7 +40,7 @@ export type { ServerScope as DbClient };
 export function dbService(client?: nano.ServerScope) {
   if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
 
-  const pagesDb: DocumentScope<PageModel> = client.db.use('pages');
+  const pagesDb: DocumentScope<PageModel> = client.db.use(dbn('pages'));
   if (!pagesDb)
     throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_COLLECTION);
 
@@ -272,27 +286,44 @@ export function dbService(client?: nano.ServerScope) {
         _rev: revisionDoc._rev,
       } as PageModel;
     },
+
+    async nukeTests() {
+      if (!isTestRun) return;
+
+      const name = dbn('pages');
+      // Ensure we are deleting the test database
+      if (name.includes('-test')) {
+        try {
+          await client.db.destroy(name);
+          await client.db.create(dbn('pages'));
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
   };
 }
 
 // bulk-load uses the same logic
 dbService.generateId = () => `page:${createId()}`;
 
-dbService.init = async () => {
+dbService.init = async (params: DbServiceInitParams) => {
   const couchdb = nano({
-    url: process.env.COUCHDB_URL || '',
+    url: params.serverUrl,
     requestDefaults: {
       auth: {
-        username: process.env.DB_USER || '',
-        password: process.env.DB_PASSWORD || '',
+        username: params.username,
+        password: params.password,
       },
     },
   });
 
+  isTestRun = params.env === 'test';
+
   try {
-    await couchdb.db.get('pages');
+    await couchdb.db.get(dbn('pages'));
   } catch (error) {
-    await couchdb.db.create('pages');
+    await couchdb.db.create(dbn('pages'));
   }
 
   return couchdb;
