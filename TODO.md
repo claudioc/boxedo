@@ -3,7 +3,6 @@ Doing
 Todo
 
   HIGH
-  - A long PRE breaks the layout
   - Check what happens if we cannot connect to the db on bootstrap
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
@@ -49,3 +48,4 @@ Done
 - consider just removing the need of pageId and use the _id field
 - Rolling window for history? (not needed with couchdb)
 - Some feedback errors must be renamed a bit because they are very mongo-like
+- A long PRE breaks the layout

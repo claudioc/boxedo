@@ -64,7 +64,7 @@ export const Layout = ({
               hx-trigger="load"
             ></div>
           )}
-          <div class="column right">{children}</div>
+          <div class="column is-8">{children}</div>
         </main>
       </body>
     </html>
