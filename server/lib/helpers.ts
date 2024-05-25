@@ -10,7 +10,7 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   return `${path}?f=${feedback.code}`;
 };
 
-export const formatDate = (date: string, def: string = '') => {
+export const formatDate = (date: string, def = '') => {
   if (!date) return def;
 
   return new Intl.DateTimeFormat('en-UK', {

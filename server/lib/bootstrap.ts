@@ -71,9 +71,9 @@ const app = Fastify({
 app.decorate(
   'dbClient',
   await dbService.init({
-    serverUrl: process.env.COUCHDB_URL || '',
-    username: process.env.DB_USER || '',
-    password: process.env.DB_PASSWORD || '',
+    serverUrl: process.env.COUCHDB_URL ?? '',
+    username: process.env.DB_USER ?? '',
+    password: process.env.DB_PASSWORD ?? '',
     env: process.env.NODE_ENV as NodeEnv,
   })
 );

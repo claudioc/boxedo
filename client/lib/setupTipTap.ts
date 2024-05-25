@@ -34,18 +34,18 @@ const editorOptions = {
 
 export const enableEditor = () => {
   const placeHolder = document.getElementById('editor-placeholder')!;
+  // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
   const pageContent = document.querySelector(
     '[name="pageContent"]'
-  ) as HTMLTextAreaElement;
+  ) as HTMLInputElement;
+  // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
   const pageTitle = document.querySelector(
     '[name="pageTitle"]'
-  ) as HTMLTextAreaElement;
-  const placeHolderContent = (placeHolder.textContent || '').trim();
+  ) as HTMLInputElement;
+  const placeHolderContent = (placeHolder.textContent ?? '').trim();
   if (placeHolder) {
     placeHolder.textContent = '';
   }
-
-  // console.log('placeHolderContent:', placeHolderContent);
 
   const editor = new Editor({
     ...editorOptions,

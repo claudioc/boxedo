@@ -50,9 +50,7 @@ const NavTree = ({ items }: NavTreeProps) => (
         >
           {item.title}
         </a>
-        {item.children && item.children.length ? (
-          <NavTree items={item.children} />
-        ) : null}
+        {item.children?.length ? <NavTree items={item.children} /> : null}
       </li>
     ))}
   </ul>

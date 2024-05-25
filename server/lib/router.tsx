@@ -149,7 +149,7 @@ const router = async (app: FastifyInstance) => {
       return (
         <ReadPage
           isFull={!isHtmx}
-          page={root || DEFAULT_HOMEPAGE}
+          page={root ?? DEFAULT_HOMEPAGE}
           feedbackCode={feedbackCode}
         />
       );
@@ -731,7 +731,7 @@ const router = async (app: FastifyInstance) => {
     return <NotFound title="Page not found" />;
   });
 
-  app.setErrorHandler((err, req, reply) => {
+  app.setErrorHandler(async (err, req, reply) => {
     app.log.error(err);
 
     if (process.env.NODE_ENV === 'test') {
@@ -745,10 +745,10 @@ const router = async (app: FastifyInstance) => {
       return 'An unexpected error occurred';
     } else {
       if (err.validation) {
-        reply.code(400);
+        await reply.code(400);
         return <Error title="Request parameters are not valid." error={err} />;
       } else {
-        reply.code(500);
+        await reply.code(500);
         return <Error title="Unhandled error" error={err} />;
       }
     }

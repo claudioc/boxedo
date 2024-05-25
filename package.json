@@ -17,7 +17,7 @@
     "clean": "rm -rf ./dist",
     "postinstall": "npm run build",
     "type-check": "tsc -p server && tsc -p client",
-    "lint": "npm run type-check && eslint . --ext .ts",
+    "lint": "npm run type-check && eslint . --ext .ts,.tsx",
     "prestart": "NODE_ENV=production npm run build",
     "start": "NODE_ENV=production node ./dist/server/app.js",
     "db:start": "docker compose up -d",
@@ -32,16 +32,17 @@
   },
   "eslintConfig": {
     "ignorePatterns": [
-      "**/*/*.js",
-      "**/*/*.json",
+      "node_modules",
+      "dist",
+      "**/*/*.js*",
       "tasks/**/*.ts",
-      "vite.config.ts",
+      "vite*",
       "esbuild.mjs"
     ],
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      "plugin:@typescript-eslint/recommended-type-checked",
+      "plugin:@typescript-eslint/stylistic-type-checked"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {

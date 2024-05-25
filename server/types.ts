@@ -29,10 +29,10 @@ export type PageSelector = {
     | MangoValue[];
 };
 
-export type PageRevInfo = {
+export interface PageRevInfo {
   rev: string;
   status: 'available' | 'missing' | 'deleted' | 'unknown';
-};
+}
 
 export interface NavItem {
   pageId: string;

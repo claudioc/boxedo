@@ -7,7 +7,7 @@ if (htmx) {
       if (!el || name !== 'htmx:xhr:loadend') {
         return;
       }
-      const [parent, activeClass] = (el.dataset.activate || '').split('/');
+      const [parent, activeClass] = (el.dataset.activate ?? '').split('/');
       if (!parent || !activeClass) {
         return;
       }
