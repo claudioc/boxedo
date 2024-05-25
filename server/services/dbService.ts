@@ -41,8 +41,7 @@ export function dbService(client?: nano.ServerScope) {
   if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
 
   const pagesDb: DocumentScope<PageModel> = client.db.use(dbn('pages'));
-  if (!pagesDb)
-    throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_COLLECTION);
+  if (!pagesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_DB);
 
   // Cache the root page
   let rootPage: PageModel | null = null;

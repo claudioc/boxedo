@@ -10,8 +10,6 @@ Todo
 
   MEDIUM
   - a simple lock system should be in place
-  - consider just removing the need of pageId and use the _id field
-  - Some feedback errors must be renamed a bit because they are very mongo-like
   - back and forth navigation works in a weird way with XHR
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
@@ -19,10 +17,9 @@ Todo
   - how do we load the editor only when needed?
 
   LOW (before live)
-  - Rolling window for history?
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
-  - mongodb must be configured to run in production
+  - couchdb must be configured to run in production
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
@@ -49,3 +46,6 @@ Done
 - consider creating an esbuild.js and simplify packages.json
 - make the port for livereload a constant (for the CSP)
 - use a fastify proxy for the livereload to 8001 and 8000
+- consider just removing the need of pageId and use the _id field
+- Rolling window for history? (not needed with couchdb)
+- Some feedback errors must be renamed a bit because they are very mongo-like

@@ -14,8 +14,7 @@ type ErrorCodes =
   | 'E_EMPTY_CONTENT'
   | 'E_WRONG_PARENT_PAGE'
   | 'E_INVALID_PARENT_PAGE'
-  | 'E_MISSING_PAGES_COLLECTION'
-  | 'E_MISSING_PAGES_HISTORY_COLLECTION'
+  | 'E_MISSING_PAGES_DB'
   | 'E_INVALID_VERSION'
   | 'E_UNKNOWN_ERROR';
 
@@ -94,17 +93,13 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
     code: 112,
     message: 'Parent page is missing or invalid',
   },
-  E_MISSING_PAGES_COLLECTION: {
+  E_MISSING_PAGES_DB: {
     code: 113,
-    message: 'Collection "Pages" not found',
+    message: 'Database "Pages" not found',
   },
   E_UNKNOWN_ERROR: {
     code: 114,
     message: 'An unknown error occurred',
-  },
-  E_MISSING_PAGES_HISTORY_COLLECTION: {
-    code: 115,
-    message: 'Collection "PagesHistory" not found',
   },
   E_INVALID_VERSION: {
     code: 116,
