@@ -89,6 +89,7 @@ const PageBodySchema = {
   properties: {
     pageTitle: { type: 'string' },
     pageContent: { type: 'string' },
+    rev: { type: 'string' },
   },
 } as const;
 
@@ -301,7 +302,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const { pageTitle, pageContent } = req.body;
+      const { pageTitle, pageContent, rev } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
 
@@ -313,10 +314,14 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_CONTENT);
       }
 
+      if (!rev || rev.trim() === '') {
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_REV);
+      }
+
       const root = await dbs.getRootPage();
 
       let page = root;
-      console.log(pageId, root?._id);
+
       if (root && root._id !== pageId) {
         page = await dbs.getPageById(pageId);
         if (!page) {
@@ -327,6 +332,13 @@ const router = async (app: FastifyInstance) => {
       if (page) {
         if (pageTitle === page.pageTitle && pageContent === page.pageContent) {
           return rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_UPDATED);
+        }
+
+        if (rev !== page._rev) {
+          return rs.slugWithFeedback(
+            page.pageSlug,
+            Feedbacks.E_REV_MISMATCH_ON_SAVE
+          );
         }
       }
 

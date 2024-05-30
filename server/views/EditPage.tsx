@@ -22,6 +22,7 @@ export const EditPage = ({ page, token }: EditPageProps) => (
         x-on:submit="App.validate"
       >
         <input type="hidden" name="_csrf" value={token} />
+        <input type="hidden" name="rev" value={page._rev} />
 
         <PageActions
           actions={['save', 'cancel']}

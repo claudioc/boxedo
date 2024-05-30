@@ -8,7 +8,6 @@ Todo
   - there are several db access in the dbservice not protected by try catch
 
   MEDIUM
-  - a simple lock system should be in place
   - back and forth navigation works in a weird way with XHR
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
@@ -49,3 +48,4 @@ Done
 - Rolling window for history? (not needed with couchdb)
 - Some feedback errors must be renamed a bit because they are very mongo-like
 - A long PRE breaks the layout
+- a simple lock system should be in place

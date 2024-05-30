@@ -16,6 +16,8 @@ type ErrorCodes =
   | 'E_INVALID_PARENT_PAGE'
   | 'E_MISSING_PAGES_DB'
   | 'E_INVALID_VERSION'
+  | 'E_MISSING_REV'
+  | 'E_REV_MISMATCH_ON_SAVE'
   | 'E_UNKNOWN_ERROR';
 
 type SuccessCodes =
@@ -104,6 +106,15 @@ export const Feedbacks: { [key in ErrorCodes | SuccessCodes]: Feedback } = {
   E_INVALID_VERSION: {
     code: 116,
     message: 'Invalid version number',
+  },
+  E_MISSING_REV: {
+    code: 117,
+    message: 'Revision number is missing',
+  },
+  E_REV_MISMATCH_ON_SAVE: {
+    code: 118,
+    message:
+      'Revision mismatch detected. Someone may have changed the content. Please try again.',
   },
 } as const;
 
