@@ -1,10 +1,10 @@
 import { store } from './lib/setupAlpine';
 import './lib/setupHtmx';
-import { enableEditor } from './lib/setupTipTap';
+import { type TipTapEditor } from './lib/setupTipTap';
 import { removeQueryParam } from './lib/helpers';
 
 class App {
-  private editor: ReturnType<typeof enableEditor> | null = null;
+  private editor: TipTapEditor | null = null;
 
   constructor() {
     document.addEventListener('DOMContentLoaded', () => {
@@ -64,7 +64,8 @@ class App {
   }
 
   enableEditor() {
-    this.editor = enableEditor();
+    // This method is rewritten in the editor.ts file
+    console.error('enableEditor is not implemented');
   }
 
   livereload() {
@@ -79,3 +80,5 @@ class App {
 }
 
 window.App = new App();
+
+export type AppInstance = InstanceType<typeof App>;

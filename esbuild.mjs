@@ -38,7 +38,7 @@ const broadcastMessage = (message) => {
 };
 
 const ctxClient = await esbuild.context({
-  entryPoints: ['./client/app.ts'],
+  entryPoints: ['./client/app.ts', './client/editor.ts'],
   bundle: true,
   sourcemap: process.env.NODE_ENV !== 'production',
   logLevel: 'info',

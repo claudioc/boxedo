@@ -75,3 +75,5 @@ export const enableEditor = () => {
   editor.commands.focus();
   return editor;
 };
+
+export type TipTapEditor = ReturnType<typeof enableEditor>;

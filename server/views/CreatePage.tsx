@@ -12,7 +12,7 @@ export interface CreatePageProps {
 }
 
 export const CreatePage = ({ parentPage, token }: CreatePageProps) => (
-  <Layout title="Creating a new page" page={parentPage}>
+  <Layout title="Creating a new page" page={parentPage} useEditor>
     <PageFormWrapper title="Creating a new page">
       <form
         action=""

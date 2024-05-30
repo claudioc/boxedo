@@ -1,4 +1,4 @@
-import { getJsBundleName, cssFile } from '~/lib/assets';
+import { getBundleFilename, cssFile } from '~/lib/assets';
 import { JSX } from 'preact';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
@@ -12,6 +12,7 @@ interface LayoutProps {
   page?: PageModel;
   feedbackCode?: number;
   children: string | JSX.Element[] | JSX.Element;
+  useEditor?: boolean;
 }
 
 export const Layout = ({
@@ -19,6 +20,7 @@ export const Layout = ({
   page,
   feedbackCode,
   children,
+  useEditor = false,
 }: LayoutProps) => {
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
@@ -35,7 +37,8 @@ export const Layout = ({
         <script src="/a/vendor/htmx.min.js"></script>
       </head>
       <body x-data class="container is-widescreen" {...onKeypress}>
-        <script src={getJsBundleName()}></script>
+        <script src={getBundleFilename('app')}></script>
+        {useEditor && <script src={getBundleFilename('editor')}></script>}
         {process.env.NODE_ENV === 'development' && (
           <script>{'App.livereload()'}</script>
         )}

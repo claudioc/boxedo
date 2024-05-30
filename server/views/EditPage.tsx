@@ -12,7 +12,7 @@ export interface EditPageProps {
 }
 
 export const EditPage = ({ page, token }: EditPageProps) => (
-  <Layout title={`Editing ${page.pageTitle}`} page={page}>
+  <Layout title={`Editing ${page.pageTitle}`} page={page} useEditor>
     <PageFormWrapper title="Editing a page">
       <form
         action=""
