@@ -1,9 +1,17 @@
 import { store } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import { enableEditor } from './lib/setupTipTap';
+import { removeQueryParam } from './lib/helpers';
 
 class App {
   private editor: ReturnType<typeof enableEditor> | null = null;
+
+  constructor() {
+    document.addEventListener('DOMContentLoaded', () => {
+      const cleanUrl: string = removeQueryParam(window.location.href, 'f');
+      history.replaceState(null, '', cleanUrl);
+    });
+  }
 
   validate(event: Event) {
     const form = event.target as HTMLFormElement;
