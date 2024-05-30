@@ -12,7 +12,6 @@ Todo
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
-  - how do we load the editor only when needed?
 
   LOW (before live)
   - consider access implications to the history of docs
@@ -21,7 +20,6 @@ Todo
   - we are always using 303 to redirect - check it
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
-  - hey, what about sqlite?
   - unit tests for the dbService would be good.
 
 Done
@@ -49,3 +47,4 @@ Done
 - Some feedback errors must be renamed a bit because they are very mongo-like
 - A long PRE breaks the layout
 - a simple lock system should be in place
+- how do we load the editor only when needed?

@@ -1,10 +1,11 @@
 import { Alpine as AlpineType } from 'alpinejs';
+import { type AppInstance } from './app';
 
 declare global {
   const LIVERELOAD_URL: string;
   interface Window {
     Alpine: AlpineType;
-    App: App;
+    App: AppInstance;
     htmx: {
       defineExtension: (
         name: string,
