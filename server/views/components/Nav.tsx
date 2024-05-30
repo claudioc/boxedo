@@ -17,7 +17,7 @@ export const Nav = ({ tree, currentPageId }: NavProps) => {
         <a
           href={tree.link}
           hx-get={tree.link}
-          hx-target=".column.right"
+          hx-target="#main-page-body"
           hx-push-url="true"
           hx-ext="activate"
           data-activate="aside/is-active"
@@ -42,7 +42,7 @@ const NavTree = ({ items }: NavTreeProps) => (
         <a
           href={item.link}
           hx-get={item.link}
-          hx-target=".column.right"
+          hx-target="#main-page-body"
           hx-push-url="true"
           hx-ext="activate"
           data-activate="aside/is-active"

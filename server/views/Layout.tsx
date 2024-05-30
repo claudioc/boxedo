@@ -67,7 +67,10 @@ export const Layout = ({
               hx-trigger="load"
             ></div>
           )}
-          <div class="column is-8">{children}</div>
+          {/* #main-page-body is used as a hx-target */}
+          <div class="column is-8" id="main-page-body">
+            {children}
+          </div>
         </main>
       </body>
     </html>
