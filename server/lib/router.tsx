@@ -606,17 +606,21 @@ const router = async (app: FastifyInstance) => {
       if (results) {
         const snippetSize = 200;
         results.forEach((result) => {
-          const textContent = cheerio.load(result.pageContent).text();
-          const matchIndex = textContent.indexOf(q);
-          if (matchIndex >= 0) {
-            let start = matchIndex - snippetSize / 2;
-            let end = matchIndex + snippetSize / 2 + q.length;
-            start = start < 0 ? 0 : start;
-            end = end > textContent.length ? textContent.length : end;
-            result.pageContent =
-              textContent.substring(start, end) +
-              (end < textContent.length ? '…' : '');
+          const textContent = cheerio
+            .load(result.pageContent)
+            .text()
+            .toLowerCase();
+          const matchIndex = textContent.indexOf(q.toLowerCase());
+          if (matchIndex < 0) {
+            return;
           }
+          let start = matchIndex - snippetSize / 2;
+          let end = matchIndex + snippetSize / 2 + q.length;
+          start = start < 0 ? 0 : start;
+          end = end > textContent.length ? textContent.length : end;
+          result.pageContent =
+            textContent.substring(start, end) +
+            (end < textContent.length ? '…' : '');
         });
       }
 

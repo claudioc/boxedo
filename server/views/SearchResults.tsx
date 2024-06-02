@@ -20,7 +20,9 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
             <li key={result._id} class="content">
               <a href={slugUrl(result.pageSlug)}>{result.pageTitle}</a>
               {result.pageContent && (
-                <blockquote class="ml-4">{result.pageContent}</blockquote>
+                <blockquote class="ml-4">
+                  <HighlightPhrase text={result.pageContent} phrase={query} />
+                </blockquote>
               )}
             </li>
           ))}
@@ -29,5 +31,26 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
         <p>No results found.</p>
       )}
     </Layout>
+  );
+};
+
+interface HighlightPhraseProps {
+  text: string;
+  phrase: string;
+}
+
+const HighlightPhrase = ({ text, phrase }: HighlightPhraseProps) => {
+  const parts = text.split(new RegExp(`(${phrase})`, 'gi'));
+
+  return (
+    <span>
+      {parts.map((part, index) =>
+        part.toLowerCase() === phrase.toLowerCase() ? (
+          <strong key={index}>{part}</strong>
+        ) : (
+          part
+        )
+      )}
+    </span>
   );
 };
