@@ -16,6 +16,9 @@ import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import { dbService, DbClient } from '~/services/dbService';
+import fastifyPolyglot, { Polyglot } from '~/lib/plugins/polyglot';
+
+import en from '../locales/en.json';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,13 +49,6 @@ const ConfigEnvSchema = {
   },
 } as const;
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    config: FromSchema<typeof ConfigEnvSchema>;
-    dbClient: DbClient;
-  }
-}
-
 const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
   development: {
     transport: {
@@ -79,7 +75,24 @@ app.decorate(
 );
 await app.register(fastifyCookie);
 
-if (process.env.NODE_ENV !== 'test') await app.register(csrfProtection);
+if (process.env.NODE_ENV !== 'test') {
+  await app.register(csrfProtection);
+}
+
+await app.register(fastifyPolyglot, {
+  defaultLocale: 'en',
+  locales: {
+    en,
+  },
+});
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    config: FromSchema<typeof ConfigEnvSchema>;
+    dbClient: DbClient;
+    i18n: Polyglot;
+  }
+}
 
 await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app

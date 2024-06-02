@@ -149,6 +149,7 @@ const router = async (app: FastifyInstance) => {
 
       return (
         <ReadPage
+          i18n={app.i18n}
           isFull={!isHtmx}
           page={root ?? DEFAULT_HOMEPAGE}
           feedbackCode={feedbackCode}
