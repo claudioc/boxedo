@@ -18,6 +18,7 @@ import { CreatePage } from '~/views/CreatePage';
 import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
+import { AppProvider } from '~/lib/context/App';
 
 const PageIdFormat = {
   type: 'string',
@@ -148,12 +149,13 @@ const router = async (app: FastifyInstance) => {
       }
 
       return (
-        <ReadPage
-          i18n={app.i18n}
-          isFull={!isHtmx}
-          page={root ?? DEFAULT_HOMEPAGE}
-          feedbackCode={feedbackCode}
-        />
+        <AppProvider app={app}>
+          <ReadPage
+            isFull={!isHtmx}
+            page={root ?? DEFAULT_HOMEPAGE}
+            feedbackCode={feedbackCode}
+          />
+        </AppProvider>
       );
     }
   );
@@ -244,7 +246,13 @@ const router = async (app: FastifyInstance) => {
 
       if (page) {
         return (
-          <ReadPage isFull={!isHtmx} page={page} feedbackCode={feedbackCode} />
+          <AppProvider app={app}>
+            <ReadPage
+              isFull={!isHtmx}
+              page={page}
+              feedbackCode={feedbackCode}
+            />
+          </AppProvider>
         );
       }
 
@@ -284,7 +292,11 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      return <EditPage page={page} token={token} />;
+      return (
+        <AppProvider app={app}>
+          <EditPage page={page} token={token} />
+        </AppProvider>
+      );
     }
   );
 
@@ -415,7 +427,11 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      return <MovePage page={page} parent={parent} />;
+      return (
+        <AppProvider app={app}>
+          <MovePage page={page} parent={parent} />
+        </AppProvider>
+      );
     }
   );
 
@@ -522,7 +538,11 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
       }
 
-      return <CreatePage parentPage={parentPage} token={token} />;
+      return (
+        <AppProvider app={app}>
+          <CreatePage parentPage={parentPage} token={token} />
+        </AppProvider>
+      );
     }
   );
 
@@ -625,7 +645,11 @@ const router = async (app: FastifyInstance) => {
         });
       }
 
-      return <SearchResults query={q} results={results} />;
+      return (
+        <AppProvider app={app}>
+          <SearchResults query={q} results={results} />
+        </AppProvider>
+      );
     }
   );
 
@@ -648,7 +672,11 @@ const router = async (app: FastifyInstance) => {
 
       const history = await dbs.getPageHistory(page);
 
-      return <PageHistory page={page} history={history} />;
+      return (
+        <AppProvider app={app}>
+          <PageHistory page={page} history={history} />
+        </AppProvider>
+      );
     }
   );
 
@@ -677,7 +705,9 @@ const router = async (app: FastifyInstance) => {
       }
 
       return (
-        <ReadPageVersion page={page} item={historyItem} version={version} />
+        <AppProvider app={app}>
+          <ReadPageVersion page={page} item={historyItem} version={version} />
+        </AppProvider>
       );
     }
   );

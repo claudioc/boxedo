@@ -1,4 +1,5 @@
 Doing
+- internazionalization
 
 Todo
 
@@ -12,7 +13,6 @@ Todo
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
   - make the name of the database configurable
-  - pass the fastify instance to the views using context?
 
   LOW (before live)
   - consider access implications to the history of docs
@@ -49,3 +49,4 @@ Done
 - A long PRE breaks the layout
 - a simple lock system should be in place
 - how do we load the editor only when needed?
+- pass the fastify instance to the views using context?

@@ -1,5 +1,37 @@
 {
   "ReadPage": {
     "createdOn": "Created on"
+  },
+
+  "PageMenu": {
+    "editThisPage": "Edit this page",
+    "createSubpage": "Create a subpage",
+    "moveThisPage": "Move this page",
+    "pageHistory": "Page history",
+    "actions": "Actions"
+  },
+
+  "PageActions": {
+    "saveAndClose": "Save and close",
+    "cancel": "Cancel"
+  },
+
+  "Search": {
+    "search": "Search"
+  },
+
+  "CreatePage": {
+    "title": "Create a new page"
+  },
+
+  "EditPage": {
+    "title": "Editing a page",
+    "editingPage": "Editing %{title}}",
+    "addImage": "Add image",
+    "deletePage": "Delete this page",
+    "deletePageConfirm": "Delete this page?",
+    "deletePageWarning": "Are you sure you want to delete this page? All its children pages will be moved to this page's parent.",
+    "deletePageConfirmButton": "Yes, delete",
+    "deletePageCancelButton": "No, cancel!"
   }
 }

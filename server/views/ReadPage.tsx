@@ -3,6 +3,7 @@ import { PageModel, WithI18nProps } from '~/types';
 import { formatDate } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
+import { useApp } from '~/lib/context/App';
 
 import styles from './ReadPage.module.css';
 
@@ -17,12 +18,13 @@ export const ReadPage = ({
   page,
   feedbackCode,
   isFull = true,
-  i18n,
 }: ReadPageProps) => {
+  const { i18n } = useApp();
+
   const content = (
     <div class={styles.ReadPage}>
       <div class="level level-right has-text-grey">
-        {i18n?.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
+        {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
         {page.updatedAt !== page.createdAt &&
           ` (${formatDate(page.updatedAt)})`}
         <PageMenu page={page} />

@@ -5,7 +5,7 @@ import { FastifyInstance, FastifyPluginCallback } from 'fastify';
 
 interface i18nPluginOptions {
   defaultLocale: string;
-  locales: Record<string, Record<string, string>>;
+  locales: Record<string, string | object>;
 }
 
 const i18nPlugin: FastifyPluginCallback<i18nPluginOptions> = (
