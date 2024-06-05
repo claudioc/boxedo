@@ -1,6 +1,7 @@
 import { Layout } from './Layout';
 import { PageModel } from '~/types';
 import { slugUrl } from '~/lib/helpers';
+import { useApp } from '~/lib/context/App';
 
 interface SearchResultsProps {
   query: string;
@@ -8,12 +9,15 @@ interface SearchResultsProps {
 }
 
 export const SearchResults = ({ query, results }: SearchResultsProps) => {
+  const { i18n } = useApp();
   const hasResults = results && results.length > 0;
 
   return (
     <Layout title="Search Results">
-      <h1 class="title">Search Results</h1>
-      <h2 class="subtitle">Results for query: {query}</h2>
+      <h1 class="title">{i18n.t('SearchResults.title')}</h1>
+      <h2 class="subtitle">
+        {i18n.t('SearchResults.resultsForQuery')}: {query}
+      </h2>
       {hasResults ? (
         <ul>
           {results.map((result) => (
@@ -28,7 +32,7 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
           ))}
         </ul>
       ) : (
-        <p>No results found.</p>
+        <p>{i18n.t('SearchResults.noResults')}</p>
       )}
     </Layout>
   );

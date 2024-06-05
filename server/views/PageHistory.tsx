@@ -1,6 +1,7 @@
 import { PageModel } from '~/types';
 import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
+import { useApp } from '~/lib/context/App';
 
 interface PageHistoryProps {
   page: PageModel;
@@ -8,23 +9,27 @@ interface PageHistoryProps {
 }
 
 export const PageHistory = ({ page, history }: PageHistoryProps) => {
+  const { i18n } = useApp();
   const len = history.length;
+
   return (
     <Layout title="Page history" page={page}>
       <h1 class="title">
-        <span class="has-text-grey is-size-4">History of:</span>{' '}
+        <span class="has-text-grey is-size-4">
+          {i18n.t('PageHistory.historyOf')}:
+        </span>{' '}
         {page.pageTitle}
       </h1>
       {len === 0 ? (
-        <p>No changes have been made to this page yet.</p>
+        <p>{i18n.t('PageHistory.noChanges')}</p>
       ) : (
         <table class="table is-fullwidth is-striped is-hoverable">
           <thead>
             <tr>
-              <th>Version</th>
-              <th>Last updated</th>
-              <th>Title</th>
-              <th>Actions</th>
+              <th>{i18n.t('PageHistory.versionLabel')}</th>
+              <th>{i18n.t('PageHistory.lastUpdatedLabel')}</th>
+              <th>{i18n.t('PageHistory.titleLabel')}</th>
+              <th>{i18n.t('PageHistory.actionsLabel')}</th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +43,7 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
                     href={`/history/${page._id}/${item._rev}`}
                     class="button is-small"
                   >
-                    View
+                    {i18n.t('PageHistory.viewLabel')}
                   </a>
                 </td>
               </tr>

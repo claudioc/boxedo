@@ -2,6 +2,7 @@
 import fp from 'fastify-plugin';
 import Polyglot from 'node-polyglot';
 import { FastifyInstance, FastifyPluginCallback } from 'fastify';
+import { replaceReact } from './replaceReact';
 
 interface i18nPluginOptions {
   defaultLocale: string;
@@ -25,6 +26,7 @@ const i18nPlugin: FastifyPluginCallback<i18nPluginOptions> = (
   const i18n = new Polyglot({
     phrases: locales[defaultLocale],
     locale: defaultLocale,
+    replace: replaceReact,
   });
 
   fastify.decorate('i18n', i18n);

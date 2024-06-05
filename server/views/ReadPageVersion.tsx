@@ -3,6 +3,7 @@ import { PageModel } from '~/types';
 import { slugUrl } from '~/lib/helpers';
 import { PageBody } from './components/PageBody';
 import { formatDate } from '~/lib/helpers';
+import { useApp } from '~/lib/context/App';
 
 export interface ReadPageVersionProps {
   page: PageModel;
@@ -14,43 +15,50 @@ export const ReadPageVersion = ({
   page,
   item,
   version,
-}: ReadPageVersionProps) => (
-  <Layout title={item.pageTitle} page={page}>
-    <div>
-      <div class="message is-info" role="alert" x-ref="message">
-        <div class="message-header">
-          <p>
-            This is an older version (#{version.split('-')[0]}) of this page
-          </p>
-          <button
-            class="delete"
-            aria-label="delete"
-            x-on:click="$refs.message.hidden = true"
-          ></button>
-        </div>
-        <div class="message-body">
-          <p>
-            This version was last saved on{' '}
-            <strong>{formatDate(item.updatedAt)}</strong> while the newest
-            version is from <strong>{formatDate(page.updatedAt)}</strong>. You
-            can view the current version following{' '}
-            <a class="is-link" href={slugUrl(page.pageSlug)}>
-              this link
-            </a>
-            , or you can go back to the{' '}
-            <a href={`../${page._id}`}>list of all its versions</a>.
-          </p>
-          <details>
-            <summary>More …</summary>
+}: ReadPageVersionProps) => {
+  const { i18n } = useApp();
+
+  return (
+    <Layout title={item.pageTitle} page={page}>
+      <div>
+        <div class="message is-info" role="alert" x-ref="message">
+          <div class="message-header">
             <p>
-              The history only reports changes to the page content and title.
-              Change on the page's authorship or hierarchy are not tracked at
-              this time.
+              {i18n.t('ReadPageVersion.oldVersion', {
+                version: version.split('-')[0],
+              })}
             </p>
-          </details>
+            <button
+              class="delete"
+              aria-label="delete"
+              x-on:click="$refs.message.hidden = true"
+            ></button>
+          </div>
+          <div class="message-body">
+            <p>
+              {i18n.t('ReadPageVersion.oldVersionInfo', {
+                date: <strong>{formatDate(item.updatedAt)}</strong>,
+                newDate: <strong>{formatDate(page.updatedAt)}</strong>,
+                link: (
+                  <a class="is-link" href={slugUrl(page.pageSlug)}>
+                    {i18n.t('ReadPageVersion.thisLink')}
+                  </a>
+                ),
+                historyLink: (
+                  <a href={`../${page._id}`}>
+                    {i18n.t('ReadPageVersion.listOfVersions')}
+                  </a>
+                ),
+              })}
+            </p>
+            <details>
+              <summary>{i18n.t('ReadPageVersion.more')}</summary>
+              <p>{i18n.t('ReadPageVersion.moreInfo')}</p>
+            </details>
+          </div>
         </div>
+        <PageBody page={item} />
       </div>
-      <PageBody page={item} />
-    </div>
-  </Layout>
-);
+    </Layout>
+  );
+};
