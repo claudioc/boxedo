@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
@@ -37,7 +37,11 @@ export const EditPage = ({ page, token }: EditPageProps) => {
             cancelUrl={slugUrl(page.pageSlug)}
           />
 
-          <button class="button is-small" x-on:click="App.addImage">
+          <button
+            type="button"
+            class="button is-small"
+            x-on:click="App.addImage"
+          >
             {i18n.t('EditPage.addImage')}
           </button>
           <div id="editor-placeholder" class="block content">
@@ -53,6 +57,7 @@ export const EditPage = ({ page, token }: EditPageProps) => {
         <div class="level">
           <div class="level-item level-right">
             <button
+              type="button"
               class="button is-danger is-light"
               id="delete-page-button"
               x-on:click="$refs.dialog.showModal()"
@@ -69,13 +74,14 @@ export const EditPage = ({ page, token }: EditPageProps) => {
             <div class="level">
               <menu class="level-item level-right">
                 <button
+                  type="button"
                   class="button"
                   value="default"
                   x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
                 >
                   {i18n.t('EditPage.deletePageConfirmButton')}
                 </button>
-                <button class="button" value="cancel">
+                <button type="button" class="button" value="cancel">
                   {i18n.t('EditPage.deletePageCancelButton')}
                 </button>
               </menu>

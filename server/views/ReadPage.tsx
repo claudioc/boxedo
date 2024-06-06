@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel, WithI18nProps } from '~/types';
+import type { PageModel, WithI18nProps } from '~/types';
 import { formatDate } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';

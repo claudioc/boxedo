@@ -1,4 +1,4 @@
-import { Feedback } from '~/types';
+import type { Feedback } from '~/types';
 
 type ErrorCodes =
   | 'E_INDEX_ALREADY_EXISTS'

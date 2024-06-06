@@ -1,5 +1,5 @@
-import { Alpine as AlpineType } from 'alpinejs';
-import { type AppInstance } from './app';
+import type { Alpine as AlpineType } from 'alpinejs';
+import type { AppInstance } from './app';
 
 declare global {
   const LIVERELOAD_URL: string;

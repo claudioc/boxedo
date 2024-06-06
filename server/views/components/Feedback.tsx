@@ -1,4 +1,4 @@
-import { Feedback as FeedbackType } from '~/types';
+import type { Feedback as FeedbackType } from '~/types';
 import { Feedbacks, isFeedbackError } from '~/lib/feedbacks';
 import clsx from 'clsx';
 import styles from './Feedback.module.css';
@@ -29,7 +29,7 @@ export const Feedback = ({ feedback }: FeedbackProps) => {
       )}
       role={isFeedbackError(feedback) ? 'alert' : 'status'}
     >
-      <button class="delete" x-on:click="$store.has.none()"></button>
+      <button type="button" class="delete" x-on:click="$store.has.none()" />
       {feedback.message}
     </div>
   );

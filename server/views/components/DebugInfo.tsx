@@ -1,4 +1,4 @@
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 
 interface DebugInfoProps {
   page?: PageModel;

@@ -1,11 +1,11 @@
 import { getBundleFilename, cssFile } from '~/lib/assets';
-import { JSX } from 'preact';
+import type { JSX } from 'preact';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
 import { getFeedback } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 
 interface LayoutProps {
   title: string;
@@ -34,10 +34,13 @@ export const Layout = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Joongle is the ultimate CMS" />
         <link rel="stylesheet" href={cssFile} />
+        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
         <script src="/a/vendor/htmx.min.js"></script>
       </head>
       <body x-data class="container is-widescreen" {...onKeypress}>
+        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
         <script src={getBundleFilename('app')}></script>
+        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
         {useEditor && <script src={getBundleFilename('editor')}></script>}
         {process.env.NODE_ENV === 'development' && (
           <script>{'App.livereload()'}</script>
@@ -65,7 +68,7 @@ export const Layout = ({
               class="column is-4"
               hx-get={`/parts/nav/${page._id}`}
               hx-trigger="load"
-            ></div>
+            />
           )}
           {/* #main-page-body is used as a hx-target */}
           <div class="column is-8" id="main-page-body">

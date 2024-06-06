@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { slugUrl } from '~/lib/helpers';
 import { PageBody } from './components/PageBody';
 import { formatDate } from '~/lib/helpers';
@@ -32,7 +32,8 @@ export const ReadPageVersion = ({
               class="delete"
               aria-label="delete"
               x-on:click="$refs.message.hidden = true"
-            ></button>
+              type="button"
+            />
           </div>
           <div class="message-body">
             <p>

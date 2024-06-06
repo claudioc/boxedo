@@ -1,4 +1,4 @@
-import {
+import type {
   PageModel,
   PageSelector,
   NavItem,
@@ -9,7 +9,7 @@ import {
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
-import nano, { DocumentScope, ServerScope } from 'nano';
+import nano, { type DocumentScope, type ServerScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
@@ -203,9 +203,9 @@ export function dbService(client?: nano.ServerScope) {
       const updatedPage: PageModel = {
         ...page,
         ...newPage,
-        pageTitle: safeHtml(newPage.pageTitle!),
-        pageContent: safeHtml(newPage.pageContent!),
-        updatedAt: newPage.updatedAt!,
+        pageTitle: safeHtml(newPage.pageTitle ?? ''),
+        pageContent: safeHtml(newPage.pageContent ?? ''),
+        updatedAt: newPage.updatedAt ?? new Date().toISOString(),
       };
 
       if (page.pageSlug !== newPage.pageSlug) {

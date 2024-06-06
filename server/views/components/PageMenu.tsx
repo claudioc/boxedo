@@ -1,7 +1,7 @@
 import { isIndexPage, isIndexPlaceholderPage } from '~/lib/helpers';
 import styles from './Menu.module.css';
 import clsx from 'clsx';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { useApp } from '~/lib/context/App';
 
 interface PageMenuProps {
@@ -23,6 +23,7 @@ export const PageMenu = ({ page }: PageMenuProps) => {
             class="button"
             aria-haspopup="true"
             aria-controls="dropdown-menu"
+            type="button"
           >
             <span>{i18n.t('PageMenu.actions')} …</span>
           </button>

@@ -1,7 +1,7 @@
 import { createContext } from 'preact';
 import { useContext } from 'preact/hooks';
-import { FastifyInstance } from 'fastify';
-import { FunctionalComponent } from 'preact';
+import type { FastifyInstance } from 'fastify';
+import type { FunctionalComponent } from 'preact';
 
 export const AppContext = createContext<FastifyInstance | null>(null);
 

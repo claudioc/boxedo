@@ -1,5 +1,5 @@
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
-import Polyglot from 'node-polyglot';
+import type Polyglot from 'node-polyglot';
 
 export type NodeEnv = 'development' | 'production' | 'test';
 

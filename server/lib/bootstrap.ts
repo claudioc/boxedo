@@ -1,22 +1,21 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import Fastify from 'fastify';
 import helmet from '@fastify/helmet';
 import staticServe from '@fastify/static';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyFavicon from 'fastify-favicon';
-import { PinoLoggerOptions } from 'fastify/types/logger';
+import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
-import path from 'path';
+import path from 'node:path';
 import router from './router';
-import { NodeEnv } from '~/types';
+import type { NodeEnv } from '~/types';
 import jsxRenderer from './jsxRenderer';
-import { FromSchema } from 'json-schema-to-ts';
-import { fileURLToPath } from 'url';
+import type { FromSchema } from 'json-schema-to-ts';
+import { fileURLToPath } from 'node:url';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
-import { dbService, DbClient } from '~/services/dbService';
-import fastifyPolyglot, { Polyglot } from '~/lib/plugins/polyglot';
+import { dbService, type DbClient } from '~/services/dbService';
+import fastifyPolyglot, { type Polyglot } from '~/lib/plugins/polyglot';
 
 import en from '../locales/en.json';
 
@@ -29,7 +28,6 @@ if (process.env.NODE_ENV !== 'test') {
   globalThis.__bundlerPathsOverrides = {
     'thread-stream-worker': path.join(
       // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       path.dirname(createRequire(import.meta.url).resolve('thread-stream')),
       'lib',
       'worker.js'

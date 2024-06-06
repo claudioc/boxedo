@@ -1,10 +1,10 @@
 import * as esbuild from 'esbuild';
-import { createServer } from 'http';
+import { createServer } from 'node:http';
 
 let { LIVERELOAD_PORT, LIVERELOAD_ADDRESS } = process.env;
 
 LIVERELOAD_ADDRESS = LIVERELOAD_ADDRESS?.trim();
-LIVERELOAD_PORT = parseInt(LIVERELOAD_PORT?.trim(), 10);
+LIVERELOAD_PORT = Number.parseInt(LIVERELOAD_PORT?.trim(), 10);
 
 const hasLiveReload = LIVERELOAD_ADDRESS && LIVERELOAD_PORT;
 const LIVERELOAD_URL = hasLiveReload

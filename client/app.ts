@@ -1,6 +1,6 @@
 import { store } from './lib/setupAlpine';
 import './lib/setupHtmx';
-import { type TipTapEditor } from './lib/setupTipTap';
+import type { TipTapEditor } from './lib/setupTipTap';
 import { removeQueryParam } from './lib/helpers';
 
 class App {

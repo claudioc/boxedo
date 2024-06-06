@@ -1,7 +1,7 @@
-import { FastifyInstance } from 'fastify';
-import { FromSchema } from 'json-schema-to-ts';
+import type { FastifyInstance } from 'fastify';
+import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import { PageModel, NavItem, PageModelWithRev } from '~/types';
+import type { PageModel, NavItem, PageModelWithRev } from '~/types';
 import { Feedbacks } from './feedbacks';
 import cheerio from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -12,7 +12,7 @@ import { SearchResults } from '~/views/SearchResults';
 import { ReadPage } from '~/views/ReadPage';
 import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { NotFound } from '~/views/NotFound';
-import { Error } from '~/views/Error';
+import { ErrorPage } from '~/views/ErrorPage';
 import { EditPage } from '~/views/EditPage';
 import { CreatePage } from '~/views/CreatePage';
 import { MovePage } from '~/views/MovePage';
@@ -120,7 +120,6 @@ const DEFAULT_HOMEPAGE: PageModel = {
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
  * @param {Object} options plugin options, refer to https://www.fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
-// eslint-disable-next-line @typescript-eslint/require-await
 const router = async (app: FastifyInstance) => {
   // The home page, folks
   app.get<{ Querystring: FromSchema<typeof PageQuerySchema> }>(
@@ -135,7 +134,7 @@ const router = async (app: FastifyInstance) => {
       const isHtmx = req.headers['hx-request'];
 
       let root: PageModel | null = null;
-      let feedbackCode;
+      let feedbackCode: number | undefined;
       try {
         root = await dbs.getRootPage();
       } catch (error) {
@@ -181,8 +180,8 @@ const router = async (app: FastifyInstance) => {
       return (
         <>
           {results.map((result) => (
-            <li>
-              <a href="#" data-page-id={result._id}>
+            <li key={result._id}>
+              <a href={`#${result._id}`} data-page-id={result._id}>
                 {result.pageTitle}
               </a>
             </li>
@@ -203,7 +202,7 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const dbs = dbService(app.dbClient);
 
-      let root;
+      let root: PageModel | null = null;
       try {
         root = await dbs.getRootPage();
       } catch {
@@ -310,7 +309,6 @@ const router = async (app: FastifyInstance) => {
         body: PageBodySchema,
         params: PageParamsSchema,
       },
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       preHandler: app.csrfProtection,
     },
     async (req, rep) => {
@@ -421,7 +419,7 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const parent = await dbs.getPageById(page.parentId!);
+      const parent = await dbs.getPageById(page.parentId ?? '');
 
       if (!parent) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -492,7 +490,7 @@ const router = async (app: FastifyInstance) => {
       const dbs = dbService(app.dbClient);
       const root = await dbs.getRootPage();
 
-      if (pageId === root!._id) {
+      if (pageId === root?._id) {
         return rs.homeWithFeedback(Feedbacks.E_CANNOT_DELETE_INDEX);
       }
 
@@ -558,7 +556,6 @@ const router = async (app: FastifyInstance) => {
         body: PageBodySchema,
         params: SubpageParamsSchema,
       },
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       preHandler: app.csrfProtection,
     },
     async (req, rep) => {
@@ -697,7 +694,7 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      let historyItem;
+      let historyItem: PageModel | undefined;
       try {
         historyItem = await dbs.getPageHistoryItem(page, version);
       } catch (error) {
@@ -790,15 +787,17 @@ const router = async (app: FastifyInstance) => {
       // If the request is a HTMX request, we send the error message as
       // a normal partial response.
       return 'An unexpected error occurred';
-    } else {
-      if (err.validation) {
-        await reply.code(400);
-        return <Error title="Request parameters are not valid." error={err} />;
-      } else {
-        await reply.code(500);
-        return <Error title="Unhandled error" error={err} />;
-      }
     }
+
+    if (err.validation) {
+      await reply.code(400);
+      return (
+        <ErrorPage title="Request parameters are not valid." error={err} />
+      );
+    }
+
+    await reply.code(500);
+    return <ErrorPage title="Unhandled error" error={err} />;
   });
 };
 

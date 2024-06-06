@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { ErrorWithFeedback } from '~/lib/errors';
 import { Feedbacks } from '~/lib/feedbacks';
-import { Feedback } from '~/types';
+import type { Feedback } from '~/types';
 import { pathWithFeedback, slugUrl } from '~/lib/helpers';
 
 export function redirectService(app: FastifyInstance, rep: FastifyReply) {

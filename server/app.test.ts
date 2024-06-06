@@ -1,6 +1,6 @@
 import { it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import bootstrap from './lib/bootstrap';
-import { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import cheerio from 'cheerio';
 import { dbService } from './services/dbService';
 
@@ -28,7 +28,7 @@ it('should show an empty home page', async () => {
 });
 
 it('should return no navigation items', async () => {
-  const response = await app.inject({ url: `/parts/nav/` });
+  const response = await app.inject({ url: '/parts/nav/' });
   const $ = cheerio.load(response.body);
   expect($('body').text()).toBe('There are no pages');
 });
@@ -41,7 +41,7 @@ it('should show a feedback when a code is passed', async () => {
 
 it('should create the index page', async () => {
   await app.inject({
-    url: `/edit/page:itdoesnotmatter`,
+    url: '/edit/page:itdoesnotmatter',
     method: 'POST',
     payload: {
       pageTitle: 'Home Page',
@@ -91,7 +91,7 @@ it('should return matching titles', async () => {
 });
 
 it('should return one navigation items', async () => {
-  const response = await app.inject({ url: `/parts/nav/` });
+  const response = await app.inject({ url: '/parts/nav/' });
   const $ = cheerio.load(response.body);
   const $a = $('a');
   expect($a.attr('href')).toBe('/');

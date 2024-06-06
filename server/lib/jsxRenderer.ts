@@ -1,8 +1,8 @@
 // Almost directly from https://evertpot.com/jsx-template/
-import { onSendHookHandler, preSerializationHookHandler } from 'fastify';
-import { isValidElement, JSX } from 'preact';
+import type { onSendHookHandler, preSerializationHookHandler } from 'fastify';
+import { isValidElement, type JSX } from 'preact';
 import render from 'preact-render-to-string';
-import { FastifyInstance } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import plugin from 'fastify-plugin';
 
 /**
@@ -12,7 +12,6 @@ import plugin from 'fastify-plugin';
  * We use this to turn React components into an object with a ___jsx key
  * that has the serialized HTML.
  */
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 const preSerialization: preSerializationHookHandler<unknown> = async (
   _request,
   reply,
@@ -21,25 +20,23 @@ const preSerialization: preSerializationHookHandler<unknown> = async (
   if (isValidElement(payload)) {
     void reply.header('Content-Type', 'text/html; charset=utf8');
     return {
-      ___jsx: '<!DOCTYPE html>\n' + render(payload as JSX.Element),
+      ___jsx: `<!DOCTYPE html>\n${render(payload as JSX.Element)}`,
     };
-  } else {
-    return payload;
   }
+
+  return payload;
 };
 
 /**
  * The onSendHookHandler lets us transform the response body (as a string)
  * We detect the ___jsx key and unwrap the HTML.
  */
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 const onSend: onSendHookHandler<unknown> = async (
   _request,
   _reply,
   payload: unknown
 ) => {
   if (typeof payload === 'string' && payload.startsWith('{"___jsx":"')) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return JSON.parse(payload).___jsx;
   }
   return payload;
@@ -47,9 +44,9 @@ const onSend: onSendHookHandler<unknown> = async (
 
 const renderJsx = (
   fastify: FastifyInstance,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   _opts: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   done: (err?: any) => void
 ) => {
   fastify.addHook('preSerialization', preSerialization);

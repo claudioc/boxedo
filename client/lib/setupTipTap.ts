@@ -33,23 +33,21 @@ const editorOptions = {
 };
 
 export const enableEditor = () => {
-  const placeHolder = document.getElementById('editor-placeholder')!;
-  // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+  const placeHolder = document.getElementById('editor-placeholder');
   const pageContent = document.querySelector(
     '[name="pageContent"]'
   ) as HTMLInputElement;
-  // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
   const pageTitle = document.querySelector(
     '[name="pageTitle"]'
   ) as HTMLInputElement;
-  const placeHolderContent = (placeHolder.textContent ?? '').trim();
+  const placeHolderContent = (placeHolder?.textContent ?? '').trim();
   if (placeHolder) {
     placeHolder.textContent = '';
   }
 
   const editor = new Editor({
     ...editorOptions,
-    element: placeHolder,
+    element: placeHolder ?? document.createElement('div'),
     content: placeHolderContent,
     onUpdate: ({ editor }) => {
       const json = editor.getJSON();

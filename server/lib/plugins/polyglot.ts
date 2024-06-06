@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import fp from 'fastify-plugin';
 import Polyglot from 'node-polyglot';
-import { FastifyInstance, FastifyPluginCallback } from 'fastify';
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import { replaceReact } from './replaceReact';
 
 interface i18nPluginOptions {
@@ -22,7 +21,6 @@ const i18nPlugin: FastifyPluginCallback<i18nPluginOptions> = (
     return;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const i18n = new Polyglot({
     phrases: locales[defaultLocale],
     locale: defaultLocale,

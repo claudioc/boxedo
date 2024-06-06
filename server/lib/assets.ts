@@ -3,8 +3,8 @@ import {
   CACHE_BUSTER,
   CLIENT_BUNDLE_LOCATION,
 } from '~/constants';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readdirSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,7 +31,8 @@ export const getBundleFilename = (bundle: Bundle): string => {
     ).filter((file) => file.startsWith(`${bundle}-`) && file.endsWith('.js'));
 
     if (files.length === 1) {
-      return (bundleNames[bundle] = `/${ASSETS_MOUNT_POINT}/js/${files[0]}`);
+      bundleNames[bundle] = `/${ASSETS_MOUNT_POINT}/js/${files[0]}`;
+      return bundleNames[bundle];
     }
 
     return '';

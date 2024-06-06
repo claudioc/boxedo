@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
@@ -31,7 +31,7 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
             cancelUrl={slugUrl(parentPage.pageSlug)}
           />
 
-          <div id="editor-placeholder" class="block content"></div>
+          <div id="editor-placeholder" class="block content" />
 
           <div class="block">
             <DebugInfo />

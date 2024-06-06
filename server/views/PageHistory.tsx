@@ -1,4 +1,4 @@
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
 import { useApp } from '~/lib/context/App';
@@ -34,7 +34,12 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
           </thead>
           <tbody>
             {history.map((item, index) => (
-              <tr key={index}>
+              <tr
+                key={`key-${
+                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                  index
+                }`}
+              >
                 <td>{item._rev?.split('-')[0]}</td>
                 <td>{formatDate(item.updatedAt, 'N/A')}</td>
                 <td>{item.pageTitle}</td>

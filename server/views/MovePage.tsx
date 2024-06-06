@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
@@ -41,11 +41,11 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
 
           <p class="block">
             {i18n.t('MovePage.newParentIs')} "
-            <span x-text="newParentTitle"></span>"
+            <span x-text="newParentTitle" />"
           </p>
 
           <input type="hidden" name="newParentId" x-model="newParentId" />
-          <input type="hidden" name="oldParentId" value={page.parentId!} />
+          <input type="hidden" name="oldParentId" value={page.parentId ?? ''} />
         </form>
 
         <div class="block">
@@ -69,7 +69,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
           </div>
         </div>
 
-        <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.innerText"></ul>
+        <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.innerText" />
       </div>
     </Layout>
   );

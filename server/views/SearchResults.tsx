@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import { PageModel } from '~/types';
+import type { PageModel } from '~/types';
 import { slugUrl } from '~/lib/helpers';
 import { useApp } from '~/lib/context/App';
 
@@ -50,6 +50,7 @@ const HighlightPhrase = ({ text, phrase }: HighlightPhraseProps) => {
     <span>
       {parts.map((part, index) =>
         part.toLowerCase() === phrase.toLowerCase() ? (
+          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
           <strong key={index}>{part}</strong>
         ) : (
           part

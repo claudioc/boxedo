@@ -1,12 +1,12 @@
 import { Layout } from './Layout';
 import { useApp } from '~/lib/context/App';
 
-interface ErrorProps {
+interface ErrorPageProps {
   title: string;
   error: Error | string;
 }
 
-export const Error = ({ title, error }: ErrorProps) => {
+export const ErrorPage = ({ title, error }: ErrorPageProps) => {
   const { i18n } = useApp();
 
   return (
