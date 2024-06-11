@@ -38,12 +38,18 @@ if (process.env.NODE_ENV !== 'test') {
 const ConfigEnvSchema = {
   type: 'object',
   properties: {
+    ADDRESS: { type: 'string', default: 'localhost' },
     PORT: { type: 'integer', default: 3000 },
     NODE_ENV: { type: 'string', default: 'development' },
     COUCHDB_URL: {
       type: 'string',
       default: 'http://localhost:5984',
     },
+    DB_USER: { type: 'string' },
+    DB_PASSWORD: { type: 'string' },
+    LIVERELOAD_PORT: { type: 'integer', default: 8007 },
+    LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
+    WEBSITE_TITLE: { type: 'string', default: 'Joongle CMS' },
   },
 } as const;
 
@@ -127,7 +133,7 @@ await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
     })
     .register(router)
     .after(() => {
-      app.log.info('Database connected');
+      app.log.info('Application initialized.');
     });
 });
 

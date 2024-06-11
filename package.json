@@ -19,7 +19,7 @@
     "type-check": "tsc -p server && tsc -p client",
     "lint": "npm run type-check && biome lint .",
     "prestart": "NODE_ENV=production npm run build",
-    "start": "NODE_ENV=production node ./dist/server/app.js",
+    "start": "NODE_ENV=production node --env-file=.env ./dist/server/app.js",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
     "db:reset": "./tasks/resetDb.sh",

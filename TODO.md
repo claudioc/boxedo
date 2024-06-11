@@ -1,10 +1,8 @@
 Doing
-- internazionalization
 
 Todo
 
   HIGH
-  - Check what happens if we cannot connect to the db on bootstrap
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
 
@@ -12,7 +10,6 @@ Todo
   - back and forth navigation works in a weird way with XHR
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
-  - make the name of the database configurable
 
   LOW (before live)
   - consider access implications to the history of docs
@@ -50,3 +47,6 @@ Done
 - a simple lock system should be in place
 - how do we load the editor only when needed?
 - pass the fastify instance to the views using context?
+- internazionalization
+- Check what happens if we cannot connect to the db on bootstrap
+- make the name of the database configurable

@@ -34,9 +34,9 @@ export const getBundleFilename = (bundle: Bundle): string => {
       bundleNames[bundle] = `/${ASSETS_MOUNT_POINT}/js/${files[0]}`;
       return bundleNames[bundle];
     }
-
-    return '';
-  } catch (err) {
-    return '';
+  } catch {
+    // Never mind
   }
+
+  return '';
 };

@@ -6,6 +6,7 @@ import { getFeedback } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
 import type { PageModel } from '~/types';
+import { useApp } from '~/lib/context/App';
 
 interface LayoutProps {
   title: string;
@@ -22,6 +23,7 @@ export const Layout = ({
   children,
   useEditor = false,
 }: LayoutProps) => {
+  const { config } = useApp();
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -34,14 +36,11 @@ export const Layout = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Joongle is the ultimate CMS" />
         <link rel="stylesheet" href={cssFile} />
-        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-        <script src="/a/vendor/htmx.min.js"></script>
+        <script src="/a/vendor/htmx.min.js" />
       </head>
       <body x-data class="container is-widescreen" {...onKeypress}>
-        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-        <script src={getBundleFilename('app')}></script>
-        {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-        {useEditor && <script src={getBundleFilename('editor')}></script>}
+        <script src={getBundleFilename('app')} />
+        {useEditor && <script src={getBundleFilename('editor')} />}
         {process.env.NODE_ENV === 'development' && (
           <script>{'App.livereload()'}</script>
         )}
@@ -49,7 +48,7 @@ export const Layout = ({
           <div class="level-item level-left">
             <div class="title">
               <a href="/" class="has-text-warning">
-                Joongle
+                {config.WEBSITE_TITLE}
               </a>
             </div>
           </div>
