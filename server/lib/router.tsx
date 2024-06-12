@@ -59,13 +59,6 @@ const PageWithVersionParamsSchema = {
   },
 } as const;
 
-const PageQuerySchema = {
-  type: 'object',
-  properties: {
-    f: { type: 'number' },
-  },
-} as const;
-
 const SearchQuerySchema = {
   type: 'object',
   required: ['q'],
@@ -122,42 +115,25 @@ const DEFAULT_HOMEPAGE: PageModel = {
  */
 const router = async (app: FastifyInstance) => {
   // The home page, folks
-  app.get<{ Querystring: FromSchema<typeof PageQuerySchema> }>(
-    '/',
-    {
-      schema: {
-        querystring: PageQuerySchema,
-      },
-    },
-    async (req) => {
-      const dbs = dbService(app.dbClient);
-      const isHtmx = req.headers['hx-request'];
+  app.get('/', async (req) => {
+    const dbs = dbService(app.dbClient);
+    const isHtmx = req.headers['hx-request'];
 
-      let root: PageModel | null = null;
-      let feedbackCode: number | undefined;
-      try {
-        root = await dbs.getRootPage();
-      } catch (error) {
-        if (error instanceof ErrorWithFeedback) {
-          feedbackCode = error.feedback.code;
-        }
+    let root: PageModel | null = null;
+    try {
+      root = await dbs.getRootPage();
+    } catch (error) {
+      if (error instanceof ErrorWithFeedback) {
+        app.feedbackCode = error.feedback.code;
       }
-
-      if (!feedbackCode) {
-        feedbackCode = req.query.f;
-      }
-
-      return (
-        <AppProvider app={app}>
-          <ReadPage
-            isFull={!isHtmx}
-            page={root ?? DEFAULT_HOMEPAGE}
-            feedbackCode={feedbackCode}
-          />
-        </AppProvider>
-      );
     }
-  );
+
+    return (
+      <AppProvider app={app}>
+        <ReadPage isFull={!isHtmx} page={root ?? DEFAULT_HOMEPAGE} />
+      </AppProvider>
+    );
+  });
 
   app.get<{
     Querystring: FromSchema<typeof SearchQuerySchema>;
@@ -226,18 +202,15 @@ const router = async (app: FastifyInstance) => {
 
   app.get<{
     Params: FromSchema<typeof PageSlugParamsSchema>;
-    Querystring: FromSchema<typeof PageQuerySchema>;
   }>(
     '/page/:slug',
     {
       schema: {
         params: PageSlugParamsSchema,
-        querystring: PageQuerySchema,
       },
     },
     async (req, rep) => {
       const { slug } = req.params;
-      const { f: feedbackCode } = req.query;
       const dbs = dbService(app.dbClient);
       const isHtmx = req.headers['hx-request'];
 
@@ -246,11 +219,7 @@ const router = async (app: FastifyInstance) => {
       if (page) {
         return (
           <AppProvider app={app}>
-            <ReadPage
-              isFull={!isHtmx}
-              page={page}
-              feedbackCode={feedbackCode}
-            />
+            <ReadPage isFull={!isHtmx} page={page} />
           </AppProvider>
         );
       }
@@ -264,7 +233,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.log.error(Feedbacks.E_MISSING_PAGE.message);
-      return <NotFound title="Page not found" />;
+      return (
+        <AppProvider app={app}>
+          <NotFound title={app.i18n.t('Error.pageNotFound')} />
+        </AppProvider>
+      );
     }
   );
 
@@ -772,7 +745,11 @@ const router = async (app: FastifyInstance) => {
   // });
 
   app.setNotFoundHandler(() => {
-    return <NotFound title="Page not found" />;
+    return (
+      <AppProvider app={app}>
+        <NotFound title={app.i18n.t('Error.pageNotFound')} />
+      </AppProvider>
+    );
   });
 
   app.setErrorHandler(async (err, req, reply) => {
@@ -786,18 +763,27 @@ const router = async (app: FastifyInstance) => {
     if (req.headers['hx-request']) {
       // If the request is a HTMX request, we send the error message as
       // a normal partial response.
-      return 'An unexpected error occurred';
+      return app.i18n.t('Error.unexpectedError');
     }
 
     if (err.validation) {
       await reply.code(400);
       return (
-        <ErrorPage title="Request parameters are not valid." error={err} />
+        <AppProvider app={app}>
+          <ErrorPage
+            title={app.i18n.t('Error.invalidParameters')}
+            error={err}
+          />
+        </AppProvider>
       );
     }
 
     await reply.code(500);
-    return <ErrorPage title="Unhandled error" error={err} />;
+    return (
+      <AppProvider app={app}>
+        <ErrorPage title={app.i18n.t('Error.unhandledError')} error={err} />
+      </AppProvider>
+    );
   });
 };
 

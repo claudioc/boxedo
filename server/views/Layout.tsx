@@ -11,7 +11,6 @@ import { useApp } from '~/lib/context/App';
 interface LayoutProps {
   title: string;
   page?: PageModel;
-  feedbackCode?: number;
   children: string | JSX.Element[] | JSX.Element;
   useEditor?: boolean;
 }
@@ -19,11 +18,10 @@ interface LayoutProps {
 export const Layout = ({
   title,
   page,
-  feedbackCode,
   children,
   useEditor = false,
 }: LayoutProps) => {
-  const { config } = useApp();
+  const { config, feedbackCode } = useApp();
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };

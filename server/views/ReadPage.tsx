@@ -9,16 +9,11 @@ import styles from './ReadPage.module.css';
 
 export interface ReadPageProps extends WithI18nProps {
   page: PageModel;
-  feedbackCode?: number;
   // Whether to show the full page or just the body
   isFull?: boolean;
 }
 
-export const ReadPage = ({
-  page,
-  feedbackCode,
-  isFull = true,
-}: ReadPageProps) => {
+export const ReadPage = ({ page, isFull = true }: ReadPageProps) => {
   const { i18n } = useApp();
 
   const content = (
@@ -34,7 +29,7 @@ export const ReadPage = ({
   );
 
   return isFull ? (
-    <Layout title={page.pageTitle} page={page} feedbackCode={feedbackCode}>
+    <Layout title={page.pageTitle} page={page}>
       {content}
     </Layout>
   ) : (

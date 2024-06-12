@@ -7,7 +7,7 @@ import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
-import type { NodeEnv } from '~/types';
+import type { Feedback, NodeEnv } from '~/types';
 import jsxRenderer from './jsxRenderer';
 import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +16,7 @@ import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import { dbService, type DbClient } from '~/services/dbService';
 import fastifyPolyglot, { type Polyglot } from '~/lib/plugins/polyglot';
+import fastifyFeedback from '~/lib/plugins/feedback';
 
 import en from '../locales/en.json';
 
@@ -90,11 +91,14 @@ await app.register(fastifyPolyglot, {
   },
 });
 
+await app.register(fastifyFeedback);
+
 declare module 'fastify' {
   interface FastifyInstance {
     config: FromSchema<typeof ConfigEnvSchema>;
     dbClient: DbClient;
     i18n: Polyglot;
+    feedbackCode: number;
   }
 }
 
