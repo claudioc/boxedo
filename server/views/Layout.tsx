@@ -2,7 +2,7 @@ import { getBundleFilename, cssFile } from '~/lib/assets';
 import type { JSX } from 'preact';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
-import { getFeedback } from '~/lib/feedbacks';
+import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
 import type { PageModel } from '~/types';
@@ -56,7 +56,7 @@ export const Layout = ({
         </header>
 
         <div class="block" x-show="$store.has.some()">
-          <Feedback feedback={getFeedback(feedbackCode)} />
+          <Feedback feedback={getFeedbackByCode(feedbackCode)} />
         </div>
 
         <main class="columns">
