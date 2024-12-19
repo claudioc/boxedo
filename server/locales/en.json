@@ -66,6 +66,10 @@
     "viewLabel": "View"
   },
 
+  "Navigation": {
+    "noRootPage": "Create your first page"
+  },
+
   "ReadPageVersion": {
     "oldVersion": "This is an older version (%{version}) of this page",
     "oldVersionInfo": "This version was last saved on %{date} while the newest version is from %{newDate}. You can view the current version following %{link}, or you can go back to the %{historyLink}",

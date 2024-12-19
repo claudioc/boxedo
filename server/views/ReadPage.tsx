@@ -1,6 +1,6 @@
 import { Layout } from './Layout';
 import type { PageModel, WithI18nProps } from '~/types';
-import { formatDate } from '~/lib/helpers';
+import { formatDate, isSameTimestamp, isDefaultIndexPage } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
 import { useApp } from '~/lib/context/App';
@@ -15,13 +15,17 @@ export interface ReadPageProps extends WithI18nProps {
 
 export const ReadPage = ({ page, isFull = true }: ReadPageProps) => {
   const { i18n } = useApp();
-
+  console.log('ReadPage.tsx: page:', page);
   const content = (
     <div class={styles.ReadPage}>
       <div class="level level-right has-text-grey">
-        {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
-        {page.updatedAt !== page.createdAt &&
-          ` (${formatDate(page.updatedAt)})`}
+        {!isDefaultIndexPage(page) && (
+          <>
+            {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
+            {!isSameTimestamp(page.updatedAt, page.createdAt) &&
+              ` (${formatDate(page.updatedAt)})`}
+          </>
+        )}
         <PageMenu page={page} />
       </div>
       <PageBody page={page} />

@@ -19,6 +19,7 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { AppProvider } from '~/lib/context/App';
+import { DEFAULT_INDEX_ID } from '~/constants';
 
 const PageIdFormat = {
   type: 'string',
@@ -97,11 +98,11 @@ const MovePageBodySchema = {
 } as const;
 
 const DEFAULT_HOMEPAGE: PageModel = {
-  _id: 'page:joongle', // anything that's a valid cuid2
+  _id: DEFAULT_INDEX_ID, // anything that's a valid cuid2
   _rev: '',
   pageTitle: 'Welcome to Joongle!',
   pageContent:
-    '<p class="empty-index-placeholder">Click on the "Create this page" link to get started</p>',
+    '<p class="empty-index-placeholder">This is the default home page. Use "Edit this page" to get started</p>',
   pageSlug: '',
   pageSlugs: [],
   createdAt: new Date().toISOString(),
@@ -167,6 +168,7 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
+  /* Returns the navigation menu */
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
     '/parts/nav/:pageId',
     {
@@ -186,7 +188,12 @@ const router = async (app: FastifyInstance) => {
       }
 
       if (!root) {
-        return 'There are no pages';
+        let msg = app.i18n.t('Navigation.noRootPage');
+        // This is non-sense but for some reason we may receive here a string array
+        if (Array.isArray(msg)) {
+          msg = msg.join('');
+        }
+        return msg;
       }
 
       const tree: NavItem = {

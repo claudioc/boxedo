@@ -69,15 +69,20 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
-app.decorate(
-  'dbClient',
-  await dbService.init({
-    serverUrl: process.env.COUCHDB_URL ?? '',
-    username: process.env.DB_USER ?? '',
-    password: process.env.DB_PASSWORD ?? '',
-    env: process.env.NODE_ENV as NodeEnv,
-  })
-);
+try {
+  app.decorate(
+    'dbClient',
+    await dbService.init({
+      serverUrl: process.env.COUCHDB_URL ?? '',
+      username: process.env.DB_USER ?? '',
+      password: process.env.DB_PASSWORD ?? '',
+      env: process.env.NODE_ENV as NodeEnv,
+    })
+  );
+} catch {
+  throw new Error('Cannot establish a database connection.');
+}
+
 await app.register(fastifyCookie);
 
 if (process.env.NODE_ENV !== 'test') {

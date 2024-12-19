@@ -1,4 +1,5 @@
 import type { Feedback, PageModel } from '~/types';
+import { DEFAULT_INDEX_ID } from '~/constants';
 
 export const slugUrl = (slug: string) => (slug === '/' ? '/' : `/page/${slug}`);
 
@@ -19,7 +20,15 @@ export const formatDate = (date: string, def = '') => {
   }).format(new Date(date));
 };
 
+// We want to consider 10ms of difference as the same timestamp
+export const isSameTimestamp = (date1: string, date2: string) => {
+  return Math.abs(new Date(date1).getTime() - new Date(date2).getTime()) < 10;
+};
+
 export const isIndexPage = (page: PageModel) => page.parentId === null;
+
+export const isDefaultIndexPage = (page: PageModel) =>
+  page._id === DEFAULT_INDEX_ID;
 
 export const isIndexPlaceholderPage = (page: PageModel) =>
   isIndexPage(page) && page.pageSlug === '';
