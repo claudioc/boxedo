@@ -43,9 +43,11 @@ export const PageMenu = ({ page }: PageMenuProps) => {
                 {i18n.t('PageMenu.moveThisPage')}
               </a>
             )}
-            <a href={`/history/${page._id}`} class="dropdown-item">
-              {i18n.t('PageMenu.pageHistory')}
-            </a>
+            {!isIndexPlaceholderPage(page) && (
+              <a href={`/history/${page._id}`} class="dropdown-item">
+                {i18n.t('PageMenu.pageHistory')}
+              </a>
+            )}
           </div>
         </div>
       </div>

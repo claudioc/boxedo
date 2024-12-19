@@ -26,6 +26,7 @@
 
   "EditPage": {
     "title": "Editing a page",
+    "titlePlaceholder": "Editing the index page",
     "editingPage": "Editing %{title}}",
     "addImage": "Add image",
     "deletePage": "Delete this page",

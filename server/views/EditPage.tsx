@@ -3,7 +3,7 @@ import type { PageModel } from '~/types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
-import { slugUrl } from '~/lib/helpers';
+import { isIndexPlaceholderPage, slugUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
 import { useApp } from '~/lib/context/App';
 
@@ -21,7 +21,13 @@ export const EditPage = ({ page, token }: EditPageProps) => {
       page={page}
       useEditor
     >
-      <PageFormWrapper title={i18n.t('EditPage.title')}>
+      <PageFormWrapper
+        title={
+          isIndexPlaceholderPage(page)
+            ? i18n.t('EditPage.titlePlaceholder')
+            : i18n.t('EditPage.title')
+        }
+      >
         <form
           action=""
           method="post"
@@ -37,13 +43,13 @@ export const EditPage = ({ page, token }: EditPageProps) => {
             cancelUrl={slugUrl(page.pageSlug)}
           />
 
-          <button
+          {/* <button
             type="button"
             class="button is-small"
             x-on:click="App.addImage"
           >
             {i18n.t('EditPage.addImage')}
-          </button>
+          </button> */}
           <div id="editor-placeholder" class="block content">
             <h1>{page.pageTitle}</h1>
             {page.pageContent}
@@ -54,44 +60,52 @@ export const EditPage = ({ page, token }: EditPageProps) => {
           </div>
         </form>
 
-        <div class="level">
-          <div class="level-item level-right">
-            <button
-              type="button"
-              class="button is-danger is-light"
-              id="delete-page-button"
-              x-on:click="$refs.dialog.showModal()"
-            >
-              {i18n.t('EditPage.deletePage')}
-            </button>
-          </div>
-        </div>
-
-        <dialog x-ref="dialog" class="card m-auto">
-          <form method="dialog">
-            <h2 class="title is-2">{i18n.t('EditPage.deletePageConfirm')}</h2>
-            <p>{i18n.t('EditPage.deletePageWarning')}</p>
+        {!isIndexPlaceholderPage(page) ? (
+          <>
             <div class="level">
-              <menu class="level-item level-right">
+              <div class="level-item level-right">
                 <button
                   type="button"
-                  class="button"
-                  value="default"
-                  x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
+                  class="button is-danger is-light"
+                  id="delete-page-button"
+                  x-on:click="$refs.dialog.showModal()"
                 >
-                  {i18n.t('EditPage.deletePageConfirmButton')}
+                  {i18n.t('EditPage.deletePage')}
                 </button>
-                <button type="button" class="button" value="cancel">
-                  {i18n.t('EditPage.deletePageCancelButton')}
-                </button>
-              </menu>
+              </div>
             </div>
-          </form>
-        </dialog>
 
-        <form x-ref="deleteForm" action="/delete" method="post">
-          <input type="hidden" name="pageId" value={page._id} />
-        </form>
+            <dialog x-ref="dialog" class="card m-auto">
+              <form method="dialog">
+                <h2 class="title is-2">
+                  {i18n.t('EditPage.deletePageConfirm')}
+                </h2>
+                <p>{i18n.t('EditPage.deletePageWarning')}</p>
+                <div class="level">
+                  <menu class="level-item level-right">
+                    <button
+                      type="button"
+                      class="button"
+                      value="default"
+                      x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
+                    >
+                      {i18n.t('EditPage.deletePageConfirmButton')}
+                    </button>
+                    <button type="button" class="button" value="cancel">
+                      {i18n.t('EditPage.deletePageCancelButton')}
+                    </button>
+                  </menu>
+                </div>
+              </form>
+            </dialog>
+
+            <form x-ref="deleteForm" action="/delete" method="post">
+              <input type="hidden" name="pageId" value={page._id} />
+            </form>
+          </>
+        ) : (
+          <></>
+        )}
       </PageFormWrapper>
 
       <EditorEnabler />

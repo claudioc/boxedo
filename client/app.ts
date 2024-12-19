@@ -17,9 +17,16 @@ class App {
     const form = event.target as HTMLFormElement;
     const data = new FormData(form);
     const error: Record<string, boolean> = {};
+    // Do not validate these fields because they are not user input
+    const preValidated = ['_csrf', 'rev'];
 
     if (form.name === 'editPage' || form.name === 'createPage') {
       for (const [key, value] of data.entries()) {
+        // Just a simple check for empty values; the same thing is done on the server
+        // Beware that the entries also include the CSRF token and the rev
+        if (preValidated.includes(key)) {
+          continue;
+        }
         error[key] = (value as string).trim() === '';
       }
     }

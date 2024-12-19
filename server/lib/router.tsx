@@ -19,7 +19,7 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { AppProvider } from '~/lib/context/App';
-import { DEFAULT_INDEX_ID } from '~/constants';
+import { ROOT_PAGE_ID } from '~/constants';
 
 const PageIdFormat = {
   type: 'string',
@@ -97,16 +97,17 @@ const MovePageBodySchema = {
   },
 } as const;
 
-const DEFAULT_HOMEPAGE: PageModel = {
-  _id: DEFAULT_INDEX_ID, // anything that's a valid cuid2
+const INDEX_PLACEHOLDER_PAGE: PageModel = {
+  _id: ROOT_PAGE_ID, // anything that's a valid cuid2
   _rev: '',
   pageTitle: 'Welcome to Joongle!',
   pageContent:
     '<p class="empty-index-placeholder">This is the default home page. Use "Edit this page" to get started</p>',
   pageSlug: '',
   pageSlugs: [],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  // Decision: createdAt and updatedAt are empty for the index page
+  createdAt: '',
+  updatedAt: '',
 };
 
 /**
@@ -131,7 +132,7 @@ const router = async (app: FastifyInstance) => {
 
     return (
       <AppProvider app={app}>
-        <ReadPage isFull={!isHtmx} page={root ?? DEFAULT_HOMEPAGE} />
+        <ReadPage isFull={!isHtmx} page={root ?? INDEX_PLACEHOLDER_PAGE} />
       </AppProvider>
     );
   });
@@ -262,7 +263,7 @@ const router = async (app: FastifyInstance) => {
       const token = rep.generateCsrf();
       const root = await dbs.getRootPage();
 
-      let page: PageModel | null = DEFAULT_HOMEPAGE;
+      let page: PageModel | null = INDEX_PLACEHOLDER_PAGE;
       if (root) {
         page = await dbs.getPageById(pageId);
       }
@@ -296,6 +297,7 @@ const router = async (app: FastifyInstance) => {
       const { pageTitle, pageContent, rev } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
+      const isIndexPlaceholderPage = pageId === ROOT_PAGE_ID;
 
       if (pageTitle.trim() === '') {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
@@ -314,6 +316,8 @@ const router = async (app: FastifyInstance) => {
       let page = root;
 
       if (root && root._id !== pageId) {
+        // If the page is not the root page (which may not exist yet),
+        // we need to check if it exists
         page = await dbs.getPageById(pageId);
         if (!page) {
           return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -325,6 +329,7 @@ const router = async (app: FastifyInstance) => {
           return rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_UPDATED);
         }
 
+        // Ensure we are updating the correct revision
         if (rev !== page._rev) {
           return rs.slugWithFeedback(
             page.pageSlug,

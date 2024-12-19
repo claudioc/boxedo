@@ -1,7 +1,8 @@
 import type { Feedback, PageModel } from '~/types';
-import { DEFAULT_INDEX_ID } from '~/constants';
+import { ROOT_PAGE_ID } from '~/constants';
 
-export const slugUrl = (slug: string) => (slug === '/' ? '/' : `/page/${slug}`);
+export const slugUrl = (slug: string) =>
+  slug === '/' || slug === '' ? '/' : `/page/${slug}`;
 
 export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   if (!feedback) {
@@ -25,10 +26,8 @@ export const isSameTimestamp = (date1: string, date2: string) => {
   return Math.abs(new Date(date1).getTime() - new Date(date2).getTime()) < 10;
 };
 
-export const isIndexPage = (page: PageModel) => page.parentId === null;
-
-export const isDefaultIndexPage = (page: PageModel) =>
-  page._id === DEFAULT_INDEX_ID;
+export const isIndexPage = (page: PageModel) =>
+  typeof page.parentId !== 'string';
 
 export const isIndexPlaceholderPage = (page: PageModel) =>
-  isIndexPage(page) && page.pageSlug === '';
+  isIndexPage(page) && page._id === ROOT_PAGE_ID && page.createdAt === '';
