@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 
 export interface AppStore {
+  pageId: string;
   error: Record<string, boolean>;
   info: boolean;
   errorOn(key: string): boolean;
@@ -9,6 +10,7 @@ export interface AppStore {
 }
 
 Alpine.store('has', {
+  pageId: '',
   error: {},
   info: true,
   errorOn(key: string) {

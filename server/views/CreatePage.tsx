@@ -8,15 +8,23 @@ import { PageFormWrapper } from './components/PageFormWrapper';
 import { useApp } from '~/lib/context/App';
 
 export interface CreatePageProps {
-  parentPage: PageModel;
+  parentPage: PageModel | null;
   token: string;
 }
 
 export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
   const { i18n } = useApp();
+
+  const titleKey = parentPage ? 'CreatePage.title' : 'CreatePage.titleTopLevel';
+
   return (
-    <Layout title={i18n.t('CreatePage.title')} page={parentPage} useEditor>
-      <PageFormWrapper title={i18n.t('CreatePage.title')}>
+    <Layout
+      title={i18n.t(titleKey)}
+      page={parentPage}
+      withEditor
+      context="editing page"
+    >
+      <PageFormWrapper title={i18n.t(titleKey)}>
         <form
           action=""
           method="post"
@@ -28,7 +36,7 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
 
           <PageActions
             actions={['save', 'cancel']}
-            cancelUrl={slugUrl(parentPage.pageSlug)}
+            cancelUrl={slugUrl(parentPage?.pageSlug || '/')}
           />
 
           <div id="editor-placeholder" class="block content" />

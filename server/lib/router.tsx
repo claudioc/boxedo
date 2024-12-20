@@ -19,7 +19,6 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { AppProvider } from '~/lib/context/App';
-import { ROOT_PAGE_ID } from '~/constants';
 
 const PageIdFormat = {
   type: 'string',
@@ -70,11 +69,12 @@ const SearchQuerySchema = {
 
 const PageIdSchema = PageParamsSchema;
 
-const SubpageParamsSchema = {
+const CreatePageParamsSchema = {
   type: 'object',
-  required: ['parentPageId'],
   properties: {
-    parentPageId: PageIdFormat,
+    parentPageId: {
+      anyOf: [PageIdFormat, { type: 'null' }],
+    },
   },
 } as const;
 
@@ -97,19 +97,6 @@ const MovePageBodySchema = {
   },
 } as const;
 
-const INDEX_PLACEHOLDER_PAGE: PageModel = {
-  _id: ROOT_PAGE_ID, // anything that's a valid cuid2
-  _rev: '',
-  pageTitle: 'Welcome to Joongle!',
-  pageContent:
-    '<p class="empty-index-placeholder">This is the default home page. Use "Edit this page" to get started</p>',
-  pageSlug: '',
-  pageSlugs: [],
-  // Decision: createdAt and updatedAt are empty for the index page
-  createdAt: '',
-  updatedAt: '',
-};
-
 /**
  * Encapsulates the routes
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -121,18 +108,26 @@ const router = async (app: FastifyInstance) => {
     const dbs = dbService(app.dbClient);
     const isHtmx = req.headers['hx-request'];
 
-    let root: PageModel | null = null;
-    try {
-      root = await dbs.getRootPage();
-    } catch (error) {
-      if (error instanceof ErrorWithFeedback) {
-        app.feedbackCode = error.feedback.code;
-      }
+    // We consider 3 scenarios
+    // 1. No page at all (first installation)
+    // 2. A page exists but it's not the landing page
+    // 3. The landing page exists
+
+    // Do we have any page at all?
+    const pageCount = await dbs.countPages();
+
+    let landingPage: PageModel | null = null;
+    if (pageCount > 0) {
+      landingPage = await dbs.getLandingPage();
     }
 
     return (
       <AppProvider app={app}>
-        <ReadPage isFull={!isHtmx} page={root ?? INDEX_PLACEHOLDER_PAGE} />
+        {landingPage && <ReadPage isFull={!isHtmx} page={landingPage} />}
+        {!landingPage && pageCount === 0 && (
+          <ReadPage isFull={!isHtmx} isWelcome />
+        )}
+        {!landingPage && pageCount > 0 && <ReadPage isFull={!isHtmx} />}
       </AppProvider>
     );
   });
@@ -170,8 +165,8 @@ const router = async (app: FastifyInstance) => {
   );
 
   /* Returns the navigation menu */
-  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
-    '/parts/nav/:pageId',
+  app.get<{ Params: FromSchema<typeof PageParamsSchemaOptional> }>(
+    '/parts/nav/:pageId?',
     {
       schema: {
         params: PageParamsSchemaOptional,
@@ -181,30 +176,37 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const dbs = dbService(app.dbClient);
 
-      let root: PageModel | null = null;
+      let topLevels: PageModel[] = [];
       try {
-        root = await dbs.getRootPage();
+        topLevels = await dbs.getTopLevelPages();
       } catch {
         /* ignore */
       }
 
-      if (!root) {
+      if (topLevels.length === 0) {
         let msg = app.i18n.t('Navigation.noRootPage');
-        // This is non-sense but for some reason we may receive here a string array
+        // FIXME This is non-sense but for some reason we may receive here a string array
         if (Array.isArray(msg)) {
           msg = msg.join('');
         }
         return msg;
       }
 
-      const tree: NavItem = {
-        pageId: root._id,
-        title: root.pageTitle,
-        link: '/',
-        children: await dbs.buildMenuTree(root._id),
-      };
+      // We build a tree for each of the top-level pages
+      const forest: NavItem[] = [];
+      for (const topLevel of topLevels) {
+        forest.push({
+          pageId: topLevel._id,
+          title: topLevel.pageTitle,
+          link: slugUrl(topLevel.pageSlug),
+          children: await dbs.buildMenuTree(topLevel._id),
+        });
+      }
 
-      return <Nav tree={tree} currentPageId={pageId || root._id} />;
+      // Use this await to simulate a slow connection
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      return <Nav forest={forest} currentPageId={pageId || ''} />;
     }
   );
 
@@ -261,12 +263,8 @@ const router = async (app: FastifyInstance) => {
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
-      const root = await dbs.getRootPage();
 
-      let page: PageModel | null = INDEX_PLACEHOLDER_PAGE;
-      if (root) {
-        page = await dbs.getPageById(pageId);
-      }
+      const page = await dbs.getPageById(pageId);
 
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -297,7 +295,6 @@ const router = async (app: FastifyInstance) => {
       const { pageTitle, pageContent, rev } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
-      const isIndexPlaceholderPage = pageId === ROOT_PAGE_ID;
 
       if (pageTitle.trim() === '') {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
@@ -311,31 +308,21 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_REV);
       }
 
-      const root = await dbs.getRootPage();
-
-      let page = root;
-
-      if (root && root._id !== pageId) {
-        // If the page is not the root page (which may not exist yet),
-        // we need to check if it exists
-        page = await dbs.getPageById(pageId);
-        if (!page) {
-          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
-        }
+      const page = await dbs.getPageById(pageId);
+      if (!page) {
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      if (page) {
-        if (pageTitle === page.pageTitle && pageContent === page.pageContent) {
-          return rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_UPDATED);
-        }
+      if (pageTitle === page.pageTitle && pageContent === page.pageContent) {
+        return rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_UPDATED);
+      }
 
-        // Ensure we are updating the correct revision
-        if (rev !== page._rev) {
-          return rs.slugWithFeedback(
-            page.pageSlug,
-            Feedbacks.E_REV_MISMATCH_ON_SAVE
-          );
-        }
+      // Ensure we are updating the correct revision
+      if (rev !== page._rev) {
+        return rs.slugWithFeedback(
+          page.pageSlug,
+          Feedbacks.E_REV_MISMATCH_ON_SAVE
+        );
       }
 
       const newSlug = await maybeNewSlug();
@@ -369,11 +356,10 @@ const router = async (app: FastifyInstance) => {
 
       return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
 
-      // The root page has always "/" as slug
       // If the title is the same as the current page, we keep the slug
       // Otherwise, we generate a new one
       async function maybeNewSlug() {
-        if (!page || page.pageSlug === '/') {
+        if (!page) {
           return '/';
         }
 
@@ -473,11 +459,6 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.body;
       const rs = redirectService(app, rep);
       const dbs = dbService(app.dbClient);
-      const root = await dbs.getRootPage();
-
-      if (pageId === root?._id) {
-        return rs.homeWithFeedback(Feedbacks.E_CANNOT_DELETE_INDEX);
-      }
 
       const page = await dbs.getPageById(pageId);
 
@@ -501,12 +482,12 @@ const router = async (app: FastifyInstance) => {
 
   // Creates a page form
   app.get<{
-    Params: FromSchema<typeof SubpageParamsSchema>;
+    Params: FromSchema<typeof CreatePageParamsSchema>;
   }>(
-    '/create/:parentPageId',
+    '/create/:parentPageId?',
     {
       schema: {
-        params: SubpageParamsSchema,
+        params: CreatePageParamsSchema,
       },
     },
     async (req, rep) => {
@@ -515,10 +496,16 @@ const router = async (app: FastifyInstance) => {
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
-      const parentPage = await dbs.getPageById(parentPageId);
-
-      if (!parentPage) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
+      let parentPage: PageModel | null = null;
+      if (parentPageId) {
+        try {
+          parentPage = await dbs.getPageById(parentPageId);
+          if (!parentPage) {
+            return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
+          }
+        } catch (error) {
+          return rs.homeWithError(error);
+        }
       }
 
       return (
@@ -533,13 +520,13 @@ const router = async (app: FastifyInstance) => {
   // case for the edit page route
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
-    Params: FromSchema<typeof SubpageParamsSchema>;
+    Params: FromSchema<typeof CreatePageParamsSchema>;
   }>(
     '/create/:parentPageId',
     {
       schema: {
         body: PageBodySchema,
-        params: SubpageParamsSchema,
+        params: CreatePageParamsSchema,
       },
       preHandler: app.csrfProtection,
     },
@@ -558,14 +545,15 @@ const router = async (app: FastifyInstance) => {
       }
 
       let parentPage: PageModel | null = null;
-      try {
-        parentPage = await dbs.getPageById(parentPageId);
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
-
-      if (!parentPage) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
+      if (parentPageId) {
+        try {
+          parentPage = await dbs.getPageById(parentPageId);
+          if (!parentPage) {
+            return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
+          }
+        } catch (error) {
+          return rs.homeWithError(error);
+        }
       }
 
       const slug = await dbs.generateUniqueSlug(pageTitle);

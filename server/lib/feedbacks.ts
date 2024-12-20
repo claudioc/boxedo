@@ -5,7 +5,6 @@ type ErrorCodes =
   | 'E_CREATING_INDEX'
   | 'E_MISSING_PAGE'
   | 'E_UPDATING_PAGE'
-  | 'E_CANNOT_DELETE_INDEX'
   | 'E_MISSING_PARENT'
   | 'E_DELETING_PAGE'
   | 'E_CREATING_PAGE'
@@ -62,10 +61,6 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_UPDATING_PAGE: {
     code: 103,
     message: 'Error updating page',
-  },
-  E_CANNOT_DELETE_INDEX: {
-    code: 104,
-    message: 'Cannot delete the index page',
   },
   E_MISSING_PARENT: {
     code: 105,

@@ -1,4 +1,4 @@
-import { isIndexPage, isIndexPlaceholderPage } from '~/lib/helpers';
+import { isTopLevelPage } from '~/lib/helpers';
 import styles from './Menu.module.css';
 import clsx from 'clsx';
 import type { PageModel } from '~/types';
@@ -33,21 +33,14 @@ export const PageMenu = ({ page }: PageMenuProps) => {
             <a href={`/edit/${page._id}`} class="dropdown-item">
               {i18n.t('PageMenu.editThisPage')}
             </a>
-            {!isIndexPlaceholderPage(page) && (
-              <a href={`/create/${page._id}`} class="dropdown-item">
-                {i18n.t('PageMenu.createSubpage')}
-              </a>
-            )}
-            {!isIndexPage(page) && (
+            {!isTopLevelPage(page) && (
               <a href={`/move/${page._id}`} class="dropdown-item">
                 {i18n.t('PageMenu.moveThisPage')}
               </a>
             )}
-            {!isIndexPlaceholderPage(page) && (
-              <a href={`/history/${page._id}`} class="dropdown-item">
-                {i18n.t('PageMenu.pageHistory')}
-              </a>
-            )}
+            <a href={`/history/${page._id}`} class="dropdown-item">
+              {i18n.t('PageMenu.pageHistory')}
+            </a>
           </div>
         </div>
       </div>

@@ -3,6 +3,8 @@ import type Polyglot from 'node-polyglot';
 
 export type NodeEnv = 'development' | 'production' | 'test';
 
+export type Context = 'none' | 'editing page' | 'viewing page';
+
 export interface PageModel {
   _id: string;
   _rev?: string;

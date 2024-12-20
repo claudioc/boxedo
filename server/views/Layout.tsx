@@ -5,23 +5,27 @@ import { Search } from './components/Search';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
-import type { PageModel } from '~/types';
+import type { PageModel, Context } from '~/types';
 import { useApp } from '~/lib/context/App';
 
 interface LayoutProps {
   title: string;
-  page?: PageModel;
+  page?: PageModel | null;
   children: string | JSX.Element[] | JSX.Element;
-  useEditor?: boolean;
+  context?: Context;
+  withEditor?: boolean;
+  withCreateButton?: boolean;
 }
 
 export const Layout = ({
   title,
   page,
   children,
-  useEditor = false,
+  context = 'none',
+  withEditor = false,
+  withCreateButton = true,
 }: LayoutProps) => {
-  const { config, feedbackCode } = useApp();
+  const { config, feedbackCode, i18n } = useApp();
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -36,39 +40,66 @@ export const Layout = ({
         <link rel="stylesheet" href={cssFile} />
         <script src="/a/vendor/htmx.min.js" />
       </head>
-      <body x-data class="container is-widescreen" {...onKeypress}>
+      <body x-data {...onKeypress}>
         <script src={getBundleFilename('app')} />
-        {useEditor && <script src={getBundleFilename('editor')} />}
+        {withEditor && <script src={getBundleFilename('editor')} />}
         {process.env.NODE_ENV === 'development' && (
           <script>{'App.livereload()'}</script>
         )}
-        <header class={clsx(styles.header, 'level', 'py-3')}>
-          <div class="level-item level-left">
-            <div class="title">
-              <a href="/" class="has-text-warning">
-                {config.WEBSITE_TITLE}
-              </a>
-            </div>
-          </div>
-          <div class="level-item level-right">
-            <Search />
-          </div>
-        </header>
 
-        <div class="block" x-show="$store.has.some()">
-          <Feedback feedback={getFeedbackByCode(feedbackCode)} />
-        </div>
+        {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
+        <main class="columns mt-0" data-context={context}>
+          <div
+            class={clsx(
+              styles.mainLeft,
+              'column',
+              'is-narrow',
+              'has-background-info-dark',
+              'p-5'
+            )}
+          >
+            <header class={clsx(styles.header, 'block')}>
+              <div class="block">
+                <div class="subtitle">
+                  <a href="/" class="has-text-warning">
+                    {config.WEBSITE_TITLE}
+                  </a>
+                </div>
+              </div>
+              <div class="block">
+                <Search />
+              </div>
+            </header>
 
-        <main class="columns">
-          {page && (
-            <div
-              class="column is-4"
-              hx-get={`/parts/nav/${page._id}`}
-              hx-trigger="load"
-            />
-          )}
+            {withCreateButton && (
+              <div class="block">
+                {/* The href is dynamically updated by our htmx extension */}
+                <a class="button" href={`/create/${page ? page._id : ''}`}>
+                  {i18n.t('Navigation.createPage')}
+                </a>
+              </div>
+            )}
+            <aside
+              class={clsx(styles.aside, 'block')}
+              hx-get={`/parts/nav/${page ? page._id : ''}`}
+              hx-trigger="load once"
+            >
+              <div class="skeleton-lines">
+                <div />
+                <div />
+                <div />
+                <div />
+                <div />
+              </div>
+            </aside>
+          </div>
+
           {/* #main-page-body is used as a hx-target */}
-          <div class="column is-8" id="main-page-body">
+          <div class="column p-5" id="main-page-body">
+            <div x-show="$store.has.some()">
+              <Feedback feedback={getFeedbackByCode(feedbackCode)} />
+            </div>
+
             {children}
           </div>
         </main>

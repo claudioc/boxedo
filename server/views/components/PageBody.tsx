@@ -1,16 +1,15 @@
-import type { PageModel } from '~/types';
-
 interface PageBodyProps {
-  page: PageModel;
+  title: string;
+  body: string;
 }
 
-export const PageBody = ({ page }: PageBodyProps) => (
+export const PageBody = ({ title, body }: PageBodyProps) => (
   <>
-    <h1 class="title">{page.pageTitle}</h1>
+    <h1 class="title">{title}</h1>
     <div
       class="content"
       // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-      dangerouslySetInnerHTML={{ __html: page.pageContent || '' }}
+      dangerouslySetInnerHTML={{ __html: body || '' }}
     />
   </>
 );

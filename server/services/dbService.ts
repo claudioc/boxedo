@@ -43,25 +43,21 @@ export function dbService(client?: nano.ServerScope) {
   const pagesDb: DocumentScope<PageModel> = client.db.use(dbn('pages'));
   if (!pagesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_DB);
 
-  // Cache the root page
-  let rootPage: PageModel | null = null;
-
   return {
-    async getRootPage(): Promise<PageModel | null> {
-      if (rootPage) return rootPage;
+    async countPages(): Promise<number> {
+      const info = await pagesDb.info();
+      return info.doc_count;
+    },
 
+    async getLandingPage(): Promise<PageModel | null> {
       const result = await pagesDb.find({
         selector: {
-          parentId: null,
+          pageSlug: "i don't know",
         } as PageSelector,
         limit: 1,
       });
 
-      if (result.docs.length > 0) {
-        rootPage = result.docs[0];
-      }
-
-      return rootPage;
+      return result.docs.length > 0 ? result.docs[0] : null;
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
@@ -169,6 +165,17 @@ export function dbService(client?: nano.ServerScope) {
           ],
         },
         limit: 25,
+      });
+
+      return result.docs;
+    },
+
+    async getTopLevelPages(): Promise<PageModel[]> {
+      const result = await pagesDb.find({
+        selector: {
+          parentId: null,
+        } as PageSelector,
+        fields: ['_id', 'pageTitle', 'pageSlug'],
       });
 
       return result.docs;

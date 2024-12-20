@@ -1,5 +1,4 @@
 import type { Feedback, PageModel } from '~/types';
-import { ROOT_PAGE_ID } from '~/constants';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/page/${slug}`;
@@ -26,8 +25,5 @@ export const isSameTimestamp = (date1: string, date2: string) => {
   return Math.abs(new Date(date1).getTime() - new Date(date2).getTime()) < 10;
 };
 
-export const isIndexPage = (page: PageModel) =>
+export const isTopLevelPage = (page: PageModel) =>
   typeof page.parentId !== 'string';
-
-export const isIndexPlaceholderPage = (page: PageModel) =>
-  isIndexPage(page) && page._id === ROOT_PAGE_ID && page.createdAt === '';

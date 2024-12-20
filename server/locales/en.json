@@ -5,7 +5,6 @@
 
   "PageMenu": {
     "editThisPage": "Edit this page",
-    "createSubpage": "Create a subpage",
     "moveThisPage": "Move this page",
     "pageHistory": "Page history",
     "actions": "Actions"
@@ -21,12 +20,12 @@
   },
 
   "CreatePage": {
-    "title": "Create a new page"
+    "title": "Create a new page",
+    "titleTopLevel": "Create a new TOP LEVEL page"
   },
 
   "EditPage": {
     "title": "Editing a page",
-    "titlePlaceholder": "Editing the index page",
     "editingPage": "Editing %{title}}",
     "addImage": "Add image",
     "deletePage": "Delete this page",
@@ -68,6 +67,7 @@
   },
 
   "Navigation": {
+    "createPage": "Create page",
     "noRootPage": "Create your first page"
   },
 

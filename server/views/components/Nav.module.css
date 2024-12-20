@@ -1,12 +1,39 @@
+
+[data-context='editing page'] .nav {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
 .nav {
-  height: 100vh;
-  overflow: auto;
-}
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.9rem;
+  list-style: none;
 
-.tree {
-  width: 150%;
-}
+  li .item {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-bottom: 0.5rem;
+    svg {
+      flex-shrink: 0;
+    }
+    a {
+      color: var(--bulma-text);
 
-.nav a:not(:global(.is-active)) {
-  background-color: transparent;
+      &:hover {
+        color: var(--bulma-text-100);
+      }
+    }
+
+    a:global(.is-active) {
+      font-weight: bold;
+      color: var(--bulma-text-100);
+    }
+  }
+
+  ul ul {
+    margin-left: 1rem;
+  }
 }

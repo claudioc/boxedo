@@ -65,6 +65,7 @@ const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
 };
 
 const app = Fastify({
+  // ignoreTrailingSlash: true,
   logger:
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });

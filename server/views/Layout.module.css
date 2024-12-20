@@ -1,7 +1,18 @@
-.header {
-  text-transform: uppercase;
+.mainLeft {
+  background-color: var(--color-primary);
+  height: 100vh;
+
+  .aside {
+    width: 250px;
+    white-space: nowrap;
+  }
+
+  .aside * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-.nav {
-  background-color: var(--color-primary);
+.header {
+  text-transform: uppercase;
 }

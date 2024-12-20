@@ -58,7 +58,7 @@ export const ReadPageVersion = ({
             </details>
           </div>
         </div>
-        <PageBody page={item} />
+        <PageBody title={item.pageTitle} body={item.pageContent} />
       </div>
     </Layout>
   );
