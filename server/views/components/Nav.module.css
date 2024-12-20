@@ -1,5 +1,4 @@
-
-[data-context='editing page'] .nav {
+[data-context="editing page"] .nav {
   pointer-events: none;
   opacity: 0.5;
 }

@@ -1,5 +1,4 @@
 import { isTopLevelPage } from '~/lib/helpers';
-import styles from './Menu.module.css';
 import clsx from 'clsx';
 import type { PageModel } from '~/types';
 import { useApp } from '~/lib/context/App';
@@ -16,7 +15,7 @@ export const PageMenu = ({ page }: PageMenuProps) => {
   }
 
   return (
-    <div class={clsx(styles.Menu)}>
+    <div>
       <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
           <button
@@ -28,7 +27,7 @@ export const PageMenu = ({ page }: PageMenuProps) => {
             <span>{i18n.t('PageMenu.actions')} …</span>
           </button>
         </div>
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+        <div class="dropdown-menu" id="dropdown-menu">
           <div class="dropdown-content">
             <a href={`/edit/${page._id}`} class="dropdown-item">
               {i18n.t('PageMenu.editThisPage')}

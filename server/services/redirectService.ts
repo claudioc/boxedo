@@ -20,7 +20,7 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
     },
 
     homeWithFeedback(feedback: Feedback) {
-      return rep.redirect(303, pathWithFeedback('/', feedback));
+      return rep.redirect(pathWithFeedback('/', feedback), 303);
     },
 
     slugWithFeedback(slug: string, feedback: Feedback) {
@@ -28,7 +28,7 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
         app.log.info(feedback.message);
       }
 
-      return rep.redirect(303, pathWithFeedback(slugUrl(slug), feedback));
+      return rep.redirect(pathWithFeedback(slugUrl(slug), feedback), 303);
     },
   };
 }

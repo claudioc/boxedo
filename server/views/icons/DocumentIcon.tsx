@@ -2,7 +2,6 @@ export const DocumentIcon = () => (
   <svg
     style={{ width: '18px', height: '18px' }}
     aria-hidden="true"
-    role="presentation"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

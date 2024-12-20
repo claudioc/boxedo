@@ -21,7 +21,7 @@ export const ReadPageVersion = ({
   return (
     <Layout title={item.pageTitle} page={page}>
       <div>
-        <div class="message is-info" role="alert" x-ref="message">
+        <div class="message is-info" x-ref="message">
           <div class="message-header">
             <p>
               {i18n.t('ReadPageVersion.oldVersion', {

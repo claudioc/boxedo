@@ -21,6 +21,18 @@
     },
     "ignore": ["dist", "tasks", "assets"]
   },
+  "css": {
+    "parser": {
+      "cssModules": true
+    },
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space"
+    },
+    "linter": {
+      "enabled": true
+    }
+  },
   "javascript": {
     "formatter": {
       "jsxQuoteStyle": "double",

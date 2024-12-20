@@ -3,7 +3,7 @@ import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
 import type { PageModel, NavItem, PageModelWithRev } from '~/types';
 import { Feedbacks } from './feedbacks';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
 import { ErrorWithFeedback } from './errors';
@@ -239,7 +239,7 @@ const router = async (app: FastifyInstance) => {
       if (oldPage) {
         // Redirect to the current slug
         app.log.error(`Using old slug ${slug} for page ${oldPage._id}`);
-        return rep.redirect(301, slugUrl(oldPage.pageSlug));
+        return rep.redirect(slugUrl(oldPage.pageSlug), 301);
       }
 
       app.log.error(Feedbacks.E_MISSING_PAGE.message);
@@ -597,10 +597,7 @@ const router = async (app: FastifyInstance) => {
       if (results) {
         const snippetSize = 200;
         results.forEach((result) => {
-          const textContent = cheerio
-            .load(result.pageContent)
-            .text()
-            .toLowerCase();
+          const textContent = load(result.pageContent).text().toLowerCase();
           const matchIndex = textContent.indexOf(q.toLowerCase());
           if (matchIndex < 0) {
             return;

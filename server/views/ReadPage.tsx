@@ -5,8 +5,6 @@ import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
 import { useApp } from '~/lib/context/App';
 
-import styles from './ReadPage.module.css';
-
 export interface ReadPageProps extends WithI18nProps {
   page?: PageModel;
   // There are no pages in the database so we show a nicer welcome page
@@ -48,7 +46,7 @@ export const ReadPage = ({
       : welcomePage;
 
   const content = (
-    <div class={styles.ReadPage}>
+    <div>
       {showPage && (
         <div class="level level-right has-text-grey is-size-7">
           <>
