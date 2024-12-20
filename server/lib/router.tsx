@@ -767,7 +767,7 @@ const router = async (app: FastifyInstance) => {
     }
 
     if (err.validation) {
-      await reply.code(400);
+      reply.code(400);
       return (
         <AppProvider app={app}>
           <ErrorPage
@@ -778,7 +778,7 @@ const router = async (app: FastifyInstance) => {
       );
     }
 
-    await reply.code(500);
+    reply.code(500);
     return (
       <AppProvider app={app}>
         <ErrorPage title={app.i18n.t('Error.unhandledError')} error={err} />
