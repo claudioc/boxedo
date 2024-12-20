@@ -18,7 +18,7 @@ const extensions = [
   Placeholder.configure({
     placeholder: ({ node }) => {
       if (node.type.name === 'heading') {
-        return "What's the title?";
+        return 'New page';
       }
 
       return '';

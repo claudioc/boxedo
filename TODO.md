@@ -20,6 +20,7 @@ Todo
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
   - unit tests for the dbService would be good.
+  - There is also Lexical as an possible replacement for tiptap, if needed
 
 Done
 - Save the history of a page
