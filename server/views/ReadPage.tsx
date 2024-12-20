@@ -50,7 +50,7 @@ export const ReadPage = ({
   const content = (
     <div class={styles.ReadPage}>
       {showPage && (
-        <div class="level level-right has-text-grey">
+        <div class="level level-right has-text-grey is-size-7">
           <>
             {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
             {!isSameTimestamp(page.updatedAt, page.createdAt) &&
