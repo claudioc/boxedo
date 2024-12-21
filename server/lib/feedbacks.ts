@@ -18,13 +18,15 @@ type ErrorCodes =
   | 'E_MISSING_REV'
   | 'E_REV_MISMATCH_ON_SAVE'
   | 'E_UNKNOWN_ERROR'
-  | 'E_MISSING_SETTINGS_DB';
+  | 'E_MISSING_SETTINGS_DB'
+  | 'E_UPDATING_SETTINGS';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
   | 'S_PAGE_UPDATED'
   | 'S_PAGE_DELETED'
-  | 'S_PAGE_MOVED';
+  | 'S_PAGE_MOVED'
+  | 'S_SETTINGS_UPDATED';
 
 type AnyCode = ErrorCodes | SuccessCodes;
 
@@ -46,6 +48,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   S_PAGE_MOVED: {
     code: 4,
     message: 'Page moved to a new parent',
+  },
+  S_SETTINGS_UPDATED: {
+    code: 5,
+    message: 'Settings updated',
   },
   E_INDEX_ALREADY_EXISTS: {
     code: 100,
@@ -119,6 +125,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_MISSING_SETTINGS_DB: {
     code: 119,
     message: 'Database "Settings" not found',
+  },
+  E_UPDATING_SETTINGS: {
+    code: 120,
+    message: 'Error updating settings',
   },
 } as const;
 

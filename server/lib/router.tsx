@@ -9,6 +9,7 @@ import { redirectService } from '~/services/redirectService';
 
 import { SearchResults } from '~/views/SearchResults';
 import { ReadPage } from '~/views/ReadPage';
+import { SettingsPage } from '~/views/SettingsPage';
 import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { NotFound } from '~/views/NotFound';
 import { ErrorPage } from '~/views/ErrorPage';
@@ -100,6 +101,14 @@ const MovePageBodySchema = {
   },
 } as const;
 
+const SettingsPageBodySchema = {
+  type: 'object',
+  required: ['landingPageId'],
+  properties: {
+    landingPageId: PageIdFormat,
+  },
+} as const;
+
 /**
  * Encapsulates the routes
  * @param {FastifyInstance} fastify  Encapsulated Fastify Instance
@@ -143,6 +152,62 @@ const router = async (app: FastifyInstance) => {
       </AppProvider>
     );
   });
+
+  app.get(
+    '/settings',
+
+    async (req) => {
+      const dbs = dbService(app.dbClient);
+      const settings = await dbs.getSettings();
+
+      let landingPage: PageModel | null = null;
+      if (settings.landingPageId) {
+        landingPage = await dbs.getPageById(settings.landingPageId);
+      }
+
+      return (
+        <AppProvider app={app}>
+          <SettingsPage settings={settings} landingPage={landingPage} />
+        </AppProvider>
+      );
+    }
+  );
+
+  app.post<{
+    Body: FromSchema<typeof SettingsPageBodySchema>;
+  }>(
+    '/settings',
+    {
+      schema: {
+        body: SettingsPageBodySchema,
+      },
+    },
+    async (req, rep) => {
+      const { landingPageId } = req.body;
+      const dbs = dbService(app.dbClient);
+      const rs = redirectService(app, rep);
+
+      const settings = await dbs.getSettings();
+
+      if (settings.landingPageId !== landingPageId) {
+        // Can't use a non-existing landing page
+        const page = await dbs.getPageById(landingPageId);
+        if (!page) {
+          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+        }
+      }
+
+      settings.landingPageId = landingPageId;
+
+      try {
+        await dbs.updateSettings(settings);
+      } catch (error) {
+        return rs.homeWithError(error);
+      }
+
+      return rs.homeWithFeedback(Feedbacks.S_SETTINGS_UPDATED);
+    }
+  );
 
   app.get<{
     Querystring: FromSchema<typeof SearchQuerySchema>;

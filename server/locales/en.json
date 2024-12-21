@@ -87,5 +87,14 @@
     "title": "Search Results",
     "resultsForQuery": "Results for query",
     "noResults": "No results found."
+  },
+
+  "SettingsPage": {
+    "title": "Edit settings",
+    "notSet": "(Not set yet)",
+    "setLandingPage": "Set landing page to:",
+    "currentLandingPageIs": "Current landing page is \"%{title}\"",
+    "newLandingPageIs": "New landing page is",
+    "startTyping": "Start typing…"
   }
 }

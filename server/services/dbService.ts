@@ -77,6 +77,14 @@ export function dbService(client?: nano.ServerScope) {
       return settings;
     },
 
+    async updateSettings(settings: SettingsModel) {
+      try {
+        await settingsDb.insert(settings);
+      } catch (error) {
+        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_SETTINGS);
+      }
+    },
+
     async countPages(): Promise<number> {
       const info = await pagesDb.info();
       return info.doc_count;
@@ -93,14 +101,6 @@ export function dbService(client?: nano.ServerScope) {
       }
 
       return page;
-      // const result = await pagesDb.find({
-      //   selector: {
-      //     _id: pageId,
-      //   } as PageSelector,
-      //   limit: 1,
-      // });
-
-      // return result.docs.length > 0 ? result.docs[0] : null;
     },
 
     async getPageBySlug(slug: string) {
