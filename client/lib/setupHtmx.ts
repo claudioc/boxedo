@@ -35,12 +35,10 @@ if (htmx) {
         }
       }
 
-      // Update the create button's href
+      // Update the create button's href (the very first value is set in the Layout.tsx file)
       const pageId = el.dataset.pageid;
       if (pageId) {
-        const createButton = document.querySelector(
-          '.button[href*="/create/"]'
-        );
+        const createButton = document.querySelector('.button[href*="/create"]');
         if (createButton) {
           createButton.setAttribute('href', `/create/${pageId}`);
         }

@@ -83,14 +83,24 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
-      const result = await pagesDb.find({
-        selector: {
-          _id: pageId,
-        } as PageSelector,
-        limit: 1,
-      });
+      let page: PageModel | null = null;
+      try {
+        page = await pagesDb.get(pageId);
+      } catch (err: unknown) {
+        if ((err as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
+      }
 
-      return result.docs.length > 0 ? result.docs[0] : null;
+      return page;
+      // const result = await pagesDb.find({
+      //   selector: {
+      //     _id: pageId,
+      //   } as PageSelector,
+      //   limit: 1,
+      // });
+
+      // return result.docs.length > 0 ? result.docs[0] : null;
     },
 
     async getPageBySlug(slug: string) {
@@ -197,7 +207,6 @@ export function dbService(client?: nano.ServerScope) {
         selector: {
           parentId: null,
         } as PageSelector,
-        fields: ['_id', 'pageTitle', 'pageSlug'],
       });
 
       return result.docs;

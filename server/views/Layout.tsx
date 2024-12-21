@@ -7,12 +7,14 @@ import styles from './Layout.module.css';
 import clsx from 'clsx';
 import type { PageModel, Context } from '~/types';
 import { useApp } from '~/lib/context/App';
+import { CogIcon } from './icons/CogIcon';
 
 interface LayoutProps {
   title: string;
   page?: PageModel | null;
   children: string | JSX.Element[] | JSX.Element;
   context?: Context;
+  isLandingPage?: boolean;
   withEditor?: boolean;
   withCreateButton?: boolean;
 }
@@ -22,6 +24,7 @@ export const Layout = ({
   page,
   children,
   context = 'none',
+  isLandingPage = false,
   withEditor = false,
   withCreateButton = true,
 }: LayoutProps) => {
@@ -29,6 +32,9 @@ export const Layout = ({
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
+
+  const createButtonLink =
+    isLandingPage || !page ? '/create' : `/create/${page._id}`;
 
   return (
     <html lang="en">
@@ -60,10 +66,21 @@ export const Layout = ({
           >
             <header class={clsx(styles.header, 'block')}>
               <div class="block">
-                <div class="subtitle">
-                  <a href="/" class="has-text-warning">
-                    {config.WEBSITE_TITLE}
-                  </a>
+                <div class="level">
+                  <div class="is-size-4 level-left">
+                    <a href="/" class="has-text-warning">
+                      {config.WEBSITE_TITLE}
+                    </a>
+                  </div>
+                  <div class="level-right">
+                    <a
+                      href="/settings"
+                      aria-label={i18n.t('Navigation.editSettings')}
+                      class=" has-text-grey-lighter"
+                    >
+                      <CogIcon />
+                    </a>
+                  </div>
                 </div>
               </div>
               <div class="block">
@@ -74,7 +91,7 @@ export const Layout = ({
             {withCreateButton && (
               <div class="block">
                 {/* The href is dynamically updated by our htmx extension */}
-                <a class="button" href={`/create/${page ? page._id : ''}`}>
+                <a class="button" href={createButtonLink}>
                   {i18n.t('Navigation.createPage')}
                 </a>
               </div>
@@ -99,7 +116,6 @@ export const Layout = ({
             <div x-show="$store.has.some()">
               <Feedback feedback={getFeedbackByCode(feedbackCode)} />
             </div>
-
             {children}
           </div>
         </main>

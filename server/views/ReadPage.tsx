@@ -11,6 +11,8 @@ export interface ReadPageProps extends WithI18nProps {
   isWelcome?: boolean;
   // Whether to show the full page or just the body
   isFull?: boolean;
+  // Whether we are showing the landing page or not
+  isLandingPage?: boolean;
 }
 
 type PageModelPartial = Pick<PageModel, 'pageTitle' | 'pageContent'>;
@@ -31,6 +33,7 @@ export const ReadPage = ({
   page,
   isFull = true,
   isWelcome = false,
+  isLandingPage = false,
 }: ReadPageProps) => {
   const { i18n } = useApp();
 
@@ -66,6 +69,7 @@ export const ReadPage = ({
       context="viewing page"
       title={actualPage.pageTitle}
       page={showPage ? page : undefined}
+      isLandingPage={isLandingPage}
     >
       {content}
     </Layout>

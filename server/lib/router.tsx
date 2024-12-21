@@ -112,9 +112,9 @@ const router = async (app: FastifyInstance) => {
     const isHtmx = req.headers['hx-request'];
 
     // We consider 3 scenarios
-    // 1. No page at all (first installation)
-    // 2. A page exists but it's not the landing page
-    // 3. The landing page exists
+    // 1. No pages at all (first installation): we show the welcome page
+    // 2. One or more pages exist but the landing page is not defined: we show the first page top-level page
+    // 3. The landing page exists: we show the landing page
 
     // Do we have any page at all?
     const pageCount = await dbs.countPages();
@@ -133,7 +133,9 @@ const router = async (app: FastifyInstance) => {
 
     return (
       <AppProvider app={app}>
-        {landingPage && <ReadPage isFull={!isHtmx} page={landingPage} />}
+        {landingPage && (
+          <ReadPage isFull={!isHtmx} page={landingPage} isLandingPage />
+        )}
         {!landingPage && pageCount === 0 && (
           <ReadPage isFull={!isHtmx} isWelcome />
         )}

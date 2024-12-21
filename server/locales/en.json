@@ -1,24 +1,4 @@
 {
-  "ReadPage": {
-    "createdOn": "Created on"
-  },
-
-  "PageMenu": {
-    "editThisPage": "Edit this page",
-    "moveThisPage": "Move this page",
-    "pageHistory": "Page history",
-    "actions": "Actions"
-  },
-
-  "PageActions": {
-    "saveAndClose": "Save and close",
-    "cancel": "Cancel"
-  },
-
-  "Search": {
-    "search": "Search"
-  },
-
   "CreatePage": {
     "title": "Create a new page",
     "titleTopLevel": "Create a new TOP LEVEL page"
@@ -53,9 +33,20 @@
     "noResults": "No title matches your search"
   },
 
+  "Navigation": {
+    "createPage": "Create page",
+    "noRootPage": "Create your first page",
+    "editSettings": "Edit settings"
+  },
+
   "NotFound": {
     "title": "Page not found",
     "message": "The page you are looking for does not exist."
+  },
+
+  "PageActions": {
+    "saveAndClose": "Save and close",
+    "cancel": "Cancel"
   },
 
   "PageHistory": {
@@ -68,9 +59,15 @@
     "viewLabel": "View"
   },
 
-  "Navigation": {
-    "createPage": "Create page",
-    "noRootPage": "Create your first page"
+  "PageMenu": {
+    "editThisPage": "Edit this page",
+    "moveThisPage": "Move this page",
+    "pageHistory": "Page history",
+    "actions": "Actions"
+  },
+
+  "ReadPage": {
+    "createdOn": "Created on"
   },
 
   "ReadPageVersion": {
@@ -80,6 +77,10 @@
     "listOfVersions": "list of all its versions",
     "more": "More…",
     "moreInfo": "The history only reports changes to the page content and title. Change on the page's authorship or hierarchy are not tracked at this time."
+  },
+
+  "Search": {
+    "search": "Search"
   },
 
   "SearchResults": {
