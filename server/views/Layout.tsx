@@ -54,20 +54,20 @@ export const Layout = ({
         )}
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
-        <main class="columns mt-0" data-context={context}>
+        <main class="columns mt-0 ml-0" data-context={context}>
           <div
             class={clsx(
               styles.mainLeft,
               'column',
               'is-narrow',
               'has-background-info-dark',
-              'p-5'
+              ''
             )}
           >
             <header class={clsx(styles.header, 'block')}>
               <div class="block">
                 <div class="level">
-                  <div class="is-size-4 level-left">
+                  <div class={clsx(styles.title, 'is-size-5', 'level-left')}>
                     <a href="/" class="has-text-warning">
                       {config.WEBSITE_TITLE}
                     </a>

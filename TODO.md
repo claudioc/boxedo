@@ -3,12 +3,13 @@ Doing
 Todo
 
   MVP
-  - a page for the settings and then use them
+  - set page title and page description in the settings
   - to find one document, we need to use get(_id), not find() with a select and limit 1
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - we should be able to reorganize pages on the same level
   - the error and success strings must be translated
+  - better design for the search results
 
   MEDIUM
   - Try errors with curl (ie /parts/nav/br0ken) and see why it does return
@@ -56,4 +57,5 @@ Done
 - internazionalization
 - Check what happens if we cannot connect to the db on bootstrap
 - make the name of the database configurable
-  - add a icon library (the chevron in pageMenu for example or in the message notifications)
+- add a icon library (the chevron in pageMenu for example or in the message notifications)
+- a page for the settings and then use them

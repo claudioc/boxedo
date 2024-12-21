@@ -1,9 +1,9 @@
 .mainLeft {
   background-color: var(--color-primary);
   height: 100vh;
+  width: 280px !important;
 
   .aside {
-    width: 250px;
     white-space: nowrap;
   }
 
@@ -15,4 +15,12 @@
 
 .header {
   text-transform: uppercase;
+  .title {
+    white-space: nowrap;
+  }
+  a {
+    text-overflow: ellipsis;
+    max-width: 225px;
+    overflow: hidden;
+  }
 }
