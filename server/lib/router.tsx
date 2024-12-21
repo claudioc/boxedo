@@ -6,7 +6,6 @@ import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
-import { ErrorWithFeedback } from './errors';
 
 import { SearchResults } from '~/views/SearchResults';
 import { ReadPage } from '~/views/ReadPage';
@@ -19,6 +18,7 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { AppProvider } from '~/lib/context/App';
+import { TitlesList } from '~/views/components/TitlesList';
 
 const PageIdFormat = {
   type: 'string',
@@ -93,7 +93,10 @@ const MovePageBodySchema = {
   required: ['newParentId', 'oldParentId'],
   properties: {
     newParentId: PageIdFormat,
-    oldParentId: PageIdFormat,
+    // The old parent is optional because the root pages have no parent
+    oldParentId: {
+      anyOf: [PageIdFormat, { type: 'null' }],
+    },
   },
 } as const;
 
@@ -150,17 +153,7 @@ const router = async (app: FastifyInstance) => {
 
       const results = await dbService(app.dbClient).search(q);
 
-      return (
-        <>
-          {results.map((result) => (
-            <li key={result._id}>
-              <a href={`#${result._id}`} data-page-id={result._id}>
-                {result.pageTitle}
-              </a>
-            </li>
-          ))}
-        </>
-      );
+      return <TitlesList results={results} i18n={app.i18n} />;
     }
   );
 
@@ -390,10 +383,13 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const parent = await dbs.getPageById(page.parentId ?? '');
+      let parent: PageModel | null = null;
+      if (page.parentId) {
+        parent = await dbs.getPageById(page.parentId ?? '');
 
-      if (!parent) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+        if (!parent) {
+          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+        }
       }
 
       return (
@@ -417,22 +413,30 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const { newParentId } = req.body;
+      const { newParentId, oldParentId } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
 
+      // Can't move a page to itself
       if (newParentId === pageId) {
         return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
       }
 
+      // Can't move a non-existing page
       const page = await dbs.getPageById(pageId);
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
+      // Can't move a page to a non-existing parent
       const newParentPage = await dbs.getPageById(newParentId);
       if (!newParentPage) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      }
+
+      // Double-check that if the old parent is not provided, we really want to move a top-level page
+      if (!oldParentId && page.parentId) {
+        return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
       }
 
       try {

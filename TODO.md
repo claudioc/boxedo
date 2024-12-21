@@ -5,12 +5,14 @@ Todo
   HIGH
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
+  - we cannot reorganize pages on the same level
 
   MEDIUM
   - Try errors with curl (ie /parts/nav/br0ken) and see why it does return
   - back and forth navigation works in a weird way with XHR: need to hook in the history events to update it? It's too easy to make put the menu and the page content out-of-sync
   - duplicate page (needs to specify parent?)
   - add a icon library (the chevron in pageMenu for example or in the message notifications)
+  - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
 
   LOW (before live)
   - consider access implications to the history of docs

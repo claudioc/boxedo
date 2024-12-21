@@ -10,29 +10,16 @@
   font-size: 0.9rem;
   list-style: none;
 
-  li .item {
-    display: flex;
-    align-items: center;
-    gap: 0.2rem;
-    margin-bottom: 0.5rem;
-    svg {
-      flex-shrink: 0;
-    }
-    a {
-      color: var(--bulma-text);
-
-      &:hover {
-        color: var(--bulma-text-100);
-      }
-    }
-
-    a:global(.is-active) {
-      font-weight: bold;
-      color: var(--bulma-text-100);
-    }
-  }
-
   ul ul {
     margin-left: 1rem;
+  }
+}
+
+.item {
+  composes: documentTitleAsListItem from "../styles/common.module.css";
+
+  a:global(.is-active) {
+    font-weight: bold;
+    color: var(--bulma-text-100);
   }
 }

@@ -1,5 +1,5 @@
 import { useApp } from '~/lib/context/App';
-import { SearchIcon } from '../icons/SearchIcon';
+import { SearchIcon } from '~/views/icons/SearchIcon';
 
 export const Search = () => {
   const { i18n } = useApp();

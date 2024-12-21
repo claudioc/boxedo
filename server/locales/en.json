@@ -48,7 +48,9 @@
     "currentParentIs": "Current parent is \"%{title}\"",
     "newParentIs": "New parent is",
     "searchNewParent": "Search for a new parent",
-    "startTyping": "Start typing…"
+    "startTyping": "Start typing…",
+    "noParent": "No parent (top level page)",
+    "noResults": "No title matches your search"
   },
 
   "NotFound": {

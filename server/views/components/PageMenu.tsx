@@ -32,11 +32,9 @@ export const PageMenu = ({ page }: PageMenuProps) => {
             <a href={`/edit/${page._id}`} class="dropdown-item">
               {i18n.t('PageMenu.editThisPage')}
             </a>
-            {!isTopLevelPage(page) && (
-              <a href={`/move/${page._id}`} class="dropdown-item">
-                {i18n.t('PageMenu.moveThisPage')}
-              </a>
-            )}
+            <a href={`/move/${page._id}`} class="dropdown-item">
+              {i18n.t('PageMenu.moveThisPage')}
+            </a>
             <a href={`/history/${page._id}`} class="dropdown-item">
               {i18n.t('PageMenu.pageHistory')}
             </a>

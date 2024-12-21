@@ -4,10 +4,11 @@ import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { useApp } from '~/lib/context/App';
+import { SearchIcon } from '~/views/icons/SearchIcon';
 
 export interface MovePageProps {
   page: PageModel;
-  parent: PageModel;
+  parent: PageModel | null;
 }
 
 export const MovePage = ({ page, parent }: MovePageProps) => {
@@ -18,7 +19,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
       title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
       page={page}
     >
-      <div x-data="{newParentId: '', newParentTitle: 'n/a', error: {newParentId: false}}">
+      <div x-data="{newParentId: '', newParentTitle: '', error: {newParentId: false}}">
         <div x-show="error && error.newParentId" class="block">
           <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
@@ -36,10 +37,12 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
           <h1 class="title">{page.pageTitle}</h1>
 
           <p class="block">
-            {i18n.t('MovePage.currentParentIs', { title: parent.pageTitle })}
+            {i18n.t('MovePage.currentParentIs', {
+              title: parent ? parent.pageTitle : i18n.t('MovePage.noParent'),
+            })}
           </p>
 
-          <p class="block">
+          <p class="block" x-show="newParentId">
             {i18n.t('MovePage.newParentIs')} "
             <span x-text="newParentTitle" />"
           </p>
@@ -54,7 +57,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
               {i18n.t('MovePage.searchNewParent')}
             </label>
           </div>
-          <div class="control">
+          <div class="control has-icons-left">
             <input
               class="input"
               autoComplete="off"
@@ -66,10 +69,13 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
               hx-trigger="keyup changed delay:200ms"
               hx-target="next ul"
             />
+            <span class="icon is-small is-left">
+              <SearchIcon />
+            </span>
           </div>
         </div>
 
-        <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.innerText" />
+        <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.dataset.pageTitle" />
       </div>
     </Layout>
   );
