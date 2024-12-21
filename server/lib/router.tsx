@@ -118,10 +118,17 @@ const router = async (app: FastifyInstance) => {
 
     // Do we have any page at all?
     const pageCount = await dbs.countPages();
+    const settings = await dbs.getSettings();
 
     let landingPage: PageModel | null = null;
-    if (pageCount > 0) {
-      landingPage = await dbs.getLandingPage();
+    if (settings.landingPageId) {
+      landingPage = await dbs.getPageById(settings.landingPageId);
+    } else {
+      if (pageCount > 0) {
+        // Decision: if there is no landing page, we show the first page
+        const topLevels = await dbs.getTopLevelPages();
+        landingPage = topLevels[0] || null;
+      }
     }
 
     return (

@@ -5,6 +5,15 @@ export type NodeEnv = 'development' | 'production' | 'test';
 
 export type Context = 'none' | 'editing page' | 'viewing page';
 
+export interface SettingsModel {
+  _id: string;
+  _rev?: string;
+  landingPageId: string | null;
+  siteTitle: string;
+  siteDescription: string;
+  siteLang: string;
+}
+
 export interface PageModel {
   _id: string;
   _rev?: string;

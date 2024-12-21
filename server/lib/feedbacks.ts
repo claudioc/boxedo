@@ -17,7 +17,8 @@ type ErrorCodes =
   | 'E_INVALID_VERSION'
   | 'E_MISSING_REV'
   | 'E_REV_MISMATCH_ON_SAVE'
-  | 'E_UNKNOWN_ERROR';
+  | 'E_UNKNOWN_ERROR'
+  | 'E_MISSING_SETTINGS_DB';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -114,6 +115,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
     code: 118,
     message:
       'Revision mismatch detected. Someone may have changed the content. Please try again.',
+  },
+  E_MISSING_SETTINGS_DB: {
+    code: 119,
+    message: 'Database "Settings" not found',
   },
 } as const;
 

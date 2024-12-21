@@ -1,4 +1,5 @@
 import type {
+  SettingsModel,
   PageModel,
   PageSelector,
   NavItem,
@@ -23,7 +24,7 @@ interface DbServiceInitParams {
 
 let isTestRun = false;
 
-const dbn = (name: 'pages') => {
+const dbn = (name: 'pages' | 'settings') => {
   return isTestRun ? `${name}-test` : name;
 };
 
@@ -43,21 +44,42 @@ export function dbService(client?: nano.ServerScope) {
   const pagesDb: DocumentScope<PageModel> = client.db.use(dbn('pages'));
   if (!pagesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_DB);
 
+  const settingsDb: DocumentScope<SettingsModel> = client.db.use(
+    dbn('settings')
+  );
+  if (!settingsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SETTINGS_DB);
+
   return {
+    async getSettings() {
+      let settings: SettingsModel | null = null;
+      try {
+        settings = await settingsDb.get('settings');
+      } catch (err: unknown) {
+        if ((err as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
+      }
+
+      // If settings are not found, create a new one
+      if (!settings) {
+        const newSettings: SettingsModel = {
+          _id: 'settings',
+          landingPageId: null,
+          siteTitle: 'Joongle',
+          siteDescription: 'Personal documentation CMS',
+          siteLang: 'en',
+        };
+
+        await settingsDb.insert(newSettings);
+        return newSettings;
+      }
+
+      return settings;
+    },
+
     async countPages(): Promise<number> {
       const info = await pagesDb.info();
       return info.doc_count;
-    },
-
-    async getLandingPage(): Promise<PageModel | null> {
-      const result = await pagesDb.find({
-        selector: {
-          pageSlug: "i don't know",
-        } as PageSelector,
-        limit: 1,
-      });
-
-      return result.docs.length > 0 ? result.docs[0] : null;
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
@@ -330,6 +352,12 @@ dbService.init = async (params: DbServiceInitParams) => {
     await couchdb.db.get(dbn('pages'));
   } catch (error) {
     await couchdb.db.create(dbn('pages'));
+  }
+
+  try {
+    await couchdb.db.get(dbn('settings'));
+  } catch (error) {
+    await couchdb.db.create(dbn('settings'));
   }
 
   return couchdb;

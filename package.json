@@ -10,10 +10,10 @@
     "node": ">=20.6.0"
   },
   "scripts": {
+    "dev": "npm run clean && conc -r -k 'npm:dev:*'",
     "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
     "dev:build": "npm run lint && node --env-file=.env esbuild.mjs",
     "build": "npm run lint && NODE_ENV=production node --env-file=.env esbuild.mjs",
-    "dev": "npm run clean && conc -r -k 'npm:dev:*'",
     "clean": "rm -rf ./dist",
     "postinstall": "npm run build",
     "type-check": "tsc -p server && tsc -p client",

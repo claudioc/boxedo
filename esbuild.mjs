@@ -1,5 +1,6 @@
 import * as esbuild from 'esbuild';
 import { createServer } from 'node:http';
+import { spawn } from 'node:child_process';
 
 let { LIVERELOAD_PORT, LIVERELOAD_ADDRESS } = process.env;
 
@@ -10,6 +11,35 @@ const hasLiveReload = LIVERELOAD_ADDRESS && LIVERELOAD_PORT;
 const LIVERELOAD_URL = hasLiveReload
   ? `http://${LIVERELOAD_ADDRESS}:${LIVERELOAD_PORT}/updates`
   : '';
+
+async function startTypeChecker() {
+  const tsc = spawn('npm', ['run', 'lint'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: true,
+  });
+
+  let hasErrors = false;
+
+  tsc.stdout.on('data', (data) => {
+    const output = data.toString();
+    console.log('[tsc && biome lint]', output);
+
+    // Update error state based on tsc output
+    if (output.includes('Found 0 errors')) {
+      hasErrors = false;
+    } else if (output.includes('error TS') || output.includes(' error.')) {
+      hasErrors = true;
+    }
+  });
+
+  tsc.stderr.on('data', (data) => {
+    console.error('[tsc]', data.toString());
+  });
+
+  return {
+    hasErrors: () => hasErrors,
+  };
+}
 
 const esbuildNotifyPlugin = {
   name: 'esbuild-notify-plugin',
@@ -22,6 +52,18 @@ const esbuildNotifyPlugin = {
         return;
       }
       broadcastMessage(`${bundle} build finished`);
+    });
+  },
+};
+
+const esbuildTypeCheckPlugin = {
+  name: 'type-check-plugin',
+  setup(build) {
+    build.onStart(async () => {
+      const typeChecker = await startTypeChecker();
+      if (typeChecker.hasErrors()) {
+        throw new Error('TypeScript type check failed');
+      }
     });
   },
 };
@@ -46,7 +88,7 @@ const ctxClient = await esbuild.context({
     LIVERELOAD_URL: JSON.stringify(LIVERELOAD_URL),
   },
   platform: 'browser',
-  plugins: hasLiveReload ? [esbuildNotifyPlugin] : [],
+  plugins: hasLiveReload ? [esbuildNotifyPlugin, esbuildTypeCheckPlugin] : [esbuildTypeCheckPlugin],
   entryNames: '[dir]/[name]-[hash]',
   minify: process.env.NODE_ENV === 'production',
   outdir: './dist/client',
@@ -57,7 +99,7 @@ const ctxServer = await esbuild.context({
   bundle: true,
   platform: 'node',
   format: 'esm',
-  plugins: hasLiveReload ? [esbuildNotifyPlugin] : [],
+  plugins: hasLiveReload ? [esbuildNotifyPlugin, esbuildTypeCheckPlugin] : [esbuildTypeCheckPlugin],
   logLevel: 'info',
   outdir: './dist/server',
   // This banner is required for a workaround in __dirname/__filename and fastify

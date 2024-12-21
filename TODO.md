@@ -2,7 +2,9 @@ Doing
 
 Todo
 
-  HIGH
+  MVP
+  - a page for the settings and then use them
+  - to find one document, we need to use get(_id), not find() with a select and limit 1
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - we cannot reorganize pages on the same level
