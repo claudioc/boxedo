@@ -112,7 +112,7 @@ export const Layout = ({
           </div>
 
           {/* #main-page-body is used as a hx-target */}
-          <div class="column p-5" id="main-page-body">
+          <div class="column p-3 pr-5" id="main-page-body">
             <div x-show="$store.has.some()">
               <Feedback feedback={getFeedbackByCode(feedbackCode)} />
             </div>

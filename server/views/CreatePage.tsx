@@ -24,7 +24,7 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
       withEditor
       context="editing page"
     >
-      <PageFormWrapper title={i18n.t(titleKey)}>
+      <PageFormWrapper>
         <form
           action=""
           method="post"
@@ -35,6 +35,7 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
           <input type="hidden" name="_csrf" value={token} />
 
           <PageActions
+            title={i18n.t(titleKey)}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(parentPage?.pageSlug || '/')}
           />

@@ -22,7 +22,7 @@ export const EditPage = ({ page, token }: EditPageProps) => {
       withEditor
       context="editing page"
     >
-      <PageFormWrapper title={i18n.t('EditPage.title')}>
+      <PageFormWrapper>
         <form
           action=""
           method="post"
@@ -36,6 +36,7 @@ export const EditPage = ({ page, token }: EditPageProps) => {
           <PageActions
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(page.pageSlug)}
+            title={i18n.t('EditPage.title')}
           />
 
           {/* <button

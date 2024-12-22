@@ -28,8 +28,11 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
           name="settingsPage"
           x-on:submit="App.validate"
         >
-          <PageActions actions={['save', 'cancel']} cancelUrl="/" />
-          <h1 class="title block">{i18n.t('SettingsPage.title')}</h1>
+          <PageActions
+            title={i18n.t('SettingsPage.title')}
+            actions={['save', 'cancel']}
+            cancelUrl="/"
+          />
           <input type="hidden" name="landingPageId" x-model="landingPageId" />
         </form>
 
