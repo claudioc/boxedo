@@ -34,7 +34,7 @@
   },
 
   "Navigation": {
-    "createPage": "Create page",
+    "createPage": "Crea pagina",
     "noRootPage": "Create your first page",
     "editSettings": "Edit settings"
   },
@@ -63,7 +63,7 @@
     "editThisPage": "Edit this page",
     "moveThisPage": "Move this page",
     "pageHistory": "Page history",
-    "actions": "Actions"
+    "actions": "Azioni"
   },
 
   "ReadPage": {

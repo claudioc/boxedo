@@ -1,8 +1,8 @@
 export const CogIcon = () => (
   <svg
     style={{ width: '18px', height: '18px' }}
-    xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
     stroke-width="1.5"

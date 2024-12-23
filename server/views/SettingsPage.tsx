@@ -4,6 +4,7 @@ import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { useApp } from '~/lib/context/App';
 import { SearchIcon } from '~/views/icons/SearchIcon';
+import { LanguageIcon } from './icons/Language';
 
 interface SettingsPageProps {
   settings: SettingsModel;
@@ -12,6 +13,7 @@ interface SettingsPageProps {
 
 export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
   const { i18n } = useApp();
+  const { siteLang } = settings;
 
   return (
     <Layout title={i18n.t('SettingsPage.title')}>
@@ -34,46 +36,66 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
             cancelUrl="/"
           />
           <input type="hidden" name="landingPageId" x-model="landingPageId" />
-        </form>
 
-        <div class="block">
           <div class="block">
-            {i18n.t('SettingsPage.currentLandingPageIs', {
-              title: landingPage
-                ? landingPage.pageTitle
-                : i18n.t('SettingsPage.notSet'),
-            })}
+            <div class="block">
+              {i18n.t('SettingsPage.currentLandingPageIs', {
+                title: landingPage
+                  ? landingPage.pageTitle
+                  : i18n.t('SettingsPage.notSet'),
+              })}
+            </div>
+
+            <div class="block" x-show="newLandingPageTitle">
+              {i18n.t('SettingsPage.newLandingPageIs')} "
+              <span x-text="newLandingPageTitle" />"
+            </div>
+
+            <div class="field">
+              <label class="label" for="search">
+                {i18n.t('SettingsPage.setLandingPage')}
+              </label>
+              <div class="control has-icons-left">
+                <input
+                  class="input"
+                  autoComplete="off"
+                  type="text"
+                  id="search"
+                  name="q"
+                  placeholder={i18n.t('SettingsPage.startTyping')}
+                  hx-get="/parts/titles"
+                  hx-trigger="keyup changed delay:200ms"
+                  hx-target="next ul"
+                />
+                <span class="icon is-small is-left">
+                  <SearchIcon />
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div class="block" x-show="newLandingPageTitle">
-            {i18n.t('SettingsPage.newLandingPageIs')} "
-            <span x-text="newLandingPageTitle" />"
-          </div>
+          <ul
+            class="block"
+            x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
+          />
 
           <div class="field">
             <label class="label" for="search">
-              {i18n.t('SettingsPage.setLandingPage')}
+              {i18n.t('SettingsPage.setLanguage')}
             </label>
+            <div class="control has-icons-left">
+              <span class="select">
+                <select name="siteLang" value={siteLang}>
+                  <option value="it">Italiano</option>
+                  <option value="en">English</option>
+                </select>
+              </span>
+              <span class="icon is-small is-left">
+                <LanguageIcon />
+              </span>
+            </div>
           </div>
-          <div class="control has-icons-left">
-            <input
-              class="input"
-              autoComplete="off"
-              type="text"
-              id="search"
-              name="q"
-              placeholder={i18n.t('SettingsPage.startTyping')}
-              hx-get="/parts/titles"
-              hx-trigger="keyup changed delay:200ms"
-              hx-target="next ul"
-            />
-            <span class="icon is-small is-left">
-              <SearchIcon />
-            </span>
-          </div>
-        </div>
-
-        <ul x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle" />
+        </form>
       </div>
     </Layout>
   );

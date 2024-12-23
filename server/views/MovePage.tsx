@@ -31,6 +31,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
           x-on:submit="App.validate"
         >
           <PageActions
+            title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(page.pageSlug)}
           />

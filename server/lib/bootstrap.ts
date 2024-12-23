@@ -15,10 +15,19 @@ import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import { dbService, type DbClient } from '~/services/dbService';
-import fastifyPolyglot, { type Polyglot } from '~/lib/plugins/polyglot';
+import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import fastifyFeedback from '~/lib/plugins/feedback';
-
 import en from '../locales/en.json';
+import it from '../locales/it.json';
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    config: FromSchema<typeof ConfigEnvSchema>;
+    dbClient: DbClient;
+    i18n: i18nExtended;
+    feedbackCode: number;
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -90,23 +99,18 @@ if (process.env.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
-await app.register(fastifyPolyglot, {
+await app.register(fastifyI18n, {
   defaultLocale: 'en',
   locales: {
     en,
+    it,
   },
 });
 
 await app.register(fastifyFeedback);
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    config: FromSchema<typeof ConfigEnvSchema>;
-    dbClient: DbClient;
-    i18n: Polyglot;
-    feedbackCode: number;
-  }
-}
+const dbs = await dbService(app.dbClient);
+app.i18n.switchTo((await dbs.getSettings()).siteLang);
 
 await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
