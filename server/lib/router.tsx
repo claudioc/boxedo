@@ -314,6 +314,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.log.error(Feedbacks.E_MISSING_PAGE.message);
+      rep.code(404);
       return (
         <AppProvider app={app}>
           <NotFound title={app.i18n.t('Error.pageNotFound')} />
@@ -548,10 +549,6 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      if (!page.parentId) {
-        await rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
-      }
-
       try {
         await dbs.deletePage(page as PageModelWithRev);
       } catch (error) {
@@ -598,13 +595,11 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  // Creates a subpage. The home page is created as a special
-  // case for the edit page route
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
     Params: FromSchema<typeof CreatePageParamsSchema>;
   }>(
-    '/create/:parentPageId',
+    '/create/:parentPageId?',
     {
       schema: {
         body: PageBodySchema,
@@ -640,11 +635,13 @@ const router = async (app: FastifyInstance) => {
 
       const slug = await dbs.generateUniqueSlug(pageTitle);
       const now = new Date().toISOString();
+      let pageId: string;
 
       try {
+        pageId = dbService.generateId();
         await dbs.insertPage({
-          _id: dbService.generateId(),
-          parentId: parentPageId,
+          _id: pageId,
+          parentId: parentPageId ?? null,
           pageTitle,
           pageContent,
           pageSlug: slug,
@@ -655,6 +652,9 @@ const router = async (app: FastifyInstance) => {
       } catch (error) {
         return rs.homeWithError(error);
       }
+
+      // This is useful for testing purposes
+      rep.header('x-page-id', pageId);
 
       return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
     }
@@ -823,8 +823,8 @@ const router = async (app: FastifyInstance) => {
   //   return 'Slugs generated for all pages';
   // });
 
-  app.setNotFoundHandler(() => {
-    return (
+  app.setNotFoundHandler(async (_, reply) => {
+    await reply.code(404).send(
       <AppProvider app={app}>
         <NotFound title={app.i18n.t('Error.pageNotFound')} />
       </AppProvider>

@@ -68,7 +68,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
               placeholder={i18n.t('MovePage.startTyping')}
               hx-get="/parts/titles"
               hx-trigger="keyup changed delay:200ms"
-              hx-target="next ul"
+              hx-target="next div.results"
             />
             <span class="icon is-small is-left">
               <SearchIcon />
@@ -76,7 +76,10 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
           </div>
         </div>
 
-        <ul x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.dataset.pageTitle" />
+        <div
+          class="results"
+          x-on:click="newParentId = $event.target.dataset.pageId; newParentTitle = $event.target.dataset.pageTitle"
+        />
       </div>
     </Layout>
   );

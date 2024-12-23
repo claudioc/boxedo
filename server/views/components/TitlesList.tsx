@@ -13,25 +13,28 @@ interface TitlesListProps {
 export const TitlesList = ({ results, i18n }: TitlesListProps) => {
   return (
     <>
-      {results.length > 0 &&
-        results.map((page) => (
-          <li key={page._id}>
-            <div class={styles.item}>
-              <DocumentIcon />
-              <a
-                href={`#${page._id}`}
-                data-page-id={page._id}
-                data-page-title={page.pageTitle}
-              >
-                {page.pageTitle}
-              </a>
-            </div>
-          </li>
-        ))}
+      {results.length > 0 && (
+        <ul>
+          {results.map((page) => (
+            <li key={page._id}>
+              <div class={styles.item}>
+                <DocumentIcon />
+                <a
+                  href={`#${page._id}`}
+                  data-page-id={page._id}
+                  data-page-title={page.pageTitle}
+                >
+                  {page.pageTitle}
+                </a>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
       {results.length === 0 && (
-        <li class={styles.noResults}>
+        <div class={styles.noResults}>
           <em>{i18n.t('MovePage.noResults')}</em>
-        </li>
+        </div>
       )}
     </>
   );

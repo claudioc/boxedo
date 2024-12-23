@@ -65,7 +65,7 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
                   placeholder={i18n.t('SettingsPage.startTyping')}
                   hx-get="/parts/titles"
                   hx-trigger="keyup changed delay:200ms"
-                  hx-target="next ul"
+                  hx-target="next div.results"
                 />
                 <span class="icon is-small is-left">
                   <SearchIcon />
@@ -74,8 +74,8 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
             </div>
           </div>
 
-          <ul
-            class="block"
+          <div
+            class="block results"
             x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
           />
 

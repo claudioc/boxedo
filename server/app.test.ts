@@ -1,14 +1,14 @@
 import { it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import bootstrap from './lib/bootstrap';
 import type { FastifyInstance } from 'fastify';
-import { load } from 'cheerio';
+import { type CheerioAPI, load } from 'cheerio';
 import { dbService } from './services/dbService';
 
 let app: FastifyInstance;
 
 beforeAll(async () => {
   app = await bootstrap(true);
-  await dbService(app.dbClient).nukeTests();
+  // await dbService(app.dbClient).nukeTests();
 });
 
 beforeEach(async () => {
@@ -20,86 +20,132 @@ afterAll(async () => {
   await app.close();
 });
 
-const TOP_LEVEL_PAGE_1_ID = 'top-level-page:1';
-
-it('should show an empty home page', async () => {
-  const response = await app.inject({ url: '/' });
-  const $ = load(response.body);
-  expect($('h1').text()).toBe('Welcome to Joongle!');
-  // expect($('p.empty-index-placeholder').text()).toContain('Create this page');
-});
-
-it('should return no navigation items', async () => {
-  const response = await app.inject({ url: '/parts/nav/' });
-  const $ = load(response.body);
-  expect($('body').text()).toBe('Not working yet');
-});
-
-it('should show a feedback when a code is passed', async () => {
-  const response = await app.inject({ url: '/?f=1' });
-  const $ = load(response.body);
-  expect($('[role="status"]').text()).toContain('Page created');
-});
-
-// it('should create the index page', async () => {
-//   await app.inject({
-//     url: '/edit/page:itdoesnotmatter',
-//     method: 'POST',
-//     payload: {
-//       pageTitle: 'Home Page',
-//       pageContent: 'Some proper content<br>',
-//     },
-//   });
-
-//   const response = await app.inject({ url: '/' });
-
-//   const $ = cheerio.load(response.body);
-//   expect($('h1').text()).toBe('Home Page');
-// });
-
-it('should return matching titles', async () => {
-  let response = await app.inject({ url: '/parts/titles?q=home+page' });
-
-  // let $ = load(response.body);
-  // expect($('li').length).toBe(1);
-
-  // response = await app.inject({ url: '/parts/titles?q=ho' });
-
-  let $ = load(response.body);
-  expect($('li').length).toBe(0);
-
-  response = await app.inject({ url: '/parts/titles?q=fooooooo' });
-
-  $ = load(response.body);
-  expect($('li').length).toBe(0);
-});
-
-it.skip('should return one navigation items', async () => {
-  const response = await app.inject({ url: '/parts/nav/' });
-  const $ = load(response.body);
-  const $a = $('a');
-  expect($a.attr('href')).toBe('/');
-  expect($a.text()).toBe('Home Page updated!');
-});
-
-it.skip('should add a new top level page', async () => {
+const postUrl = async (path: string, payload: Record<string, string>) => {
   await app.inject({
+    url: path,
+    method: 'POST',
+    payload,
+  });
+};
+
+const getUrl = async (url: string) => {
+  const response = await app.inject({ url });
+  return response;
+};
+
+const getContent: (url: string) => Promise<CheerioAPI> = async (url) => {
+  const response = await app.inject({ url });
+  return load(response.body);
+};
+
+const createPage = async (pageTitle: string, pageContent = 'content') => {
+  const response = await app.inject({
     url: '/create',
     method: 'POST',
     payload: {
-      pageTitle: 'New top level page',
-      pageContent: 'More content is provided',
+      pageTitle,
+      pageContent,
     },
   });
+  return response;
+};
 
-  let response = await app.inject({ url: '/page/new-top-level-page' });
+it('should not find a url', async () => {
+  const response = await getUrl('/what-is-this');
+  expect(response.statusCode).toBe(404);
+});
 
-  let $ = load(response.body);
-  expect($('h1').text()).toBe('New top level page');
+it('should show the welcome page', async () => {
+  const $ = await getContent('/');
+  const $el = $('.is-welcome');
 
-  response = await app.inject({ url: '/parts/nav' });
-  $ = load(response.body);
+  expect($el).toHaveLength(1);
+  expect($el.hasClass('is-page')).toBe(false);
+  expect($el.hasClass('is-landing')).toBe(false);
+
+  expect($('.page-actions')).toHaveLength(0);
+});
+
+it('should create a page', async () => {
+  const response = await createPage('First and only page');
+  expect(response.statusCode).toBe(303);
+  expect(response.headers.location).toBe('/page/first-and-only-page?f=1');
+});
+
+it('should not find a page', async () => {
+  const response = await getUrl('/page/baaaah');
+  expect(response.statusCode).toBe(404);
+});
+
+it('should show the landing page as the first page created', async () => {
+  const response = await createPage('First and only page');
+  const pageId = response.headers['x-page-id'];
+  await createPage('Another page, actually');
+
+  const $ = await getContent('/');
+  const $el = $('.is-page');
+  expect($el).toHaveLength(1);
+  expect($el.hasClass('is-welcome')).toBe(false);
+  expect($el.hasClass('is-landing')).toBe(true);
+  // Should show the oldest one
+  expect($el.data('page-id')).toBe(pageId);
+});
+
+it('should set a different landing page in the settings', async () => {
+  let response = await createPage('First and only page');
+
+  response = await createPage('Another page, actually');
+  const pageId = response.headers['x-page-id'] as string;
+
+  await postUrl('/settings', {
+    landingPageId: pageId,
+    siteLang: 'en',
+  });
+
+  const $ = await getContent('/');
+
+  const $el = $('.is-page');
+  expect($el).toHaveLength(1);
+  expect($el.hasClass('is-welcome')).toBe(false);
+  expect($el.hasClass('is-landing')).toBe(true);
+  // Should show the oldest one
+  expect($el.data('page-id')).toBe(pageId);
+});
+
+it('should return no navigation items', async () => {
+  const $ = await getContent('/parts/nav/');
+  expect($('body').text()).toBe('Create your first page');
+});
+
+it('should show a feedback when a code is passed', async () => {
+  const $ = await getContent('/?f=1');
+  expect($('[role="status"]').text()).toContain('Page created');
+});
+
+it('should return matching titles', async () => {
+  await createPage('First and only page');
+  await createPage('Second and only page');
+  await createPage('Third and only page');
+
+  let $ = await getContent('/parts/titles?q=First');
+  expect($('li').length).toBe(1);
+
+  $ = await getContent('/parts/titles?q=only+Page');
+  expect($('li').length).toBe(3);
+
+  $ = await getContent('/parts/titles?q=foooobar');
+  expect($('li').length).toBe(0);
+});
+
+it('should return no navigation items', async () => {
+  const $ = await getContent('/parts/nav');
   const $a = $('a');
-  expect($a.length).toBe(2);
-  expect($a.eq(1).attr('href')).toBe('/page/second-page');
+  expect($a).toHaveLength(0);
+});
+
+it('should return one navigation items', async () => {
+  await createPage('First and only page');
+  const $ = await getContent('/parts/nav');
+  const $a = $('a');
+  expect($a).toHaveLength(1);
 });

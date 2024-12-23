@@ -4,6 +4,7 @@ import { formatDate, isSameTimestamp } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
 import { useApp } from '~/lib/context/App';
+import clsx from 'clsx';
 
 export interface ReadPageProps extends WithI18nProps {
   page?: PageModel;
@@ -23,12 +24,6 @@ const welcomePage: PageModelPartial = {
     '<p>To get started, add your first page by using on the "Create page" button above</p>',
 };
 
-const noLandingPage: PageModelPartial = {
-  pageTitle: 'This is your landing page',
-  pageContent:
-    '<p>There are already several pages that you can select as your landing page</p>',
-};
-
 export const ReadPage = ({
   page,
   isFull = true,
@@ -39,25 +34,26 @@ export const ReadPage = ({
 
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
-  const showNoLandingPage = !page && !isWelcome;
   const showPage = page && !isWelcome;
 
-  const actualPage = showPage
-    ? page
-    : showNoLandingPage
-      ? noLandingPage
-      : welcomePage;
+  const actualPage = showPage ? page : welcomePage;
 
   const content = (
-    <div>
+    <div
+      // These classes are referenced in tests
+      class={clsx(
+        isWelcome && 'is-welcome',
+        showPage && 'is-page',
+        isLandingPage && 'is-landing'
+      )}
+      data-page-id={page?._id}
+    >
       {showPage && (
-        <div class="level level-right has-text-grey is-size-7">
-          <>
-            {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
-            {!isSameTimestamp(page.updatedAt, page.createdAt) &&
-              ` (${formatDate(page.updatedAt)})`}
-            <PageMenu page={page} />
-          </>
+        <div class="level level-right has-text-grey is-size-7 page-actions">
+          {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
+          {!isSameTimestamp(page.updatedAt, page.createdAt) &&
+            ` (${formatDate(page.updatedAt)})`}
+          <PageMenu page={page} />
         </div>
       )}
       <PageBody title={actualPage.pageTitle} body={actualPage.pageContent} />

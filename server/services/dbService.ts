@@ -15,6 +15,8 @@ import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 
+const DESIGN_DOCUMENTS_COUNT = 1;
+
 interface DbServiceInitParams {
   serverUrl: string;
   username: string;
@@ -87,7 +89,8 @@ export function dbService(client?: nano.ServerScope) {
 
     async countPages(): Promise<number> {
       const info = await pagesDb.info();
-      return info.doc_count;
+      // Let's be 100% sure that we are never returning a negative value
+      return Math.max(info.doc_count - DESIGN_DOCUMENTS_COUNT, 0);
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
@@ -207,6 +210,7 @@ export function dbService(client?: nano.ServerScope) {
         selector: {
           parentId: null,
         } as PageSelector,
+        sort: [{ createdAt: 'asc' }],
       });
 
       return result.docs;
@@ -327,7 +331,7 @@ export function dbService(client?: nano.ServerScope) {
     async nukeTests() {
       if (!isTestRun) return;
 
-      const name = dbn('pages');
+      let name = dbn('pages');
       // Ensure we are deleting the test database
       if (name.includes('-test')) {
         try {
@@ -337,12 +341,42 @@ export function dbService(client?: nano.ServerScope) {
           console.log(error);
         }
       }
+
+      name = dbn('settings');
+      // Ensure we are deleting the test database
+      if (name.includes('-test')) {
+        try {
+          await client.db.destroy(name);
+          await client.db.create(dbn('settings'));
+          await this.getSettings();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      try {
+        /*
+         * If you add a design document (and index) don't forget
+         * to increase DESIGN_DOCUMENTS_COUNT
+         */
+        await dbService._createIndexes(client);
+      } catch {
+        // Index might already exist, that's fine
+      }
     },
   };
 }
 
 // bulk-load uses the same logic
 dbService.generateId = () => `page:${createId()}`;
+
+dbService._createIndexes = async (client: nano.ServerScope) => {
+  await client.db.use(dbn('pages')).createIndex({
+    index: {
+      fields: ['parentId', 'createdAt'],
+    },
+  });
+};
 
 dbService.init = async (params: DbServiceInitParams) => {
   const couchdb = nano({
@@ -367,6 +401,16 @@ dbService.init = async (params: DbServiceInitParams) => {
     await couchdb.db.get(dbn('settings'));
   } catch (error) {
     await couchdb.db.create(dbn('settings'));
+  }
+
+  try {
+    /*
+     * If you add a design document (and index) don't forget
+     * to increase DESIGN_DOCUMENTS_COUNT
+     */
+    await dbService._createIndexes(couchdb);
+  } catch {
+    // Index might already exist, that's fine
   }
 
   return couchdb;
