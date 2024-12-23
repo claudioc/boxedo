@@ -23,6 +23,33 @@
     "pageNotFound": "Page not found"
   },
 
+  "Feedbacks": {
+    "S_PAGE_CREATED": "Page created",
+    "S_PAGE_UPDATED": "Page updated",
+    "S_PAGE_DELETED": "Page deleted",
+    "S_PAGE_MOVED": "Page moved to a new parent",
+    "S_SETTINGS_UPDATED": "Settings updated",
+    "E_INDEX_ALREADY_EXISTS": "Index already exists",
+    "E_CREATING_INDEX": "Error creating index page",
+    "E_MISSING_PAGE": "Error loading the page",
+    "E_UPDATING_PAGE": "Error updating page",
+    "E_MISSING_PARENT": "Parent page not found",
+    "E_DELETING_PAGE": "Error deleting page",
+    "E_CREATING_PAGE": "Error creating page",
+    "E_MISSING_DB": "Database not connected or connection invalid",
+    "E_EMPTY_TITLE": "Title cannot be empty",
+    "E_EMPTY_CONTENT": "Content cannot be empty",
+    "E_WRONG_PARENT_PAGE": "Parent page is invalid or not found",
+    "E_INVALID_PARENT_PAGE": "Parent page is missing or invalid",
+    "E_MISSING_PAGES_DB": "Database \"Pages\" not found",
+    "E_UNKNOWN_ERROR": "An unknown error occurred",
+    "E_INVALID_VERSION": "Invalid version number",
+    "E_MISSING_REV": "Revision number is missing",
+    "E_REV_MISMATCH_ON_SAVE": "Revision mismatch detected. Someone may have changed the content. Please try again.",
+    "E_MISSING_SETTINGS_DB": "Database \"Settings\" not found",
+    "E_UPDATING_SETTINGS": "Error updating settings"
+  },
+
   "MovePage": {
     "movingPage": "Moving %{title} to another parent",
     "currentParentIs": "Current parent is \"%{title}\"",
@@ -97,5 +124,10 @@
     "currentLandingPageIs": "Current landing page is \"%{title}\"",
     "newLandingPageIs": "New landing page is",
     "startTyping": "Start typing…"
+  },
+
+  "WelcomePage": {
+    "title": "Welcome!",
+    "content": "<p>This page is just a placeholder: to get started, add your first page by using the \"Create page\" button.</p>"
   }
 }

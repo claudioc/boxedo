@@ -19,9 +19,8 @@ export interface ReadPageProps extends WithI18nProps {
 type PageModelPartial = Pick<PageModel, 'pageTitle' | 'pageContent'>;
 
 const welcomePage: PageModelPartial = {
-  pageTitle: 'Welcome to Joongle!',
-  pageContent:
-    '<p>To get started, add your first page by using on the "Create page" button above</p>',
+  pageTitle: '', // Handled by translations
+  pageContent: '', // Handled by translations
 };
 
 export const ReadPage = ({
@@ -35,8 +34,13 @@ export const ReadPage = ({
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
   const showPage = page && !isWelcome;
+  if (showPage) {
+    welcomePage.pageContent = i18n.t('WelcomePage.content');
+    welcomePage.pageTitle = i18n.t('WelcomePage.title');
+  }
 
-  const actualPage = showPage ? page : welcomePage;
+  // const actualPage = showPage ? page : welcomePage;
+  const actualPage = welcomePage;
 
   const content = (
     <div

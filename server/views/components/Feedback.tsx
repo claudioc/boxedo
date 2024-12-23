@@ -1,13 +1,20 @@
 import type { Feedback as FeedbackType } from '~/types';
-import { Feedbacks, isFeedbackError } from '~/lib/feedbacks';
+import {
+  Feedbacks,
+  isFeedbackError,
+  getFeedbackKeyByCode,
+} from '~/lib/feedbacks';
 import clsx from 'clsx';
 import styles from './Feedback.module.css';
+import { useApp } from '~/lib/context/App';
 
 interface FeedbackProps {
   feedback?: FeedbackType;
 }
 
 export const Feedback = ({ feedback }: FeedbackProps) => {
+  const { i18n } = useApp();
+
   if (!feedback) {
     return null;
   }
@@ -30,7 +37,7 @@ export const Feedback = ({ feedback }: FeedbackProps) => {
       role={isFeedbackError(feedback) ? 'alert' : 'status'}
     >
       <button type="button" class="delete" x-on:click="$store.has.none()" />
-      {feedback.message}
+      {i18n.t(getFeedbackKeyByCode(feedback.code))}
     </div>
   );
 };

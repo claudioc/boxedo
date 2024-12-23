@@ -15,6 +15,33 @@
     "deletePageCancelButton": "No, annulla!"
   },
 
+  "Feedbacks": {
+    "S_PAGE_CREATED": "Pagina creata",
+    "S_PAGE_UPDATED": "Pagina aggiornata",
+    "S_PAGE_DELETED": "Pagina eliminata",
+    "S_PAGE_MOVED": "Pagina spostata in una nuova posizione",
+    "S_SETTINGS_UPDATED": "Impostazioni aggiornate",
+    "E_INDEX_ALREADY_EXISTS": "Indice già esistente",
+    "E_CREATING_INDEX": "Errore durante la creazione della pagina indice",
+    "E_MISSING_PAGE": "Errore durante il caricamento della pagina",
+    "E_UPDATING_PAGE": "Errore durante l'aggiornamento della pagina",
+    "E_MISSING_PARENT": "Pagina genitore non trovata",
+    "E_DELETING_PAGE": "Errore durante l'eliminazione della pagina",
+    "E_CREATING_PAGE": "Errore durante la creazione della pagina",
+    "E_MISSING_DB": "Database non connesso o connessione non valida",
+    "E_EMPTY_TITLE": "Il titolo non può essere vuoto",
+    "E_EMPTY_CONTENT": "Il contenuto non può essere vuoto",
+    "E_WRONG_PARENT_PAGE": "La pagina genitore non è valida o non è stata trovata",
+    "E_INVALID_PARENT_PAGE": "La pagina genitore è mancante o non valida",
+    "E_MISSING_PAGES_DB": "Database \"Pages\" non trovato",
+    "E_UNKNOWN_ERROR": "Si è verificato un errore sconosciuto",
+    "E_INVALID_VERSION": "Numero di versione non valido",
+    "E_MISSING_REV": "Numero di revisione mancante",
+    "E_REV_MISMATCH_ON_SAVE": "Rilevata discrepanza nella revisione. Qualcuno potrebbe aver modificato il contenuto. Si prega di riprovare.",
+    "E_MISSING_SETTINGS_DB": "Database \"Settings\" non trovato",
+    "E_UPDATING_SETTINGS": "Errore durante l'aggiornamento delle impostazioni"
+  },
+
   "Error": {
     "requestFailed": "La richiesta non può essere completata",
     "unexpectedError": "Si è verificato un errore inatteso",
@@ -97,5 +124,10 @@
     "currentLandingPageIs": "La pagina iniziale attuale è \"%{title}\"",
     "newLandingPageIs": "La nuova pagina iniziale è",
     "startTyping": "Inizia a scrivere…"
+  },
+
+  "WelcomePage": {
+    "title": "Benvenuti!",
+    "content": "<p>Questa pagina è solo un segnaposto; per iniziare, crea la tua prima pagina usando il bottone \"Crea pagina\".</p>"
   }
 }

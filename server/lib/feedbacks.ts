@@ -35,7 +35,6 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   S_PAGE_CREATED: {
     code: 1,
     message: 'Page created',
-    // key: 'pageCreated'
   },
   S_PAGE_UPDATED: {
     code: 2,
@@ -135,5 +134,13 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
 const feedbackValues = Object.values(Feedbacks);
 export const getFeedbackByCode = (code?: number) =>
   code ? feedbackValues.find((f) => f.code === code) : undefined;
+
+export const getFeedbackKeyByCode = (code: number): string => {
+  return `Feedbacks.${
+    Object.entries(Feedbacks).find(
+      ([_, feedback]) => feedback.code === code
+    )?.[0]
+  }`;
+};
 
 export const isFeedbackError = (feedback: Feedback) => feedback.code >= 100;
