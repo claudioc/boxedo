@@ -6,6 +6,7 @@ import { EditorEnabler } from './components/EditorEnabler';
 import { slugUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
 import { useApp } from '~/lib/context/App';
+import styles from './EditPage.module.css';
 
 export interface CreatePageProps {
   parentPage: PageModel | null;
@@ -40,8 +41,9 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
             cancelUrl={slugUrl(parentPage?.pageSlug || '/')}
           />
 
-          <div id="editor-placeholder" class="block content" />
-
+          <div class={styles.mainContent}>
+            <div id="editor-placeholder" class="block content" />
+          </div>
           <div class="block">
             <DebugInfo />
           </div>

@@ -6,6 +6,7 @@ import { EditorEnabler } from './components/EditorEnabler';
 import { PageFormWrapper } from './components/PageFormWrapper';
 import { useApp } from '~/lib/context/App';
 import { slugUrl } from '~/lib/helpers';
+import styles from './EditPage.module.css';
 
 export interface EditPageProps {
   page: PageModel;
@@ -46,13 +47,15 @@ export const EditPage = ({ page, token }: EditPageProps) => {
           >
             {i18n.t('EditPage.addImage')}
           </button> */}
-          <div id="editor-placeholder" class="block content">
-            <h1>{page.pageTitle}</h1>
-            {page.pageContent}
-          </div>
+          <div class={styles.mainContent}>
+            <div id="editor-placeholder" class="block content">
+              <h1>{page.pageTitle}</h1>
+              {page.pageContent}
+            </div>
 
-          <div class="block">
-            <DebugInfo page={page} />
+            <div class="block">
+              <DebugInfo page={page} />
+            </div>
           </div>
         </form>
 

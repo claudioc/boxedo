@@ -5,7 +5,6 @@
   - we should be able to reorganize pages on the same level
 
   MEDIUM
-  - Try errors with curl (ie /parts/nav/br0ken) and see why it does return
   - back and forth navigation works in a weird way with XHR: need to hook in the history events to update it? It's too easy to make put the menu and the page content out-of-sync
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
@@ -58,3 +57,4 @@ Done
 - translate the content of the landing page
 - better design for the search results
 - set page title and page description in the settings
+- Try errors with curl (ie /parts/nav/br0ken) and see why it does return

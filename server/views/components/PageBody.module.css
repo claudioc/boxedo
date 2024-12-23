@@ -1,0 +1,3 @@
+.mainContent {
+  composes: mainContent from "../styles/common.module.css";
+}
