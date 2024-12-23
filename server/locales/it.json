@@ -112,7 +112,7 @@
 
   "SearchResults": {
     "title": "Risultati della ricerca",
-    "resultsForQuery": "Risultati per la ricerca",
+    "resultsForQuery": "Hai cercato",
     "noResults": "Nessun risultato trovato."
   },
 

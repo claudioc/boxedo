@@ -34,13 +34,12 @@ export const ReadPage = ({
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
   const showPage = page && !isWelcome;
-  if (showPage) {
+  if (!showPage) {
     welcomePage.pageContent = i18n.t('WelcomePage.content');
     welcomePage.pageTitle = i18n.t('WelcomePage.title');
   }
 
-  // const actualPage = showPage ? page : welcomePage;
-  const actualPage = welcomePage;
+  const actualPage = showPage ? page : welcomePage;
 
   const content = (
     <div
