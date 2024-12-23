@@ -120,10 +120,12 @@
     "title": "Modifica impostazioni",
     "notSet": "(Non ancora impostato)",
     "setLandingPage": "Imposta pagina iniziale a:",
-    "setLanguage": "Imposta lingua a:",
+    "setLanguage": "Imposta lingua dell'interfaccia utente a:",
     "currentLandingPageIs": "La pagina iniziale attuale è \"%{title}\"",
     "newLandingPageIs": "La nuova pagina iniziale è",
-    "startTyping": "Inizia a scrivere…"
+    "startTyping": "Inizia a scrivere…",
+    "siteTitle": "Breve titolo per la testata",
+    "siteTitleHelp": "Verrà visualizzato solo in alto a sinistra nell'applicazione"
   },
 
   "WelcomePage": {

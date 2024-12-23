@@ -103,10 +103,12 @@ const MovePageBodySchema = {
 
 const SettingsPageBodySchema = {
   type: 'object',
-  required: ['landingPageId', 'siteLang'],
+  required: ['landingPageId', 'siteLang', 'siteTitle'],
   properties: {
     landingPageId: PageIdFormat,
     siteLang: { type: 'string', enum: ['en', 'it'] },
+    siteTitle: { type: 'string' },
+    siteDescription: { type: 'string' },
   },
 } as const;
 
@@ -184,7 +186,7 @@ const router = async (app: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const { landingPageId, siteLang } = req.body;
+      const { landingPageId, siteLang, siteTitle } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
 
@@ -200,8 +202,11 @@ const router = async (app: FastifyInstance) => {
 
       settings.landingPageId = landingPageId;
       settings.siteLang = siteLang;
+      settings.siteTitle = siteTitle;
 
       app.i18n.switchTo(siteLang);
+
+      app.settings = settings;
 
       try {
         await dbs.updateSettings(settings);

@@ -5,6 +5,8 @@ export type NodeEnv = 'development' | 'production' | 'test';
 
 export type Context = 'none' | 'editing page' | 'viewing page';
 
+type WithoutId<T> = Omit<T, '_id' | '_rev'>;
+
 export interface SettingsModel {
   _id: string;
   _rev?: string;
@@ -30,7 +32,8 @@ export interface PageModelWithRev extends PageModel {
   _rev: string;
 }
 
-export type PageModelWithoutId = Omit<PageModel, '_id' | '_rev'>;
+export type SettingsModelWithoutId = WithoutId<SettingsModel>;
+export type PageModelWithoutId = WithoutId<PageModel>;
 export type PageModelWithoutRev = Omit<PageModel, '_rev'>;
 
 export type PageSelector = {

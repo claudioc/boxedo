@@ -120,10 +120,12 @@
     "title": "Edit settings",
     "notSet": "(Not set yet)",
     "setLandingPage": "Set landing page to:",
-    "setLanguage": "Set language to:",
+    "setLanguage": "Set the language of the user interface to:",
     "currentLandingPageIs": "Current landing page is \"%{title}\"",
     "newLandingPageIs": "New landing page is",
-    "startTyping": "Start typing…"
+    "startTyping": "Start typing…",
+    "siteTitle": "Short header title",
+    "siteTitleHelp": "This will appear at the very top left corner of the application"
   },
 
   "WelcomePage": {

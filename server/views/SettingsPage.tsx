@@ -35,16 +35,34 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
             actions={['save', 'cancel']}
             cancelUrl="/"
           />
+
+          <div class="block">
+            <div class="field">
+              <label class="label" for="search">
+                {i18n.t('SettingsPage.siteTitle')}
+              </label>
+              <div class="control">
+                <input
+                  name="siteTitle"
+                  class="input"
+                  type="text"
+                  value={settings.siteTitle}
+                />
+              </div>
+              <p class="help">{i18n.t('SettingsPage.siteTitleHelp')}</p>
+            </div>
+          </div>
+
           <input type="hidden" name="landingPageId" x-model="landingPageId" />
 
           <div class="block">
-            <div class="block">
+            <p>
               {i18n.t('SettingsPage.currentLandingPageIs', {
                 title: landingPage
                   ? landingPage.pageTitle
                   : i18n.t('SettingsPage.notSet'),
               })}
-            </div>
+            </p>
 
             <div class="block" x-show="newLandingPageTitle">
               {i18n.t('SettingsPage.newLandingPageIs')} "

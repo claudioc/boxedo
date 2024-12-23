@@ -1,10 +1,5 @@
-Doing
-
-Todo
 
   MVP
-  - better design for the search results
-  - set page title and page description in the settings
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - we should be able to reorganize pages on the same level
@@ -61,3 +56,5 @@ Done
 - to find one document, we need to use get(_id), not find() with a select and limit 1
 - the error and success strings must be translated
 - translate the content of the landing page
+- better design for the search results
+- set page title and page description in the settings

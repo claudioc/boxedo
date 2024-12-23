@@ -28,7 +28,7 @@ export const Layout = ({
   withEditor = false,
   withCreateButton = true,
 }: LayoutProps) => {
-  const { config, feedbackCode, i18n } = useApp();
+  const { feedbackCode, i18n, settings } = useApp();
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -69,7 +69,7 @@ export const Layout = ({
                 <div class="level">
                   <div class={clsx(styles.title, 'is-size-5', 'level-left')}>
                     <a href="/" class="has-text-warning">
-                      {config.WEBSITE_TITLE}
+                      {settings.siteTitle}
                     </a>
                   </div>
                   <div class="level-right">

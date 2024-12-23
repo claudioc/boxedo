@@ -7,7 +7,7 @@ import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
-import type { Feedback, NodeEnv } from '~/types';
+import type { NodeEnv, SettingsModel } from '~/types';
 import jsxRenderer from './jsxRenderer';
 import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +23,7 @@ import it from '../locales/it.json';
 declare module 'fastify' {
   interface FastifyInstance {
     config: FromSchema<typeof ConfigEnvSchema>;
+    settings: SettingsModel;
     dbClient: DbClient;
     i18n: i18nExtended;
     feedbackCode: number;
@@ -59,7 +60,6 @@ const ConfigEnvSchema = {
     DB_PASSWORD: { type: 'string' },
     LIVERELOAD_PORT: { type: 'integer', default: 8007 },
     LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
-    WEBSITE_TITLE: { type: 'string', default: 'Joongle CMS' },
   },
 } as const;
 
@@ -110,8 +110,10 @@ await app.register(fastifyI18n, {
 await app.register(fastifyFeedback);
 
 const dbs = await dbService(app.dbClient);
-app.i18n.switchTo((await dbs.getSettings()).siteLang);
+const settings = await dbs.getSettings();
+app.i18n.switchTo(settings.siteLang);
 
+app.decorate('settings', settings);
 await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
     .register(fastifyFavicon, {

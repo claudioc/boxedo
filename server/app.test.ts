@@ -3,6 +3,7 @@ import bootstrap from './lib/bootstrap';
 import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
 import { dbService } from './services/dbService';
+import type { SettingsModelWithoutId } from './types';
 
 let app: FastifyInstance;
 
@@ -97,10 +98,14 @@ it('should set a different landing page in the settings', async () => {
   response = await createPage('Another page, actually');
   const pageId = response.headers['x-page-id'] as string;
 
-  await postUrl('/settings', {
+  const settings: SettingsModelWithoutId = {
     landingPageId: pageId,
     siteLang: 'en',
-  });
+    siteTitle: 'Joongle',
+    siteDescription: '',
+  };
+
+  await postUrl('/settings', settings as Record<string, string>);
 
   const $ = await getContent('/');
 
