@@ -59,3 +59,4 @@ Done
 - make the name of the database configurable
 - add a icon library (the chevron in pageMenu for example or in the message notifications)
 - a page for the settings and then use them
+- switch language from the settings
