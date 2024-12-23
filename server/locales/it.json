@@ -1,101 +1,101 @@
 {
   "CreatePage": {
-    "title": "Create a new page",
-    "titleTopLevel": "Create a new TOP LEVEL page"
+    "title": "Crea una nuova pagina",
+    "titleTopLevel": "Crea una nuova pagina di PRIMO LIVELLO"
   },
 
   "EditPage": {
-    "title": "Editing a page",
-    "editingPage": "Editing %{title}}",
-    "addImage": "Add image",
-    "deletePage": "Delete this page",
-    "deletePageConfirm": "Delete this page?",
-    "deletePageWarning": "Are you sure you want to delete this page? All its children pages will be moved to this page's parent.",
-    "deletePageConfirmButton": "Yes, delete",
-    "deletePageCancelButton": "No, cancel!"
+    "title": "Modifica pagina",
+    "editingPage": "Modifica di %{title}",
+    "addImage": "Aggiungi immagine",
+    "deletePage": "Elimina questa pagina",
+    "deletePageConfirm": "Eliminare questa pagina?",
+    "deletePageWarning": "Sei sicuro di voler eliminare questa pagina? Tutte le pagine figlie verranno spostate al livello superiore.",
+    "deletePageConfirmButton": "Sì, elimina",
+    "deletePageCancelButton": "No, annulla!"
   },
 
   "Error": {
-    "requestFailed": "The request cannot be fullfilled",
-    "unexpectedError": "An unexpected error occurred",
-    "invalidParameters": "Request parameters are not valid.",
-    "unhandledError": "Unhandled error",
-    "pageNotFound": "Page not found"
+    "requestFailed": "La richiesta non può essere completata",
+    "unexpectedError": "Si è verificato un errore inatteso",
+    "invalidParameters": "I parametri della richiesta non sono validi.",
+    "unhandledError": "Errore non gestito",
+    "pageNotFound": "Pagina non trovata"
   },
 
   "MovePage": {
-    "movingPage": "Moving %{title} to another parent",
-    "currentParentIs": "Current parent is \"%{title}\"",
-    "newParentIs": "New parent is",
-    "searchNewParent": "Search for a new parent",
-    "startTyping": "Start typing…",
-    "noParent": "No parent (top level page)",
-    "noResults": "No title matches your search"
+    "movingPage": "Spostamento di %{title} sotto un altro genitore",
+    "currentParentIs": "Il genitore attuale è \"%{title}\"",
+    "newParentIs": "Il nuovo genitore è",
+    "searchNewParent": "Cerca un nuovo genitore",
+    "startTyping": "Inizia a scrivere…",
+    "noParent": "Nessun genitore (pagina di primo livello)",
+    "noResults": "Nessun titolo corrisponde alla tua ricerca"
   },
 
   "Navigation": {
     "createPage": "Crea pagina",
-    "noRootPage": "Create your first page",
-    "editSettings": "Edit settings"
+    "noRootPage": "Crea la tua prima pagina",
+    "editSettings": "Modifica impostazioni"
   },
 
   "NotFound": {
-    "title": "Page not found",
-    "message": "The page you are looking for does not exist."
+    "title": "Pagina non trovata",
+    "message": "La pagina che stai cercando non esiste."
   },
 
   "PageActions": {
-    "saveAndClose": "Save and close",
-    "cancel": "Cancel"
+    "saveAndClose": "Salva e chiudi",
+    "cancel": "Annulla"
   },
 
   "PageHistory": {
-    "historyOf": "History of",
-    "noChanges": "No changes have been made to this page yet.",
-    "versionLabel": "Version ",
-    "lastUpdatedLabel": "Last updated",
-    "titleLabel": "Title",
-    "actionsLabel": "Actions",
-    "viewLabel": "View"
+    "historyOf": "Cronologia di",
+    "noChanges": "Non sono ancora state apportate modifiche a questa pagina.",
+    "versionLabel": "Versione ",
+    "lastUpdatedLabel": "Ultimo aggiornamento",
+    "titleLabel": "Titolo",
+    "actionsLabel": "Azioni",
+    "viewLabel": "Visualizza"
   },
 
   "PageMenu": {
-    "editThisPage": "Edit this page",
-    "moveThisPage": "Move this page",
-    "pageHistory": "Page history",
+    "editThisPage": "Modifica questa pagina",
+    "moveThisPage": "Sposta questa pagina",
+    "pageHistory": "Cronologia pagina",
     "actions": "Azioni"
   },
 
   "ReadPage": {
-    "createdOn": "Created on"
+    "createdOn": "Creata il"
   },
 
   "ReadPageVersion": {
-    "oldVersion": "This is an older version (%{version}) of this page",
-    "oldVersionInfo": "This version was last saved on %{date} while the newest version is from %{newDate}. You can view the current version following %{link}, or you can go back to the %{historyLink}",
-    "thisLink": "this link",
-    "listOfVersions": "list of all its versions",
-    "more": "More…",
-    "moreInfo": "The history only reports changes to the page content and title. Change on the page's authorship or hierarchy are not tracked at this time."
+    "oldVersion": "Questa è una versione precedente (%{version}) della pagina",
+    "oldVersionInfo": "Questa versione è stata salvata il %{date} mentre la versione più recente è del %{newDate}. Puoi vedere la versione attuale seguendo %{link}, oppure puoi tornare alla %{historyLink}",
+    "thisLink": "questo link",
+    "listOfVersions": "lista di tutte le versioni",
+    "more": "Altro…",
+    "moreInfo": "La cronologia riporta solo le modifiche al contenuto e al titolo della pagina. Le modifiche alla paternità o alla gerarchia della pagina non vengono attualmente tracciate."
   },
 
   "Search": {
-    "search": "Search"
+    "search": "Cerca"
   },
 
   "SearchResults": {
-    "title": "Search Results",
-    "resultsForQuery": "Results for query",
-    "noResults": "No results found."
+    "title": "Risultati della ricerca",
+    "resultsForQuery": "Risultati per la ricerca",
+    "noResults": "Nessun risultato trovato."
   },
 
   "SettingsPage": {
-    "title": "Edit settings",
-    "notSet": "(Not set yet)",
-    "setLandingPage": "Set landing page to:",
-    "setLanguage": "Set language to:",
-    "currentLandingPageIs": "Current landing page is \"%{title}\"",
-    "newLandingPageIs": "New landing page is",
-    "startTyping": "Start typing…"
+    "title": "Modifica impostazioni",
+    "notSet": "(Non ancora impostato)",
+    "setLandingPage": "Imposta pagina iniziale a:",
+    "setLanguage": "Imposta lingua a:",
+    "currentLandingPageIs": "La pagina iniziale attuale è \"%{title}\"",
+    "newLandingPageIs": "La nuova pagina iniziale è",
+    "startTyping": "Inizia a scrivere…"
   }
 }

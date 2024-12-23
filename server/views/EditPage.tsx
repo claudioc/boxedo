@@ -83,7 +83,12 @@ export const EditPage = ({ page, token }: EditPageProps) => {
                 >
                   {i18n.t('EditPage.deletePageConfirmButton')}
                 </button>
-                <button type="button" class="button" value="cancel">
+                <button
+                  type="button"
+                  class="button"
+                  value="cancel"
+                  x-on:click="$refs.dialog.close()"
+                >
                   {i18n.t('EditPage.deletePageCancelButton')}
                 </button>
               </menu>
