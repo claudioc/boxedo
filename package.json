@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "npm run clean && conc -r -k 'npm:dev:*'",
-    "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
+    "dev:start": "wait-on ./dist/server/app.js && node --env-file=.env --watch --watch-preserve-output --watch-path ./dist/server ./dist/server/app.js",
     "dev:build": "npm run lint && node --env-file=.env esbuild.mjs",
     "build": "npm run lint && NODE_ENV=production node --env-file=.env esbuild.mjs",
     "clean": "rm -rf ./dist",
