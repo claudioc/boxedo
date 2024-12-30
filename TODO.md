@@ -10,6 +10,7 @@
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
 
   LOW (before live)
+  - use kitajs? https://github.com/kitajs/html
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production

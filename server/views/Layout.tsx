@@ -60,8 +60,7 @@ export const Layout = ({
               styles.mainLeft,
               'column',
               'is-narrow',
-              'has-background-info-dark',
-              ''
+              'has-background-info-dark'
             )}
           >
             <header class={clsx(styles.header, 'block')}>
