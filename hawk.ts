@@ -3,7 +3,6 @@ import * as esbuild from 'esbuild';
 import { type ChildProcess, spawn } from 'node:child_process';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
-import { setTimeout as sleep } from 'node:timers/promises';
 
 interface SseClient {
   id: number;
@@ -101,13 +100,13 @@ const startApiServer: TaskFn = async (name) => {
       resolve(false);
     });
 
-    apiServer.on('spawn', (err) => {
+    apiServer.on('spawn', (_) => {
       resolve(true);
     });
   });
 };
 
-const clean: TaskFn = async (name: string, target = 'client') => {
+const clean: TaskFn = async (_, target = 'client') => {
   try {
     console.log(`[Hawk] Cleaning dist/${target}`);
     await rm(`dist/${target}`, { recursive: true, force: true });
@@ -118,7 +117,7 @@ const clean: TaskFn = async (name: string, target = 'client') => {
   }
 };
 
-const setupFileWatchers: TaskFn = async (name) => {
+const setupFileWatchers: TaskFn = async (_) => {
   try {
     const watchClient = async () => {
       const clientWatcher = watch('client', { recursive: true });
@@ -204,7 +203,7 @@ const setupFileWatchers: TaskFn = async (name) => {
   return true;
 };
 
-const typeCheck: TaskFn = async (name, target = 'client') => {
+const typeCheck: TaskFn = async (_, target = 'client') => {
   return new Promise<boolean>((resolve) => {
     const tsc = spawn('node_modules/.bin/tsc', ['-p', target], {
       stdio: 'inherit',
@@ -219,7 +218,7 @@ const typeCheck: TaskFn = async (name, target = 'client') => {
   });
 };
 
-const lint: TaskFn = async (name, target = 'client') => {
+const lint: TaskFn = async (_, target = 'client') => {
   return new Promise<boolean>((resolve) => {
     const tsc = spawn('node_modules/.bin/biome', ['lint', target], {
       stdio: 'inherit',
@@ -234,7 +233,7 @@ const lint: TaskFn = async (name, target = 'client') => {
   });
 };
 
-const buildClient: TaskFn = async (name) => {
+const buildClient: TaskFn = async (_) => {
   await esbuild.build({
     entryPoints: ['./client/app.ts', './client/editor.ts'],
     bundle: true,
@@ -252,7 +251,7 @@ const buildClient: TaskFn = async (name) => {
   return true;
 };
 
-const buildServer: TaskFn = async (name) => {
+const buildServer: TaskFn = async (_) => {
   await esbuild.build({
     entryPoints: ['./server/app.ts'],
     bundle: true,
@@ -268,7 +267,7 @@ const buildServer: TaskFn = async (name) => {
   return true;
 };
 
-const notifyUpdates: TaskFn = async (name, target = 'client') => {
+const notifyUpdates: TaskFn = async (_, target = 'client') => {
   const delay = target === 'server' ? 1000 : 0;
   sseClients.forEach((client) => {
     setTimeout(() => {
@@ -323,7 +322,7 @@ const startSseServer: TaskFn = async () => {
   return true;
 };
 
-const ready: TaskFn = async (taskName) => {
+const ready: TaskFn = async (_) => {
   return new Promise((res) => {
     setTimeout(() => {
       console.log('[Hawk] -=> READY <=-');
@@ -343,7 +342,7 @@ const longTask: TaskFn = async () => {
   });
 };
 
-class Task<T = void> {
+class Task {
   public status: TaskStatus = 'pending';
   private startTime = 0;
   private duration = 0;

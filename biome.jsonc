@@ -17,6 +17,9 @@
       "recommended": true,
       "complexity": {
         "noForEach": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "error"
       }
     },
     "ignore": ["dist", "tasks", "assets"]

@@ -82,7 +82,7 @@ export function dbService(client?: nano.ServerScope) {
     async updateSettings(settings: SettingsModel) {
       try {
         await settingsDb.insert(settings);
-      } catch (error) {
+      } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_SETTINGS);
       }
     },
@@ -256,7 +256,7 @@ export function dbService(client?: nano.ServerScope) {
 
       try {
         await pagesDb.insert(updatedPage);
-      } catch (error) {
+      } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
     },
@@ -268,7 +268,7 @@ export function dbService(client?: nano.ServerScope) {
       };
       try {
         await pagesDb.insert(updatedPage);
-      } catch (error) {
+      } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
     },
@@ -286,7 +286,7 @@ export function dbService(client?: nano.ServerScope) {
           childPage.parentId = page.parentId;
           await pagesDb.insert(childPage);
         }
-      } catch (error) {
+      } catch {
         throw new ErrorWithFeedback(Feedbacks.E_DELETING_PAGE);
       }
     },
@@ -393,13 +393,13 @@ dbService.init = async (params: DbServiceInitParams) => {
 
   try {
     await couchdb.db.get(dbn('pages'));
-  } catch (error) {
+  } catch {
     await couchdb.db.create(dbn('pages'));
   }
 
   try {
     await couchdb.db.get(dbn('settings'));
-  } catch (error) {
+  } catch {
     await couchdb.db.create(dbn('settings'));
   }
 

@@ -1,5 +1,3 @@
-import { isTopLevelPage } from '~/lib/helpers';
-import clsx from 'clsx';
 import type { PageModel } from '~/types';
 import { useApp } from '~/lib/context/App';
 

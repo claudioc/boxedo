@@ -159,7 +159,7 @@ const router = async (app: FastifyInstance) => {
   app.get(
     '/settings',
 
-    async (req) => {
+    async () => {
       const dbs = dbService(app.dbClient);
       const settings = await dbs.getSettings();
 
@@ -754,7 +754,7 @@ const router = async (app: FastifyInstance) => {
       let historyItem: PageModel | undefined;
       try {
         historyItem = await dbs.getPageHistoryItem(page, version);
-      } catch (error) {
+      } catch {
         return rs.slugWithFeedback(page.pageSlug, Feedbacks.E_INVALID_VERSION);
       }
 

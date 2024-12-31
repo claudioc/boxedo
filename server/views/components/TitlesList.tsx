@@ -1,7 +1,6 @@
 import type { PageModel } from '~/types';
 import { DocumentIcon } from '../icons/DocumentIcon';
 import styles from './TitlesList.module.css';
-import { useApp } from '~/lib/context/App';
 import type Polyglot from 'node-polyglot';
 
 interface TitlesListProps {
