@@ -16,5 +16,7 @@
 }
 
 .mainContent {
-  padding: 5vh 10vh;
+  margin-left: 5%;
+  max-width: 900px;
+  padding: 0 10vh 10vh 10vh;
 }

@@ -55,6 +55,7 @@ const NavItemComponent = ({ item }: NavItemProps) => {
         data-context={context}
         data-pageid={item.pageId}
         class={item.pageId === pageId ? 'is-active' : ''}
+        title={item.title}
       >
         {item.title}
       </a>
