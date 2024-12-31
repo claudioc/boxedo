@@ -27,7 +27,7 @@ Joongle is and will remain **Free Software**.
 
 ### Secondary goal
 
-Joongle is also the first serious project to put at test some ideas that have been floating in my mind for several months. Those ideas initially gave birth to my [Fastify-HTMX-JSX](https://github.com/claudioc/fastify-htmx-ts-starter-kit) starter kit, so Joongle is basically the first of my project to stem from that starter kit, and of course improve over it adding other bits.
+Joongle is also the first serious project to put at test some ideas that have been floating in my mind for several months. Those ideas initially gave birth to my [Fastify-HTMX-JSX](https://github.com/claudioc/fastify-htmx-ts-starter-kit) starter kit, so Joongle is basically the first of my projects to stem from that starter kit, and of course improve over it adding other bits.
 
 I have been experimenting with several ideas during the development of Joongle and right now I am pretty happy with the development workflow, which is of [primary importance for me](https://claudio.cica.li/posts/2024/using-nodejs-for-everything/). I have tried to keep the dependencies to the bare minimum (more on that later) and although I work with React every day, this project only uses JSX which is server-side rendered (using [Preact](https://preactjs.com/)). The rest of the frontend is managed by [HTMX](https://htmx.org/) for the server interactions and [Alpinejs](https://alpinejs.dev/) for a bit of UI and state management.
 
@@ -35,8 +35,8 @@ I have been experimenting with several ideas during the development of Joongle a
 
 ## Missing Features for First Release
 
-### Authentication & Authorization
-Currently, Joongle lacks built-in login or user management features. Planned improvements include pluggable authentication and authorization systems.
+### No Authentication & Authorization
+Currently, Joongle lacks built-in login or user management features. Planned improvements include pluggable authentication and authorization systems. I want to lay out all the most important features before deciding who-can-do-what. This means that at this time Joongle **does not provide any login** capability. You use it for yourself, as you own Knowledge Base, or you would help me with adding that feature
 
 In the interim, you can secure access using a reverse proxy (e.g., nginx) but note that Joongle won't distinguish between users once "logged in."
 
@@ -84,6 +84,8 @@ CouchDB was chosen to explore document-oriented, schema-less database architectu
 I could have chosen several other alternatives of course, but I wanted to use this project to better understand how a document-oriented, schema-less database works. I have never had a lot of experience with any of those, and using a SQL database seemed a bit too comfortable for me. I wanted to look a bit outside of the box.
 
 I initially chose Mongodb, but then I realized that its licensing terms are a bit problematic.
+
+Couchdb also offers, out-of-the-box, and administrative web interface (called Fauxston) at `http://localhost:5984/_utils`. That's _very_ handy indeed.
 
 ---
 
