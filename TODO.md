@@ -9,12 +9,12 @@
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
 
-  LOW (before live)
+  LOW
   - use kitajs? https://github.com/kitajs/html
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production
-  - we are always using 303 to redirect - check it
+  - we are always using 303 to redirect - check if that makes sense
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
   - unit tests for the dbService would be good.
