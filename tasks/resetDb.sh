@@ -4,6 +4,8 @@
 read -p "This will delete all your database data. Press Y to continue: " -n 1 -r
 echo    # move to a new line
 
+exit 0
+
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     # If Y or y is pressed, continue with the operation

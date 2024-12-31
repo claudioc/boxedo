@@ -19,8 +19,8 @@
     "db:stop": "docker compose down",
     "db:reset": "./tasks/resetDb.sh",
     "server:test": "vitest",
-    "bulk-load": "npm run db:reset && sleep 2 && esbuild --target=es2021 tasks/couchdb/bulkLoad.ts --outfile=tasks/bulkLoad.js && node --env-file=.env tasks/bulkLoad.js",
-    "check-trans": "node --env-file=.env tasks/checkTrans"
+    "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
+    "check-trans": "tsx --env-file=.env tasks/checkTrans.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",

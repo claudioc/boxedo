@@ -123,6 +123,8 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
   return client;
 }
 
-generatePages(100).then((client) => {
-  console.log('Pages generated successfully');
-});
+// generatePages(100).then((client) => {
+//   console.log('Pages generated successfully');
+// });
+
+console.log('done')
