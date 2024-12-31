@@ -1,6 +1,6 @@
 import { PageModel, PageModelWithoutRev } from '../../server/types';
 import nano, { DocumentScope, DocumentBulkResponse } from 'nano';
-import cheerio from 'cheerio';
+import { load } from 'cheerio';
 import fs from 'fs';
 import { createId } from '@paralleldrive/cuid2';
 import slugify from 'slugify';
@@ -59,7 +59,7 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
   const pagesDb: DocumentScope<PageModel> = client.db.use('pages');
 
   const html = fs.readFileSync('data/roman-empire.html', 'utf-8');
-  const $ = cheerio.load(html);
+  const $ = load(html);
   const pElements = $('p:not(.foot)')
     .filter(function () {
       return $(this).text().length > 100;
