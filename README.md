@@ -10,8 +10,6 @@
 
 ## Project Status
 
-Officially unreleased (and unsupported).
-
 **Unreleased** (and unsupported).
 
 ---
@@ -121,6 +119,14 @@ I initially chose Mongodb, but then I realized that its licensing terms are a bi
 
 ## Mandatory screenshots
 
+### Reading a page
+
 ![Screenshot of how reading a page looks like](/docs/any-page.png)
+
+### Creating a page
+
+![Screenshot of how editing a page looks like](/docs/creating-page.png)
+
+### Settings
 
 ![Screenshot of how the settings page looks like](/docs/settings.png)
