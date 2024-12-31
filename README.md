@@ -6,92 +6,118 @@
 > [!CAUTION]
 > Although at this point the project is relatively stable in terms of MVP features, don't take this project too seriously and most importantly don't install it on public facing internet website.
 
-## Current status
+---
+
+## Project Status
 
 Officially unreleased (and unsupported).
 
-## Project's end goal
+**Unreleased** (and unsupported).
 
-Joongle aims to provide a modern alternative to systems like Atlassian Confluence, specifically designed for writing internal documentation in regulated companies that require audit trails and access control (IAM). Unlike general website creation tools such as WordPress, Joongle focuses on organizing documentation hierarchically, offering an "OK" design (can't invest much on it), theming options, search capabilities, and ease of customization. Joongle is also Free Software and aims to stay so forever.
+---
 
-## Secondary goal
+## Vision and Goals
+
+### Primary (End) Goal
+Joongle aims to provide a modern alternative to tools like Atlassian Confluence, tailored for creating internal documentation in regulated environments requiring audit trails and robust access control (IAM). Unlike general-purpose website builders such as WordPress, Joongle focuses on:
+- **Hierarchical documentation organization**
+- **Basic but functional design** (limited resources for aesthetics)
+- **Theming and search capabilities**
+- **Ease of customization**
+
+Joongle is and will remain **Free Software**.
+
+### Secondary goal
 
 Joongle is also the first serious project to put at test some ideas that have been floating in my mind for several months. Those ideas initially gave birth to my [Fastify-HTMX-JSX](https://github.com/claudioc/fastify-htmx-ts-starter-kit) starter kit, so Joongle is basically the first of my project to stem from that starter kit, and of course improve over it adding other bits.
 
 I have been experimenting with several ideas during the development of Joongle and right now I am pretty happy with the development workflow, which is of [primary importance for me](https://claudio.cica.li/posts/2024/using-nodejs-for-everything/). I have tried to keep the dependencies to the bare minimum (more on that later) and although I work with React every day, this project only uses JSX which is server-side rendered (using [Preact](https://preactjs.com/)). The rest of the frontend is managed by [HTMX](https://htmx.org/) for the server interactions and [Alpinejs](https://alpinejs.dev/) for a bit of UI and state management.
 
-## Missing for the a real first release
+---
 
-First and foremost, I want to add some kind of _pluggable_ authentication and authorization later on; I want to lay out all the most important features before deciding who-can-do-what. This means that at this time Joongle **does not provide any login** capability. You use it for yourself, as you own Knowledge Base, or you would help me with adding that feature ;)
+## Missing Features for First Release
 
-Of course, you can always add a basic Auth in front of the server using nginx as reverse proxy (or whatever you are going to use) just to protect access to it, but Joongle won't know who you are once "logged in".
+### Authentication & Authorization
+Currently, Joongle lacks built-in login or user management features. Planned improvements include pluggable authentication and authorization systems.
 
-Another important feature that's missing is the support for media (images and/or videos). This is a hard nut to crack and must also be considered "pluggable".
+In the interim, you can secure access using a reverse proxy (e.g., nginx) but note that Joongle won't distinguish between users once "logged in."
 
-Configurability is also pretty rough; the db configuration for example is spread over at least 2 files (the defaults work out-of-the-box to get you started anyway).
+### Media Support
+Support for embedding images or videos is not yet implemented and is envisioned as a pluggable feature.
 
-## What is inside, anyway
+### Configuration
+Configuration is rudimentary and spans multiple files. Default settings work out of the box for quick experimentation.
 
-I think Joongle is pretty packed with features, given the relative youth for the project (and one single developer):
-- For editing, Joongle uses the low-level [TipTap editor](https://tiptap.dev/) which is extremely configurable; for now I haven't done any crazy thing with it, so expect pretty basic functionalities when writing your docs
-- Supports i18n out of the box, although we only have English translation at the moment
-- Basic search capabilities
-- Some configuration capabilities directly from the website
-- History of changes for each page
-- Pretty solid security from the ground up
-- a quite primitive but effective autoreload of the pages when you update one of the files. Not HMR of course, but it works
-- I try to make hacking it an easy and enjoyable experience (see [my post about the `hawk`](https://claudio.cica.li/posts/2024/using-nodejs-for-everything/)) script I developed for this project specifically
+---
 
-## Tech stack
+## Features
 
-- Fastify
-- Couchdb
-- TipTap WYSIWYG editor
-- Server side JSX (via Preact)
-- Alpinejs
-- HTMX
+Despite its experimental nature, Joongle includes:
+
+- **Content editing**: Powered by [TipTap](https://tiptap.dev/) for basic WYSIWYG functionality.
+- **Internationalization (i18n)**: Only English is supported at the moment.
+- **Basic search capabilities**
+- **Page history tracking**: Includes revisions.
+- **Configurable settings**: Directly adjustable from the web UI.
+- **Developer-friendly**: Designed for easy hacking.
+- **Autoreload on file change**: Not HMR but the next best thing
+
+---
+
+## Technical Stack
+
+- [Fastify](https://www.fastify.io/)
+- [CouchDB](https://couchdb.apache.org/)
+- [TipTap](https://tiptap.dev/)
+- Server-side JSX rendering with [Preact](https://preactjs.com/)
+- [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
 - CSS Modules
-- esbuild
-- biome
-- TypeScript everywhere
-- docker compose
+- [esbuild](https://esbuild.github.io/)
+- [biome](https://biome.sh/)
+- TypeScript
+- Docker Compose
+
+---
 
 ## Why couchdb?
+
+CouchDB was chosen to explore document-oriented, schema-less database architecture. Its built-in features like document revisions and history tracking make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
 
 I could have chosen several other alternatives of course, but I wanted to use this project to better understand how a document-oriented, schema-less database works. I have never had a lot of experience with any of those, and using a SQL database seemed a bit too comfortable for me. I wanted to look a bit outside of the box.
 
 I initially chose Mongodb, but then I realized that its licensing terms are a bit problematic.
 
-Couchdb is admittedly a bit overkill for this project at this point, but since I work in a big corporation I also know that this for sure is a "future proof" solution in case the documents cardinality will grow exponentially. There is also a `data` directory in the repository, which contains a book I found on the [Project Gutenberg](https://www.gutenberg.org/) about the [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) (Public Domain), that I use to load test the application.
-
-Couchdb also offers document's revisions and history out-of-the-box which something that I would have to implement anyway.
+---
 
 ## Installation
 
-Requirements:
+### Prerequisites
 - nodejs 20+
 - docker
-- macOS (not tested on linux but it should work)
+- macOS (Linux support untested but likely functional)
 
-Clone the repository and:
-- `npm install`
-- `cp dot.env .env` and change what you want (the default values already work). The DB password is also shared in `compose.yml`
-- `npm run db:start` (there is also a `db:stop`)
-- `npm run dev`
-- now you can open http://localhost:3000
+### Setup
+1. Clone the repository
+2. Run `npm install`
+3. Copy environment config: `cp dot.env .env` and edit the values if you feel like it, although the default should work already
+4. Start the database: `npm run db:start`
+5. Launch development server: `npm run dev`
+6. Access at http://localhost:3000
 
-## Random info
-- A cookie is used for csrf protection
-- Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
-- Alpine "dot" discussion https://github.com/alpinejs/alpine/discussions/4164
-- Conflicts are managed by checking the revision while saving; only the same revision gets saved
+---
 
-## Security
+## Security and other stuff
 - uses Hamlet
 - uses schema validation
 - uses CSRF
 - uses query sanitizer
 - user user input sanitizer
+- A cookie is used for csrf protection
+- Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+- Alpine "dot" discussion https://github.com/alpinejs/alpine/discussions/4164
+- Conflicts are managed by checking the revision while saving; only the same revision gets saved
+
+---
 
 ## Mandatory screenshots
 
