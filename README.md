@@ -98,8 +98,8 @@ Couchdb also offers, out-of-the-box, and administrative web interface (called Fa
 
 ### Setup
 1. Clone the repository
-2. Run `npm install`
-3. Copy environment config: `cp dot.env .env` and edit the values if you feel like it, although the default should work already
+2. Copy environment config: `cp dot.env .env` and edit the values if you feel like 3. Run `npm install`
+it, although the default should work already
 4. Start the database: `npm run db:start`
 5. Launch development server: `npm run dev`
 6. Access at http://localhost:3000
