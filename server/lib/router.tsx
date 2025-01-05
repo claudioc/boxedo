@@ -290,7 +290,15 @@ const router = async (app: FastifyInstance) => {
       // Use this await to simulate a slow connection
       // await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      return <Nav forest={forest} currentPageId={pageId || ''} />;
+      return (
+        <Nav
+          forest={forest}
+          currentPageId={
+            // Don't highlight the landing page in the menu
+            pageId && app.settings.landingPageId !== pageId ? pageId : ''
+          }
+        />
+      );
     }
   );
 

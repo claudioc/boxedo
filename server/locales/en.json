@@ -51,7 +51,7 @@
   },
 
   "MovePage": {
-    "movingPage": "Moving %{title} to another parent",
+    "movingPage": "Change a page's parent",
     "currentParentIs": "Current parent is \"%{title}\"",
     "newParentIs": "New parent is",
     "searchNewParent": "Search for a new parent",

@@ -51,7 +51,7 @@
   },
 
   "MovePage": {
-    "movingPage": "Spostamento di %{title} sotto un altro genitore",
+    "movingPage": "Cambia collocazione della pagina",
     "currentParentIs": "Il genitore attuale è \"%{title}\"",
     "newParentIs": "Il nuovo genitore è",
     "searchNewParent": "Cerca un nuovo genitore",

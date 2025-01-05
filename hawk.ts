@@ -149,6 +149,17 @@ const setupFileWatchers: TaskFn = async (_) => {
             'notify-server-update',
           ]);
         }
+
+        if (event.filename?.match(/\.(json)$/)) {
+          console.log(`[Hawk] Server JSON change: ${event.filename}`);
+          // Just avoid lintng and type-checking
+          taskManager.run([
+            'clean-server',
+            'build-server',
+            'start-api-server',
+            'notify-server-update',
+          ]);
+        }
       }
     };
 
