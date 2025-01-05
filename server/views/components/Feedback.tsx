@@ -32,6 +32,8 @@ export const Feedback = ({ feedback }: FeedbackProps) => {
         'block',
         'notification',
         'is-light',
+        'px-4',
+        'py-3',
         isFeedbackError(feedback) ? 'is-danger' : 'is-success'
       )}
       role={isFeedbackError(feedback) ? 'alert' : 'status'}

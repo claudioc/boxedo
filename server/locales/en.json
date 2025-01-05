@@ -89,7 +89,7 @@
 
   "PageMenu": {
     "editThisPage": "Edit this page",
-    "moveThisPage": "Move this page",
+    "moveThisPage": "Change parent",
     "pageHistory": "Page history",
     "actions": "Actions"
   },
