@@ -1,4 +1,10 @@
-export const DocumentIcon = () => (
+interface DocumentIconProps {
+  isSortableHandle?: boolean;
+}
+
+export const DocumentIcon = ({
+  isSortableHandle = false,
+}: DocumentIconProps) => (
   <svg
     style={{ width: '18px', height: '18px' }}
     aria-hidden="true"
@@ -7,6 +13,7 @@ export const DocumentIcon = () => (
     viewBox="0 0 24 24"
     stroke-width="1.5"
     stroke="currentColor"
+    class={isSortableHandle ? 'sortable-handle' : ''}
   >
     <path
       stroke-linecap="round"

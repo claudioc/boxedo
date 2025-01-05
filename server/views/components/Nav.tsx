@@ -2,6 +2,7 @@ import type { NavItem, Context } from '~/types';
 import clsx from 'clsx';
 import styles from './Nav.module.css';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
+import { SortableEnabler } from './SortableEnabler';
 
 interface NavProps {
   forest: NavItem[];
@@ -14,9 +15,12 @@ export const Nav = ({ forest, currentPageId }: NavProps) => {
   pageId = currentPageId;
 
   return (
-    <menu class={clsx(styles.nav)}>
-      {forest.length ? <NavTree items={forest} /> : null}
-    </menu>
+    <>
+      <menu class={clsx(styles.nav)} id="main-navigation">
+        {forest.length ? <NavTree items={forest} /> : null}
+      </menu>
+      <SortableEnabler />
+    </>
   );
 };
 
@@ -44,7 +48,7 @@ const NavItemComponent = ({ item }: NavItemProps) => {
 
   return (
     <div class={styles.item}>
-      <DocumentIcon />
+      <DocumentIcon isSortableHandle />
       <a
         href={item.link}
         hx-get={item.link}

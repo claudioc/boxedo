@@ -28,6 +28,7 @@
     "@types/node": "^22.10.2",
     "@types/node-polyglot": "^2.5.0",
     "@types/sanitize-html": "^2.11.0",
+    "@types/sortablejs": "^1.15.8",
     "concurrently": "^9.1.0",
     "dotenv": "^16.4.5",
     "esbuild": "0.24.0",
@@ -70,6 +71,7 @@
     "preact": "^10.25.0",
     "preact-render-to-string": "^6.5.0",
     "sanitize-html": "^2.14.0",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "sortablejs": "^1.15.6"
   }
 }

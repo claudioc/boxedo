@@ -1,8 +1,42 @@
+Doing:
+  - we should be able to reorganize pages on the same level
+    - test the insert
+    - rewrite the nav tree to consider the new sort (see below)
+    - test it updating the positions manually
+    - continue working on sortable to actually change the position
+
+```ts
+async buildMenuTree(parentId: string | null): Promise<NavItem[]> {
+  const result = await pagesDb.find({
+    selector: {
+      parentId: parentId ?? { $eq: null },
+      position: { $gte: 0 }  // Ensure position field exists
+    }
+  });
+
+  // Sort siblings by position
+  const sortedPages = result.docs.sort((a, b) => a.position - b.position);
+
+  const menuTree = await Promise.all(
+    sortedPages.map(async page => {
+      const menuItem: NavItem = {
+        pageId: page._id,
+        title: page.pageTitle,
+        link: slugUrl(page.pageSlug),
+        children: await this.buildMenuTree(page._id),
+      };
+
+      return menuItem;
+    })
+  );
+
+  return menuTree;
+}
+```
 
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
-  - we should be able to reorganize pages on the same level
 
   MEDIUM
   - back and forth navigation works in a weird way with XHR: need to hook in the history events to update it? It's too easy to make put the menu and the page content out-of-sync

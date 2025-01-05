@@ -25,3 +25,14 @@
 #editor-data {
   display: none;
 }
+
+.sortable-handle {
+  cursor: grab;
+}
+
+.sortable-ghost {
+  background: transparent !important;
+  opacity: 0.5;
+  cursor:grab !important;
+  border: 1px solid gray;
+}

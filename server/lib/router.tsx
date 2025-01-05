@@ -1,7 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import type { PageModel, NavItem, PageModelWithRev } from '~/types';
+import {
+  type PageModel,
+  type NavItem,
+  type PageModelWithRev,
+  InsertPosition,
+} from '~/types';
 import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -640,19 +645,25 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
+      const parentId = parentPageId ?? null;
       const slug = await dbs.generateUniqueSlug(pageTitle);
       const now = new Date().toISOString();
       let pageId: string;
+      const position = await dbs.findInsertPosition(
+        parentId,
+        InsertPosition.END
+      );
 
       try {
         pageId = dbService.generateId();
         await dbs.insertPage({
           _id: pageId,
-          parentId: parentPageId ?? null,
+          parentId,
           pageTitle,
           pageContent,
           pageSlug: slug,
           pageSlugs: [],
+          position,
           updatedAt: now,
           createdAt: now,
         });
@@ -779,56 +790,46 @@ const router = async (app: FastifyInstance) => {
   //   } catch (err) {
   //     return err;
   //   }
-
   //   return 'Text index generated';
   // });
 
-  // app.get('/admin/generate-slugs', async () => {
-  //   const collection = app.dbClient.db?.collection<PageModel>('pages');
-  //   if (!collection) {
-  //     return 'No collection found.';
-  //   }
+  app.get('/admin/schema/add-position', async () => {
+    const dbs = dbService(app.dbClient);
+    const pageDb = dbs.getPageDb();
 
-  //   const pages = await collection.find().toArray();
-  //   if (!pages) {
-  //     return 'No pages found.';
-  //   }
+    // Get all pages without a position field
+    const result = await pageDb.find({
+      selector: {
+        position: { $exists: false }, // Find docs missing position
+      },
+    });
 
-  //   for (const page of pages) {
-  //     if (!page.pageSlug) {
-  //       const slug = await generateUniqueSlug(page.pageTitle, collection);
-  //       await collection.updateOne(
-  //         { _id: page._id },
-  //         { $set: { pageSlug: slug, pageSlugs: [] } }
-  //       );
-  //     }
-  //   }
+    const pagesByParent = new Map<string, PageModel[]>();
+    result.docs.forEach((doc) => {
+      const pages = pagesByParent.get(doc.parentId ?? 'null') || [];
+      pages.push(doc);
+      pagesByParent.set(doc.parentId ?? 'null', pages);
+    });
 
-  //   return 'Slugs generated for all pages';
-  // });
+    // Update each group of siblings
+    const updates: PageModel[] = [];
+    for (const [_, siblings] of pagesByParent) {
+      siblings.forEach((doc, index) => {
+        updates.push({
+          ...doc,
+          position: index,
+        });
+      });
+    }
 
-  // app.get('/admin/schema/add-created-at', async () => {
-  //   const collection = app.dbClient.db?.collection<PageModel>('pages');
-  //   if (!collection) {
-  //     return 'No collection found.';
-  //   }
-
-  //   const pages = await collection.find().toArray();
-  //   if (!pages) {
-  //     return 'No pages found.';
-  //   }
-
-  //   for (const page of pages) {
-  //     if (!page.createdAt) {
-  //       await collection.updateOne(
-  //         { _id: page._id },
-  //         { $set: { createdAt: new Date(), updatedAt: new Date() } }
-  //       );
-  //     }
-  //   }
-
-  //   return 'Slugs generated for all pages';
-  // });
+    // Bulk update if there are any documents to migrate
+    if (updates.length > 0) {
+      await pageDb.bulk({ docs: updates });
+      app.log.info(`Migrated ${updates.length} documents`);
+    } else {
+      app.log.info('No pages migrated');
+    }
+  });
 
   app.setNotFoundHandler(async (_, reply) => {
     await reply.code(404).send(

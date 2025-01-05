@@ -10,8 +10,17 @@
   font-size: 0.9rem;
   list-style: none;
 
+  li {
+    margin: 1px solid transparent;
+  }
+
   ul ul {
     margin-left: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  li:not(:last-child) {
+    margin-bottom: 0.5rem;
   }
 }
 

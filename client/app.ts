@@ -2,6 +2,7 @@ import { store } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import type { TipTapEditor } from './lib/setupTipTap';
 import { removeQueryParam } from './lib/helpers';
+import { enableSortable, destroySortable } from './lib/setupSortable';
 
 class App {
   private editor: TipTapEditor | null = null;
@@ -73,6 +74,15 @@ class App {
   enableEditor() {
     // This method is rewritten in the editor.ts file
     console.error('enableEditor is not implemented');
+  }
+
+  enableSortable(el?: Element | null) {
+    destroySortable();
+    enableSortable(el as HTMLElement);
+  }
+
+  destroySortable() {
+    destroySortable();
   }
 
   livereload() {

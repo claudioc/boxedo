@@ -52,6 +52,10 @@ export function dbService(client?: nano.ServerScope) {
   if (!settingsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SETTINGS_DB);
 
   return {
+    getPageDb() {
+      return pagesDb;
+    },
+
     async getSettings() {
       let settings: SettingsModel | null = null;
       try {
@@ -214,6 +218,56 @@ export function dbService(client?: nano.ServerScope) {
       });
 
       return result.docs;
+    },
+
+    // 0 based!
+    async findInsertPosition(
+      parentId: string | null,
+      targetIndex: number
+    ): Promise<number> {
+      const result = await pagesDb.find({
+        selector: {
+          parentId: parentId ?? { $eq: null },
+          position: { $gte: 0 },
+        },
+        fields: ['_id', 'position'] as Array<keyof PageModel>,
+      });
+
+      if (result.docs.length === 0) {
+        return 0; // First page in this level (root or under parent)
+      }
+
+      const siblings = result.docs.sort((a, b) => a.position - b.position);
+
+      // Validate target index
+      const safeTargetIndex = Math.max(
+        0,
+        Math.min(targetIndex, siblings.length)
+      );
+
+      // Common cases
+      if (safeTargetIndex === 0) {
+        // Insert at start
+        return siblings[0].position > 0 ? 0 : siblings[0].position - 1;
+      }
+
+      if (safeTargetIndex === siblings.length) {
+        // Insert at end
+        return siblings[siblings.length - 1].position + 1;
+      }
+
+      // Insert between two pages
+      const prevPosition = siblings[safeTargetIndex - 1].position;
+      const nextPosition = siblings[safeTargetIndex].position;
+
+      // If there's a gap, use it
+      if (nextPosition - prevPosition > 1) {
+        return prevPosition + 1;
+      }
+
+      // No gap available - need to reorder
+      // Optional: you could reorder all siblings here to normalize positions
+      return prevPosition + 1;
     },
 
     async buildMenuTree(parentId: string): Promise<NavItem[]> {

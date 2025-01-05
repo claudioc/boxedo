@@ -5,6 +5,11 @@ export type NodeEnv = 'development' | 'production' | 'test';
 
 export type Context = 'none' | 'editing page' | 'viewing page';
 
+export const InsertPosition = {
+  START: 0,
+  END: Number.MAX_SAFE_INTEGER,
+} as const;
+
 type WithoutId<T> = Omit<T, '_id' | '_rev'>;
 
 export interface SettingsModel {
@@ -24,6 +29,7 @@ export interface PageModel {
   pageSlug: string;
   pageSlugs: string[];
   pageContent: string;
+  position: number;
   createdAt: string;
   updatedAt: string;
 }

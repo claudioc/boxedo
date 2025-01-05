@@ -46,6 +46,7 @@ export const Layout = ({
         {withEditor && <meta http-equiv="Cache-Control" content="no-store" />}
         <link rel="stylesheet" href={cssFile} />
         <script src="/a/vendor/htmx.min.js" />
+        <script src="/a/vendor/Sortable.min.js" />
       </head>
       <body x-data {...onKeypress}>
         <script src={getBundleFilename('app')} />

@@ -50,6 +50,9 @@ if (htmx) {
           createButton.textContent = createButton.dataset.labelnested ?? '';
         }
       }
+
+      // Rebind sortable to the closest UL
+      window.App.enableSortable(el.closest('ul'));
     },
   });
 
