@@ -20,7 +20,11 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
     },
 
     homeWithFeedback(feedback: Feedback) {
-      return rep.redirect(pathWithFeedback('/', feedback), 303);
+      return rep
+        .header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        .header('Pragma', 'no-cache')
+        .header('Expires', '0')
+        .redirect(pathWithFeedback('/', feedback), 303);
     },
 
     slugWithFeedback(slug: string, feedback: Feedback) {
@@ -28,7 +32,11 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
         app.log.info(feedback.message);
       }
 
-      return rep.redirect(pathWithFeedback(slugUrl(slug), feedback), 303);
+      return rep
+        .header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        .header('Pragma', 'no-cache')
+        .header('Expires', '0')
+        .redirect(pathWithFeedback(slugUrl(slug), feedback), 303);
     },
   };
 }

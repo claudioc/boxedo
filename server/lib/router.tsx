@@ -159,7 +159,7 @@ const router = async (app: FastifyInstance) => {
   app.get(
     '/settings',
 
-    async () => {
+    async (_, rep) => {
       const dbs = dbService(app.dbClient);
       const settings = await dbs.getSettings();
 
@@ -167,6 +167,8 @@ const router = async (app: FastifyInstance) => {
       if (settings.landingPageId) {
         landingPage = await dbs.getPageById(settings.landingPageId);
       }
+
+      rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 
       return (
         <AppProvider app={app}>
@@ -248,7 +250,7 @@ const router = async (app: FastifyInstance) => {
         params: PageParamsSchemaOptional,
       },
     },
-    async (req) => {
+    async (req, reply) => {
       const { pageId } = req.params;
       const dbs = dbService(app.dbClient);
 
@@ -278,6 +280,8 @@ const router = async (app: FastifyInstance) => {
           children: await dbs.buildMenuTree(topLevel._id),
         });
       }
+
+      reply.header('Cache-Control', 'no-store');
 
       // Use this await to simulate a slow connection
       // await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -347,6 +351,8 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
+      rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+
       return (
         <AppProvider app={app}>
           <EditPage page={page} token={token} />
@@ -405,28 +411,12 @@ const router = async (app: FastifyInstance) => {
       const newSlug = await maybeNewSlug();
 
       try {
-        if (!page) {
-          // Inserting the index page for the first time
-          const newPage: PageModel = {
-            _id: dbService.generateId(),
-            parentId: null,
-            pageTitle: req.body.pageTitle,
-            pageContent: req.body.pageContent,
-            pageSlug: newSlug,
-            pageSlugs: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          await dbs.insertPage(newPage);
-        } else {
-          // Updating an old index page or any other page
-          await dbs.updatePage(page, {
-            pageTitle: req.body.pageTitle,
-            pageContent: req.body.pageContent,
-            pageSlug: newSlug,
-            updatedAt: new Date().toISOString(),
-          });
-        }
+        await dbs.updatePage(page, {
+          pageTitle: req.body.pageTitle,
+          pageContent: req.body.pageContent,
+          pageSlug: newSlug,
+          updatedAt: new Date().toISOString(),
+        });
       } catch (error) {
         return rs.homeWithError(error);
       }
