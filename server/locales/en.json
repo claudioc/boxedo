@@ -61,7 +61,8 @@
   },
 
   "Navigation": {
-    "createPage": "Create page",
+    "createTopPage": "Create top level page",
+    "createNestedPage": "Add nested page",
     "noRootPage": "Create your first page",
     "editSettings": "Edit settings"
   },

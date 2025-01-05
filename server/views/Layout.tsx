@@ -90,9 +90,15 @@ export const Layout = ({
 
             {withCreateButton && (
               <div class="block">
-                {/* The href is dynamically updated by our htmx extension */}
-                <a class="button" href={createButtonLink}>
-                  {i18n.t('Navigation.createPage')}
+                {/* The href and text is dynamically updated by our htmx extension */}
+                <a
+                  class="button"
+                  href={createButtonLink}
+                  data-labelNested={i18n.t('Navigation.createNestedPage')}
+                >
+                  {isLandingPage
+                    ? i18n.t('Navigation.createTopPage')
+                    : i18n.t('Navigation.createNestedPage')}
                 </a>
               </div>
             )}

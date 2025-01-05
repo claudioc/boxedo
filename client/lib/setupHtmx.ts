@@ -16,6 +16,9 @@ if (htmx) {
         return;
       }
 
+      // FIXME this is a "make it works" solution but all the actions below should be handled
+      // by a change the Alpine store
+
       // Activate the current page in the nav
       const [parent, activeClass] = (el.dataset.activate ?? '').split('/');
       if (parent && activeClass) {
@@ -38,9 +41,13 @@ if (htmx) {
       // Update the create button's href (the very first value is set in the Layout.tsx file)
       const pageId = el.dataset.pageid;
       if (pageId) {
-        const createButton = document.querySelector('.button[href*="/create"]');
+        const createButton = document.querySelector(
+          '.button[href*="/create"]'
+        ) as HTMLElement;
         if (createButton) {
           createButton.setAttribute('href', `/create/${pageId}`);
+          // As we are moving away from the landing page, the button label must be updated accordingly
+          createButton.textContent = createButton.dataset.labelnested ?? '';
         }
       }
     },
