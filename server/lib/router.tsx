@@ -103,9 +103,11 @@ const MovePageBodySchema = {
 
 const SettingsPageBodySchema = {
   type: 'object',
-  required: ['landingPageId', 'siteLang', 'siteTitle'],
+  required: ['siteLang', 'siteTitle'],
   properties: {
-    landingPageId: PageIdFormat,
+    landingPageId: {
+      anyOf: [PageIdFormat, { type: 'null' }],
+    },
     siteLang: { type: 'string', enum: ['en', 'it'] },
     siteTitle: { type: 'string' },
     siteDescription: { type: 'string' },
@@ -194,15 +196,17 @@ const router = async (app: FastifyInstance) => {
 
       const settings = await dbs.getSettings();
 
-      if (settings.landingPageId !== landingPageId) {
-        // Can't use a non-existing landing page
-        const page = await dbs.getPageById(landingPageId);
-        if (!page) {
-          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      if (landingPageId) {
+        if (settings.landingPageId !== landingPageId) {
+          // Can't use a non-existing landing page
+          const page = await dbs.getPageById(landingPageId);
+          if (!page) {
+            return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+          }
+          settings.landingPageId = landingPageId;
         }
       }
 
-      settings.landingPageId = landingPageId;
       settings.siteLang = siteLang;
       settings.siteTitle = siteTitle;
 
