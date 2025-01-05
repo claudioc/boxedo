@@ -467,7 +467,7 @@ taskManager.registerTask('notify-server-update', notifyUpdates, 'server');
 
 if (process.env.NODE_ENV === 'production') {
   taskManager.run(
-    ['type-check-client', 'build-client', 'type-check-server', 'build-server'],
+    ['clean-client', 'clean-server', 'build-client', 'build-server'],
     true
   );
 } else {

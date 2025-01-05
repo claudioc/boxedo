@@ -44,17 +44,6 @@ export const Layout = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Joongle is the ultimate CMS" />
         {withEditor && <meta http-equiv="Cache-Control" content="no-store" />}
-        {withEditor && (
-          <script>
-            {/* We don't want page with dynamic content to be cached in the bfcache */}
-            {`
-          window.addEventListener('pagehide', (event) => {
-          alert('boop');
-            document.body.style.display = 'none'
-          })
-`}
-          </script>
-        )}
         <link rel="stylesheet" href={cssFile} />
         <script src="/a/vendor/htmx.min.js" />
       </head>
