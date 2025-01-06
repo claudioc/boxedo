@@ -286,6 +286,7 @@ const router = async (app: FastifyInstance) => {
           pageId: topLevel._id,
           title: topLevel.pageTitle,
           link: slugUrl(topLevel.pageSlug),
+          position: topLevel.position,
           children: await dbs.buildMenuTree(topLevel._id),
         });
       }
@@ -829,6 +830,17 @@ const router = async (app: FastifyInstance) => {
     } else {
       app.log.info('No pages migrated');
     }
+
+    try {
+      await pageDb.createIndex({
+        index: {
+          fields: ['parentId', 'position'],
+        },
+        name: 'pages-by-parent-position',
+      });
+    } catch {}
+
+    return 'All done';
   });
 
   app.setNotFoundHandler(async (_, reply) => {

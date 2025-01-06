@@ -59,6 +59,7 @@ export interface NavItem {
   pageId: string;
   title: string;
   link: string;
+  position: number;
   children: NavItem[];
 }
 

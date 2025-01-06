@@ -48,7 +48,7 @@ const NavItemComponent = ({ item }: NavItemProps) => {
 
   return (
     <div class={styles.item}>
-      <DocumentIcon isSortableHandle />
+      <DocumentIcon isSortableHandle />[{item.position}]
       <a
         href={item.link}
         hx-get={item.link}

@@ -1,4 +1,4 @@
-import { it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { it, expect, describe, beforeAll, afterAll, beforeEach } from 'vitest';
 import bootstrap from './lib/bootstrap';
 import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
@@ -51,106 +51,129 @@ const createPage = async (pageTitle: string, pageContent = 'content') => {
   return response;
 };
 
-it('should not find a url', async () => {
-  const response = await getUrl('/what-is-this');
-  expect(response.statusCode).toBe(404);
+describe('Welcome page', () => {
+  it('should show the welcome page', async () => {
+    const $ = await getContent('/');
+    const $el = $('.is-welcome');
+
+    expect($el).toHaveLength(1);
+    expect($el.hasClass('is-page')).toBe(false);
+    expect($el.hasClass('is-landing')).toBe(false);
+
+    expect($('.page-actions')).toHaveLength(0);
+  });
+
+  it('should show the landing page as the first page created', async () => {
+    const response = await createPage('First and only page');
+    const pageId = response.headers['x-page-id'];
+    await createPage('Another page, actually');
+
+    const $ = await getContent('/');
+    const $el = $('.is-page');
+    expect($el).toHaveLength(1);
+    expect($el.hasClass('is-welcome')).toBe(false);
+    expect($el.hasClass('is-landing')).toBe(true);
+    // Should show the oldest one
+    expect($el.data('page-id')).toBe(pageId);
+  });
 });
 
-it('should show the welcome page', async () => {
-  const $ = await getContent('/');
-  const $el = $('.is-welcome');
+describe('Not finding stuff', () => {
+  it('should not find a url', async () => {
+    const response = await getUrl('/what-is-this');
+    expect(response.statusCode).toBe(404);
+  });
 
-  expect($el).toHaveLength(1);
-  expect($el.hasClass('is-page')).toBe(false);
-  expect($el.hasClass('is-landing')).toBe(false);
-
-  expect($('.page-actions')).toHaveLength(0);
+  it('should not find a page', async () => {
+    const response = await getUrl('/page/baaaah');
+    expect(response.statusCode).toBe(404);
+  });
 });
 
-it('should create a page', async () => {
-  const response = await createPage('First and only page');
-  expect(response.statusCode).toBe(303);
-  expect(response.headers.location).toBe('/page/first-and-only-page?f=1');
+describe('Settings', () => {
+  it('should set a different landing page in the settings', async () => {
+    let response = await createPage('First and only page');
+
+    response = await createPage('Another page, actually');
+    const pageId = response.headers['x-page-id'] as string;
+
+    const settings: SettingsModelWithoutId = {
+      landingPageId: pageId,
+      siteLang: 'en',
+      siteTitle: 'Joongle',
+      siteDescription: '',
+    };
+
+    await postUrl('/settings', settings as Record<string, string>);
+
+    const $ = await getContent('/');
+
+    const $el = $('.is-page');
+    expect($el).toHaveLength(1);
+    expect($el.hasClass('is-welcome')).toBe(false);
+    expect($el.hasClass('is-landing')).toBe(true);
+    // Should show the oldest one
+    expect($el.data('page-id')).toBe(pageId);
+  });
 });
 
-it('should not find a page', async () => {
-  const response = await getUrl('/page/baaaah');
-  expect(response.statusCode).toBe(404);
+describe('Creating page', () => {
+  it('should create a page', async () => {
+    const response = await createPage('First and only page');
+    expect(response.statusCode).toBe(303);
+    expect(response.headers.location).toBe('/page/first-and-only-page?f=1');
+  });
+  it('should show a feedback when a code is passed', async () => {
+    const $ = await getContent('/?f=1');
+    expect($('[role="status"]').text()).toContain('Page created');
+  });
 });
 
-it('should show the landing page as the first page created', async () => {
-  const response = await createPage('First and only page');
-  const pageId = response.headers['x-page-id'];
-  await createPage('Another page, actually');
+describe('Navigation', () => {
+  it('should return no navigation items', async () => {
+    const $ = await getContent('/parts/nav/');
+    expect($('body').text()).toBe('Create your first page');
+  });
 
-  const $ = await getContent('/');
-  const $el = $('.is-page');
-  expect($el).toHaveLength(1);
-  expect($el.hasClass('is-welcome')).toBe(false);
-  expect($el.hasClass('is-landing')).toBe(true);
-  // Should show the oldest one
-  expect($el.data('page-id')).toBe(pageId);
+  it('should return no navigation items', async () => {
+    const $ = await getContent('/parts/nav');
+    const $a = $('a');
+    expect($a).toHaveLength(0);
+  });
+
+  it('should return one navigation items', async () => {
+    await createPage('First and only page');
+    const $ = await getContent('/parts/nav');
+    const $a = $('a');
+    expect($a).toHaveLength(1);
+  });
+
+  it('should return tree navigation items, in the insert order', async () => {
+    await createPage('First page');
+    await createPage('Second page');
+    await createPage('Third page');
+    const $ = await getContent('/parts/nav');
+    const $a = $('a');
+    expect($a).toHaveLength(3);
+    expect($a.eq(0).text()).toBe('First page');
+    expect($a.eq(1).text()).toBe('Second page');
+    expect($a.eq(2).text()).toBe('Third page');
+  });
 });
 
-it('should set a different landing page in the settings', async () => {
-  let response = await createPage('First and only page');
+describe('Searching titles', () => {
+  it('should return matching titles', async () => {
+    await createPage('First and only page');
+    await createPage('Second and only page');
+    await createPage('Third and only page');
 
-  response = await createPage('Another page, actually');
-  const pageId = response.headers['x-page-id'] as string;
+    let $ = await getContent('/parts/titles?q=First');
+    expect($('li').length).toBe(1);
 
-  const settings: SettingsModelWithoutId = {
-    landingPageId: pageId,
-    siteLang: 'en',
-    siteTitle: 'Joongle',
-    siteDescription: '',
-  };
+    $ = await getContent('/parts/titles?q=only+Page');
+    expect($('li').length).toBe(3);
 
-  await postUrl('/settings', settings as Record<string, string>);
-
-  const $ = await getContent('/');
-
-  const $el = $('.is-page');
-  expect($el).toHaveLength(1);
-  expect($el.hasClass('is-welcome')).toBe(false);
-  expect($el.hasClass('is-landing')).toBe(true);
-  // Should show the oldest one
-  expect($el.data('page-id')).toBe(pageId);
-});
-
-it('should return no navigation items', async () => {
-  const $ = await getContent('/parts/nav/');
-  expect($('body').text()).toBe('Create your first page');
-});
-
-it('should show a feedback when a code is passed', async () => {
-  const $ = await getContent('/?f=1');
-  expect($('[role="status"]').text()).toContain('Page created');
-});
-
-it('should return matching titles', async () => {
-  await createPage('First and only page');
-  await createPage('Second and only page');
-  await createPage('Third and only page');
-
-  let $ = await getContent('/parts/titles?q=First');
-  expect($('li').length).toBe(1);
-
-  $ = await getContent('/parts/titles?q=only+Page');
-  expect($('li').length).toBe(3);
-
-  $ = await getContent('/parts/titles?q=foooobar');
-  expect($('li').length).toBe(0);
-});
-
-it('should return no navigation items', async () => {
-  const $ = await getContent('/parts/nav');
-  const $a = $('a');
-  expect($a).toHaveLength(0);
-});
-
-it('should return one navigation items', async () => {
-  await createPage('First and only page');
-  const $ = await getContent('/parts/nav');
-  const $a = $('a');
-  expect($a).toHaveLength(1);
+    $ = await getContent('/parts/titles?q=foooobar');
+    expect($('li').length).toBe(0);
+  });
 });

@@ -15,7 +15,7 @@ import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 
-const DESIGN_DOCUMENTS_COUNT = 1;
+const DESIGN_DOCUMENTS_COUNT = 2;
 
 interface DbServiceInitParams {
   serverUrl: string;
@@ -214,7 +214,7 @@ export function dbService(client?: nano.ServerScope) {
         selector: {
           parentId: null,
         } as PageSelector,
-        sort: [{ createdAt: 'asc' }],
+        sort: [{ position: 'asc' }],
       });
 
       return result.docs;
@@ -270,30 +270,57 @@ export function dbService(client?: nano.ServerScope) {
       return prevPosition + 1;
     },
 
-    async buildMenuTree(parentId: string): Promise<NavItem[]> {
+    async buildMenuTree(parentId: string | null): Promise<NavItem[]> {
       const result = await pagesDb.find({
         selector: {
-          parentId,
-        } as PageSelector,
-        // FIXME: Ensure that the field array contains only
-        // valid fields from the PageModel type
-        fields: ['_id', 'pageTitle', 'pageSlug'],
+          parentId: parentId ?? { $eq: null },
+          position: { $gte: 0 },
+        },
+        fields: ['_id', 'pageTitle', 'pageSlug', 'position'],
+        sort: [{ position: 'asc' }],
       });
 
-      const menuTree = [];
-      for (const page of result.docs) {
-        const menuItem: NavItem = {
-          pageId: page._id,
-          title: page.pageTitle,
-          link: slugUrl(page.pageSlug),
-          children: await this.buildMenuTree(page._id),
-        };
+      const menuTree = await Promise.all(
+        result.docs.map(async (page) => {
+          const menuItem: NavItem = {
+            pageId: page._id,
+            title: page.pageTitle,
+            link: slugUrl(page.pageSlug),
+            position: page.position,
+            children: await this.buildMenuTree(page._id),
+          };
 
-        menuTree.push(menuItem);
-      }
-
+          return menuItem;
+        })
+      );
       return menuTree;
     },
+
+    // Original version without the position
+    // async _buildMenuTree(parentId: string): Promise<NavItem[]> {
+    //   const result = await pagesDb.find({
+    //     selector: {
+    //       parentId,
+    //     } as PageSelector,
+    //     // FIXME: Ensure that the field array contains only
+    //     // valid fields from the PageModel type
+    //     fields: ['_id', 'pageTitle', 'pageSlug'],
+    //   });
+
+    //   const menuTree = [];
+    //   for (const page of result.docs) {
+    //     const menuItem: NavItem = {
+    //       pageId: page._id,
+    //       title: page.pageTitle,
+    //       link: slugUrl(page.pageSlug),
+    //       children: await this.buildMenuTree(page._id),
+    //     };
+
+    //     menuTree.push(menuItem);
+    //   }
+
+    //   return menuTree;
+    // },
 
     async updatePage(page: PageModel, newPage: Partial<PageModel>) {
       const updatedPage: PageModel = {
@@ -428,6 +455,12 @@ dbService._createIndexes = async (client: nano.ServerScope) => {
   await client.db.use(dbn('pages')).createIndex({
     index: {
       fields: ['parentId', 'createdAt'],
+    },
+  });
+
+  await client.db.use(dbn('pages')).createIndex({
+    index: {
+      fields: ['parentId', 'position'],
     },
   });
 };
