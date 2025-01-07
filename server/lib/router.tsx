@@ -106,6 +106,14 @@ const MovePageBodySchema = {
   },
 } as const;
 
+const ReorderPageBodySchema = {
+  type: 'object',
+  required: ['targetIndex'],
+  properties: {
+    targetIndex: { type: 'integer', minimum: 0 },
+  },
+} as const;
+
 const SettingsPageBodySchema = {
   type: 'object',
   required: ['siteLang', 'siteTitle'],
@@ -533,6 +541,43 @@ const router = async (app: FastifyInstance) => {
 
       try {
         await dbs.updatePageParent(page, newParentId);
+      } catch (error) {
+        return rs.homeWithError(error);
+      }
+
+      await rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_MOVED);
+    }
+  );
+
+  app.post<{
+    Body: FromSchema<typeof ReorderPageBodySchema>;
+    Params: FromSchema<typeof PageParamsSchema>;
+  }>(
+    '/reorder/:pageId',
+    {
+      schema: {
+        body: ReorderPageBodySchema,
+        params: PageParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const { pageId } = req.params;
+      const { targetIndex } = req.body;
+      const dbs = dbService(app.dbClient);
+      const rs = redirectService(app, rep);
+
+      const page = await dbs.getPageById(pageId);
+      if (!page) {
+        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      }
+
+      const position = await dbs.findInsertPosition(
+        page.parentId ?? null,
+        targetIndex
+      );
+
+      try {
+        await dbs.updatePagePosition(page, position);
       } catch (error) {
         return rs.homeWithError(error);
       }

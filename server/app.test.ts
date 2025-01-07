@@ -158,6 +158,38 @@ describe('Navigation', () => {
     expect($a.eq(0).text()).toBe('First page');
     expect($a.eq(1).text()).toBe('Second page');
     expect($a.eq(2).text()).toBe('Third page');
+    expect($a.eq(0).data('position')).toBe(0);
+    expect($a.eq(1).data('position')).toBe(1);
+    expect($a.eq(2).data('position')).toBe(2);
+  });
+});
+
+describe('Reordering pages', () => {
+  it('should return tree navigation items, and change the order of the first', async () => {
+    const pageIds = [];
+
+    let response = await createPage('First page');
+    pageIds[0] = response.headers['x-page-id'];
+
+    response = await createPage('Second page');
+    pageIds[1] = response.headers['x-page-id'];
+
+    response = await createPage('Third page');
+    pageIds[2] = response.headers['x-page-id'];
+
+    await postUrl(`/reorder/${pageIds[2]}`, {
+      targetIndex: '0',
+    });
+
+    const $ = await getContent('/parts/nav');
+    const $a = $('a');
+    expect($a).toHaveLength(3);
+    expect($a.eq(0).text()).toBe('Third page');
+    expect($a.eq(1).text()).toBe('First page');
+    expect($a.eq(2).text()).toBe('Second page');
+    expect($a.eq(0).data('position')).toBe(0);
+    expect($a.eq(1).data('position')).toBe(1);
+    expect($a.eq(2).data('position')).toBe(2);
   });
 });
 

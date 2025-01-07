@@ -231,13 +231,14 @@ export function dbService(client?: nano.ServerScope) {
           position: { $gte: 0 },
         },
         fields: ['_id', 'position'] as Array<keyof PageModel>,
+        sort: [{ position: 'asc' }],
       });
 
-      if (result.docs.length === 0) {
+      const siblings = result.docs;
+
+      if (siblings.length === 0) {
         return 0; // First page in this level (root or under parent)
       }
-
-      const siblings = result.docs.sort((a, b) => a.position - b.position);
 
       // Validate target index
       const safeTargetIndex = Math.max(
@@ -346,6 +347,18 @@ export function dbService(client?: nano.ServerScope) {
       const updatedPage: PageModel = {
         ...page,
         parentId: newParentId,
+      };
+      try {
+        await pagesDb.insert(updatedPage);
+      } catch {
+        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
+      }
+    },
+
+    async updatePagePosition(page: PageModel, position: number) {
+      const updatedPage: PageModel = {
+        ...page,
+        position,
       };
       try {
         await pagesDb.insert(updatedPage);
