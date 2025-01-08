@@ -12,8 +12,23 @@ export const enableSortable = (el?: HTMLElement) => {
       handle: '.sortable-handle',
       ghostClass: 'sortable-ghost',
       animation: 150,
-      onEnd: (evt) => {
-        console.log([...evt.to.children]);
+      onEnd: async (evt) => {
+        if (evt.oldIndex === evt.newIndex) {
+          return;
+        }
+
+        const pageId = evt.item.querySelector('a')?.dataset.pageid;
+        try {
+          await fetch(`/reorder/${pageId}`, {
+            method: 'POST',
+            // Use a plain form request to avoid CORS preflight calls
+            body: new URLSearchParams({
+              targetIndex: evt.newIndex as unknown as string,
+            }),
+          });
+        } catch (err) {
+          console.error(err);
+        }
       },
     });
   }

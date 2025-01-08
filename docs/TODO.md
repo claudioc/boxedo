@@ -1,7 +1,6 @@
 Doing:
   - we should be able to reorganize pages on the same level
     - when changing parent the position must be revisited
-    - tests are all failing
     - add the metadataOnly flag to the document
 
 See REORDERING.md

@@ -180,14 +180,18 @@ export function dbService(client?: nano.ServerScope) {
     // Find the appropriate position for inserting a page
     async findInsertPosition(
       parentId: string | null,
-      targetIndex = Number.POSITIVE_INFINITY
+      targetIndex = Number.POSITIVE_INFINITY,
+      pageId?: string
     ): Promise<number> {
       const siblings = await pagesDb.view('pages', 'by_parent_position', {
         startkey: [parentId],
         endkey: [parentId, {}],
         include_docs: true,
       });
-      const pages = siblings.rows.map((row) => row.doc) as PageModel[];
+      let pages = siblings.rows.map((row) => row.doc) as PageModel[];
+      if (pageId) {
+        pages = pages.filter((page) => page._id !== pageId);
+      }
 
       // No siblings - first page
       if (pages.length === 0) {

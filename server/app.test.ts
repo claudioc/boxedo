@@ -4,6 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
 import { dbService } from './services/dbService';
 import type { SettingsModelWithoutId } from './types';
+import { POSITION_GAP_SIZE } from './constants';
 
 let app: FastifyInstance;
 
@@ -39,9 +40,13 @@ const getContent: (url: string) => Promise<CheerioAPI> = async (url) => {
   return load(response.body);
 };
 
-const createPage = async (pageTitle: string, pageContent = 'content') => {
+const createPage = async (
+  pageTitle: string,
+  pageContent = 'content',
+  parentId: string | null = null
+) => {
   const response = await app.inject({
-    url: '/create',
+    url: `/create${parentId ? `/${parentId}` : ''}`,
     method: 'POST',
     payload: {
       pageTitle,
@@ -148,7 +153,7 @@ describe('Navigation', () => {
     expect($a).toHaveLength(1);
   });
 
-  it('should return tree navigation items, in the insert order', async () => {
+  it('should return three navigation items, in the insert order', async () => {
     await createPage('First page');
     await createPage('Second page');
     await createPage('Third page');
@@ -158,14 +163,14 @@ describe('Navigation', () => {
     expect($a.eq(0).text()).toBe('First page');
     expect($a.eq(1).text()).toBe('Second page');
     expect($a.eq(2).text()).toBe('Third page');
-    expect($a.eq(0).data('position')).toBe(0);
-    expect($a.eq(1).data('position')).toBe(1);
-    expect($a.eq(2).data('position')).toBe(2);
+    expect($a.eq(0).data('position')).toBe(POSITION_GAP_SIZE);
+    expect($a.eq(1).data('position')).toBe(POSITION_GAP_SIZE * 2);
+    expect($a.eq(2).data('position')).toBe(POSITION_GAP_SIZE * 3);
   });
 });
 
 describe('Reordering pages', () => {
-  it('should return tree navigation items, and change the order of the first', async () => {
+  it('should return tree navigation items, and change the order of the first one', async () => {
     const pageIds = [];
 
     let response = await createPage('First page');
@@ -177,6 +182,7 @@ describe('Reordering pages', () => {
     response = await createPage('Third page');
     pageIds[2] = response.headers['x-page-id'];
 
+    // Move the second page at the top
     await postUrl(`/reorder/${pageIds[2]}`, {
       targetIndex: '0',
     });
@@ -187,9 +193,46 @@ describe('Reordering pages', () => {
     expect($a.eq(0).text()).toBe('Third page');
     expect($a.eq(1).text()).toBe('First page');
     expect($a.eq(2).text()).toBe('Second page');
-    expect($a.eq(0).data('position')).toBe(0);
-    expect($a.eq(1).data('position')).toBe(1);
-    expect($a.eq(2).data('position')).toBe(2);
+    expect($a.eq(0).data('position')).toBe(POSITION_GAP_SIZE / 2);
+    expect($a.eq(1).data('position')).toBe(POSITION_GAP_SIZE * 1);
+    expect($a.eq(2).data('position')).toBe(POSITION_GAP_SIZE * 2);
+  });
+
+  it('should return reorder within the parent', async () => {
+    const pageIds = [];
+
+    let response = await createPage('First page');
+    pageIds[0] = response.headers['x-page-id'];
+
+    response = await createPage('Second page');
+    pageIds[1] = response.headers['x-page-id'] as string;
+
+    response = await createPage(
+      'Second page, first child',
+      'something',
+      pageIds[1]
+    );
+    pageIds[2] = response.headers['x-page-id'];
+
+    response = await createPage(
+      'Second page, second child',
+      'something',
+      pageIds[1]
+    );
+    pageIds[3] = response.headers['x-page-id'];
+
+    // Move the second page at the top
+    await postUrl(`/reorder/${pageIds[3]}`, {
+      targetIndex: '0',
+    });
+
+    const $ = await getContent('/parts/nav');
+    const $a = $('a');
+    expect($a).toHaveLength(4);
+    expect($a.eq(0).text()).toBe('First page');
+    expect($a.eq(1).text()).toBe('Second page');
+    expect($a.eq(2).text()).toBe('Second page, second child');
+    expect($a.eq(3).text()).toBe('Second page, first child');
   });
 });
 

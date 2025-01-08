@@ -564,16 +564,18 @@ const router = async (app: FastifyInstance) => {
 
       const position = await dbs.findInsertPosition(
         page.parentId ?? null,
-        targetIndex
+        targetIndex,
+        pageId
       );
 
       try {
         await dbs.updatePagePosition(page, position);
       } catch (error) {
-        return rs.homeWithError(error);
+        app.log.error(error);
+        return rep.status(500);
       }
 
-      await rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_MOVED);
+      return rep.status(204).send();
     }
   );
 
