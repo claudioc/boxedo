@@ -131,6 +131,6 @@
 
   "WelcomePage": {
     "title": "Welcome!",
-    "content": "<p>This page is just a placeholder: to get started, add your first page by using the \"Create page\" button.</p>"
+    "content": "<p>This page is just a placeholder: to get started, add your first page by using the \"%{buttonLabel}\" button.</p>"
   }
 }

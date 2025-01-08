@@ -19,9 +19,9 @@ export const PageActions = ({
   const { i18n } = useApp();
 
   return (
-    <div class="level">
+    <div class="level is-flex-direction-row">
       <div class=" level-left is-size-5">{title}</div>
-      <menu class="level-right m-0">
+      <menu class="level-right m-0 is-flex-direction-row">
         {actions.includes('save') && (
           <button class="button" type="submit">
             {i18n.t('PageActions.saveAndClose')}
