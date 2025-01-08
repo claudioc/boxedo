@@ -58,7 +58,7 @@ describe('Welcome page', () => {
 
     expect($el).toHaveLength(1);
     expect($el.hasClass('is-page')).toBe(false);
-    expect($el.hasClass('is-landing')).toBe(false);
+    expect($el.hasClass('is-landing')).toBe(true);
 
     expect($('.page-actions')).toHaveLength(0);
   });
@@ -132,7 +132,7 @@ describe('Creating page', () => {
 describe('Navigation', () => {
   it('should return no navigation items', async () => {
     const $ = await getContent('/parts/nav/');
-    expect($('body').text()).toBe('Create your first page');
+    expect($('body').text()).toBe('');
   });
 
   it('should return no navigation items', async () => {

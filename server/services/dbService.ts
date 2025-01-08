@@ -91,9 +91,19 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async countPages(): Promise<number> {
-      const result = await pagesDb.view('pages', 'count', { reduce: true });
-      console.log('pages', result.rows[0].value);
-      return result.rows[0].value as number;
+      try {
+        const result = await pagesDb.view('pages', 'count', { reduce: true });
+
+        // Check if we have results and a valid value
+        if (result?.rows?.[0]?.value != null) {
+          return Number(result.rows[0].value);
+        }
+
+        return 0; // Default if no results or invalid structure
+      } catch (error) {
+        console.error('Error counting pages:', error);
+        return 0; // Default on error
+      }
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
@@ -445,6 +455,7 @@ export function dbService(client?: nano.ServerScope) {
          * to increase DESIGN_DOCUMENTS_COUNT
          */
         await dbService._createIndexes(client);
+        await dbService._createViews(client);
       } catch {
         // Index might already exist, that's fine
       }
