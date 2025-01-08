@@ -1,12 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import {
-  type PageModel,
-  type NavItem,
-  type PageModelWithRev,
-  InsertPosition,
-} from '~/types';
+import type { PageModel, NavItem, PageModelWithRev } from '~/types';
 import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -25,6 +20,7 @@ import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { AppProvider } from '~/lib/context/App';
 import { TitlesList } from '~/views/components/TitlesList';
+import { POSITION_GAP_SIZE } from '~/constants';
 
 const PageIdFormat = {
   type: 'string',
@@ -689,11 +685,9 @@ const router = async (app: FastifyInstance) => {
       const parentId = parentPageId ?? null;
       const slug = await dbs.generateUniqueSlug(pageTitle);
       const now = new Date().toISOString();
+      const position = await dbs.findInsertPosition(parentId);
+
       let pageId: string;
-      const position = await dbs.findInsertPosition(
-        parentId,
-        InsertPosition.END
-      );
 
       try {
         pageId = dbService.generateId();
@@ -858,7 +852,7 @@ const router = async (app: FastifyInstance) => {
       siblings.forEach((doc, index) => {
         updates.push({
           ...doc,
-          position: index,
+          position: (index + 1) * POSITION_GAP_SIZE,
         });
       });
     }

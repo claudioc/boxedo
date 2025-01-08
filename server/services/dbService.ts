@@ -14,8 +14,7 @@ import nano, { type DocumentScope, type ServerScope } from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
-
-const DESIGN_DOCUMENTS_COUNT = 2;
+import { POSITION_GAP_SIZE } from '~/constants';
 
 interface DbServiceInitParams {
   serverUrl: string;
@@ -92,9 +91,9 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async countPages(): Promise<number> {
-      const info = await pagesDb.info();
-      // Let's be 100% sure that we are never returning a negative value
-      return Math.max(info.doc_count - DESIGN_DOCUMENTS_COUNT, 0);
+      const result = await pagesDb.view('pages', 'count', { reduce: true });
+      console.log('pages', result.rows[0].value);
+      return result.rows[0].value as number;
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
@@ -155,6 +154,50 @@ export function dbService(client?: nano.ServerScope) {
       }
 
       return slug;
+    },
+
+    // Helper to get siblings of a page sorted by position
+    async getSiblingPages(parentId: string) {
+      const result = await pagesDb.view('pages', 'by_parent_position', {
+        startkey: [parentId],
+        endkey: [parentId, {}],
+        include_docs: true,
+      });
+
+      return result.rows.map((row) => row.doc);
+    },
+
+    // Find the appropriate position for inserting a page
+    async findInsertPosition(
+      parentId: string | null,
+      targetIndex = Number.POSITIVE_INFINITY
+    ): Promise<number> {
+      const siblings = await pagesDb.view('pages', 'by_parent_position', {
+        startkey: [parentId],
+        endkey: [parentId, {}],
+        include_docs: true,
+      });
+      const pages = siblings.rows.map((row) => row.doc) as PageModel[];
+
+      // No siblings - first page
+      if (pages.length === 0) {
+        return POSITION_GAP_SIZE;
+      }
+
+      // Append at end
+      if (targetIndex >= pages.length) {
+        return pages[pages.length - 1].position + POSITION_GAP_SIZE;
+      }
+
+      // Insert at beginning
+      if (targetIndex === 0) {
+        return pages[0].position / 2;
+      }
+
+      // Insert between pages
+      const prevPosition = pages[targetIndex - 1].position;
+      const nextPosition = pages[targetIndex].position;
+      return (prevPosition + nextPosition) / 2;
     },
 
     async insertPage(page: PageModel) {
@@ -218,57 +261,6 @@ export function dbService(client?: nano.ServerScope) {
       });
 
       return result.docs;
-    },
-
-    // 0 based!
-    async findInsertPosition(
-      parentId: string | null,
-      targetIndex: number
-    ): Promise<number> {
-      const result = await pagesDb.find({
-        selector: {
-          parentId: parentId ?? { $eq: null },
-          position: { $gte: 0 },
-        },
-        fields: ['_id', 'position'] as Array<keyof PageModel>,
-        sort: [{ position: 'asc' }],
-      });
-
-      const siblings = result.docs;
-
-      if (siblings.length === 0) {
-        return 0; // First page in this level (root or under parent)
-      }
-
-      // Validate target index
-      const safeTargetIndex = Math.max(
-        0,
-        Math.min(targetIndex, siblings.length)
-      );
-
-      // Common cases
-      if (safeTargetIndex === 0) {
-        // Insert at start
-        return siblings[0].position > 0 ? 0 : siblings[0].position - 1;
-      }
-
-      if (safeTargetIndex === siblings.length) {
-        // Insert at end
-        return siblings[siblings.length - 1].position + 1;
-      }
-
-      // Insert between two pages
-      const prevPosition = siblings[safeTargetIndex - 1].position;
-      const nextPosition = siblings[safeTargetIndex].position;
-
-      // If there's a gap, use it
-      if (nextPosition - prevPosition > 1) {
-        return prevPosition + 1;
-      }
-
-      // No gap available - need to reorder
-      // Optional: you could reorder all siblings here to normalize positions
-      return prevPosition + 1;
     },
 
     async buildMenuTree(parentId: string | null): Promise<NavItem[]> {
@@ -356,12 +348,11 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async updatePagePosition(page: PageModel, position: number) {
-      const updatedPage: PageModel = {
-        ...page,
-        position,
-      };
       try {
-        await pagesDb.insert(updatedPage);
+        await pagesDb.insert({
+          ...page,
+          position,
+        });
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
@@ -478,6 +469,46 @@ dbService._createIndexes = async (client: nano.ServerScope) => {
   });
 };
 
+dbService._createViews = async (client: nano.ServerScope) => {
+  const db = await client.db.use(dbn('pages'));
+
+  const designDoc = {
+    _id: '_design/pages',
+    views: {
+      by_parent_position: {
+        map: `function(doc) {
+          if (doc.position !== undefined) {
+            emit([doc.parentId || null, doc.position], null);
+          }
+        }`,
+      },
+
+      count: {
+        map: `function(doc) {
+          if (!doc._id.startsWith('_design/')) {
+            emit(null, 1);
+          }
+        }`,
+        reduce: '_count',
+      },
+    },
+  };
+
+  try {
+    // Try to get existing design doc
+    const existing = await db.get('_design/pages');
+    const updatedDoc = { ...designDoc, _rev: existing._rev };
+    await db.insert(updatedDoc);
+  } catch (err) {
+    if ((err as { statusCode?: number })?.statusCode === 404) {
+      // Design doc doesn't exist, create it
+      await db.insert(designDoc);
+    } else {
+      throw err;
+    }
+  }
+};
+
 dbService.init = async (params: DbServiceInitParams) => {
   const couchdb = nano({
     url: params.serverUrl,
@@ -509,6 +540,7 @@ dbService.init = async (params: DbServiceInitParams) => {
      * to increase DESIGN_DOCUMENTS_COUNT
      */
     await dbService._createIndexes(couchdb);
+    await dbService._createViews(couchdb);
   } catch {
     // Index might already exist, that's fine
   }

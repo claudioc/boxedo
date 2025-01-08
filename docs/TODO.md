@@ -1,9 +1,7 @@
 Doing:
   - we should be able to reorganize pages on the same level
-    - test the insert
-    - rewrite the nav tree to consider the new sort (see below)
-    - test it updating the positions manually
-    - continue working on sortable to actually change the position
+    - when changing parent the position must be revisited
+    - tests are all failing
     - add the metadataOnly flag to the document
 
 See REORDERING.md
