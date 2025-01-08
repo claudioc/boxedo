@@ -67,7 +67,7 @@ export const Layout = ({
           >
             <header class={clsx(styles.header, 'block')}>
               <div class="block">
-                <div class="level">
+                <div class="level is-flew-direction-row">
                   <div class={clsx(styles.title, 'is-size-5', 'level-left')}>
                     <a href="/" class="has-text-warning">
                       {settings.siteTitle}

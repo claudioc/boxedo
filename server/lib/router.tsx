@@ -164,7 +164,7 @@ const router = async (app: FastifyInstance) => {
           <ReadPage isFull={!isHtmx} page={landingPage} isLandingPage />
         )}
         {!landingPage && pageCount === 0 && (
-          <ReadPage isFull={!isHtmx} isWelcome />
+          <ReadPage isFull={!isHtmx} isWelcome isLandingPage />
         )}
         {!landingPage && pageCount > 0 && <ReadPage isFull={!isHtmx} />}
       </AppProvider>
@@ -279,12 +279,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       if (topLevels.length === 0) {
-        let msg = app.i18n.t('Navigation.noRootPage');
-        // FIXME This is non-sense but for some reason we may receive here a string array
-        if (Array.isArray(msg)) {
-          msg = msg.join('');
-        }
-        return msg;
+        return '';
       }
 
       // We build a tree for each of the top-level pages

@@ -35,7 +35,12 @@ export const ReadPage = ({
   // or we still don't have a landing page
   const showPage = page && !isWelcome;
   if (!showPage) {
-    welcomePage.pageContent = i18n.t('WelcomePage.content');
+    welcomePage.pageContent = welcomePage.pageContent = i18n.t(
+      'WelcomePage.content',
+      {
+        buttonLabel: i18n.t('Navigation.createTopPage'),
+      }
+    );
     welcomePage.pageTitle = i18n.t('WelcomePage.title');
   }
 
