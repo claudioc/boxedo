@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
@@ -18,18 +18,14 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
     <Layout
       title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
       page={page}
+      context="moving page"
     >
-      <div x-data="{newParentId: '', newParentTitle: '', error: {newParentId: false}}">
-        <div x-show="error && error.newParentId" class="block">
+      <div x-data="{newParentId: '', newParentTitle: '', moveToTop: false}">
+        <div x-show="$store.has.errorOn('newParentId')">
           <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
-        <form
-          action=""
-          method="post"
-          name="movePage"
-          x-on:submit="App.validate"
-        >
+        <form action="" method="post" x-on:submit="App.validate">
           <PageActions
             title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
             actions={['save', 'cancel']}
@@ -48,11 +44,18 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
             <span x-text="newParentTitle" />"
           </p>
 
+          <input type="hidden" name="moveToTop" x-model="moveToTop" />
           <input type="hidden" name="newParentId" x-model="newParentId" />
-          <input type="hidden" name="oldParentId" value={page.parentId ?? ''} />
         </form>
 
         <div class="block">
+          <label class="checkbox">
+            <input type="checkbox" x-model="moveToTop" />{' '}
+            {i18n.t('MovePage.moveToTop')}
+          </label>
+        </div>
+
+        <div class="block" x-show="!moveToTop">
           <div class="field">
             <label class="label" for="search">
               {i18n.t('MovePage.searchNewParent')}

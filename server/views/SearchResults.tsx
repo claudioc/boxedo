@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import { useApp } from '~/lib/context/App';
 import styles from './SearchResults.module.css';

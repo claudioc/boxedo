@@ -57,7 +57,8 @@
     "searchNewParent": "Search for a new parent",
     "startTyping": "Start typing…",
     "noParent": "No parent (top level page)",
-    "noResults": "No title matches your search"
+    "noResults": "No title matches your search",
+    "moveToTop": "Move to top level"
   },
 
   "Navigation": {

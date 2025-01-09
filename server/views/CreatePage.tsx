@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';

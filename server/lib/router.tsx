@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import type { PageModel, NavItem, PageModelWithRev } from '~/types';
+import type { PageModel, NavItem, PageModelWithRev } from '~/../types';
 import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -92,13 +92,11 @@ const PageBodySchema = {
 
 const MovePageBodySchema = {
   type: 'object',
-  required: ['newParentId', 'oldParentId'],
   properties: {
-    newParentId: PageIdFormat,
-    // The old parent is optional because the root pages have no parent
-    oldParentId: {
+    newParentId: {
       anyOf: [PageIdFormat, { type: 'null' }],
     },
+    moveToTop: { type: 'string', enum: ['true', 'false'] },
   },
 } as const;
 
@@ -504,12 +502,23 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const { newParentId, oldParentId } = req.body;
+      const { newParentId, moveToTop } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
 
+      let parentId = newParentId ?? null;
+      // Yes, test the string and not the boolean
+      if (moveToTop === 'true') {
+        parentId = null;
+      }
+
+      if (moveToTop === 'false' && !parentId) {
+        // Something is wrong
+        return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
+      }
+
       // Can't move a page to itself
-      if (newParentId === pageId) {
+      if (parentId === pageId) {
         return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
       }
 
@@ -519,19 +528,23 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      // Can't move a page to a non-existing parent
-      const newParentPage = await dbs.getPageById(newParentId);
-      if (!newParentPage) {
-        return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+      if (page.parentId === parentId) {
+        // Nothing to do here
+        return rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_MOVED);
       }
 
-      // Double-check that if the old parent is not provided, we really want to move a top-level page
-      if (!oldParentId && page.parentId) {
-        return rs.homeWithFeedback(Feedbacks.E_WRONG_PARENT_PAGE);
+      // Can't move a page to a non-existing parent
+      if (parentId) {
+        const newParentPage = await dbs.getPageById(parentId);
+        if (!newParentPage) {
+          return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
+        }
       }
+
+      const position = await dbs.findInsertPosition(parentId);
 
       try {
-        await dbs.updatePageParent(page, newParentId);
+        await dbs.changePageParent(page, parentId, position);
       } catch (error) {
         return rs.homeWithError(error);
       }

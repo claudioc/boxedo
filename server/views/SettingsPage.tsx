@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { SettingsModel, PageModel } from '~/types';
+import type { SettingsModel, PageModel } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { useApp } from '~/lib/context/App';

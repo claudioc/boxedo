@@ -1,4 +1,4 @@
-import type { Feedback } from '~/types';
+import type { Feedback } from '~/../types';
 
 export class ErrorWithFeedback extends Error {
   constructor(public feedback: Feedback) {

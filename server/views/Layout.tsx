@@ -5,7 +5,7 @@ import { Search } from './components/Search';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
-import type { PageModel, Context } from '~/types';
+import type { PageModel, Context } from '~/../types';
 import { useApp } from '~/lib/context/App';
 import { CogIcon } from './icons/CogIcon';
 

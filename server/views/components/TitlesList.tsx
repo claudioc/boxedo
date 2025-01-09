@@ -1,4 +1,4 @@
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { DocumentIcon } from '../icons/DocumentIcon';
 import styles from './TitlesList.module.css';
 import type Polyglot from 'node-polyglot';

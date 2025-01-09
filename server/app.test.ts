@@ -3,7 +3,7 @@ import bootstrap from './lib/bootstrap';
 import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
 import { dbService } from './services/dbService';
-import type { SettingsModelWithoutId } from './types';
+import type { SettingsModelWithoutId } from '../types';
 import { POSITION_GAP_SIZE } from './constants';
 
 let app: FastifyInstance;

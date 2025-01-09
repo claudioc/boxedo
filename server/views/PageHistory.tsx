@@ -1,4 +1,4 @@
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
 import { useApp } from '~/lib/context/App';

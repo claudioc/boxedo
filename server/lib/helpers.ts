@@ -1,4 +1,4 @@
-import type { Feedback, PageModel } from '~/types';
+import type { Feedback, PageModel } from '~/../types';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/page/${slug}`;

@@ -1,4 +1,4 @@
-import type { Feedback as FeedbackType } from '~/types';
+import type { Feedback as FeedbackType } from '~/../types';
 import {
   Feedbacks,
   isFeedbackError,

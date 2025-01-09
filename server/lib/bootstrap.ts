@@ -7,7 +7,7 @@ import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
-import type { NodeEnv, SettingsModel } from '~/types';
+import type { NodeEnv, SettingsModel } from '~/../types';
 import jsxRenderer from './jsxRenderer';
 import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';

@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
@@ -24,13 +24,7 @@ export const EditPage = ({ page, token }: EditPageProps) => {
       context="editing page"
     >
       <PageFormWrapper>
-        <form
-          action=""
-          method="post"
-          class="block"
-          name="editPage"
-          x-on:submit="App.validate"
-        >
+        <form action="" method="post" class="block" x-on:submit="App.validate">
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
 

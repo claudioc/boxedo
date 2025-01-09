@@ -3,6 +3,7 @@ import './lib/setupHtmx';
 import type { TipTapEditor } from './lib/setupTipTap';
 import { removeQueryParam } from './lib/helpers';
 import { enableSortable, destroySortable } from './lib/setupSortable';
+import type { Context } from '../types';
 
 class App {
   private editor: TipTapEditor | null = null;
@@ -19,14 +20,36 @@ class App {
     });
   }
 
+  getContext(el: HTMLElement) {
+    const provider = el.closest('[data-context]') as HTMLElement | null;
+    if (!provider) {
+      return null;
+    }
+
+    const context: Context | null = provider.dataset?.context
+      ? (provider.dataset.context as Context)
+      : null;
+
+    return context;
+  }
+
   validate(event: Event) {
     const form = event.target as HTMLFormElement;
     const data = new FormData(form);
     const error: Record<string, boolean> = {};
+
+    const context = window.App.getContext(form);
+
+    if (!context) {
+      event.preventDefault();
+      console.error('Cannot validate out of a context', context);
+      return null;
+    }
+
     // Do not validate these fields because they are not user input
     const preValidated = ['_csrf', 'rev'];
 
-    if (form.name === 'editPage' || form.name === 'createPage') {
+    if (context === 'editing page') {
       for (const [key, value] of data.entries()) {
         // Just a simple check for empty values; the same thing is done on the server
         // Beware that the entries also include the CSRF token and the rev
@@ -37,9 +60,9 @@ class App {
       }
     }
 
-    if (form.name === 'movePage') {
+    if (context === 'moving page') {
       if (
-        data.get('newParentId') === '' ||
+        (data.get('moveToTop') === 'false' && data.get('newParentId') === '') ||
         data.get('newParentId') === data.get('oldParentId')
       ) {
         error.newParentId = true;

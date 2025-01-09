@@ -57,7 +57,8 @@
     "searchNewParent": "Cerca un nuovo genitore",
     "startTyping": "Inizia a scrivere…",
     "noParent": "Nessun genitore (pagina di primo livello)",
-    "noResults": "Nessun titolo corrisponde alla tua ricerca"
+    "noResults": "Nessun titolo corrisponde alla tua ricerca",
+    "moveToTop": "Sposta al livello più alto"
   },
 
   "Navigation": {

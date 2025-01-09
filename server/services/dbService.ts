@@ -6,7 +6,7 @@ import type {
   PageRevInfo,
   PageModelWithRev,
   NodeEnv,
-} from '~/types';
+} from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
@@ -349,9 +349,14 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
-    async updatePageParent(page: PageModel, newParentId: string) {
+    async changePageParent(
+      page: PageModel,
+      newParentId: string | null,
+      position: number
+    ) {
       const updatedPage: PageModel = {
         ...page,
+        position,
         parentId: newParentId,
       };
       try {

@@ -1,4 +1,4 @@
-import type { PageModel } from '~/types';
+import type { PageModel } from '~/../types';
 import { useApp } from '~/lib/context/App';
 
 interface PageMenuProps {

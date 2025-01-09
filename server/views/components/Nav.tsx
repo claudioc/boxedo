@@ -1,4 +1,4 @@
-import type { NavItem, Context } from '~/types';
+import type { NavItem, Context } from '~/../types';
 import clsx from 'clsx';
 import styles from './Nav.module.css';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
