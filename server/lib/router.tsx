@@ -92,6 +92,7 @@ const PageBodySchema = {
 
 const MovePageBodySchema = {
   type: 'object',
+  required: ['moveToTop'],
   properties: {
     newParentId: {
       anyOf: [PageIdFormat, { type: 'null' }],
@@ -322,6 +323,10 @@ const router = async (app: FastifyInstance) => {
       const page = await dbs.getPageBySlug(slug);
 
       if (page) {
+        // These are useful for testing purposes
+        rep.header('x-page-id', page._id);
+        rep.header('x-parent-id', page.parentId ?? '');
+
         return (
           <AppProvider app={app}>
             <ReadPage isFull={!isHtmx} page={page} />
@@ -721,8 +726,9 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
-      // This is useful for testing purposes
+      // These are useful for testing purposes
       rep.header('x-page-id', pageId);
+      rep.header('x-parent-id', parentId ?? '');
 
       return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
     }

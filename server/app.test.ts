@@ -40,6 +40,8 @@ const getContent: (url: string) => Promise<CheerioAPI> = async (url) => {
   return load(response.body);
 };
 
+const getPage = async (slug: string) => app.inject({ url: `/page/${slug}` });
+
 const createPage = async (
   pageTitle: string,
   pageContent = 'content',
@@ -128,6 +130,7 @@ describe('Creating page', () => {
     expect(response.statusCode).toBe(303);
     expect(response.headers.location).toBe('/page/first-and-only-page?f=1');
   });
+
   it('should show a feedback when a code is passed', async () => {
     const $ = await getContent('/?f=1');
     expect($('[role="status"]').text()).toContain('Page created');
@@ -166,6 +169,49 @@ describe('Navigation', () => {
     expect($a.eq(0).data('position')).toBe(POSITION_GAP_SIZE);
     expect($a.eq(1).data('position')).toBe(POSITION_GAP_SIZE * 2);
     expect($a.eq(2).data('position')).toBe(POSITION_GAP_SIZE * 3);
+  });
+});
+
+describe('Moving pages', () => {
+  it('should move a page to the top level', async () => {
+    await createPage('First page');
+    let resp = await createPage('Second page');
+    const parentPageId = resp.headers['x-page-id'] as string;
+
+    resp = await createPage('Third page', 'something', parentPageId);
+    const childPageId = resp.headers['x-page-id'];
+
+    resp = await getPage('third-page');
+    expect(resp.headers['x-parent-id']).toBe(parentPageId);
+
+    await postUrl(`/move/${childPageId}`, {
+      moveToTop: 'true',
+    });
+
+    resp = await getPage('third-page');
+    expect(resp.headers['x-parent-id']).toBe('');
+  });
+
+  it('should move a page to another parent', async () => {
+    let resp = await createPage('First page');
+    const firstPageId = resp.headers['x-page-id'] as string;
+
+    resp = await createPage('Second page');
+    const parentPageId = resp.headers['x-page-id'] as string;
+
+    resp = await createPage('Third page', 'something', parentPageId);
+    const childPageId = resp.headers['x-page-id'];
+
+    resp = await getPage('third-page');
+    expect(resp.headers['x-parent-id']).toBe(parentPageId);
+
+    await postUrl(`/move/${childPageId}`, {
+      moveToTop: 'false',
+      newParentId: firstPageId,
+    });
+
+    resp = await getPage('third-page');
+    expect(resp.headers['x-parent-id']).toBe(firstPageId);
   });
 });
 
