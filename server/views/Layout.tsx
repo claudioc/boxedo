@@ -57,6 +57,7 @@ export const Layout = ({
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
         <main class="columns mt-0 ml-0" data-context={context}>
+          {/* "main > div" is referenced in App.ts */}
           <div
             class={clsx(
               styles.mainLeft,
@@ -67,13 +68,13 @@ export const Layout = ({
           >
             <header class={clsx(styles.header, 'block')}>
               <div class="block">
-                <div class="level is-flew-direction-row">
+                <div class="level is-flex-direction-row">
                   <div class={clsx(styles.title, 'is-size-5', 'level-left')}>
                     <a href="/" class="has-text-warning">
                       {settings.siteTitle}
                     </a>
                   </div>
-                  <div class="level-right">
+                  <div class="level-right is-flex-direction-row">
                     <a
                       href="/settings"
                       aria-label={i18n.t('Navigation.editSettings')}
@@ -119,11 +120,27 @@ export const Layout = ({
           </div>
 
           {/* #main-page-body is used as a hx-target */}
-          <div class="column p-3 pr-5" id="main-page-body">
+          <div class={clsx(styles.mainRight, 'column', 'p-3', 'pr-5')}>
+            <button
+              type="button"
+              class={clsx(
+                styles.burgerToggle,
+                'navbar-burger',
+                'level',
+                'level-right'
+              )}
+              aria-label="menu"
+              aria-expanded="false"
+            >
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+              <span aria-hidden="true" />
+            </button>
             <div x-show="$store.has.some()">
               <Feedback feedback={getFeedbackByCode(feedbackCode)} />
             </div>
-            {children}
+            <div id="main-page-body">{children}</div>
           </div>
         </main>
       </body>

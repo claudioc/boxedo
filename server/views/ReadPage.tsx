@@ -57,7 +57,7 @@ export const ReadPage = ({
       data-page-id={page?._id}
     >
       {showPage && (
-        <div class="level level-right has-text-grey is-size-7 page-actions">
+        <div class="level level-right has-text-grey is-size-7 page-actions is-flex-direction-row">
           {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
           {!isSameTimestamp(page.updatedAt, page.createdAt) &&
             ` (${formatDate(page.updatedAt)})`}

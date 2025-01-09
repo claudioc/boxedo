@@ -9,8 +9,10 @@ See REORDERING.md
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
+  - we need an export of the page (backup / restore)
 
   MEDIUM
+  - better Mobile experience
   - back and forth navigation works in a weird way with XHR: need to hook in the history events to update it? It's too easy to make put the menu and the page content out-of-sync
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
