@@ -23,6 +23,7 @@ Doing:
   - uses CSRF for delete and move page? (probably not)
   - unit tests for the dbService would be good.
   - There is also Lexical as an possible replacement for tiptap, if needed
+  - Do we still need the replaceReact plugin?
 
 Done
 - Save the history of a page
