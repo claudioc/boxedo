@@ -1,21 +1,20 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
-import { useApp } from '~/lib/context/App';
 import styles from './SearchResults.module.css';
 import { DocumentIcon } from './icons/DocumentIcon';
 
-interface SearchResultsProps {
+interface SearchResultsProps extends WithApp {
   query: string;
   results?: PageModel[];
 }
 
-export const SearchResults = ({ query, results }: SearchResultsProps) => {
-  const { i18n } = useApp();
+export const SearchResults = ({ app, query, results }: SearchResultsProps) => {
+  const { i18n } = app;
   const hasResults = results && results.length > 0;
 
   return (
-    <Layout title="Search Results">
+    <Layout app={app} title="Search Results">
       <h1 class="title">{i18n.t('SearchResults.title')}</h1>
       <p class="is-size-4 block">
         {i18n.t('SearchResults.resultsForQuery')}: <em>{query}</em>
@@ -23,7 +22,7 @@ export const SearchResults = ({ query, results }: SearchResultsProps) => {
       {hasResults ? (
         <ul>
           {results.map((result) => (
-            <li key={result._id} class="content">
+            <li class="content">
               <div class={styles.item}>
                 <DocumentIcon />
                 <a href={slugUrl(result.pageSlug)}>{result.pageTitle}!!</a>
@@ -53,10 +52,9 @@ const HighlightPhrase = ({ text, phrase }: HighlightPhraseProps) => {
 
   return (
     <span>
-      {parts.map((part, index) =>
+      {parts.map((part) =>
         part.toLowerCase() === phrase.toLowerCase() ? (
-          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-          <strong key={index}>{part}</strong>
+          <strong>{part}</strong>
         ) : (
           part
         )

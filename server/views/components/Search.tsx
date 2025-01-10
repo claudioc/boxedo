@@ -1,8 +1,8 @@
-import { useApp } from '~/lib/context/App';
 import { SearchIcon } from '~/views/icons/SearchIcon';
+import type { WithApp } from '~/../types';
 
-export const Search = () => {
-  const { i18n } = useApp();
+export const Search = ({ app }: WithApp) => {
+  const { i18n } = app;
 
   return (
     <form action="/search" method="get">

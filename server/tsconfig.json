@@ -9,7 +9,13 @@
     "module": "ESNext",
     "downlevelIteration": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsxImportSource": "@kitajs/html",
+    "plugins": [
+      {
+        "name": "@kitajs/ts-html-plugin"
+      }
+    ],
+    "types": ["@kitajs/html/alpine.d.ts"],
     "baseUrl": ".",
     "paths": {
       "~/*": ["./*"]

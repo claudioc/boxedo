@@ -1,15 +1,15 @@
+import type { WithApp } from '~/../types';
 import { Layout } from './Layout';
-import { useApp } from '~/lib/context/App';
 
-interface NotFoundProps {
+interface NotFoundProps extends WithApp {
   title: string;
 }
 
-export const NotFound = ({ title }: NotFoundProps) => {
-  const { i18n } = useApp();
+export const NotFound = ({ app, title }: NotFoundProps) => {
+  const { i18n } = app;
 
   return (
-    <Layout title={title}>
+    <Layout app={app} title={title}>
       <h1 class="title">{i18n.t('NotFound.title')}</h1>
       <p>{i18n.t('NotFound.message')}</p>
     </Layout>

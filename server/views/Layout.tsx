@@ -1,15 +1,15 @@
 import { getBundleFilename, cssFile } from '~/lib/assets';
-import type { JSX } from 'preact';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import clsx from 'clsx';
-import type { PageModel, Context } from '~/../types';
-import { useApp } from '~/lib/context/App';
+import type { PageModel, Context, WithApp } from '~/../types';
 import { CogIcon } from './icons/CogIcon';
+import type { FastifyInstance } from 'fastify';
 
-interface LayoutProps {
+interface LayoutProps extends WithApp {
+  app: FastifyInstance;
   title: string;
   page?: PageModel | null;
   children: string | JSX.Element[] | JSX.Element;
@@ -20,6 +20,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({
+  app,
   title,
   page,
   children,
@@ -28,7 +29,7 @@ export const Layout = ({
   withEditor = false,
   withCreateButton = true,
 }: LayoutProps) => {
-  const { feedbackCode, i18n, settings } = useApp();
+  const { feedbackCode, i18n, settings } = app;
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -48,7 +49,7 @@ export const Layout = ({
         <script src="/a/vendor/htmx.min.js" />
         <script src="/a/vendor/Sortable.min.js" />
       </head>
-      <body x-data {...onKeypress}>
+      <body x-data="" {...onKeypress}>
         <script src={getBundleFilename('app')} />
         {withEditor && <script src={getBundleFilename('editor')} />}
         {process.env.NODE_ENV === 'development' && (
@@ -86,7 +87,7 @@ export const Layout = ({
                 </div>
               </div>
               <div class="block">
-                <Search />
+                <Search app={app} />
               </div>
             </header>
 
@@ -138,7 +139,7 @@ export const Layout = ({
               <span aria-hidden="true" />
             </button>
             <div x-show="$store.has.some()">
-              <Feedback feedback={getFeedbackByCode(feedbackCode)} />
+              <Feedback app={app} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
             <div id="main-page-body">{children}</div>
           </div>

@@ -84,13 +84,15 @@ const editorOptions: Partial<EditorOptions> = {
 
 export const enableEditor = () => {
   const placeHolder = document.getElementById('editor-placeholder');
+  /* Debug info */
   const pageContent = document.querySelector(
     '[name="pageContent"]'
   ) as HTMLInputElement;
   const pageTitle = document.querySelector(
     '[name="pageTitle"]'
   ) as HTMLInputElement;
-  const placeHolderContent = (placeHolder?.textContent ?? '').trim();
+  /* End Debug info */
+  const placeHolderContent = (placeHolder?.getHTML() ?? '').trim();
   if (placeHolder) {
     placeHolder.textContent = '';
   }

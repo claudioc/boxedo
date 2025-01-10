@@ -1,25 +1,25 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import { PageBody } from './components/PageBody';
 import { formatDate } from '~/lib/helpers';
-import { useApp } from '~/lib/context/App';
 
-export interface ReadPageVersionProps {
+export interface ReadPageVersionProps extends WithApp {
   page: PageModel;
   item: PageModel;
   version: string;
 }
 
 export const ReadPageVersion = ({
+  app,
   page,
   item,
   version,
 }: ReadPageVersionProps) => {
-  const { i18n } = useApp();
+  const { i18n } = app;
 
   return (
-    <Layout title={item.pageTitle} page={page}>
+    <Layout app={app} title={item.pageTitle} page={page}>
       <div>
         <div class="message is-info" x-ref="message">
           <div class="message-header">

@@ -31,7 +31,7 @@ interface NavTreeProps {
 const NavTree = ({ items }: NavTreeProps) => (
   <ul>
     {items.map((item: NavItem) => (
-      <li key={item.link}>
+      <li>
         <NavItemComponent item={item} />
         {item.children?.length ? <NavTree items={item.children} /> : null}
       </li>

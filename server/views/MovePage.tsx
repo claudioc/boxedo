@@ -1,32 +1,33 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
-import { useApp } from '~/lib/context/App';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 
-export interface MovePageProps {
+export interface MovePageProps extends WithApp {
   page: PageModel;
   parent: PageModel | null;
 }
 
-export const MovePage = ({ page, parent }: MovePageProps) => {
-  const { i18n } = useApp();
+export const MovePage = ({ app, page, parent }: MovePageProps) => {
+  const { i18n } = app;
 
   return (
     <Layout
+      app={app}
       title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
       page={page}
       context="moving page"
     >
       <div x-data="{newParentId: '', newParentTitle: '', moveToTop: false}">
         <div x-show="$store.has.errorOn('newParentId')">
-          <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
+          <Feedback app={app} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
         <form action="" method="post" x-on:submit="App.validate">
           <PageActions
+            app={app}
             title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(page.pageSlug)}
@@ -64,7 +65,7 @@ export const MovePage = ({ page, parent }: MovePageProps) => {
           <div class="control has-icons-left">
             <input
               class="input"
-              autoComplete="off"
+              autocomplete="off"
               type="text"
               id="search"
               name="q"

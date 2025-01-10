@@ -1,28 +1,31 @@
 import { Layout } from './Layout';
-import type { SettingsModel, PageModel } from '~/../types';
+import type { SettingsModel, PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
-import { useApp } from '~/lib/context/App';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { LanguageIcon } from './icons/Language';
 import styles from './SettingsPage.module.css';
 
-interface SettingsPageProps {
+interface SettingsPageProps extends WithApp {
   settings: SettingsModel;
   landingPage: PageModel | null;
 }
 
-export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
-  const { i18n } = useApp();
+export const SettingsPage = ({
+  app,
+  settings,
+  landingPage,
+}: SettingsPageProps) => {
+  const { i18n } = app;
   const { siteLang } = settings;
 
   return (
-    <Layout title={i18n.t('SettingsPage.title')}>
+    <Layout app={app} title={i18n.t('SettingsPage.title')}>
       <div
         x-data={`{landingPageId: '${landingPage ? landingPage._id : ''}', newLandingPageTitle: '', error: {landingPageId: false}}`}
       >
         <div x-show="error && error.landingPageId" class="block">
-          <Feedback feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
+          <Feedback app={app} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
         <form
@@ -32,6 +35,7 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
           x-on:submit="App.validate"
         >
           <PageActions
+            app={app}
             title={i18n.t('SettingsPage.title')}
             actions={['save', 'cancel']}
             cancelUrl="/"
@@ -78,7 +82,7 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
                 <div class="control has-icons-left">
                   <input
                     class="input"
-                    autoComplete="off"
+                    autocomplete="off"
                     type="text"
                     id="search"
                     name="q"
@@ -105,9 +109,13 @@ export const SettingsPage = ({ settings, landingPage }: SettingsPageProps) => {
               </label>
               <div class="control has-icons-left">
                 <span class="select">
-                  <select name="siteLang" value={siteLang}>
-                    <option value="it">Italiano</option>
-                    <option value="en">English</option>
+                  <select name="siteLang">
+                    <option selected={siteLang === 'it'} value="it">
+                      Italiano
+                    </option>
+                    <option selected={siteLang === 'en'} value="en">
+                      English
+                    </option>
                   </select>
                 </span>
                 <span class="icon is-small is-left">

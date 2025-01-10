@@ -15,7 +15,7 @@ export const TitlesList = ({ results, i18n }: TitlesListProps) => {
       {results.length > 0 && (
         <ul>
           {results.map((page) => (
-            <li key={page._id}>
+            <li>
               <div class={styles.item}>
                 <DocumentIcon />
                 <a

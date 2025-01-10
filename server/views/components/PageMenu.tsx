@@ -1,12 +1,13 @@
+import type { FastifyInstance } from 'fastify';
 import type { PageModel } from '~/../types';
-import { useApp } from '~/lib/context/App';
 
 interface PageMenuProps {
+  app: FastifyInstance;
   page?: PageModel;
 }
 
-export const PageMenu = ({ page }: PageMenuProps) => {
-  const { i18n } = useApp();
+export const PageMenu = ({ app, page }: PageMenuProps) => {
+  const { i18n } = app;
 
   if (!page) {
     return null;

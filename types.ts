@@ -1,11 +1,15 @@
+import type { FastifyInstance } from 'fastify';
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
-import type Polyglot from 'node-polyglot';
 
 export type NodeEnv = 'development' | 'production' | 'test';
 
 export type Context = 'none' | 'editing page' | 'viewing page' | 'moving page';
 
 type WithoutId<T> = Omit<T, '_id' | '_rev'>;
+
+export interface WithApp {
+  app: FastifyInstance;
+}
 
 export interface SettingsModel {
   _id: string;
@@ -63,8 +67,4 @@ export type PageWithoutContentModel = Omit<PageModel, 'pageContent'>;
 export interface Feedback {
   code: number;
   message: string;
-}
-
-export interface WithI18nProps {
-  i18n?: Polyglot;
 }

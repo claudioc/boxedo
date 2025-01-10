@@ -1,13 +1,13 @@
-import type { JSX } from 'preact';
 import { ValidationErrors } from '~/views/components/ValidationErrors';
+import type { WithApp } from '../../../types';
 
-interface PageFormWrapperProps {
+interface PageFormWrapperProps extends WithApp {
   children: string | JSX.Element[] | JSX.Element;
 }
 
-export const PageFormWrapper = ({ children }: PageFormWrapperProps) => (
+export const PageFormWrapper = ({ app, children }: PageFormWrapperProps) => (
   <div x-init="window.onbeforeunload=function() { return true };">
-    <ValidationErrors />
+    <ValidationErrors app={app} />
     {children}
   </div>
 );

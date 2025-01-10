@@ -1,34 +1,35 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { PageFormWrapper } from './components/PageFormWrapper';
-import { useApp } from '~/lib/context/App';
 import { slugUrl } from '~/lib/helpers';
 import styles from './EditPage.module.css';
 
-export interface EditPageProps {
+export interface EditPageProps extends WithApp {
   page: PageModel;
   token: string;
 }
 
-export const EditPage = ({ page, token }: EditPageProps) => {
-  const { i18n } = useApp();
+export const EditPage = ({ app, page, token }: EditPageProps) => {
+  const { i18n } = app;
 
   return (
     <Layout
+      app={app}
       title={i18n.t('EditPage.editingPage', { title: page.pageTitle })}
       page={page}
       withEditor
       context="editing page"
     >
-      <PageFormWrapper>
+      <PageFormWrapper app={app}>
         <form action="" method="post" class="block" x-on:submit="App.validate">
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
 
           <PageActions
+            app={app}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(page.pageSlug)}
             title={i18n.t('EditPage.title')}

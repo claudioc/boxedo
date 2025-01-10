@@ -1,4 +1,4 @@
-import type { Feedback as FeedbackType } from '~/../types';
+import type { Feedback as FeedbackType, WithApp } from '~/../types';
 import {
   Feedbacks,
   isFeedbackError,
@@ -6,14 +6,13 @@ import {
 } from '~/lib/feedbacks';
 import clsx from 'clsx';
 import styles from './Feedback.module.css';
-import { useApp } from '~/lib/context/App';
 
-interface FeedbackProps {
+interface FeedbackProps extends WithApp {
   feedback?: FeedbackType;
 }
 
-export const Feedback = ({ feedback }: FeedbackProps) => {
-  const { i18n } = useApp();
+export const Feedback = ({ app, feedback }: FeedbackProps) => {
+  const { i18n } = app;
 
   if (!feedback) {
     return null;

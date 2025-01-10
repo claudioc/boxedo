@@ -18,7 +18,6 @@ import { CreatePage } from '~/views/CreatePage';
 import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
-import { AppProvider } from '~/lib/context/App';
 import { TitlesList } from '~/views/components/TitlesList';
 import { POSITION_GAP_SIZE } from '~/constants';
 
@@ -129,7 +128,7 @@ const SettingsPageBodySchema = {
  */
 const router = async (app: FastifyInstance) => {
   // The home page, folks
-  app.get('/', async (req) => {
+  app.get('/', async (req, rep) => {
     const dbs = dbService(app.dbClient);
     const isHtmx = req.headers['hx-request'];
 
@@ -153,16 +152,23 @@ const router = async (app: FastifyInstance) => {
       }
     }
 
-    return (
-      <AppProvider app={app}>
+    rep.html(
+      <>
         {landingPage && (
-          <ReadPage isFull={!isHtmx} page={landingPage} isLandingPage />
+          <ReadPage
+            app={app}
+            isFull={!isHtmx}
+            page={landingPage}
+            isLandingPage
+          />
         )}
         {!landingPage && pageCount === 0 && (
-          <ReadPage isFull={!isHtmx} isWelcome isLandingPage />
+          <ReadPage app={app} isFull={!isHtmx} isWelcome isLandingPage />
         )}
-        {!landingPage && pageCount > 0 && <ReadPage isFull={!isHtmx} />}
-      </AppProvider>
+        {!landingPage && pageCount > 0 && (
+          <ReadPage app={app} isFull={!isHtmx} />
+        )}
+      </>
     );
   });
 
@@ -180,10 +186,8 @@ const router = async (app: FastifyInstance) => {
 
       rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 
-      return (
-        <AppProvider app={app}>
-          <SettingsPage settings={settings} landingPage={landingPage} />
-        </AppProvider>
+      rep.html(
+        <SettingsPage app={app} settings={settings} landingPage={landingPage} />
       );
     }
   );
@@ -241,7 +245,7 @@ const router = async (app: FastifyInstance) => {
         querystring: SearchQuerySchema,
       },
     },
-    async (req) => {
+    async (req, rep) => {
       const { q } = req.query;
 
       if (q.length < 3 || q.length > 50) {
@@ -250,7 +254,7 @@ const router = async (app: FastifyInstance) => {
 
       const results = await dbService(app.dbClient).search(q);
 
-      return <TitlesList results={results} i18n={app.i18n} />;
+      rep.html(<TitlesList results={results} i18n={app.i18n} />);
     }
   );
 
@@ -262,7 +266,7 @@ const router = async (app: FastifyInstance) => {
         params: PageParamsSchemaOptional,
       },
     },
-    async (req, reply) => {
+    async (req, rep) => {
       const { pageId } = req.params;
       const dbs = dbService(app.dbClient);
 
@@ -289,12 +293,12 @@ const router = async (app: FastifyInstance) => {
         });
       }
 
-      reply.header('Cache-Control', 'no-store');
+      rep.header('Cache-Control', 'no-store');
 
       // Use this await to simulate a slow connection
       // await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      return (
+      rep.html(
         <Nav
           forest={forest}
           currentPageId={
@@ -327,11 +331,7 @@ const router = async (app: FastifyInstance) => {
         rep.header('x-page-id', page._id);
         rep.header('x-parent-id', page.parentId ?? '');
 
-        return (
-          <AppProvider app={app}>
-            <ReadPage isFull={!isHtmx} page={page} />
-          </AppProvider>
-        );
+        return rep.html(<ReadPage app={app} isFull={!isHtmx} page={page} />);
       }
 
       const oldPage = await dbs.lookupPageBySlug(slug);
@@ -344,11 +344,7 @@ const router = async (app: FastifyInstance) => {
 
       app.log.error(Feedbacks.E_MISSING_PAGE.message);
       rep.code(404);
-      return (
-        <AppProvider app={app}>
-          <NotFound title={app.i18n.t('Error.pageNotFound')} />
-        </AppProvider>
-      );
+      rep.html(<NotFound app={app} title={app.i18n.t('Error.pageNotFound')} />);
     }
   );
 
@@ -373,11 +369,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 
-      return (
-        <AppProvider app={app}>
-          <EditPage page={page} token={token} />
-        </AppProvider>
-      );
+      rep.html(<EditPage app={app} page={page} token={token} />);
     }
   );
 
@@ -486,11 +478,7 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      return (
-        <AppProvider app={app}>
-          <MovePage page={page} parent={parent} />
-        </AppProvider>
-      );
+      rep.html(<MovePage app={app} page={page} parent={parent} />);
     }
   );
 
@@ -656,11 +644,7 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      return (
-        <AppProvider app={app}>
-          <CreatePage parentPage={parentPage} token={token} />
-        </AppProvider>
-      );
+      rep.html(<CreatePage app={app} parentPage={parentPage} token={token} />);
     }
   );
 
@@ -744,7 +728,7 @@ const router = async (app: FastifyInstance) => {
       },
     },
 
-    async (req) => {
+    async (req, rep) => {
       const { q } = req.query;
       const dbs = dbService(app.dbClient);
 
@@ -768,11 +752,7 @@ const router = async (app: FastifyInstance) => {
         });
       }
 
-      return (
-        <AppProvider app={app}>
-          <SearchResults query={q} results={results} />
-        </AppProvider>
-      );
+      rep.html(<SearchResults app={app} query={q} results={results} />);
     }
   );
 
@@ -795,11 +775,7 @@ const router = async (app: FastifyInstance) => {
 
       const history = await dbs.getPageHistory(page);
 
-      return (
-        <AppProvider app={app}>
-          <PageHistory page={page} history={history} />
-        </AppProvider>
-      );
+      rep.html(<PageHistory app={app} page={page} history={history} />);
     }
   );
 
@@ -827,10 +803,13 @@ const router = async (app: FastifyInstance) => {
         return rs.slugWithFeedback(page.pageSlug, Feedbacks.E_INVALID_VERSION);
       }
 
-      return (
-        <AppProvider app={app}>
-          <ReadPageVersion page={page} item={historyItem} version={version} />
-        </AppProvider>
+      rep.html(
+        <ReadPageVersion
+          app={app}
+          page={page}
+          item={historyItem}
+          version={version}
+        />
       );
     }
   );
@@ -898,15 +877,13 @@ const router = async (app: FastifyInstance) => {
     return 'All done';
   });
 
-  app.setNotFoundHandler(async (_, reply) => {
-    await reply.code(404).send(
-      <AppProvider app={app}>
-        <NotFound title={app.i18n.t('Error.pageNotFound')} />
-      </AppProvider>
-    );
+  app.setNotFoundHandler(async (_, rep) => {
+    await rep
+      .code(404)
+      .html(<NotFound app={app} title={app.i18n.t('Error.pageNotFound')} />);
   });
 
-  app.setErrorHandler(async (err, req, reply) => {
+  app.setErrorHandler(async (err, req, rep) => {
     app.log.error(err);
 
     if (process.env.NODE_ENV === 'test') {
@@ -921,22 +898,24 @@ const router = async (app: FastifyInstance) => {
     }
 
     if (err.validation) {
-      reply.code(400);
-      return (
-        <AppProvider app={app}>
-          <ErrorPage
-            title={app.i18n.t('Error.invalidParameters')}
-            error={err}
-          />
-        </AppProvider>
+      rep.code(400);
+      rep.html(
+        <ErrorPage
+          app={app}
+          title={app.i18n.t('Error.invalidParameters')}
+          error={err}
+        />
       );
+      return;
     }
 
-    reply.code(500);
-    return (
-      <AppProvider app={app}>
-        <ErrorPage title={app.i18n.t('Error.unhandledError')} error={err} />
-      </AppProvider>
+    rep.code(500);
+    rep.html(
+      <ErrorPage
+        app={app}
+        title={app.i18n.t('Error.unhandledError')}
+        error={err}
+      />
     );
   });
 };

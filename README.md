@@ -29,7 +29,7 @@ Joongle is and will remain **Free Software**.
 
 Joongle is also the first serious project to put at test some ideas that have been floating in my mind for several months. Those ideas initially gave birth to my [Fastify-HTMX-JSX](https://github.com/claudioc/fastify-htmx-ts-starter-kit) starter kit, so Joongle is basically the first of my projects to stem from that starter kit, and of course improve over it adding other bits.
 
-I have been experimenting with several ideas during the development of Joongle and right now I am pretty happy with the development workflow, which is of [primary importance for me](https://claudio.cica.li/posts/2024/using-nodejs-for-everything/). I have tried to keep the dependencies to the bare minimum (more on that later) and although I work with React every day, this project only uses JSX which is server-side rendered (using [Preact](https://preactjs.com/)). The rest of the frontend is managed by [HTMX](https://htmx.org/) for the server interactions and [Alpinejs](https://alpinejs.dev/) for a bit of UI and state management.
+I have been experimenting with several ideas during the development of Joongle and right now I am pretty happy with the development workflow, which is of [primary importance for me](https://claudio.cica.li/posts/2024/using-nodejs-for-everything/). I have tried to keep the dependencies to the bare minimum (more on that later) and although I work with React every day, this project only uses JSX which is server-side rendered (using [Kitajs](https://github.com/kitajs/html)). The rest of the frontend is managed by [HTMX](https://htmx.org/) for the server interactions and [Alpinejs](https://alpinejs.dev/) for a bit of UI and state management.
 
 ---
 
@@ -67,7 +67,7 @@ Despite its experimental nature, Joongle includes:
 - [Fastify](https://www.fastify.io/)
 - [CouchDB](https://couchdb.apache.org/)
 - [TipTap](https://tiptap.dev/)
-- Server-side JSX rendering with [Preact](https://preactjs.com/)
+- Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
 - [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
 - CSS Modules
 - [esbuild](https://esbuild.github.io/)

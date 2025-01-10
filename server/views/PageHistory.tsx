@@ -1,19 +1,18 @@
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
-import { useApp } from '~/lib/context/App';
 
-interface PageHistoryProps {
+interface PageHistoryProps extends WithApp {
   page: PageModel;
   history: PageModel[];
 }
 
-export const PageHistory = ({ page, history }: PageHistoryProps) => {
-  const { i18n } = useApp();
+export const PageHistory = ({ app, page, history }: PageHistoryProps) => {
+  const { i18n } = app;
   const len = history.length;
 
   return (
-    <Layout title="Page history" page={page}>
+    <Layout app={app} title="Page history" page={page}>
       <h1 class="title">
         <span class="has-text-grey is-size-4">
           {i18n.t('PageHistory.historyOf')}:
@@ -33,13 +32,8 @@ export const PageHistory = ({ page, history }: PageHistoryProps) => {
             </tr>
           </thead>
           <tbody>
-            {history.map((item, index) => (
-              <tr
-                key={`key-${
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                  index
-                }`}
-              >
+            {history.map((item) => (
+              <tr>
                 <td>{item._rev?.split('-')[0]}</td>
                 <td>{formatDate(item.updatedAt, 'N/A')}</td>
                 <td>{item.pageTitle}</td>

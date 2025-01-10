@@ -1,26 +1,30 @@
-// Almost directly from https://evertpot.com/jsx-template/
 import type { onSendHookHandler, preSerializationHookHandler } from 'fastify';
-import { isValidElement, type JSX } from 'preact';
-import render from 'preact-render-to-string';
 import type { FastifyInstance } from 'fastify';
 import plugin from 'fastify-plugin';
 
 /**
- * The preserialization hook lets us transform the response body
- * before it's json-encoded.
- *
- * We use this to turn React components into an object with a ___jsx key
- * that has the serialized HTML.
+ * Type guard to check if something is a JSX element
+ * With Kita, JSX elements are compiled to string literals
+ */
+const isJsxElement = (payload: unknown): boolean => {
+  // When using Kita, JSX elements are compiled to strings
+  // with HTML content, so we can check for that
+  return typeof payload === 'string' && payload.trim().startsWith('<');
+};
+
+/**
+ * The preserialization hook transforms JSX elements into a specially marked object
+ * before JSON serialization
  */
 const preSerialization: preSerializationHookHandler<unknown> = async (
   _request,
   reply,
   payload: unknown
 ) => {
-  if (isValidElement(payload)) {
+  if (isJsxElement(payload)) {
     void reply.header('Content-Type', 'text/html; charset=utf8');
     return {
-      ___jsx: `<!DOCTYPE html>\n${render(payload as JSX.Element)}`,
+      ___jsx: `<!DOCTYPE html>\n${payload}`,
     };
   }
 
@@ -28,8 +32,7 @@ const preSerialization: preSerializationHookHandler<unknown> = async (
 };
 
 /**
- * The onSendHookHandler lets us transform the response body (as a string)
- * We detect the ___jsx key and unwrap the HTML.
+ * The onSend hook unwraps the HTML content from our specially marked object
  */
 const onSend: onSendHookHandler<unknown> = async (
   _request,
@@ -44,10 +47,8 @@ const onSend: onSendHookHandler<unknown> = async (
 
 const renderJsx = (
   fastify: FastifyInstance,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  _opts: any,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  done: (err?: any) => void
+  _opts: Record<string, unknown>,
+  done: (err?: Error) => void
 ) => {
   fastify.addHook('preSerialization', preSerialization);
   fastify.addHook('onSend', onSend);

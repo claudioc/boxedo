@@ -8,7 +8,7 @@ import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
 import type { NodeEnv, SettingsModel } from '~/../types';
-import jsxRenderer from './jsxRenderer';
+import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
 import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';
 import csrfProtection from '@fastify/csrf-protection';
@@ -122,7 +122,7 @@ await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
       maxAge: 3600,
     })
     .register(fastifyFormbody)
-    .register(jsxRenderer)
+    .register(kitaHtmlPlugin)
     .register(helmet, {
       referrerPolicy: {
         policy: 'same-origin',

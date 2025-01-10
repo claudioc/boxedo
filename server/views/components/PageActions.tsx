@@ -1,8 +1,8 @@
-import { useApp } from '~/lib/context/App';
+import type { WithApp } from '~/../types';
 
 type PageAction = 'save' | 'cancel';
 
-interface PageActionsProps {
+interface PageActionsProps extends WithApp {
   actions: PageAction[];
   cancelUrl: string;
   title: string;
@@ -12,11 +12,12 @@ interface PageActionsProps {
  * The menu that shows up at the top of any form page (edit / create)
  */
 export const PageActions = ({
+  app,
   actions,
   cancelUrl,
   title,
 }: PageActionsProps) => {
-  const { i18n } = useApp();
+  const { i18n } = app;
 
   return (
     <div class="level is-flex-direction-row">

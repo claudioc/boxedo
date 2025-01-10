@@ -1,31 +1,31 @@
 import { Layout } from './Layout';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { slugUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
-import { useApp } from '~/lib/context/App';
 import styles from './EditPage.module.css';
 
-export interface CreatePageProps {
+export interface CreatePageProps extends WithApp {
   parentPage: PageModel | null;
   token: string;
 }
 
-export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
-  const { i18n } = useApp();
+export const CreatePage = ({ app, parentPage, token }: CreatePageProps) => {
+  const { i18n } = app;
 
   const titleKey = parentPage ? 'CreatePage.title' : 'CreatePage.titleTopLevel';
 
   return (
     <Layout
+      app={app}
       title={i18n.t(titleKey)}
       page={parentPage}
       withEditor
       context="editing page"
     >
-      <PageFormWrapper>
+      <PageFormWrapper app={app}>
         <form
           action=""
           method="post"
@@ -36,6 +36,7 @@ export const CreatePage = ({ parentPage, token }: CreatePageProps) => {
           <input type="hidden" name="_csrf" value={token} />
 
           <PageActions
+            app={app}
             title={i18n.t(titleKey)}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(parentPage?.pageSlug || '/')}

@@ -19,7 +19,8 @@
         "noForEach": "off"
       },
       "correctness": {
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "useJsxKeyInIterable": "off"
       }
     },
     "ignore": ["dist", "tasks", "assets"]
