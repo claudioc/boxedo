@@ -29,6 +29,7 @@ export interface PageModel {
   pageSlugs: string[];
   pageContent: string;
   position: number;
+  contentUpdated: boolean;
   createdAt: string;
   updatedAt: string;
 }

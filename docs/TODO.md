@@ -1,5 +1,4 @@
 Doing:
-  - add the metadataOnly flag to the document
 
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
@@ -66,3 +65,4 @@ Done
 - Try errors with curl (ie /parts/nav/br0ken) and see why it does return
 - use kitajs? https://github.com/kitajs/html
 - we should be able to reorganize pages on the same level
+- add the metadataOnly flag to the document

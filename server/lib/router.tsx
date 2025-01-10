@@ -423,7 +423,7 @@ const router = async (app: FastifyInstance) => {
       const newSlug = await maybeNewSlug();
 
       try {
-        await dbs.updatePage(page, {
+        await dbs.updatePageContent(page, {
           pageTitle: req.body.pageTitle,
           pageContent: req.body.pageContent,
           pageSlug: newSlug,
@@ -703,6 +703,7 @@ const router = async (app: FastifyInstance) => {
           pageSlug: slug,
           pageSlugs: [],
           position,
+          contentUpdated: true,
           updatedAt: now,
           createdAt: now,
         });

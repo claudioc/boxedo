@@ -217,6 +217,7 @@ export function dbService(client?: nano.ServerScope) {
     async insertPage(page: PageModel) {
       page.pageContent = safeHtml(page.pageContent);
       page.pageTitle = safeHtml(page.pageTitle);
+      page.contentUpdated = true;
 
       try {
         await pagesDb.insert(page);
@@ -329,10 +330,11 @@ export function dbService(client?: nano.ServerScope) {
     //   return menuTree;
     // },
 
-    async updatePage(page: PageModel, newPage: Partial<PageModel>) {
+    async updatePageContent(page: PageModel, newPage: Partial<PageModel>) {
       const updatedPage: PageModel = {
         ...page,
         ...newPage,
+        contentUpdated: true,
         pageTitle: safeHtml(newPage.pageTitle ?? ''),
         pageContent: safeHtml(newPage.pageContent ?? ''),
         updatedAt: newPage.updatedAt ?? new Date().toISOString(),
@@ -357,6 +359,7 @@ export function dbService(client?: nano.ServerScope) {
       const updatedPage: PageModel = {
         ...page,
         position,
+        contentUpdated: false,
         parentId: newParentId,
       };
       try {
@@ -370,6 +373,7 @@ export function dbService(client?: nano.ServerScope) {
       try {
         await pagesDb.insert({
           ...page,
+          contentUpdated: false,
           position,
         });
       } catch {
@@ -388,6 +392,7 @@ export function dbService(client?: nano.ServerScope) {
 
         for (const childPage of childPages.docs) {
           childPage.parentId = page.parentId;
+          childPage.contentUpdated = false;
           await pagesDb.insert(childPage);
         }
       } catch {
@@ -406,6 +411,7 @@ export function dbService(client?: nano.ServerScope) {
             if (rev.status !== 'available') return null;
             if (rev.rev === doc._rev) return null;
             const revisionDoc = await pagesDb.get(page._id, { rev: rev.rev });
+            if (!revisionDoc.contentUpdated) return null;
             return {
               pageTitle: revisionDoc.pageTitle,
               updatedAt: revisionDoc.updatedAt,
@@ -459,10 +465,6 @@ export function dbService(client?: nano.ServerScope) {
       }
 
       try {
-        /*
-         * If you add a design document (and index) don't forget
-         * to increase DESIGN_DOCUMENTS_COUNT
-         */
         await dbService._createIndexes(client);
         await dbService._createViews(client);
       } catch {
@@ -515,13 +517,11 @@ dbService._createViews = async (client: nano.ServerScope) => {
   };
 
   try {
-    // Try to get existing design doc
     const existing = await db.get('_design/pages');
     const updatedDoc = { ...designDoc, _rev: existing._rev };
     await db.insert(updatedDoc);
   } catch (err) {
     if ((err as { statusCode?: number })?.statusCode === 404) {
-      // Design doc doesn't exist, create it
       await db.insert(designDoc);
     } else {
       throw err;
@@ -555,10 +555,6 @@ dbService.init = async (params: DbServiceInitParams) => {
   }
 
   try {
-    /*
-     * If you add a design document (and index) don't forget
-     * to increase DESIGN_DOCUMENTS_COUNT
-     */
     await dbService._createIndexes(couchdb);
     await dbService._createViews(couchdb);
   } catch {

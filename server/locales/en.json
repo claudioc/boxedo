@@ -6,7 +6,7 @@
 
   "EditPage": {
     "title": "Editing a page",
-    "editingPage": "Editing %{title}}",
+    "editingPage": "Editing %{title}",
     "addImage": "Add image",
     "deletePage": "Delete this page",
     "deletePageConfirm": "Delete this page?",
