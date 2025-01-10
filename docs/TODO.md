@@ -1,8 +1,5 @@
 Doing:
-  - we should be able to reorganize pages on the same level
-    - add the metadataOnly flag to the document
-
-See REORDERING.md
+  - add the metadataOnly flag to the document
 
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
@@ -12,13 +9,12 @@ See REORDERING.md
 
   MEDIUM
   - better Mobile experience
-  - back and forth navigation works in a weird way with XHR: need to hook in the history events to update it? It's too easy to make put the menu and the page content out-of-sync
+  - back and forth navigation does not keep the active item in the menu
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - move document metadata in their own document, instead of using the metadata flag
 
   LOW
-  - use kitajs? https://github.com/kitajs/html
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production
@@ -67,3 +63,5 @@ Done
 - better design for the search results
 - set page title and page description in the settings
 - Try errors with curl (ie /parts/nav/br0ken) and see why it does return
+- use kitajs? https://github.com/kitajs/html
+- we should be able to reorganize pages on the same level
