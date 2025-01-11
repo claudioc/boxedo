@@ -17,7 +17,7 @@
 .mainContent {
   margin-left: 5%;
   max-width: 900px;
-  padding: 0 10vh 10vh 10vh;
+  padding: 0 5vw 10vh 5vw;
 }
 
 @media screen and (max-width: 768px) {

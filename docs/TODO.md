@@ -12,6 +12,7 @@ Doing:
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - move document metadata in their own document, instead of using the metadata flag
+  - What about https://demo.umodoc.com/editor ?
 
   LOW
   - consider access implications to the history of docs
