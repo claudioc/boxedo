@@ -26,6 +26,7 @@ Doing:
   - unit tests for the dbService would be good.
   - There is also Lexical as an possible replacement for tiptap, if needed
   - Do we still need the replaceReact plugin?
+  - Add inline comments
 
 Done
 - Save the history of a page

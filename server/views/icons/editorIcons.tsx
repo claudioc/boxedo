@@ -63,3 +63,56 @@ export const HighlightIcon = () => (
     />
   </svg>
 );
+
+export const CodeIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Code</title>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+    />
+  </svg>
+);
+
+export const CodeBlockIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Code Block</title>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"
+    />
+  </svg>
+);
+
+export const H1Icon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Toggle H1 level</title>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M2.243 4.493v7.5m0 0v7.502m0-7.501h10.5m0-7.5v7.5m0 0v7.501m4.501-8.627 2.25-1.5v10.126m0 0h-2.25m2.25 0h2.25"
+    />
+  </svg>
+);
+
+export const H2Icon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Toggle H2 level</title>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M21.75 19.5H16.5v-1.609a2.25 2.25 0 0 1 1.244-2.012l2.89-1.445c.651-.326 1.116-.955 1.116-1.683 0-.498-.04-.987-.118-1.463-.135-.825-.835-1.422-1.668-1.489a15.202 15.202 0 0 0-3.464.12M2.243 4.492v7.5m0 0v7.502m0-7.501h10.5m0-7.5v7.5m0 0v7.501"
+    />
+  </svg>
+);
+
+export const ParagraphIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Paragraph</title>
+    <path d="M13 4v16" />
+    <path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13" />
+    <path d="M17 4v16" />
+  </svg>
+);

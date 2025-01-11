@@ -4,6 +4,11 @@ import {
   StrikeIcon,
   UnderlineIcon,
   HighlightIcon,
+  CodeIcon,
+  CodeBlockIcon,
+  H1Icon,
+  H2Icon,
+  ParagraphIcon,
 } from '../icons/editorIcons';
 
 import styles from './EditorEnabler.module.css';
@@ -24,8 +29,26 @@ export const EditorEnabler = () => (
       <button type="button" class="bmButton" data-command="underline">
         <UnderlineIcon />
       </button>
+      <div aria-hidden="true" class={styles.separator} />
       <button type="button" class="bmButton" data-command="highlight">
         <HighlightIcon />
+      </button>
+      <div aria-hidden="true" class={styles.separator} />
+      <button type="button" class="bmButton" data-command="code">
+        <CodeIcon />
+      </button>
+      <button type="button" class="bmButton" data-command="codeblock">
+        <CodeBlockIcon />
+      </button>
+      <div aria-hidden="true" class={styles.separator} />
+      <button type="button" class="bmButton" data-command="h1">
+        <H1Icon />
+      </button>
+      <button type="button" class="bmButton" data-command="h2">
+        <H2Icon />
+      </button>
+      <button type="button" class="bmButton" data-command="p">
+        <ParagraphIcon />
       </button>
     </div>
     <script defer>{'App.enableEditor()'}</script>

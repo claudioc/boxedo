@@ -25,7 +25,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     }),
     Link.configure({
       openOnClick: false,
-
       HTMLAttributes: {
         defaultProtocol: 'https',
         // Remove target entirely so links open in current tab
@@ -102,6 +101,11 @@ type BubbleMenuCommands =
   | 'strike'
   | 'underline'
   | 'highlight'
+  | 'code'
+  | 'codeblock'
+  | 'h1'
+  | 'h2'
+  | 'p'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -127,6 +131,26 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'highlight':
           editor.chain().focus().toggleHighlight().run();
+          break;
+        case 'code':
+          editor.chain().focus().toggleCode().run();
+          break;
+        case 'codeblock':
+          editor.chain().focus().toggleCodeBlock().run();
+          break;
+        case 'h1':
+        case 'h2':
+          editor
+            .chain()
+            .focus()
+            .toggleHeading({
+              // @ts-ignore
+              level: Number.parseInt(command.charAt(1), 10),
+            })
+            .run();
+          break;
+        case 'p':
+          editor.chain().focus().setParagraph().run();
           break;
         default:
           console.warn(`Unknown command: ${command}`);
