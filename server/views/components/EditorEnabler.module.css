@@ -1,0 +1,26 @@
+.bubbleMenu {
+  background-color: white;
+  color: #222;
+  border-radius: 3px;
+  display: flex;
+  padding: 0.2rem;
+  gap: .3rem;
+
+  button {
+    line-height: 1;
+    padding: .2rem;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: rgb(228, 228, 228);
+    }
+
+    &.is-active {
+      background-color: var(--purple);
+
+      &:hover {
+        background-color: var(--purple-contrast);
+      }
+    }
+  }
+}

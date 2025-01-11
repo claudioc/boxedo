@@ -9,3 +9,5 @@ I also added, to each icon:
     style={{ width: '18px', height: '18px' }}
     aria-hidden="true"
 ```
+
+All the icons for the editor are in the editorIcons.tsx

@@ -119,6 +119,16 @@ const clean: TaskFn = async (_, target = 'client') => {
 
 const setupFileWatchers: TaskFn = async (_) => {
   try {
+    const watchAssets = async () => {
+      const assetsWatcher = watch('assets', { recursive: true });
+      for await (const event of assetsWatcher) {
+        if (event.filename?.match(/style\.css$/)) {
+          console.log(`[Hawk] Assets change: ${event.filename}`);
+          taskManager.run(['notify-client-update']);
+        }
+      }
+    };
+
     const watchClient = async () => {
       const clientWatcher = watch('client', { recursive: true });
       for await (const event of clientWatcher) {
@@ -180,30 +190,16 @@ const setupFileWatchers: TaskFn = async (_) => {
           await killApiServer();
           await killSseServer();
           process.exit();
-
-          /*
-          const proc = spawn('npm', ['run', 'dev'], {
-            stdio: 'inherit',
-            env: process.env,
-            detached: false,
-          });
-
-          process.on('SIGINT', () => {
-            proc.kill('SIGINT');
-          });
-          process.on('SIGTERM', () => {
-            proc.kill('SIGTERM');
-          });
-
-          proc.on('exit', (code) => {
-            process.exit(code);
-          });
-          */
         }
       }
     };
 
-    Promise.all([watchClient(), watchServer(), watchRoot()]).catch((error) => {
+    Promise.all([
+      watchAssets(),
+      watchClient(),
+      watchServer(),
+      watchRoot(),
+    ]).catch((error) => {
       console.error('[Hawk] Watch error:', error);
     });
   } catch (error) {

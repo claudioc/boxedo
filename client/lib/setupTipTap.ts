@@ -4,82 +4,135 @@ import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
+import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
-import { Editor, type EditorOptions } from '@tiptap/core';
+import { Editor, type Extensions, type EditorOptions } from '@tiptap/core';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
 
 // The one and only Editor instance
 let editor: Editor;
 
-const extensions = [
-  Link.configure({
-    openOnClick: false,
+// This function is called at the moment the editor is instantiated
+const getEditorOptions = (): Partial<EditorOptions> => {
+  const extensions: Extensions = [
+    BubbleMenu.configure({
+      tippyOptions: {
+        appendTo: 'parent',
+      },
+      element: document.querySelector('.bubbleMenu') as HTMLElement,
+    }),
+    Link.configure({
+      openOnClick: false,
 
-    HTMLAttributes: {
-      defaultProtocol: 'https',
-      // Remove target entirely so links open in current tab
-      target: null,
-    },
-  }),
-  Typography,
-  Image,
-  Document.extend({
-    content: 'heading block*',
-  }),
-  StarterKit.configure({
-    document: false,
-  }),
-  Placeholder.configure({
-    placeholder: ({ node }) => {
-      if (node.type.name === 'heading') {
-        return 'New page';
-      }
+      HTMLAttributes: {
+        defaultProtocol: 'https',
+        // Remove target entirely so links open in current tab
+        target: null,
+      },
+    }),
+    Typography,
+    Highlight,
+    Underline,
+    Image,
+    Document.extend({
+      content: 'heading block*',
+    }),
+    StarterKit.configure({
+      document: false,
+    }),
+    Placeholder.configure({
+      placeholder: ({ node }) => {
+        if (node.type.name === 'heading') {
+          return 'New page';
+        }
 
-      return '';
-    },
-  }),
-];
+        return '';
+      },
+    }),
+  ];
 
-const editorOptions: Partial<EditorOptions> = {
-  injectCSS: true,
-  editable: true,
-  extensions,
-  editorProps: {
-    handleKeyDown: (_view, event) => {
-      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-      if (!(event.metaKey || event.ctrlKey) || event.key !== 'k') {
-        return false;
-      }
+  return {
+    injectCSS: true,
+    editable: true,
+    extensions,
+    editorProps: {
+      handleKeyDown: (_view, event) => {
+        // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+        if (!(event.metaKey || event.ctrlKey) || event.key !== 'k') {
+          return false;
+        }
 
-      event.preventDefault();
+        event.preventDefault();
 
-      // If there's no selection, return
-      if (editor.state.selection.empty) return;
+        // If there's no selection, return
+        if (editor.state.selection.empty) return;
 
-      // Get URL from user
-      const url = window.prompt('Enter URL:');
+        // Get URL from user
+        const url = window.prompt('Enter URL:');
 
-      if (url === null) {
-        // User cancelled the prompt
+        if (url === null) {
+          // User cancelled the prompt
+          return true;
+        }
+
+        if (url === '') {
+          // Empty URL, remove the link
+          editor.chain().focus().extendMarkRange('link').unsetLink().run();
+        } else {
+          // Set or update the link
+          editor
+            .chain()
+            .focus()
+            .extendMarkRange('link')
+            .setLink({ href: url })
+            .run();
+        }
+
         return true;
-      }
-
-      if (url === '') {
-        // Empty URL, remove the link
-        editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      } else {
-        // Set or update the link
-        editor
-          .chain()
-          .focus()
-          .extendMarkRange('link')
-          .setLink({ href: url })
-          .run();
-      }
-
-      return true;
+      },
     },
-  },
+  };
+};
+
+type BubbleMenuCommands =
+  | 'bold'
+  | 'italic'
+  | 'strike'
+  | 'underline'
+  | 'highlight'
+  | '';
+
+const addBubbleMenuHandlers = () => {
+  const buttons = document.querySelectorAll('.bmButton');
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', (evt) => {
+      evt.preventDefault();
+      const command: BubbleMenuCommands = ((button as HTMLElement).dataset
+        .command ?? '') as BubbleMenuCommands;
+      switch (command) {
+        case 'bold':
+          editor.chain().focus().toggleBold().run();
+          break;
+        case 'italic':
+          editor.chain().focus().toggleItalic().run();
+          break;
+        case 'strike':
+          editor.chain().focus().toggleStrike().run();
+          break;
+        case 'underline':
+          editor.chain().focus().toggleUnderline().run();
+          break;
+        case 'highlight':
+          editor.chain().focus().toggleHighlight().run();
+          break;
+        default:
+          console.warn(`Unknown command: ${command}`);
+      }
+    });
+  });
 };
 
 export const enableEditor = () => {
@@ -97,8 +150,13 @@ export const enableEditor = () => {
     placeHolder.textContent = '';
   }
 
+  const options = getEditorOptions();
+
+  // Tippy destroy the DOM element, hence we need to set the handlers before creating the editor
+  addBubbleMenuHandlers();
+
   editor = new Editor({
-    ...editorOptions,
+    ...options,
     element: placeHolder ?? document.createElement('div'),
     content: placeHolderContent,
     onUpdate: ({ editor }) => {
@@ -118,7 +176,7 @@ export const enableEditor = () => {
       pageContent.value =
         rest.length === 0
           ? ''
-          : generateHTML({ ...json, content: rest }, extensions);
+          : generateHTML({ ...json, content: rest }, options.extensions ?? []);
     },
   });
 

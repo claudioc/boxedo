@@ -5,6 +5,7 @@ Doing:
   - there are several db access in the dbservice not protected by try catch
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
   - we need an export of the page (backup / restore)
+  - we don't need clsx anymore
 
   MEDIUM
   - better Mobile experience
@@ -13,6 +14,8 @@ Doing:
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - move document metadata in their own document, instead of using the metadata flag
   - What about https://demo.umodoc.com/editor ?
+  - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
+  - the editor icons' title is not translated
 
   LOW
   - consider access implications to the history of docs

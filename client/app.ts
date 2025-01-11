@@ -33,6 +33,14 @@ class App {
     return context;
   }
 
+  getEditor() {
+    return this.editor;
+  }
+
+  setEditor(editor: typeof this.editor) {
+    this.editor = editor;
+  }
+
   validate(event: Event) {
     const form = event.target as HTMLFormElement;
     const data = new FormData(form);
@@ -79,25 +87,25 @@ class App {
     window.onbeforeunload = null;
   }
 
-  addImage(event: Event) {
-    event.preventDefault();
-    if (!this.editor) {
-      return;
-    }
+  // addImage(event: Event) {
+  //   event.preventDefault();
+  //   if (!this.editor) {
+  //     return;
+  //   }
 
-    const imgUrl = 'https://source.unsplash.com/random/320x200';
+  //   const imgUrl = 'https://source.unsplash.com/random/320x200';
 
-    this.editor
-      .chain()
-      .focus()
-      .setImage({
-        src: imgUrl,
-        alt: 'Random image from unsplash',
-      })
-      .run();
-    // Not sure what's the difference.
-    // editor.commands.insertContent(image);
-  }
+  //   this.editor
+  //     .chain()
+  //     .focus()
+  //     .setImage({
+  //       src: imgUrl,
+  //       alt: 'Random image from unsplash',
+  //     })
+  //     .run();
+  //   // Not sure what's the difference.
+  //   // editor.commands.insertContent(image);
+  // }
 
   enableEditor() {
     // This method is rewritten in the editor.ts file
