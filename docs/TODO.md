@@ -5,7 +5,6 @@ Doing:
   - there are several db access in the dbservice not protected by try catch
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
   - we need an export of the page (backup / restore)
-  - we don't need clsx anymore
 
   MEDIUM
   - better Mobile experience
@@ -70,3 +69,4 @@ Done
 - use kitajs? https://github.com/kitajs/html
 - we should be able to reorganize pages on the same level
 - add the metadataOnly flag to the document
+- we don't need clsx anymore

@@ -3,7 +3,6 @@ import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
-import clsx from 'clsx';
 import type { PageModel, Context, WithApp } from '~/../types';
 import { CogIcon } from './icons/CogIcon';
 import type { FastifyInstance } from 'fastify';
@@ -60,17 +59,17 @@ export const Layout = ({
         <main class="columns mt-0 ml-0" data-context={context}>
           {/* "main > div" is referenced in App.ts */}
           <div
-            class={clsx(
+            class={[
               styles.mainLeft,
               'column',
               'is-narrow',
-              'has-background-info-dark'
-            )}
+              'has-background-info-dark',
+            ]}
           >
-            <header class={clsx(styles.header, 'block')}>
+            <header class={[styles.header, 'block']}>
               <div class="block">
                 <div class="level is-flex-direction-row">
-                  <div class={clsx(styles.title, 'is-size-5', 'level-left')}>
+                  <div class={[styles.title, 'is-size-5', 'level-left']}>
                     <a href="/" class="has-text-warning">
                       {settings.siteTitle}
                     </a>
@@ -106,7 +105,7 @@ export const Layout = ({
               </div>
             )}
             <aside
-              class={clsx(styles.aside, 'block')}
+              class={[styles.aside, 'block']}
               hx-get={`/parts/nav/${page ? page._id : ''}`}
               hx-trigger="load once"
             >
@@ -121,15 +120,15 @@ export const Layout = ({
           </div>
 
           {/* #main-page-body is used as a hx-target */}
-          <div class={clsx(styles.mainRight, 'column', 'p-3', 'pr-5')}>
+          <div class={[styles.mainRight, 'column', 'p-3', 'pr-5']}>
             <button
               type="button"
-              class={clsx(
+              class={[
                 styles.burgerToggle,
                 'navbar-burger',
                 'level',
-                'level-right'
-              )}
+                'level-right',
+              ]}
               aria-label="menu"
               aria-expanded="false"
             >

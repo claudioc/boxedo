@@ -3,7 +3,6 @@ import type { PageModel, WithApp } from '~/../types';
 import { formatDate, isSameTimestamp } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
-import clsx from 'clsx';
 
 export interface ReadPageProps extends WithApp {
   page?: PageModel;
@@ -49,11 +48,11 @@ export const ReadPage = ({
   const content = (
     <div
       // These classes are referenced in tests
-      class={clsx(
+      class={[
         isWelcome && 'is-welcome',
         showPage && 'is-page',
-        isLandingPage && 'is-landing'
-      )}
+        isLandingPage && 'is-landing',
+      ]}
       data-page-id={page?._id}
     >
       {showPage && (

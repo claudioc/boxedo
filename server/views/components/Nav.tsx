@@ -1,5 +1,4 @@
 import type { NavItem, Context } from '~/../types';
-import clsx from 'clsx';
 import styles from './Nav.module.css';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
 import { SortableEnabler } from './SortableEnabler';
@@ -16,7 +15,7 @@ export const Nav = ({ forest, currentPageId }: NavProps) => {
 
   return (
     <>
-      <menu class={clsx(styles.nav)} id="main-navigation">
+      <menu class={styles.nav} id="main-navigation">
         {forest.length ? <NavTree items={forest} /> : null}
       </menu>
       <SortableEnabler />
