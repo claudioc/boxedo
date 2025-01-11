@@ -4,7 +4,7 @@
 > The name of this project (Joongle) is subject to change in case it will get out of the current "experimental" phase
 
 > [!CAUTION]
-> Although at this point the project is relatively stable in terms of MVP features, don't take this project too seriously and most importantly don't install it on public facing internet website.
+> Although at this point the project is relatively stable in terms of MVP features, its quality is to be considered Alpha: don't install it on public facing internet website.
 
 ---
 
@@ -50,7 +50,7 @@ Configuration is rudimentary and spans multiple files. Default settings work out
 
 ## Features
 
-Despite its experimental nature, Joongle includes:
+Despite its experimental nature, Joongle already includes:
 
 - **Content editing**: Powered by [TipTap](https://tiptap.dev/) for basic WYSIWYG functionality.
 - **Internationalization (i18n)**: Only English is supported at the moment.
@@ -59,6 +59,8 @@ Despite its experimental nature, Joongle includes:
 - **Configurable settings**: Directly adjustable from the web UI.
 - **Developer-friendly**: Designed for easy hacking.
 - **Autoreload on file change**: Not HMR but the next best thing
+- **Page reordering using drag & drop**
+- **Editor's bubble menu for commands**
 
 ---
 
@@ -72,6 +74,8 @@ Despite its experimental nature, Joongle includes:
 - CSS Modules
 - [esbuild](https://esbuild.github.io/)
 - [biome](https://biome.sh/)
+- [Bulma CSS](https://bulma.io)
+- [Sortablejs](https://github.com/SortableJS/Sortable)
 - TypeScript
 - Docker Compose
 
