@@ -4,9 +4,9 @@ Doing:
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
-  - we need an export of the page (backup / restore)
 
-  MEDIUM
+  NEXT
+  - immersive read / immersive edit
   - better Mobile experience
   - back and forth navigation does not keep the active item in the menu
   - allow to duplicate/copy a page (needs to specify parent?)
@@ -16,7 +16,7 @@ Doing:
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
   - the editor icons' title is not translated
 
-  LOW
+  LATER
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production
@@ -71,3 +71,4 @@ Done
 - we should be able to reorganize pages on the same level
 - add the metadataOnly flag to the document
 - we don't need clsx anymore
+- we need an export of the page (backup / restore)

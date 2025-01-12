@@ -16,6 +16,7 @@
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
     "db:reset": "./tasks/resetDb.sh",
+    "db:export": "tsx --env-file=.env ./tasks/exporter.ts",
     "server:test": "vitest",
     "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts"
@@ -27,6 +28,7 @@
     "@types/nano": "^7.0.0",
     "@types/node": "^22.10.2",
     "@types/node-polyglot": "^2.5.0",
+    "@types/sanitize-filename": "^1.1.28",
     "@types/sanitize-html": "^2.11.0",
     "@types/sortablejs": "^1.15.8",
     "concurrently": "^9.1.0",
@@ -73,6 +75,7 @@
     "htmx.org": "^2.0.0",
     "nano": "^10.1.3",
     "node-polyglot": "^2.6.0",
+    "sanitize-filename": "^1.6.3",
     "sanitize-html": "^2.14.0",
     "slugify": "^1.6.6",
     "sortablejs": "^1.15.6"
