@@ -52,7 +52,7 @@ export const Layout = ({
         <script src={getBundleFilename('app')} />
         {withEditor && <script src={getBundleFilename('editor')} />}
         {process.env.NODE_ENV === 'development' && (
-          <script>{'App.livereload()'}</script>
+          <script>App.livereload();</script>
         )}
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}

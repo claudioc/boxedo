@@ -1,3 +1,3 @@
 export const SortableEnabler = () => (
-  <script defer>{'App.enableSortable()'}</script>
+  <script defer>App.enableSortable();</script>
 );

@@ -51,6 +51,6 @@ export const EditorEnabler = () => (
         <ParagraphIcon />
       </button>
     </div>
-    <script defer>{'App.enableEditor()'}</script>
+    <script defer>App.enableEditor();</script>
   </>
 );
