@@ -9,7 +9,6 @@ Doing:
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
   - better Mobile experience
-  - keep the active item in the menu on back / forward
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - move document metadata in their own document, instead of using the metadata flag
@@ -73,3 +72,4 @@ Done
 - add the metadataOnly flag to the document
 - we don't need clsx anymore
 - we need an export of the page (backup / restore)
+- keep the active item in the menu on back / forward

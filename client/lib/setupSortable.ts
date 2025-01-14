@@ -17,7 +17,7 @@ export const enableSortable = (el?: HTMLElement) => {
           return;
         }
 
-        const pageId = evt.item.querySelector('a')?.dataset.pageid;
+        const pageId = evt.item.querySelector('a')?.dataset.pageId;
         try {
           await fetch(`/reorder/${pageId}`, {
             method: 'POST',

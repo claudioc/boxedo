@@ -3,6 +3,20 @@ let controller: AbortController;
 // FIXME bad idea but we need to know if an error occurred since htmx doesn't persist this information
 let htmxAjaxFailed = false;
 
+const updateCreateButton = (pageId = '') => {
+  if (!pageId) {
+    return;
+  }
+  const createButton = document.querySelector(
+    '.button[href*="/create"]'
+  ) as HTMLElement;
+  if (createButton) {
+    createButton.setAttribute('href', `/create/${pageId}`);
+    // As we are moving away from the landing page, the button label must be updated accordingly
+    createButton.textContent = createButton.dataset.labelnested ?? '';
+  }
+};
+
 const navigationHandlers = (_event: PageTransitionEvent) => {
   // Clean up old controller if it exists
   if (controller) {
@@ -18,11 +32,25 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
       // to the navigation menu when the user uses back/forward. We need
       // to find a way to highlight the loaded item properly
       setTimeout(() => {
+        const page = document.querySelector('#main-page-body [data-page-id]');
+        if (!page) {
+          return;
+        }
         const active = document.querySelector('.Layout_aside .is-active');
+        // @ts-ignore
+        const pageId = page.dataset?.pageId;
         if (active) {
           active.classList.remove('is-active');
         }
-      }, 100);
+        const nextActive = document.querySelector(
+          // @ts-ignore
+          `.Layout_aside [data-page-id="${pageId}"]`
+        );
+        if (nextActive) {
+          nextActive.classList.add('is-active');
+        }
+        updateCreateButton(pageId);
+      }, 200);
     },
     { signal: controller.signal }
   );
@@ -97,17 +125,7 @@ const setupHtmx = () => {
       }
 
       // Update the create button's href (the very first value is set in the Layout.tsx file)
-      const pageId = el.dataset.pageid;
-      if (pageId) {
-        const createButton = document.querySelector(
-          '.button[href*="/create"]'
-        ) as HTMLElement;
-        if (createButton) {
-          createButton.setAttribute('href', `/create/${pageId}`);
-          // As we are moving away from the landing page, the button label must be updated accordingly
-          createButton.textContent = createButton.dataset.labelnested ?? '';
-        }
-      }
+      updateCreateButton(el.dataset.pageId);
 
       // Rebind sortable to the closest UL
       window.App.enableSortable(el.closest('ul'));

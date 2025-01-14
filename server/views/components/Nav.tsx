@@ -52,11 +52,11 @@ const NavItemComponent = ({ item }: NavItemProps) => {
         href={item.link}
         hx-get={item.link}
         hx-target="#main-page-body"
-        hx-push-url="true"
+        hx-push-url={item.link}
         hx-ext="activate"
         data-activate="aside/is-active"
         data-context={context}
-        data-pageid={item.pageId}
+        data-page-id={item.pageId}
         data-position={item.position}
         class={item.pageId === pageId ? 'is-active' : ''}
         title={item.title}
