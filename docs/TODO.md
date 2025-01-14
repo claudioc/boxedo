@@ -9,14 +9,13 @@ Doing:
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
   - better Mobile experience
-  - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
-  - move document metadata in their own document, instead of using the metadata flag
   - What about https://demo.umodoc.com/editor ?
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
   - the editor icons' title is not translated
 
   LATER
+  - allow to duplicate/copy a page (needs to specify parent?)
   - consider access implications to the history of docs
   - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production
@@ -27,6 +26,7 @@ Doing:
   - There is also Lexical as an possible replacement for tiptap, if needed
   - Do we still need the replaceReact plugin?
   - Add inline comments
+  - move document metadata in their own document, instead of using the metadata flag
 
 Done
 - Save the history of a page
