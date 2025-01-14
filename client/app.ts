@@ -87,26 +87,6 @@ class App {
     window.onbeforeunload = null;
   }
 
-  // addImage(event: Event) {
-  //   event.preventDefault();
-  //   if (!this.editor) {
-  //     return;
-  //   }
-
-  //   const imgUrl = 'https://source.unsplash.com/random/320x200';
-
-  //   this.editor
-  //     .chain()
-  //     .focus()
-  //     .setImage({
-  //       src: imgUrl,
-  //       alt: 'Random image from unsplash',
-  //     })
-  //     .run();
-  //   // Not sure what's the difference.
-  //   // editor.commands.insertContent(image);
-  // }
-
   enableEditor() {
     // This method is rewritten in the editor.ts file
     console.error('enableEditor is not implemented');

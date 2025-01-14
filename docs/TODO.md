@@ -6,9 +6,10 @@ Doing:
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
 
   NEXT
+  - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
   - better Mobile experience
-  - back and forth navigation does not keep the active item in the menu
+  - keep the active item in the menu on back / forward
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - move document metadata in their own document, instead of using the metadata flag
