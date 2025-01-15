@@ -19,7 +19,7 @@ export const enableSortable = (el?: HTMLElement) => {
 
         const pageId = evt.item.querySelector('a')?.dataset.pageId;
         try {
-          await fetch(`/reorder/${pageId}`, {
+          await fetch(`/pages/${pageId}/reorder`, {
             method: 'POST',
             // Use a plain form request to avoid CORS preflight calls
             body: new URLSearchParams({

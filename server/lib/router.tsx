@@ -313,7 +313,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{
     Params: FromSchema<typeof PageSlugParamsSchema>;
   }>(
-    '/page/:slug',
+    '/pages/:slug',
     {
       schema: {
         params: PageSlugParamsSchema,
@@ -330,6 +330,7 @@ const router = async (app: FastifyInstance) => {
         // These are useful for testing purposes
         rep.header('x-page-id', page._id);
         rep.header('x-parent-id', page.parentId ?? '');
+        rep.header('x-rev', page._rev);
 
         return rep.html(<ReadPage app={app} isFull={!isHtmx} page={page} />);
       }
@@ -349,7 +350,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
-    '/edit/:pageId',
+    '/pages/:pageId/edit',
     {
       schema: {
         params: PageParamsSchema,
@@ -377,7 +378,7 @@ const router = async (app: FastifyInstance) => {
     Body: FromSchema<typeof PageBodySchema>;
     Params: FromSchema<typeof PageParamsSchema>;
   }>(
-    '/edit/:pageId',
+    '/pages/:pageId/edit',
     {
       schema: {
         body: PageBodySchema,
@@ -452,7 +453,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
-    '/move/:pageId',
+    '/pages/:pageId/move',
     {
       schema: {
         params: PageParamsSchema,
@@ -486,7 +487,7 @@ const router = async (app: FastifyInstance) => {
     Body: FromSchema<typeof MovePageBodySchema>;
     Params: FromSchema<typeof PageParamsSchema>;
   }>(
-    '/move/:pageId',
+    '/pages/:pageId/move',
     {
       schema: {
         body: MovePageBodySchema,
@@ -550,7 +551,7 @@ const router = async (app: FastifyInstance) => {
     Body: FromSchema<typeof ReorderPageBodySchema>;
     Params: FromSchema<typeof PageParamsSchema>;
   }>(
-    '/reorder/:pageId',
+    '/pages/:pageId/reorder',
     {
       schema: {
         body: ReorderPageBodySchema,
@@ -711,9 +712,12 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
+      const page = await dbs.getPageById(pageId);
+
       // These are useful for testing purposes
       rep.header('x-page-id', pageId);
       rep.header('x-parent-id', parentId ?? '');
+      rep.header('x-rev', page?._rev);
 
       return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
     }

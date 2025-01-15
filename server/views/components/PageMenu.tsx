@@ -27,10 +27,10 @@ export const PageMenu = ({ app, page }: PageMenuProps) => {
       </div>
       <div class="dropdown-menu" id="dropdown-menu">
         <div class="dropdown-content">
-          <a href={`/edit/${page._id}`} class="dropdown-item">
+          <a href={`/pages/${page._id}/edit`} class="dropdown-item">
             {i18n.t('PageMenu.editThisPage')}
           </a>
-          <a href={`/move/${page._id}`} class="dropdown-item">
+          <a href={`/pages/${page._id}/move`} class="dropdown-item">
             {i18n.t('PageMenu.moveThisPage')}
           </a>
           <a href={`/history/${page._id}`} class="dropdown-item">

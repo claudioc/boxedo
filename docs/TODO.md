@@ -4,6 +4,7 @@ Doing:
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
+    - still missing: create, delete, history
 
   NEXT
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)

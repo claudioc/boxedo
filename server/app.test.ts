@@ -8,6 +8,8 @@ import { POSITION_GAP_SIZE } from './constants';
 
 let app: FastifyInstance;
 
+type InjectResponse = Awaited<ReturnType<typeof app.inject>>;
+
 beforeAll(async () => {
   app = await bootstrap(true);
   // await dbService(app.dbClient).nukeTests();
@@ -23,7 +25,7 @@ afterAll(async () => {
 });
 
 const postUrl = async (path: string, payload: Record<string, string>) => {
-  await app.inject({
+  return await app.inject({
     url: path,
     method: 'POST',
     payload,
@@ -40,7 +42,10 @@ const getContent: (url: string) => Promise<CheerioAPI> = async (url) => {
   return load(response.body);
 };
 
-const getPage = async (slug: string) => app.inject({ url: `/page/${slug}` });
+const getPage = async (slug: string) => app.inject({ url: `/pages/${slug}` });
+
+const extractIdFrom = (resp: InjectResponse) =>
+  resp.headers['x-page-id'] as string;
 
 const createPage = async (
   pageTitle: string,
@@ -71,8 +76,7 @@ describe('Welcome page', () => {
   });
 
   it('should show the landing page as the first page created', async () => {
-    const response = await createPage('First and only page');
-    const pageId = response.headers['x-page-id'];
+    const pageId = extractIdFrom(await createPage('First and only page'));
     await createPage('Another page, actually');
 
     const $ = await getContent('/');
@@ -92,7 +96,7 @@ describe('Not finding stuff', () => {
   });
 
   it('should not find a page', async () => {
-    const response = await getUrl('/page/baaaah');
+    const response = await getUrl('/pages/baaaah');
     expect(response.statusCode).toBe(404);
   });
 });
@@ -102,7 +106,7 @@ describe('Settings', () => {
     let response = await createPage('First and only page');
 
     response = await createPage('Another page, actually');
-    const pageId = response.headers['x-page-id'] as string;
+    const pageId = extractIdFrom(response);
 
     const settings: SettingsModelWithoutId = {
       landingPageId: pageId,
@@ -128,12 +132,26 @@ describe('Creating page', () => {
   it('should create a page', async () => {
     const response = await createPage('First and only page');
     expect(response.statusCode).toBe(303);
-    expect(response.headers.location).toBe('/page/first-and-only-page?f=1');
+    expect(response.headers.location).toBe('/pages/first-and-only-page?f=1');
   });
 
   it('should show a feedback when a code is passed', async () => {
     const $ = await getContent('/?f=1');
     expect($('[role="status"]').text()).toContain('Page created');
+  });
+});
+
+describe('Editing page', () => {
+  it('should change the title of a page', async () => {
+    const resp = await createPage('First and only page');
+    const pageId = extractIdFrom(resp);
+    await postUrl(`/pages/${pageId}/edit`, {
+      pageTitle: 'bazinga',
+      pageContent: 'content now',
+      rev: resp.headers['x-rev'] as string,
+    });
+    const page = await getPage('bazinga');
+    expect(pageId).toBe(extractIdFrom(page));
   });
 });
 
@@ -175,7 +193,8 @@ describe('Navigation', () => {
 describe('Deleting pages', () => {
   it('should delete a page', async () => {
     let resp = await createPage('First page');
-    const pageId = (resp.headers['x-page-id'] ?? '') as string;
+    const pageId = extractIdFrom(resp);
+
     await createPage('Second page');
 
     resp = await getPage('first-page');
@@ -196,15 +215,15 @@ describe('Moving pages', () => {
   it('should move a page to the top level', async () => {
     await createPage('First page');
     let resp = await createPage('Second page');
-    const parentPageId = resp.headers['x-page-id'] as string;
+    const parentPageId = extractIdFrom(resp);
 
     resp = await createPage('Third page', 'something', parentPageId);
-    const childPageId = resp.headers['x-page-id'];
+    const childPageId = extractIdFrom(resp);
 
     resp = await getPage('third-page');
     expect(resp.headers['x-parent-id']).toBe(parentPageId);
 
-    await postUrl(`/move/${childPageId}`, {
+    await postUrl(`/pages/${childPageId}/move`, {
       moveToTop: 'true',
     });
 
@@ -214,18 +233,18 @@ describe('Moving pages', () => {
 
   it('should move a page to another parent', async () => {
     let resp = await createPage('First page');
-    const firstPageId = resp.headers['x-page-id'] as string;
+    const firstPageId = extractIdFrom(resp);
 
     resp = await createPage('Second page');
-    const parentPageId = resp.headers['x-page-id'] as string;
+    const parentPageId = extractIdFrom(resp);
 
     resp = await createPage('Third page', 'something', parentPageId);
-    const childPageId = resp.headers['x-page-id'];
+    const childPageId = extractIdFrom(resp);
 
     resp = await getPage('third-page');
     expect(resp.headers['x-parent-id']).toBe(parentPageId);
 
-    await postUrl(`/move/${childPageId}`, {
+    await postUrl(`/pages/${childPageId}/move`, {
       moveToTop: 'false',
       newParentId: firstPageId,
     });
@@ -240,16 +259,16 @@ describe('Reordering pages', () => {
     const pageIds = [];
 
     let response = await createPage('First page');
-    pageIds[0] = response.headers['x-page-id'];
+    pageIds[0] = extractIdFrom(response);
 
     response = await createPage('Second page');
-    pageIds[1] = response.headers['x-page-id'];
+    pageIds[1] = extractIdFrom(response);
 
     response = await createPage('Third page');
-    pageIds[2] = response.headers['x-page-id'];
+    pageIds[2] = extractIdFrom(response);
 
     // Move the second page at the top
-    await postUrl(`/reorder/${pageIds[2]}`, {
+    await postUrl(`/pages/${pageIds[2]}/reorder`, {
       targetIndex: '0',
     });
 
@@ -268,27 +287,27 @@ describe('Reordering pages', () => {
     const pageIds = [];
 
     let response = await createPage('First page');
-    pageIds[0] = response.headers['x-page-id'];
+    pageIds[0] = extractIdFrom(response);
 
     response = await createPage('Second page');
-    pageIds[1] = response.headers['x-page-id'] as string;
+    pageIds[1] = extractIdFrom(response);
 
     response = await createPage(
       'Second page, first child',
       'something',
       pageIds[1]
     );
-    pageIds[2] = response.headers['x-page-id'];
+    pageIds[2] = extractIdFrom(response);
 
     response = await createPage(
       'Second page, second child',
       'something',
       pageIds[1]
     );
-    pageIds[3] = response.headers['x-page-id'];
+    pageIds[3] = extractIdFrom(response);
 
     // Move the second page at the top
-    await postUrl(`/reorder/${pageIds[3]}`, {
+    await postUrl(`/pages/${pageIds[3]}/reorder`, {
       targetIndex: '0',
     });
 
