@@ -39,7 +39,7 @@ export const PageHistory = ({ app, page, history }: PageHistoryProps) => {
                 <td>{item.pageTitle}</td>
                 <td>
                   <a
-                    href={`/history/${page._id}/${item._rev}`}
+                    href={`/pages/${page._id}/history/${item._rev}`}
                     class="button is-small"
                   >
                     {i18n.t('PageHistory.viewLabel')}

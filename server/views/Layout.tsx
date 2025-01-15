@@ -34,7 +34,9 @@ export const Layout = ({
   };
 
   const createButtonLink =
-    isLandingPage || !page ? '/create' : `/create/${page._id}`;
+    isLandingPage || !page
+      ? '/pages/create'
+      : `/pages/create?parentPageId=${page._id}`;
 
   return (
     <html lang="en">

@@ -9,11 +9,11 @@ const updateCreateButton = (pageId = '') => {
   }
 
   const createButton = document.querySelector(
-    '.button[href*="/create"]'
+    '.button[href*="/pages/create"]'
   ) as HTMLElement;
 
   if (createButton) {
-    createButton.setAttribute('href', `/create/${pageId}`);
+    createButton.setAttribute('href', `/pages/create?parentPageId=${pageId}`);
     // As we are moving away from the landing page, the button label must be updated accordingly
     createButton.textContent = createButton.dataset.labelnested ?? '';
   }

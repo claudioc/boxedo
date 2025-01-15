@@ -42,7 +42,7 @@ const getContent: (url: string) => Promise<CheerioAPI> = async (url) => {
   return load(response.body);
 };
 
-const getPage = async (slug: string) => app.inject({ url: `/pages/${slug}` });
+const getPage = async (slug: string) => app.inject({ url: `/view/${slug}` });
 
 const extractIdFrom = (resp: InjectResponse) =>
   resp.headers['x-page-id'] as string;
@@ -53,7 +53,7 @@ const createPage = async (
   parentId: string | null = null
 ) => {
   const response = await app.inject({
-    url: `/create${parentId ? `/${parentId}` : ''}`,
+    url: `/pages/create${parentId ? `?parentPageId=${parentId}` : ''}`,
     method: 'POST',
     payload: {
       pageTitle,
@@ -132,7 +132,7 @@ describe('Creating page', () => {
   it('should create a page', async () => {
     const response = await createPage('First and only page');
     expect(response.statusCode).toBe(303);
-    expect(response.headers.location).toBe('/pages/first-and-only-page?f=1');
+    expect(response.headers.location).toBe('/view/first-and-only-page?f=1');
   });
 
   it('should show a feedback when a code is passed', async () => {

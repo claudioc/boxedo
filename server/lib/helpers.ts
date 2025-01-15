@@ -1,7 +1,7 @@
 import type { Feedback, PageModel } from '~/../types';
 
 export const slugUrl = (slug: string) =>
-  slug === '/' || slug === '' ? '/' : `/pages/${slug}`;
+  slug === '/' || slug === '' ? '/' : `/view/${slug}`;
 
 export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   if (!feedback) {

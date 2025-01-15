@@ -68,7 +68,7 @@ const SearchQuerySchema = {
   },
 } as const;
 
-const CreatePageParamsSchema = {
+const CreatePageQuerySchema = {
   type: 'object',
   properties: {
     parentPageId: {
@@ -311,7 +311,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{
     Params: FromSchema<typeof PageSlugParamsSchema>;
   }>(
-    '/pages/:slug',
+    '/view/:slug',
     {
       schema: {
         params: PageSlugParamsSchema,
@@ -617,16 +617,16 @@ const router = async (app: FastifyInstance) => {
 
   // Creates a page form
   app.get<{
-    Params: FromSchema<typeof CreatePageParamsSchema>;
+    Querystring: FromSchema<typeof CreatePageQuerySchema>;
   }>(
-    '/create/:parentPageId?',
+    '/pages/create',
     {
       schema: {
-        params: CreatePageParamsSchema,
+        querystring: CreatePageQuerySchema,
       },
     },
     async (req, rep) => {
-      const { parentPageId } = req.params;
+      const { parentPageId } = req.query;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
@@ -649,18 +649,18 @@ const router = async (app: FastifyInstance) => {
 
   app.post<{
     Body: FromSchema<typeof PageBodySchema>;
-    Params: FromSchema<typeof CreatePageParamsSchema>;
+    Querystring: FromSchema<typeof CreatePageQuerySchema>;
   }>(
-    '/create/:parentPageId?',
+    '/pages/create',
     {
       schema: {
         body: PageBodySchema,
-        params: CreatePageParamsSchema,
+        querystring: CreatePageQuerySchema,
       },
       preHandler: app.csrfProtection,
     },
     async (req, rep) => {
-      const { parentPageId } = req.params;
+      const { parentPageId } = req.query;
       const { pageTitle, pageContent } = req.body;
       const rs = redirectService(app, rep);
       const dbs = dbService(app.dbClient);
@@ -760,7 +760,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
-    '/history/:pageId',
+    '/pages/:pageId/history',
     {
       schema: {
         params: PageParamsSchema,
@@ -783,7 +783,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{ Params: FromSchema<typeof PageWithVersionParamsSchema> }>(
-    '/history/:pageId/:version',
+    '/pages/:pageId/history/:version',
     {
       schema: {
         params: PageWithVersionParamsSchema,
