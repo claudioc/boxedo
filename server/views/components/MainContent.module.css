@@ -1,0 +1,13 @@
+.mainContent {
+  margin-left: 5%;
+  max-width: 900px;
+  padding: 0 5vw 10vh 5vw;
+}
+
+@media screen and (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+    max-width: auto;
+    padding: 0 20px;
+  }
+}

@@ -3,6 +3,7 @@ import type { PageModel, WithApp } from '~/../types';
 import { formatDate, isSameTimestamp } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
+import { MainContent } from './components/MainContent';
 
 export interface ReadPageProps extends WithApp {
   page?: PageModel;
@@ -63,7 +64,9 @@ export const ReadPage = ({
           <PageMenu app={app} page={page} />
         </div>
       )}
-      <PageBody title={actualPage.pageTitle} body={actualPage.pageContent} />
+      <MainContent>
+        <PageBody title={actualPage.pageTitle} body={actualPage.pageContent} />
+      </MainContent>
     </div>
   );
 

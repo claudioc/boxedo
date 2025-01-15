@@ -5,7 +5,7 @@ import { DebugInfo } from './components/DebugInfo';
 import { EditorEnabler } from './components/EditorEnabler';
 import { PageFormWrapper } from './components/PageFormWrapper';
 import { slugUrl } from '~/lib/helpers';
-import styles from './EditPage.module.css';
+import { MainContent } from './components/MainContent';
 
 export interface EditPageProps extends WithApp {
   page: PageModel;
@@ -42,7 +42,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
           >
             {i18n.t('EditPage.addImage')}
           </button> */}
-          <div class={styles.mainContent}>
+          <MainContent>
             <div id="editor-placeholder" class="block content">
               <h1>{page.pageTitle}</h1>
               {page.pageContent}
@@ -51,7 +51,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
             <div class="block">
               <DebugInfo page={page} />
             </div>
-          </div>
+          </MainContent>
         </form>
 
         <div class="level">

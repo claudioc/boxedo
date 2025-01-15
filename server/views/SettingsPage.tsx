@@ -4,7 +4,7 @@ import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { LanguageIcon } from './icons/Language';
-import styles from './SettingsPage.module.css';
+import { MainContent } from './components/MainContent';
 
 interface SettingsPageProps extends WithApp {
   settings: SettingsModel;
@@ -41,7 +41,7 @@ export const SettingsPage = ({
             cancelUrl="/"
           />
 
-          <div class={styles.mainContent}>
+          <MainContent>
             <div class="block">
               <div class="field">
                 <label class="label" for="search">
@@ -123,7 +123,7 @@ export const SettingsPage = ({
                 </span>
               </div>
             </div>
-          </div>
+          </MainContent>
         </form>
       </div>
     </Layout>

@@ -172,6 +172,26 @@ describe('Navigation', () => {
   });
 });
 
+describe('Deleting pages', () => {
+  it('should delete a page', async () => {
+    let resp = await createPage('First page');
+    const pageId = (resp.headers['x-page-id'] ?? '') as string;
+    await createPage('Second page');
+
+    resp = await getPage('first-page');
+    expect(resp.statusCode).toBe(200);
+
+    await postUrl('/delete', {
+      pageId,
+    });
+
+    resp = await getPage('first-page');
+    expect(resp.statusCode).toBe(404);
+    resp = await getPage('second-page');
+    expect(resp.statusCode).toBe(200);
+  });
+});
+
 describe('Moving pages', () => {
   it('should move a page to the top level', async () => {
     await createPage('First page');

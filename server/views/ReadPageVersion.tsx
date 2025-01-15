@@ -3,6 +3,7 @@ import type { PageModel, WithApp } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import { PageBody } from './components/PageBody';
 import { formatDate } from '~/lib/helpers';
+import { MainContent } from './components/MainContent';
 
 export interface ReadPageVersionProps extends WithApp {
   page: PageModel;
@@ -58,7 +59,9 @@ export const ReadPageVersion = ({
             </details>
           </div>
         </div>
-        <PageBody title={item.pageTitle} body={item.pageContent} />
+        <MainContent>
+          <PageBody title={item.pageTitle} body={item.pageContent} />
+        </MainContent>
       </div>
     </Layout>
   );

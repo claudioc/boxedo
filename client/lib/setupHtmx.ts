@@ -7,9 +7,11 @@ const updateCreateButton = (pageId = '') => {
   if (!pageId) {
     return;
   }
+
   const createButton = document.querySelector(
     '.button[href*="/create"]'
   ) as HTMLElement;
+
   if (createButton) {
     createButton.setAttribute('href', `/create/${pageId}`);
     // As we are moving away from the landing page, the button label must be updated accordingly
@@ -29,26 +31,34 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
     'popstate',
     () => {
       // FIXME this is a tragic way to just remove the active class
-      // to the navigation menu when the user uses back/forward. We need
-      // to find a way to highlight the loaded item properly
+      // to the navigation menu when the user uses back/forward.
       setTimeout(() => {
-        const page = document.querySelector('#main-page-body [data-page-id]');
+        // The document currently displayed
+        const page = document.querySelector(
+          '#main-page-body [data-page-id]'
+        ) as HTMLElement;
         if (!page) {
           return;
         }
-        const active = document.querySelector('.Layout_aside .is-active');
-        // @ts-ignore
+
+        // The document currently highlighted in the navigation
+        const active = document.querySelector(
+          '.Layout_aside .is-active'
+        ) as HTMLElement;
+
         const pageId = page.dataset?.pageId;
-        if (active) {
+        if (active && active.dataset.pageId !== pageId) {
           active.classList.remove('is-active');
         }
+
         const nextActive = document.querySelector(
-          // @ts-ignore
           `.Layout_aside [data-page-id="${pageId}"]`
         );
+
         if (nextActive) {
           nextActive.classList.add('is-active');
         }
+
         updateCreateButton(pageId);
       }, 200);
     },

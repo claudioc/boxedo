@@ -119,7 +119,6 @@ export const Layout = ({
             </aside>
           </div>
 
-          {/* #main-page-body is used as a hx-target */}
           <div class={[styles.mainRight, 'column', 'p-3', 'pr-5']}>
             <button
               type="button"
@@ -140,6 +139,7 @@ export const Layout = ({
             <div x-show="$store.has.some()">
               <Feedback app={app} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
+            {/* #main-page-body is used as a hx-target */}
             <div id="main-page-body">{children}</div>
           </div>
         </main>
