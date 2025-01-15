@@ -94,9 +94,11 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
           </form>
         </dialog>
 
-        <form x-ref="deleteForm" action="/delete" method="post">
-          <input type="hidden" name="pageId" value={page._id} />
-        </form>
+        <form
+          x-ref="deleteForm"
+          action={`/pages/${page._id}/delete`}
+          method="post"
+        />
       </PageFormWrapper>
 
       <EditorEnabler />

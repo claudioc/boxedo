@@ -68,8 +68,6 @@ const SearchQuerySchema = {
   },
 } as const;
 
-const PageIdSchema = PageParamsSchema;
-
 const CreatePageParamsSchema = {
   type: 'object',
   properties: {
@@ -587,17 +585,17 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof PageIdSchema>;
+    Params: FromSchema<typeof PageParamsSchema>;
   }>(
-    '/delete',
+    '/pages/:pageId/delete',
     {
       schema: {
-        body: PageIdSchema,
+        params: PageParamsSchema,
       },
     },
 
     async (req, rep) => {
-      const { pageId } = req.body;
+      const { pageId } = req.params;
       const rs = redirectService(app, rep);
       const dbs = dbService(app.dbClient);
 

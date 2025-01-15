@@ -200,7 +200,7 @@ describe('Deleting pages', () => {
     resp = await getPage('first-page');
     expect(resp.statusCode).toBe(200);
 
-    await postUrl('/delete', {
+    await postUrl(`/pages/${pageId}/delete`, {
       pageId,
     });
 
