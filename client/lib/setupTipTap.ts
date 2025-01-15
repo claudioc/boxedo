@@ -47,6 +47,10 @@ const getEditorOptions = (): Partial<EditorOptions> => {
           return 'New page';
         }
 
+        if (node.type.name === 'paragraph') {
+          return 'New paragraph';
+        }
+
         return '';
       },
     }),
@@ -66,33 +70,34 @@ const getEditorOptions = (): Partial<EditorOptions> => {
         event.preventDefault();
 
         // If there's no selection, return
-        if (editor.state.selection.empty) return;
-
-        // Get URL from user
-        const url = window.prompt('Enter URL:');
-
-        if (url === null) {
-          // User cancelled the prompt
-          return true;
+        if (editor.state.selection.empty) {
+          return;
         }
 
-        if (url === '') {
-          // Empty URL, remove the link
-          editor.chain().focus().extendMarkRange('link').unsetLink().run();
-        } else {
-          // Set or update the link
-          editor
-            .chain()
-            .focus()
-            .extendMarkRange('link')
-            .setLink({ href: url })
-            .run();
-        }
+        addLink();
 
         return true;
       },
     },
   };
+};
+
+const addLink = () => {
+  // Get URL from user
+  const url = window.prompt('Enter URL:');
+
+  if (url === null) {
+    // User cancelled the prompt
+    return true;
+  }
+
+  if (url === '') {
+    // Empty URL, remove the link
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+  } else {
+    // Set or update the link
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  }
 };
 
 type BubbleMenuCommands =
@@ -106,6 +111,7 @@ type BubbleMenuCommands =
   | 'h1'
   | 'h2'
   | 'p'
+  | 'link'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -151,6 +157,9 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'p':
           editor.chain().focus().setParagraph().run();
+          break;
+        case 'link':
+          addLink();
           break;
         default:
           console.warn(`Unknown command: ${command}`);

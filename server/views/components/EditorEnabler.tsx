@@ -9,6 +9,7 @@ import {
   H1Icon,
   H2Icon,
   ParagraphIcon,
+  LinkIcon,
 } from '../icons/editorIcons';
 
 import styles from './EditorEnabler.module.css';
@@ -49,6 +50,10 @@ export const EditorEnabler = () => (
       </button>
       <button type="button" class="bmButton" data-command="p">
         <ParagraphIcon />
+      </button>
+      <div aria-hidden="true" class={styles.separator} />
+      <button type="button" class="bmButton" data-command="link">
+        <LinkIcon />
       </button>
     </div>
     <script defer>App.enableEditor();</script>
