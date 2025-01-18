@@ -1,7 +1,7 @@
 import { Layout } from './Layout';
 import type { PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
-import { DebugInfo } from './components/DebugInfo';
+import { PageData } from './components/PageData';
 import { EditorEnabler } from './components/EditorEnabler';
 import { slugUrl } from '~/lib/helpers';
 import { PageFormWrapper } from './components/PageFormWrapper';
@@ -45,9 +45,8 @@ export const CreatePage = ({ app, parentPage, token }: CreatePageProps) => {
           <MainContent>
             <div id="editor-placeholder" class="block content" />
           </MainContent>
-          <div class="block">
-            <DebugInfo />
-          </div>
+
+          <PageData debug={app.isDev} />
         </form>
       </PageFormWrapper>
       <EditorEnabler />

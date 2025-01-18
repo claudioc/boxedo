@@ -1,7 +1,7 @@
 import { Layout } from './Layout';
 import type { PageModel, WithApp } from '~/../types';
 import { PageActions } from './components/PageActions';
-import { DebugInfo } from './components/DebugInfo';
+import { PageData } from './components/PageData';
 import { EditorEnabler } from './components/EditorEnabler';
 import { PageFormWrapper } from './components/PageFormWrapper';
 import { slugUrl } from '~/lib/helpers';
@@ -27,7 +27,6 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
         <form action="" method="post" class="block" x-on:submit="App.validate">
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
-
           <PageActions
             app={app}
             actions={['save', 'cancel']}
@@ -39,15 +38,8 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
               <h1>{page.pageTitle}</h1>
               {page.pageContent}
             </div>
-
-            {app.isDev ? (
-              <div class="block">
-                <DebugInfo page={page} />
-              </div>
-            ) : (
-              ''
-            )}
           </MainContent>
+          <PageData page={page} debug={app.isDev} />
         </form>
 
         <div class="level">
