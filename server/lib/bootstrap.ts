@@ -23,6 +23,7 @@ import it from '../locales/it.json';
 declare module 'fastify' {
   interface FastifyInstance {
     config: FromSchema<typeof ConfigEnvSchema>;
+    isDev: boolean;
     settings: SettingsModel;
     dbClient: DbClient;
     i18n: i18nExtended;
@@ -74,7 +75,6 @@ const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
 };
 
 const app = Fastify({
-  // ignoreTrailingSlash: true,
   logger:
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
@@ -114,6 +114,8 @@ const settings = await dbs.getSettings();
 app.i18n.switchTo(settings.siteLang);
 
 app.decorate('settings', settings);
+app.decorate('isDev', process.env.NODE_ENV !== 'production');
+
 await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
     .register(fastifyFavicon, {

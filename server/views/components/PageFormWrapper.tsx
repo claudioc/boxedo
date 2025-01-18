@@ -6,7 +6,9 @@ interface PageFormWrapperProps extends WithApp {
 }
 
 export const PageFormWrapper = ({ app, children }: PageFormWrapperProps) => (
-  <div x-init="window.onbeforeunload=function() { return true };">
+  <div
+    x-init={`window.onbeforeunload=${app.isDev ? 'null' : 'function() { return true };'}`}
+  >
     <ValidationErrors app={app} />
     {children}
   </div>

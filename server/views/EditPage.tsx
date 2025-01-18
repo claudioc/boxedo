@@ -48,9 +48,13 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
               {page.pageContent}
             </div>
 
-            <div class="block">
-              <DebugInfo page={page} />
-            </div>
+            {app.isDev ? (
+              <div class="block">
+                <DebugInfo page={page} />
+              </div>
+            ) : (
+              ''
+            )}
           </MainContent>
         </form>
 
