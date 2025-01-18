@@ -128,7 +128,7 @@ export const LinkIcon = () => (
   </svg>
 );
 
-export const ImageIcon = () => {
+export const ImageIcon = () => (
   <svg style={style} {...commonProps}>
     <title>Insert image</title>
     <path
@@ -136,5 +136,32 @@ export const ImageIcon = () => {
       stroke-linejoin="round"
       d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
     />
-  </svg>;
-};
+  </svg>
+);
+
+export const CenterIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Align center</title>
+    <line x1="21" x2="3" y1="6" y2="6" />
+    <line x1="17" x2="7" y1="12" y2="12" />
+    <line x1="19" x2="5" y1="18" y2="18" />
+  </svg>
+);
+
+export const LeftIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Align left</title>
+    <line x1="21" x2="3" y1="6" y2="6" />
+    <line x1="15" x2="3" y1="12" y2="12" />
+    <line x1="17" x2="3" y1="18" y2="18" />
+  </svg>
+);
+
+export const RightIcon = () => (
+  <svg style={style} {...commonProps}>
+    <title>Align right</title>
+    <line x1="21" x2="3" y1="6" y2="6" />
+    <line x1="21" x2="9" y1="12" y2="12" />
+    <line x1="21" x2="7" y1="18" y2="18" />
+  </svg>
+);

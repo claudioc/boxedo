@@ -3,7 +3,6 @@ Doing:
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
-  - add the bubble menu to images (align, set dimensions)
 
   NEXT
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
@@ -12,6 +11,7 @@ Doing:
   - What about https://demo.umodoc.com/editor ?
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
   - the editor icons' title is not translated
+  - use a real dialog to set image url and dimension
 
   LATER
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
@@ -74,3 +74,5 @@ Done
 - we need an export of the page (backup / restore)
 - keep the active item in the menu on back / forward
 - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
+- menu cache
+- add the bubble menu to images (align, set dimensions)

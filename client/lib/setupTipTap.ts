@@ -2,15 +2,16 @@
 import StarterKit from '@tiptap/starter-kit';
 import Document from '@tiptap/extension-document';
 import Placeholder from '@tiptap/extension-placeholder';
-import Image from '@tiptap/extension-image';
 import Typography from '@tiptap/extension-typography';
 import Highlight from '@tiptap/extension-highlight';
+import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
 import { Editor, type Extensions, type EditorOptions } from '@tiptap/core';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
-import { ImageMacro } from './extensions/imageMacro';
+import { ImageMacro } from './extensions/image-macro';
+import { ImageAlign } from './extensions/image-align';
 
 // The one and only Editor instance
 let editor: Editor;
@@ -22,17 +23,17 @@ const getEditorOptions = (): Partial<EditorOptions> => {
       tippyOptions: {
         appendTo: 'parent',
       },
-      shouldShow: ({ state, from }) => {
-        // Don't show on images and empty selections
-        const { empty } = state.selection;
-        const node = state.doc.nodeAt(from);
+      // shouldShow: ({ state, from }) => {
+      //   // Don't show on images and empty selections
+      //   const { empty } = state.selection;
+      //   const node = state.doc.nodeAt(from);
 
-        if (empty || node?.type.name === 'image') {
-          return false;
-        }
+      //   if (empty || node?.type.name === 'imsage') {
+      //     return false;
+      //   }
 
-        return true;
-      },
+      //   return true;
+      // },
       element: document.querySelector('.bubbleMenu') as HTMLElement,
     }),
     Link.configure({
@@ -46,7 +47,10 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     Typography,
     Highlight,
     Underline,
-    Image,
+    TextAlign.configure({
+      types: ['paragraph'],
+    }),
+    ImageAlign,
     ImageMacro,
     Document.extend({
       content: 'heading block*',
@@ -125,6 +129,9 @@ type BubbleMenuCommands =
   | 'h2'
   | 'p'
   | 'link'
+  | 'alignLeft'
+  | 'alignCenter'
+  | 'alignRight'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -173,6 +180,36 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'link':
           addLink();
+          break;
+        case 'alignLeft':
+          {
+            const chain = editor.chain().focus();
+            if (editor.isActive('image')) {
+              chain.updateAttributes('image', { alignment: 'left' }).run();
+            } else {
+              chain.setTextAlign('left').run();
+            }
+          }
+          break;
+        case 'alignCenter':
+          {
+            const chain = editor.chain().focus();
+            if (editor.isActive('image')) {
+              chain.updateAttributes('image', { alignment: 'center' }).run();
+            } else {
+              chain.setTextAlign('center').run();
+            }
+          }
+          break;
+        case 'alignRight':
+          {
+            const chain = editor.chain().focus();
+            if (editor.isActive('image')) {
+              chain.updateAttributes('image', { alignment: 'right' }).run();
+            } else {
+              chain.setTextAlign('right').run();
+            }
+          }
           break;
         default:
           console.warn(`Unknown command: ${command}`);

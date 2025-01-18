@@ -25,6 +25,12 @@ Alpine.store('has', {
   },
 } as AppStore);
 
+Alpine.store('editorState', {
+  isImage() {
+    return !!window.App.getEditor()?.isActive('image');
+  },
+});
+
 Alpine.start();
 
 const store = Alpine.store('has') as AppStore;

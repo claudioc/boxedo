@@ -29,22 +29,30 @@ export const ImageMacro = Extension.create<ImageMacroOptions>({
     return {
       insertImageAtPos:
         (url: string, position: number) =>
-        ({ tr, commands }) => {
-          // Delete the trigger text
-          const deleteFrom = position - this.options.trigger.length;
+        ({ tr, commands, state }) => {
+          const deleteFrom = position - (this.options.trigger.length - 1); // -1 because we don't have the final }
           const deleteTo = position;
 
           if (deleteFrom < 0) return false;
 
-          tr.delete(deleteFrom, deleteTo);
+          // Find the current paragraph node
+          const $pos = state.doc.resolve(deleteFrom);
+          const paragraph = $pos.parent;
+
+          // If this is an empty paragraph (only contains our trigger without the final })
+          if (paragraph.textContent === this.options.trigger.slice(0, -1)) {
+            // Delete the entire paragraph
+            tr.delete($pos.before(), $pos.after());
+          } else {
+            // Just delete the trigger text
+            tr.delete(deleteFrom, deleteTo);
+          }
 
           // Insert image at the adjusted position
-          return commands.insertContent([
-            {
-              type: 'image',
-              attrs: { src: url },
-            },
-          ]);
+          return commands.insertContent({
+            type: 'image',
+            attrs: { src: url },
+          });
         },
     };
   },
@@ -91,22 +99,3 @@ export const ImageMacro = Extension.create<ImageMacroOptions>({
     ];
   },
 });
-
-// Usage example:
-/*
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import { Image } from '@tiptap/extension-image'
-import { ImageMacro } from './image-macro'
-
-const editor = new Editor({
-  element: document.querySelector('#editor'),
-  extensions: [
-    StarterKit,
-    Image,
-    ImageMacro.configure({
-      trigger: '{img}' // Optional: customize the trigger
-    })
-  ],
-})
-*/

@@ -22,6 +22,22 @@
   background-color: #222;
 }
 
+.tiptap-img {
+  display: block;
+
+  &.tiptap-left {
+    margin: 0 0 var(--bulma-content-block-margin-bottom) 0;
+  }
+
+  &.tiptap-center {
+    margin: 0 auto var(--bulma-content-block-margin-bottom) auto;
+  }
+
+  &.tiptap-right {
+    margin: 0 0 var(--bulma-content-block-margin-bottom) auto;
+  }
+}
+
 #editor-data {
   display: none;
 }
