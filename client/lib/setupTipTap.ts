@@ -10,6 +10,7 @@ import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
 import { Editor, type Extensions, type EditorOptions } from '@tiptap/core';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
+import { ImageMacro } from './extensions/imageMacro';
 
 // The one and only Editor instance
 let editor: Editor;
@@ -20,6 +21,17 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     BubbleMenu.configure({
       tippyOptions: {
         appendTo: 'parent',
+      },
+      shouldShow: ({ state, from }) => {
+        // Don't show on images and empty selections
+        const { empty } = state.selection;
+        const node = state.doc.nodeAt(from);
+
+        if (empty || node?.type.name === 'image') {
+          return false;
+        }
+
+        return true;
       },
       element: document.querySelector('.bubbleMenu') as HTMLElement,
     }),
@@ -35,6 +47,7 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     Highlight,
     Underline,
     Image,
+    ImageMacro,
     Document.extend({
       content: 'heading block*',
     }),

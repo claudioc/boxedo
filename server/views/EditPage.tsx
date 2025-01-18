@@ -34,14 +34,6 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
             cancelUrl={slugUrl(page.pageSlug)}
             title={i18n.t('EditPage.title')}
           />
-
-          {/* <button
-            type="button"
-            class="button is-small"
-            x-on:click="App.addImage"
-          >
-            {i18n.t('EditPage.addImage')}
-          </button> */}
           <MainContent>
             <div id="editor-placeholder" class="block content">
               <h1>{page.pageTitle}</h1>
