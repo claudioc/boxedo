@@ -19,7 +19,7 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { TitlesList } from '~/views/components/TitlesList';
-import { POSITION_GAP_SIZE } from '~/constants';
+import { POSITION_GAP_SIZE, NAVIGATION_CACHE_KEY } from '~/constants';
 
 const PageIdFormat = {
   type: 'string',
@@ -268,27 +268,36 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const dbs = dbService(app.dbClient);
 
-      let topLevels: PageModel[] = [];
-      try {
-        topLevels = await dbs.getTopLevelPages();
-      } catch {
-        /* ignore */
-      }
+      let forest: NavItem[] = [];
+      const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
 
-      if (topLevels.length === 0) {
-        return '';
-      }
+      if (cached) {
+        forest = cached.data;
+      } else {
+        let topLevels: PageModel[] = [];
+        try {
+          topLevels = await dbs.getTopLevelPages();
+        } catch {
+          /* ignore */
+        }
 
-      // We build a tree for each of the top-level pages
-      const forest: NavItem[] = [];
-      for (const topLevel of topLevels) {
-        forest.push({
-          pageId: topLevel._id,
-          title: topLevel.pageTitle,
-          link: slugUrl(topLevel.pageSlug),
-          position: topLevel.position,
-          children: await dbs.buildMenuTree(topLevel._id),
-        });
+        if (topLevels.length === 0) {
+          app.cache.reset(NAVIGATION_CACHE_KEY);
+          return '';
+        }
+
+        // We build a tree for each of the top-level pages
+        for (const topLevel of topLevels) {
+          forest.push({
+            pageId: topLevel._id,
+            title: topLevel.pageTitle,
+            link: slugUrl(topLevel.pageSlug),
+            position: topLevel.position,
+            children: await dbs.buildMenuTree(topLevel._id),
+          });
+        }
+
+        app.cache.set(NAVIGATION_CACHE_KEY, forest);
       }
 
       rep.header('Cache-Control', 'no-store');
@@ -432,6 +441,8 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
+      app.cache.reset(NAVIGATION_CACHE_KEY);
+
       return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
 
       // If the title is the same as the current page, we keep the slug
@@ -541,6 +552,8 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
+      app.cache.reset(NAVIGATION_CACHE_KEY);
+
       await rs.slugWithFeedback(page.pageSlug, Feedbacks.S_PAGE_MOVED);
     }
   );
@@ -580,6 +593,8 @@ const router = async (app: FastifyInstance) => {
         return rep.status(500);
       }
 
+      app.cache.reset(NAVIGATION_CACHE_KEY);
+
       return rep.status(204).send();
     }
   );
@@ -610,6 +625,8 @@ const router = async (app: FastifyInstance) => {
       } catch (error) {
         return rs.homeWithError(error);
       }
+
+      app.cache.reset(NAVIGATION_CACHE_KEY);
 
       return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
@@ -709,6 +726,8 @@ const router = async (app: FastifyInstance) => {
       } catch (error) {
         return rs.homeWithError(error);
       }
+
+      app.cache.reset(NAVIGATION_CACHE_KEY);
 
       const page = await dbs.getPageById(pageId);
 

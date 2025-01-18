@@ -3,3 +3,4 @@ export const ASSETS_MOUNT_POINT = 'a';
 export const ASSETS_PATH = '../../assets';
 export const CLIENT_BUNDLE_LOCATION = '../../dist/client';
 export const POSITION_GAP_SIZE = 10000;
+export const NAVIGATION_CACHE_KEY = 'navigation-tree';
