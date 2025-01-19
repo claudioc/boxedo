@@ -87,6 +87,28 @@ export const EditorEnabler = () => (
         <ImageIcon />
       </button>
     </div>
+
+    {/* <dialog x-ref="uploadDialog" class="card m-auto">
+      <form method="dialog">
+        <h2 class="title is-2">Image url</h2>
+        <div class="level">
+          <menu class="level-item level-right">
+            <button type="button" class="button" value="default">
+              One button
+            </button>
+            <button
+              type="button"
+              class="button"
+              value="cancel"
+              x-on:click="$refs.dialog.close()"
+            >
+              Cancel{' '}
+            </button>
+          </menu>
+        </div>
+      </form>
+    </dialog> */}
+
     <script defer>App.enableEditor();</script>
   </>
 );
