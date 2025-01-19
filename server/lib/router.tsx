@@ -351,8 +351,9 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.log.error(Feedbacks.E_MISSING_PAGE.message);
-      rep.code(404);
-      rep.html(<NotFound app={app} title={app.i18n.t('Error.pageNotFound')} />);
+      rep
+        .code(404)
+        .html(<NotFound app={app} title={app.i18n.t('Error.pageNotFound')} />);
     }
   );
 
