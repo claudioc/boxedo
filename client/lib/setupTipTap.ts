@@ -10,6 +10,7 @@ import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
 import { Editor, type Extensions, type EditorOptions } from '@tiptap/core';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 import { ImageMacro } from './extensions/image-macro';
 import { ImageAlign } from './extensions/image-align';
 
@@ -36,6 +37,27 @@ const getEditorOptions = (): Partial<EditorOptions> => {
       // },
       element: document.querySelector('.bubbleMenu') as HTMLElement,
     }),
+    FloatingMenu.configure({
+      tippyOptions: {
+        // offset: [0, -100],
+        placement: 'left',
+      },
+      shouldShow: ({ editor }) => {
+        const { $from } = editor.state.selection;
+        const currentNode = $from.parent;
+
+        // Check three conditions:
+        // 1. We're in a paragraph
+        // 2. The paragraph is empty
+        // 3. We're at the start of the node
+        return (
+          currentNode.type.name === 'paragraph' &&
+          currentNode.content.size === 0 &&
+          $from.parentOffset === 0
+        );
+      },
+      element: document.querySelector('.floatingMenu') as HTMLElement,
+    }),
     Link.configure({
       openOnClick: false,
       HTMLAttributes: {
@@ -61,7 +83,10 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     Placeholder.configure({
       placeholder: ({ node }) => {
         if (node.type.name === 'heading') {
-          return 'New page';
+          if (node.attrs.level === 1) {
+            return 'New page';
+          }
+          return `New heading level ${node.attrs.level}`;
         }
 
         if (node.type.name === 'paragraph') {
@@ -117,6 +142,24 @@ const addLink = () => {
   }
 };
 
+const addImage = () => {
+  // Get URL from user
+  const url = window.prompt('Enter image URL:');
+
+  if (url === null || url.trim() === '') {
+    // User cancelled the prompt
+    return true;
+  }
+
+  editor
+    .chain()
+    .focus()
+    .setImage({
+      src: url,
+    })
+    .run();
+};
+
 type BubbleMenuCommands =
   | 'bold'
   | 'italic'
@@ -127,15 +170,19 @@ type BubbleMenuCommands =
   | 'codeblock'
   | 'h1'
   | 'h2'
+  | 'h3'
   | 'p'
   | 'link'
   | 'alignLeft'
   | 'alignCenter'
   | 'alignRight'
+  | 'image'
   | '';
 
 const addBubbleMenuHandlers = () => {
-  const buttons = document.querySelectorAll('.bmButton');
+  const buttons = document.querySelectorAll(
+    '.floatingMenu button, .bubbleMenu button'
+  );
 
   buttons.forEach((button) => {
     button.addEventListener('click', (evt) => {
@@ -166,6 +213,7 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'h1':
         case 'h2':
+        case 'h3':
           editor
             .chain()
             .focus()
@@ -180,6 +228,9 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'link':
           addLink();
+          break;
+        case 'image':
+          addImage();
           break;
         case 'alignLeft':
           {
