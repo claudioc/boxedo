@@ -24,17 +24,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
       tippyOptions: {
         appendTo: 'parent',
       },
-      // shouldShow: ({ state, from }) => {
-      //   // Don't show on images and empty selections
-      //   const { empty } = state.selection;
-      //   const node = state.doc.nodeAt(from);
-
-      //   if (empty || node?.type.name === 'imsage') {
-      //     return false;
-      //   }
-
-      //   return true;
-      // },
       element: document.querySelector('.bubbleMenu') as HTMLElement,
     }),
     FloatingMenu.configure({
@@ -46,14 +35,16 @@ const getEditorOptions = (): Partial<EditorOptions> => {
         const { $from } = editor.state.selection;
         const currentNode = $from.parent;
 
-        // Check three conditions:
+        // Check four conditions:
         // 1. We're in a paragraph
         // 2. The paragraph is empty
         // 3. We're at the start of the node
+        // 4. We're not in a list
         return (
           currentNode.type.name === 'paragraph' &&
           currentNode.content.size === 0 &&
-          $from.parentOffset === 0
+          $from.parentOffset === 0 &&
+          $from.depth === 1
         );
       },
       element: document.querySelector('.floatingMenu') as HTMLElement,
