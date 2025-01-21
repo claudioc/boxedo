@@ -19,7 +19,8 @@
     "db:export": "tsx --env-file=.env ./tasks/exporter.ts",
     "server:test": "vitest",
     "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
-    "check-trans": "tsx --env-file=.env tasks/checkTrans.ts"
+    "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
+    "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",

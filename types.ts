@@ -3,7 +3,12 @@ import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
 
 export type NodeEnv = 'development' | 'production' | 'test';
 
-export type Context = 'none' | 'editing page' | 'viewing page' | 'moving page';
+export type Context =
+  | 'none'
+  | 'editing page'
+  | 'viewing page'
+  | 'moving page'
+  | 'uploading file';
 
 type WithoutId<T> = Omit<T, '_id' | '_rev'>;
 

@@ -89,7 +89,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
         />
       </PageFormWrapper>
 
-      <EditorEnabler />
+      <EditorEnabler app={app} />
     </Layout>
   );
 };

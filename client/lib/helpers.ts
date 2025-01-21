@@ -3,3 +3,6 @@ export const removeQueryParam = (url: string, param: string): string => {
   urlObj.searchParams.delete(param);
   return urlObj.toString();
 };
+
+export const isUrl = (str: string) =>
+  /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(str);

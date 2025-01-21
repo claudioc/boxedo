@@ -47,7 +47,9 @@
     "E_MISSING_REV": "Revision number is missing",
     "E_REV_MISMATCH_ON_SAVE": "Revision mismatch detected. Someone may have changed the content. Please try again.",
     "E_MISSING_SETTINGS_DB": "Database \"Settings\" not found",
-    "E_UPDATING_SETTINGS": "Error updating settings"
+    "E_UPDATING_SETTINGS": "Error updating settings",
+    "E_UPLOAD_DATA_MISSING": "Either the URL or the file is missing",
+    "E_UPLOAD_URL_PROBLEMATIC": "The URL provided is not valid"
   },
 
   "MovePage": {
@@ -133,5 +135,24 @@
   "WelcomePage": {
     "title": "Welcome!",
     "content": "<p>This page is just a placeholder: to get started, add your first page by using the \"%{buttonLabel}\" button.</p>"
+  },
+
+  "EditIcons": {
+    "boldSelection": "Bold selection",
+    "italicSelection": "Italic selection",
+    "strikeSelection": "Strike selection",
+    "underlineSelection": "Underline selection",
+    "highlightSelection": "Highlight selection",
+    "code": "Code",
+    "codeBlock": "Code Block",
+    "toggleH1Level": "Toggle H1 level",
+    "toggleH2Level": "Toggle H2 level",
+    "toggleH3Level": "Toggle H3 level",
+    "paragraph": "Paragraph",
+    "toggleLink": "Toggle link",
+    "insertImage": "Insert image",
+    "alignCenter": "Align center",
+    "alignLeft": "Align left",
+    "alignRight": "Align right"
   }
 }

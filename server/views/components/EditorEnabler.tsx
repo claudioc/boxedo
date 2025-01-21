@@ -1,3 +1,4 @@
+import type { WithApp } from '~/../types';
 import {
   BoldIcon,
   ItalicIcon,
@@ -18,97 +19,144 @@ import {
 
 import styles from './EditorEnabler.module.css';
 
-export const EditorEnabler = () => (
-  <>
-    {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
-    <div class={[styles.bubbleMenu, 'bubbleMenu']}>
-      <div x-show="!$store.editorState.isImage()">
-        <button type="button" data-command="bold">
-          <BoldIcon />
-        </button>
-        <button type="button" data-command="italic">
-          <ItalicIcon />
-        </button>
-        <button type="button" data-command="strike">
-          <StrikeIcon />
-        </button>
-        <button type="button" data-command="underline">
-          <UnderlineIcon />
-        </button>
-        <div aria-hidden="true" class={styles.separator} />
-        <button type="button" data-command="highlight">
-          <HighlightIcon />
-        </button>
-        <div aria-hidden="true" class={styles.separator} />
-        <button type="button" data-command="code">
-          <CodeIcon />
-        </button>
-        <button type="button" data-command="codeblock">
-          <CodeBlockIcon />
-        </button>
-        <div aria-hidden="true" class={styles.separator} />
+interface EditorEnablerProps extends WithApp {}
+
+export const EditorEnabler = ({ app }: EditorEnablerProps) => {
+  const { i18n } = app;
+
+  return (
+    <>
+      {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
+      <div class={[styles.bubbleMenu, 'bubbleMenu']}>
+        <div x-show="!$store.editorState.isImage()">
+          <button type="button" data-command="bold">
+            <BoldIcon title={i18n.t('EditIcons.boldSelection')} />
+          </button>
+          <button type="button" data-command="italic">
+            <ItalicIcon title={i18n.t('EditIcons.italicSelection')} />
+          </button>
+          <button type="button" data-command="strike">
+            <StrikeIcon title={i18n.t('EditIcons.strikeSelection')} />
+          </button>
+          <button type="button" data-command="underline">
+            <UnderlineIcon title={i18n.t('EditIcons.underlineSelection')} />
+          </button>
+          <div aria-hidden="true" class={styles.separator} />
+          <button type="button" data-command="highlight">
+            <HighlightIcon title={i18n.t('EditIcons.highlightSelection')} />
+          </button>
+          <div aria-hidden="true" class={styles.separator} />
+          <button type="button" data-command="code">
+            <CodeIcon title={i18n.t('EditIcons.code')} />
+          </button>
+          <button type="button" data-command="codeblock">
+            <CodeBlockIcon title={i18n.t('EditIcons.codeBlock')} />
+          </button>
+          <div aria-hidden="true" class={styles.separator} />
+          <button type="button" data-command="h2">
+            <H2Icon title={i18n.t('EditIcons.toggleH2Level')} />
+          </button>
+          <button type="button" data-command="h3">
+            <H3Icon title={i18n.t('EditIcons.toggleH3Level')} />
+          </button>
+          <button type="button" data-command="p">
+            <ParagraphIcon title={i18n.t('EditIcons.paragraph')} />
+          </button>
+          <div aria-hidden="true" class={styles.separator} />
+          <button type="button" data-command="link">
+            <LinkIcon title={i18n.t('EditIcons.toggleLink')} />
+          </button>
+          <div aria-hidden="true" class={styles.separator} />
+        </div>
+        <div>
+          <button type="button" data-command="alignLeft">
+            <LeftIcon title={i18n.t('EditIcons.alignLeft')} />
+          </button>
+          <button type="button" data-command="alignCenter">
+            <CenterIcon title={i18n.t('EditIcons.alignCenter')} />
+          </button>
+          <button type="button" data-command="alignRight">
+            <RightIcon title={i18n.t('EditIcons.alignRight')} />
+          </button>
+        </div>
+      </div>
+
+      {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
+      <div class={[styles.floatingMenu, 'floatingMenu']}>
         <button type="button" data-command="h2">
-          <H2Icon />
+          <H2Icon title={i18n.t('EditIcons.toggleH2Level')} />
         </button>
         <button type="button" data-command="h3">
-          <H3Icon />
+          <H3Icon title={i18n.t('EditIcons.toggleH3Level')} />
         </button>
-        <button type="button" data-command="p">
-          <ParagraphIcon />
-        </button>
-        <div aria-hidden="true" class={styles.separator} />
-        <button type="button" data-command="link">
-          <LinkIcon />
-        </button>
-        <div aria-hidden="true" class={styles.separator} />
-      </div>
-      <div>
-        <button type="button" data-command="alignLeft">
-          <LeftIcon />
-        </button>
-        <button type="button" data-command="alignCenter">
-          <CenterIcon />
-        </button>
-        <button type="button" data-command="alignRight">
-          <RightIcon />
+        <button type="button" data-command="image">
+          <ImageIcon title={i18n.t('EditIcons.insertImage')} />
         </button>
       </div>
-    </div>
 
-    {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
-    <div class={[styles.floatingMenu, 'floatingMenu']}>
-      <button type="button" data-command="h2">
-        <H2Icon />
-      </button>
-      <button type="button" data-command="h3">
-        <H3Icon />
-      </button>
-      <button type="button" data-command="image">
-        <ImageIcon />
-      </button>
-    </div>
+      <dialog
+        id="uploadDialog"
+        data-context="uploading file"
+        x-ref="uploadDialog"
+        class="card m-auto"
+      >
+        <form method="dialog" x-on:submit="App.validate">
+          <h3 class="title is-2">{i18n.t('Upload image')}</h3>
 
-    {/* <dialog x-ref="uploadDialog" class="card m-auto">
-      <form method="dialog">
-        <h2 class="title is-2">Image url</h2>
-        <div class="level">
-          <menu class="level-item level-right">
-            <button type="button" class="button" value="default">
-              One button
+          <div class="block">
+            <div class="field">
+              <label class="label" for="uploadUrl">
+                Enter URL
+              </label>
+              <div class="control">
+                <input
+                  name="uploadUrl"
+                  id="uploadUrl"
+                  class="input"
+                  type="text"
+                />
+              </div>
+              <p class="help">
+                The URL of the image to display, including the https:// prefix
+              </p>
+            </div>
+          </div>
+
+          <hr />
+
+          <div class="block">
+            <div class="field">
+              <label class="label" for="uploadFile">
+                Upload a file
+              </label>
+              <div class="control">
+                <input
+                  name="uploadFile"
+                  id="uploadFile"
+                  class="input"
+                  type="file"
+                />
+              </div>
+              <p class="help">Upload an image from your computer</p>
+            </div>
+          </div>
+          <div class="level">
+            <button type="submit" class="button" value="default">
+              OK
             </button>
             <button
               type="button"
               class="button"
               value="cancel"
-              x-on:click="$refs.dialog.close()"
+              x-on:click="$refs.uploadDialog.close()"
             >
-              Cancel{' '}
+              Cancel
             </button>
-          </menu>
-        </div>
-      </form>
-    </dialog> */}
+          </div>
+        </form>
+      </dialog>
 
-    <script defer>App.enableEditor();</script>
-  </>
-);
+      <script defer>App.enableEditor();</script>
+    </>
+  );
+};

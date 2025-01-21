@@ -39,7 +39,9 @@
     "E_MISSING_REV": "Numero di revisione mancante",
     "E_REV_MISMATCH_ON_SAVE": "Rilevata discrepanza nella revisione. Qualcuno potrebbe aver modificato il contenuto. Si prega di riprovare.",
     "E_MISSING_SETTINGS_DB": "Database \"Settings\" non trovato",
-    "E_UPDATING_SETTINGS": "Errore durante l'aggiornamento delle impostazioni"
+    "E_UPDATING_SETTINGS": "Errore durante l'aggiornamento delle impostazioni",
+    "E_UPLOAD_DATA_MISSING": "L'indirizzo o il file è assente",
+    "E_UPLOAD_URL_PROBLEMATIC": "L'indirizzo fornito non è un URL valido"
   },
 
   "Error": {
@@ -133,5 +135,24 @@
   "WelcomePage": {
     "title": "Benvenuti!",
     "content": "<p>Questa pagina è solo un segnaposto; per iniziare, crea la tua prima pagina usando il bottone \"Crea pagina\".</p>"
+  },
+
+  "EditIcons": {
+    "boldSelection": "Selezione in grassetto",
+    "italicSelection": "Selezione in corsivo",
+    "strikeSelection": "Selezione barrata",
+    "underlineSelection": "Selezione sottolineata",
+    "highlightSelection": "Evidenzia selezione",
+    "code": "Codice",
+    "codeBlock": "Blocco di codice",
+    "toggleH1Level": "Attiva/disattiva livello H1",
+    "toggleH2Level": "Attiva/disattiva livello H2",
+    "toggleH3Level": "Attiva/disattiva livello H3",
+    "paragraph": "Paragrafo",
+    "toggleLink": "Attiva/disattiva link",
+    "insertImage": "Inserisci immagine",
+    "alignCenter": "Allinea al centro",
+    "alignLeft": "Allinea a sinistra",
+    "alignRight": "Allinea a destra"
   }
 }

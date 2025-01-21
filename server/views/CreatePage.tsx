@@ -49,7 +49,7 @@ export const CreatePage = ({ app, parentPage, token }: CreatePageProps) => {
           <PageData debug={app.isDev} />
         </form>
       </PageFormWrapper>
-      <EditorEnabler />
+      <EditorEnabler app={app} />
     </Layout>
   );
 };

@@ -133,22 +133,59 @@ const addLink = () => {
   }
 };
 
-const addImage = () => {
-  // Get URL from user
-  const url = window.prompt('Enter image URL:');
+// const addImage = () => {
+//   // Get URL from user
+//   const url = window.prompt('Enter image URL:');
 
-  if (url === null || url.trim() === '') {
-    // User cancelled the prompt
-    return true;
+//   if (url === null || url.trim() === '') {
+//     // User cancelled the prompt
+//     return true;
+//   }
+
+//   editor
+//     .chain()
+//     .focus()
+//     .setImage({
+//       src: url,
+//     })
+//     .run();
+// };
+
+let uploadDialog: HTMLDialogElement;
+
+interface UploadFormFields {
+  uploadUrl: string;
+  uploadFile: File;
+}
+
+const addImageWithDialog = () => {
+  if (!uploadDialog) {
+    uploadDialog = document.getElementById('uploadDialog') as HTMLDialogElement;
+    if (!uploadDialog) {
+      return;
+    }
+
+    const form = uploadDialog.querySelector('form') as HTMLFormElement;
+    form?.addEventListener('submit', (evt) => submitUpload(evt, form));
   }
 
-  editor
-    .chain()
-    .focus()
-    .setImage({
-      src: url,
-    })
-    .run();
+  uploadDialog.showModal();
+
+  function submitUpload(evt: Event, form: HTMLFormElement) {
+    evt.preventDefault();
+    const data = new FormData(form);
+
+    const formFields = Object.fromEntries(
+      data.entries()
+    ) as unknown as UploadFormFields;
+
+    if (formFields.uploadUrl.trim() !== '') {
+      editor.chain().focus().setImage({ src: formFields.uploadUrl }).run();
+      uploadDialog.close();
+      form.reset();
+      return;
+    }
+  }
 };
 
 type BubbleMenuCommands =
@@ -221,7 +258,7 @@ const addBubbleMenuHandlers = () => {
           addLink();
           break;
         case 'image':
-          addImage();
+          addImageWithDialog();
           break;
         case 'alignLeft':
           {

@@ -1,7 +1,7 @@
 import { store } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import type { TipTapEditor } from './lib/setupTipTap';
-import { removeQueryParam } from './lib/helpers';
+import { removeQueryParam, isUrl } from './lib/helpers';
 import { enableSortable, destroySortable } from './lib/setupSortable';
 import type { Context } from '../types';
 
@@ -41,6 +41,8 @@ class App {
     this.editor = editor;
   }
 
+  // Validates all the forms on the client to work in conjunction with Alpine
+  // to show error messages
   validate(event: Event) {
     const form = event.target as HTMLFormElement;
     const data = new FormData(form);
@@ -69,17 +71,34 @@ class App {
     }
 
     if (context === 'moving page') {
+      const formFields = Object.fromEntries(data.entries());
       if (
-        (data.get('moveToTop') === 'false' && data.get('newParentId') === '') ||
-        data.get('newParentId') === data.get('oldParentId')
+        (formFields.moveToTop === 'false' && formFields.newParentId === '') ||
+        formFields.newParentId === formFields.oldParentId
       ) {
         error.newParentId = true;
+      }
+    }
+
+    if (context === 'uploading file') {
+      const formFields = Object.fromEntries(data.entries());
+      const url = (formFields.uploadUrl as string).trim();
+      const file = formFields.uploadFile as File;
+
+      if (url === '' && file.size === 0) {
+        error.uploadUrl = true;
+        error.uploadFile = true;
+      }
+
+      if (url !== '' && !isUrl(url)) {
+        error.uploadUrl = true;
       }
     }
 
     store.error = error;
 
     if (Object.values(error).some((v) => v)) {
+      event.stopImmediatePropagation();
       event.preventDefault();
       return;
     }

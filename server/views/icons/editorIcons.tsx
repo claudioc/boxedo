@@ -10,9 +10,13 @@ const commonProps = {
   stroke: 'currentColor',
 };
 
-export const BoldIcon = () => (
+interface IconProps {
+  title: string;
+}
+
+export const BoldIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Bold selection</title>
+    <title>{title}</title>
     <path
       stroke-linejoin="round"
       d="M6.75 3.744h-.753v8.25h7.125a4.125 4.125 0 0 0 0-8.25H6.75Zm0 0v.38m0 16.122h6.747a4.5 4.5 0 0 0 0-9.001h-7.5v9h.753Zm0 0v-.37m0-15.751h6a3.75 3.75 0 1 1 0 7.5h-6m0-7.5v7.5m0 0v8.25m0-8.25h6.375a4.125 4.125 0 0 1 0 8.25H6.75m.747-15.38h4.875a3.375 3.375 0 0 1 0 6.75H7.497v-6.75Zm0 7.5h5.25a3.75 3.75 0 0 1 0 7.5h-5.25v-7.5Z"
@@ -20,9 +24,9 @@ export const BoldIcon = () => (
   </svg>
 );
 
-export const ItalicIcon = () => (
+export const ItalicIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Italic selection</title>
+    <title>{title}</title>
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -31,9 +35,9 @@ export const ItalicIcon = () => (
   </svg>
 );
 
-export const StrikeIcon = () => (
+export const StrikeIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Strike selection</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -42,9 +46,9 @@ export const StrikeIcon = () => (
   </svg>
 );
 
-export const UnderlineIcon = () => (
+export const UnderlineIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Underline selection</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -53,9 +57,9 @@ export const UnderlineIcon = () => (
   </svg>
 );
 
-export const HighlightIcon = () => (
+export const HighlightIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Highlight selection</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -64,9 +68,9 @@ export const HighlightIcon = () => (
   </svg>
 );
 
-export const CodeIcon = () => (
+export const CodeIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Code</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -75,9 +79,9 @@ export const CodeIcon = () => (
   </svg>
 );
 
-export const CodeBlockIcon = () => (
+export const CodeBlockIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Code Block</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -86,9 +90,9 @@ export const CodeBlockIcon = () => (
   </svg>
 );
 
-export const H1Icon = () => (
+export const H1Icon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Toggle H1 level</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -97,9 +101,9 @@ export const H1Icon = () => (
   </svg>
 );
 
-export const H2Icon = () => (
+export const H2Icon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Toggle H2 level</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -108,9 +112,9 @@ export const H2Icon = () => (
   </svg>
 );
 
-export const H3Icon = () => (
+export const H3Icon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Toggle H3 level</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -119,18 +123,18 @@ export const H3Icon = () => (
   </svg>
 );
 
-export const ParagraphIcon = () => (
+export const ParagraphIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Paragraph</title>
+    <title>{title}</title>
     <path d="M13 4v16" />
     <path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H13" />
     <path d="M17 4v16" />
   </svg>
 );
 
-export const LinkIcon = () => (
+export const LinkIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Toggle link</title>
+    <title>{title}</title>
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -139,9 +143,9 @@ export const LinkIcon = () => (
   </svg>
 );
 
-export const ImageIcon = () => (
+export const ImageIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Insert image</title>
+    <title>{title}</title>
     <path
       stroke-linecap="round"
       stroke-linejoin="round"
@@ -150,27 +154,27 @@ export const ImageIcon = () => (
   </svg>
 );
 
-export const CenterIcon = () => (
+export const CenterIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Align center</title>
+    <title>{title}</title>
     <line x1="21" x2="3" y1="6" y2="6" />
     <line x1="17" x2="7" y1="12" y2="12" />
     <line x1="19" x2="5" y1="18" y2="18" />
   </svg>
 );
 
-export const LeftIcon = () => (
+export const LeftIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Align left</title>
+    <title>{title}</title>
     <line x1="21" x2="3" y1="6" y2="6" />
     <line x1="15" x2="3" y1="12" y2="12" />
     <line x1="17" x2="3" y1="18" y2="18" />
   </svg>
 );
 
-export const RightIcon = () => (
+export const RightIcon = ({ title }: IconProps) => (
   <svg style={style} {...commonProps}>
-    <title>Align right</title>
+    <title>{title}</title>
     <line x1="21" x2="3" y1="6" y2="6" />
     <line x1="21" x2="9" y1="12" y2="12" />
     <line x1="21" x2="7" y1="18" y2="18" />

@@ -19,7 +19,9 @@ type ErrorCodes =
   | 'E_REV_MISMATCH_ON_SAVE'
   | 'E_UNKNOWN_ERROR'
   | 'E_MISSING_SETTINGS_DB'
-  | 'E_UPDATING_SETTINGS';
+  | 'E_UPDATING_SETTINGS'
+  | 'E_UPLOAD_DATA_MISSING'
+  | 'E_UPLOAD_URL_PROBLEMATIC';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -31,6 +33,7 @@ type SuccessCodes =
 type AnyCode = ErrorCodes | SuccessCodes;
 
 // Keep this as an object instead of a Map to have a really strict and tight typing
+// The messages are translated but also we keep them here in plain text for the server logs
 export const Feedbacks: { [key in AnyCode]: Feedback } = {
   S_PAGE_CREATED: {
     code: 1,
@@ -128,6 +131,14 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_UPDATING_SETTINGS: {
     code: 120,
     message: 'Error updating settings',
+  },
+  E_UPLOAD_DATA_MISSING: {
+    code: 121,
+    message: 'Either the URL or the file is missing',
+  },
+  E_UPLOAD_URL_PROBLEMATIC: {
+    code: 122,
+    message: 'The URL provided is not valid',
   },
 } as const;
 
