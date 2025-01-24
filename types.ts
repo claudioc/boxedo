@@ -32,6 +32,7 @@ export interface FileModel {
   originalMimetype: string;
   originalSize: number;
   processedSize: number;
+  processedMimetype: string;
   originalDimensions: {
     width: number;
     height: number;
@@ -39,7 +40,7 @@ export interface FileModel {
   uploadedAt: string;
 }
 
-export interface FileAttachment {
+export interface FileAttachmentModel {
   docId: string;
   attachmentName: string;
   attachment: Buffer | NodeJS.ReadableStream;

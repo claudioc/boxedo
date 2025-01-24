@@ -6,6 +6,21 @@ import { pathWithFeedback, slugUrl } from '~/lib/helpers';
 
 export function redirectService(app: FastifyInstance, rep: FastifyReply) {
   return {
+    bailWithError(code: number, message: unknown) {
+      app.log.error(message);
+      if (message instanceof ErrorWithFeedback) {
+        app.log.error(message.feedback.message);
+        return rep.code(code).send({
+          error: message.feedback.message,
+          statusCode: code,
+        });
+      }
+
+      return rep.code(code).send({
+        error: message,
+      });
+    },
+
     homeWithError(error: unknown) {
       let feedback: Feedback = Feedbacks.E_UNKNOWN_ERROR;
       if (error instanceof ErrorWithFeedback) {

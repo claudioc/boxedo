@@ -6,7 +6,7 @@ import type {
   NavItem,
   PageModelWithRev,
   FileModel,
-  FileAttachment,
+  FileAttachmentModel,
 } from '~/../types';
 import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
@@ -33,7 +33,7 @@ import {
   NAVIGATION_CACHE_KEY,
 } from '~/constants';
 import sharp from 'sharp';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 const PageIdFormat = {
   type: 'string',
@@ -662,35 +662,38 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post('/uploads', async (req, rep) => {
+    const rs = redirectService(app, rep);
     const dbs = dbService(app.dbClient);
 
     if (!req.isMultipart()) {
-      return rep.code(400).send({
-        error: 'Invalid file type. Please upload an image.',
-      });
+      return rs.bailWithError(
+        400,
+        'Invalid file type. Please upload an image.'
+      );
     }
 
     const options = { limits: { fileSize: MAX_IMAGE_SIZE, files: 1 } };
     const data = await req.file(options);
     if (!data) {
-      return rep.code(400).send({
-        error: 'Invalid file type. Please upload an image.',
-      });
+      return rs.bailWithError(
+        400,
+        'Invalid file type. Please upload an image.'
+      );
     }
 
     // Check if it's an image
     if (!data.mimetype.startsWith('image/')) {
-      return rep.code(400).send({
-        error: 'Invalid file type. Please upload an image.',
-      });
+      return rs.bailWithError(
+        400,
+        'Invalid file type. Please upload an image.'
+      );
     }
 
     let buffer: Buffer;
     try {
       buffer = await data.toBuffer();
     } catch {
-      rep.send(app.multipartErrors.RequestFileTooLargeError());
-      return;
+      return rep.send(app.multipartErrors.RequestFileTooLargeError());
     }
 
     const imageInfo = await sharp(buffer).metadata();
@@ -702,6 +705,7 @@ const router = async (app: FastifyInstance) => {
 
     // Process image if needed
     let processedBuffer = buffer;
+    let finalMimeType = data.mimetype;
     if (needsResize) {
       processedBuffer = await sharp(buffer)
         .resize(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION, {
@@ -710,6 +714,7 @@ const router = async (app: FastifyInstance) => {
         })
         .jpeg({ quality: JPEG_QUALITY }) // Convert to JPEG with good quality
         .toBuffer();
+      finalMimeType = 'image/jpeg';
     }
 
     const docId = `${Date.now()}_${data.filename}`;
@@ -720,6 +725,7 @@ const router = async (app: FastifyInstance) => {
       originalMimetype: data.mimetype,
       originalSize: buffer.length,
       processedSize: processedBuffer.length,
+      processedMimetype: finalMimeType,
       originalDimensions: {
         width: imageInfo.width ?? 0,
         height: imageInfo.height ?? 0,
@@ -727,20 +733,29 @@ const router = async (app: FastifyInstance) => {
       uploadedAt: new Date().toISOString(),
     };
 
-    const rev = await dbs.insertFile(doc);
+    let fileRev: string;
+    try {
+      const { rev } = await dbs.insertFile(doc);
+      fileRev = rev;
+    } catch (err) {
+      return rs.bailWithError(500, err);
+    }
 
-    // Store the processed image
     const stream = Readable.from(processedBuffer);
 
-    const attachment: FileAttachment = {
+    const attachment: FileAttachmentModel = {
       docId,
       attachmentName: data.filename,
       attachment: stream,
-      contentType: 'image/jpeg',
-      params: { rev },
+      contentType: finalMimeType,
+      params: { rev: fileRev },
     };
 
-    await dbs.insertFileAttachment(attachment);
+    try {
+      await dbs.insertFileAttachment(attachment);
+    } catch (err) {
+      return rs.bailWithError(500, err);
+    }
 
     return {
       success: true,
@@ -749,22 +764,31 @@ const router = async (app: FastifyInstance) => {
       originalSize: buffer.length,
       processedSize: processedBuffer.length,
       wasResized: needsResize,
-      url: `/uploads/${docId}/${data.filename}`,
+      url: `/uploads/${docId}/${encodeURIComponent(data.filename)}`,
     };
   });
 
-  app.get('/uploads/:id/:filename', async (request, reply) => {
-    const { id, filename } = request.params as { id: string; filename: string };
+  app.get('/uploads/:docId/:filename', async (req, rep) => {
+    const rs = redirectService(app, rep);
+    const dbs = dbService(app.dbClient);
+
+    const { docId, filename } = req.params as {
+      docId: string;
+      filename: string;
+    };
 
     try {
-      const doc = await attachments.get(id);
-      const stream = await attachments.attachment.get(id, filename);
+      const doc = await dbs.getFileById(docId);
+      if (!doc) {
+        return rs.bailWithError(404, 'File not found');
+      }
 
-      reply.type(doc.mimetype);
+      const stream = await dbs.getFileAttachment(docId, filename);
+
+      rep.type(doc.processedMimetype);
       return stream;
     } catch (err) {
-      request.log.error(err);
-      throw err;
+      return rs.bailWithError(500, err);
     }
   });
 

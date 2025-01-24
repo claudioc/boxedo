@@ -23,7 +23,8 @@ type ErrorCodes =
   | 'E_UPLOAD_DATA_MISSING'
   | 'E_UPLOAD_URL_PROBLEMATIC'
   | 'E_MISSING_FILES_DB'
-  | 'E_CREATING_FILE';
+  | 'E_CREATING_FILE'
+  | 'E_CREATING_ATTACHMENT';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -149,6 +150,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_CREATING_FILE: {
     code: 124,
     message: 'An error occurred while inserting a file in the db',
+  },
+  E_CREATING_ATTACHMENT: {
+    code: 125,
+    message: 'An error occurred while inserting an attachment in the db',
   },
 } as const;
 

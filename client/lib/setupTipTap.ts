@@ -168,6 +168,8 @@ const addImageWithDialog = () => {
     return url;
   };
 
+  uploadDialog.showModal();
+
   const handleFileUpload = async (file: File): Promise<string> => {
     if (!file.type.startsWith('image/')) {
       alert('Only images can be uploaded');
@@ -179,25 +181,16 @@ const addImageWithDialog = () => {
       throw new Error('File size exceeds 5MB limit');
     }
 
-    const objectUrl = URL.createObjectURL(file);
-
+    let serverUrl = '';
     try {
-      const serverUrl = await uploadToServer(file);
-      editor
-        .chain()
-        .focus()
-        .updateAttributes('image', { src: serverUrl })
-        .run();
-      URL.revokeObjectURL(objectUrl);
+      serverUrl = await uploadToServer(file);
     } catch (err) {
-      console.error('Background upload failed:', err);
+      console.error('Image upload failed:', err);
       alert('Failed saving image to server');
     }
 
-    return objectUrl;
+    return serverUrl;
   };
-
-  uploadDialog.showModal();
 
   async function submitUpload(evt: Event, form: HTMLFormElement) {
     evt.preventDefault();

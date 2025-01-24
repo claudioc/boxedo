@@ -7,11 +7,16 @@ import type {
   PageModelWithRev,
   NodeEnv,
   FileModel,
+  FileAttachmentModel,
 } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
-import nano, { type DocumentScope, type ServerScope } from 'nano';
+import nano, {
+  type DocumentInsertResponse,
+  type DocumentScope,
+  type ServerScope,
+} from 'nano';
 import { slugUrl } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
@@ -379,15 +384,59 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async insertFile(file: FileModel) {
-      let doc = '';
+      let doc: DocumentInsertResponse;
       try {
-        const { rev } = await filesDb.insert(file);
-        doc = rev;
+        // const { rev } = await filesDb.insert(file);
+        // doc = rev;
+        doc = await filesDb.insert(file);
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_FILE);
       }
 
       return doc;
+    },
+
+    async insertFileAttachment(attachment: FileAttachmentModel) {
+      let att: DocumentInsertResponse;
+      try {
+        att = await filesDb.attachment.insert(
+          attachment.docId,
+          attachment.attachmentName,
+          attachment.attachment,
+          attachment.contentType,
+          attachment.params
+        );
+      } catch {
+        throw new ErrorWithFeedback(Feedbacks.E_CREATING_ATTACHMENT);
+      }
+
+      return att;
+    },
+
+    async getFileById(fileId: string): Promise<FileModel | null> {
+      let file: FileModel | null = null;
+      try {
+        file = await filesDb.get(fileId);
+      } catch (err: unknown) {
+        if ((err as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
+      }
+
+      return file;
+    },
+
+    async getFileAttachment(fileId: string, attachmentName: string) {
+      let attachment: Buffer | null = null;
+      try {
+        attachment = await filesDb.attachment.get(fileId, attachmentName);
+      } catch (err: unknown) {
+        if ((err as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
+      }
+
+      return attachment;
     },
 
     async getPageHistory(page: PageModel): Promise<PageModel[]> {

@@ -147,7 +147,7 @@ await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
             "'unsafe-inline'",
             "'unsafe-eval'",
           ],
-          'img-src': ['https:', 'data:', 'blob:'],
+          'img-src': ['http:', 'https:', 'data:', 'blob:'],
           'connect-src': ['http:', "'self'", 'ws:'],
           'default-src': ["'self'", 'ws:'],
         },
