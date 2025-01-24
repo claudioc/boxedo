@@ -50,6 +50,7 @@
     "@fastify/env": "^5.0.1",
     "@fastify/formbody": "^8.0.1",
     "@fastify/helmet": "^13.0.0",
+    "@fastify/multipart": "^9.0.3",
     "@fastify/static": "^8.0.0",
     "@kitajs/fastify-html-plugin": "^4.2.0",
     "@kitajs/html": "^4.2.6",
@@ -80,6 +81,7 @@
     "node-polyglot": "^2.6.0",
     "sanitize-filename": "^1.6.3",
     "sanitize-html": "^2.14.0",
+    "sharp": "^0.33.5",
     "slugify": "^1.6.6",
     "sortablejs": "^1.15.6"
   }

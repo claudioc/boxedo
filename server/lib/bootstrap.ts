@@ -18,6 +18,7 @@ import { dbService, type DbClient } from '~/services/dbService';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
+import multipart from '@fastify/multipart';
 
 import en from '../locales/en.json';
 import it from '../locales/it.json';
@@ -99,6 +100,9 @@ try {
 await app.register(fastifyCookie);
 
 await app.register(fastifyCache);
+
+// Register multipart plugin (file upload) with custom limits
+await app.register(multipart);
 
 if (process.env.NODE_ENV !== 'test') {
   await app.register(csrfProtection);

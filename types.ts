@@ -25,6 +25,28 @@ export interface SettingsModel {
   siteLang: string;
 }
 
+export interface FileModel {
+  _id: string;
+  _rev?: string;
+  originalName: string;
+  originalMimetype: string;
+  originalSize: number;
+  processedSize: number;
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+  uploadedAt: string;
+}
+
+export interface FileAttachment {
+  docId: string;
+  attachmentName: string;
+  attachment: Buffer | NodeJS.ReadableStream;
+  contentType: string;
+  params?: { rev?: string };
+}
+
 export interface PageModel {
   _id: string;
   _rev?: string;

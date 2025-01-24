@@ -133,24 +133,6 @@ const addLink = () => {
   }
 };
 
-// const addImage = () => {
-//   // Get URL from user
-//   const url = window.prompt('Enter image URL:');
-
-//   if (url === null || url.trim() === '') {
-//     // User cancelled the prompt
-//     return true;
-//   }
-
-//   editor
-//     .chain()
-//     .focus()
-//     .setImage({
-//       src: url,
-//     })
-//     .run();
-// };
-
 let uploadDialog: HTMLDialogElement;
 
 interface UploadFormFields {
@@ -169,9 +151,55 @@ const addImageWithDialog = () => {
     form?.addEventListener('submit', (evt) => submitUpload(evt, form));
   }
 
+  const uploadToServer = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch('/uploads', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Server upload failed');
+    }
+
+    const { url } = await response.json();
+    return url;
+  };
+
+  const handleFileUpload = async (file: File): Promise<string> => {
+    if (!file.type.startsWith('image/')) {
+      alert('Only images can be uploaded');
+      throw new Error('Please upload an image file');
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('The file size exceed the 5MB limit');
+      throw new Error('File size exceeds 5MB limit');
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+
+    try {
+      const serverUrl = await uploadToServer(file);
+      editor
+        .chain()
+        .focus()
+        .updateAttributes('image', { src: serverUrl })
+        .run();
+      URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+      console.error('Background upload failed:', err);
+      alert('Failed saving image to server');
+    }
+
+    return objectUrl;
+  };
+
   uploadDialog.showModal();
 
-  function submitUpload(evt: Event, form: HTMLFormElement) {
+  async function submitUpload(evt: Event, form: HTMLFormElement) {
     evt.preventDefault();
     const data = new FormData(form);
 
@@ -179,11 +207,16 @@ const addImageWithDialog = () => {
       data.entries()
     ) as unknown as UploadFormFields;
 
-    if (formFields.uploadUrl.trim() !== '') {
-      editor.chain().focus().setImage({ src: formFields.uploadUrl }).run();
+    const imageSrc =
+      formFields.uploadUrl?.trim() ||
+      (formFields.uploadFile
+        ? await handleFileUpload(formFields.uploadFile)
+        : '');
+
+    if (imageSrc) {
+      editor.chain().focus().setImage({ src: imageSrc }).run();
       uploadDialog.close();
       form.reset();
-      return;
     }
   }
 };

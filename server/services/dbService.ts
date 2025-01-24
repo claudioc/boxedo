@@ -6,6 +6,7 @@ import type {
   PageRevInfo,
   PageModelWithRev,
   NodeEnv,
+  FileModel,
 } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
@@ -25,7 +26,7 @@ interface DbServiceInitParams {
 
 let isTestRun = false;
 
-const dbn = (name: 'pages' | 'settings') => {
+const dbn = (name: 'pages' | 'settings' | 'files') => {
   return isTestRun ? `${name}-test` : name;
 };
 
@@ -49,6 +50,9 @@ export function dbService(client?: nano.ServerScope) {
     dbn('settings')
   );
   if (!settingsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SETTINGS_DB);
+
+  const filesDb: DocumentScope<FileModel> = client.db.use(dbn('files'));
+  if (!filesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_FILES_DB);
 
   return {
     getPageDb() {
@@ -304,32 +308,6 @@ export function dbService(client?: nano.ServerScope) {
       return menuTree;
     },
 
-    // Original version without the position
-    // async _buildMenuTree(parentId: string): Promise<NavItem[]> {
-    //   const result = await pagesDb.find({
-    //     selector: {
-    //       parentId,
-    //     } as PageSelector,
-    //     // FIXME: Ensure that the field array contains only
-    //     // valid fields from the PageModel type
-    //     fields: ['_id', 'pageTitle', 'pageSlug'],
-    //   });
-
-    //   const menuTree = [];
-    //   for (const page of result.docs) {
-    //     const menuItem: NavItem = {
-    //       pageId: page._id,
-    //       title: page.pageTitle,
-    //       link: slugUrl(page.pageSlug),
-    //       children: await this.buildMenuTree(page._id),
-    //     };
-
-    //     menuTree.push(menuItem);
-    //   }
-
-    //   return menuTree;
-    // },
-
     async updatePageContent(page: PageModel, newPage: Partial<PageModel>) {
       const updatedPage: PageModel = {
         ...page,
@@ -400,6 +378,18 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
+    async insertFile(file: FileModel) {
+      let doc = '';
+      try {
+        const { rev } = await filesDb.insert(file);
+        doc = rev;
+      } catch {
+        throw new ErrorWithFeedback(Feedbacks.E_CREATING_FILE);
+      }
+
+      return doc;
+    },
+
     async getPageHistory(page: PageModel): Promise<PageModel[]> {
       const doc = await pagesDb.get(page._id, { revs_info: true });
 
@@ -459,6 +449,17 @@ export function dbService(client?: nano.ServerScope) {
           await client.db.destroy(name);
           await client.db.create(dbn('settings'));
           await this.getSettings();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      name = dbn('files');
+      // Ensure we are deleting the test database
+      if (name.includes('-test')) {
+        try {
+          await client.db.destroy(name);
+          await client.db.create(dbn('files'));
         } catch (error) {
           console.log(error);
         }
@@ -552,6 +553,12 @@ dbService.init = async (params: DbServiceInitParams) => {
     await couchdb.db.get(dbn('settings'));
   } catch {
     await couchdb.db.create(dbn('settings'));
+  }
+
+  try {
+    await couchdb.db.get(dbn('files'));
+  } catch {
+    await couchdb.db.create(dbn('files'));
   }
 
   try {

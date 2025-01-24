@@ -1,7 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { slugUrl } from './helpers';
-import type { PageModel, NavItem, PageModelWithRev } from '~/../types';
+import type {
+  PageModel,
+  NavItem,
+  PageModelWithRev,
+  FileModel,
+  FileAttachment,
+} from '~/../types';
 import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
@@ -19,7 +25,15 @@ import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
 import { PageHistory } from '~/views/PageHistory';
 import { TitlesList } from '~/views/components/TitlesList';
-import { POSITION_GAP_SIZE, NAVIGATION_CACHE_KEY } from '~/constants';
+import {
+  MAX_IMAGE_DIMENSION,
+  MAX_IMAGE_SIZE,
+  JPEG_QUALITY,
+  POSITION_GAP_SIZE,
+  NAVIGATION_CACHE_KEY,
+} from '~/constants';
+import sharp from 'sharp';
+import { Readable } from 'stream';
 
 const PageIdFormat = {
   type: 'string',
@@ -118,6 +132,20 @@ const SettingsPageBodySchema = {
     siteDescription: { type: 'string' },
   },
 } as const;
+
+// const UploadImageBodySchema = {
+//   consumes: ['multipart/form-data'],
+//   // body: {
+//   //   type: 'object',
+//   //   properties: {
+//   //     image: {
+//   //       type: 'string',
+//   //       format: 'binary',
+//   //     },
+//   //   },
+//   //   required: ['image'],
+//   // },
+// } as const;
 
 /**
  * Encapsulates the routes
@@ -632,6 +660,113 @@ const router = async (app: FastifyInstance) => {
       return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
   );
+
+  app.post('/uploads', async (req, rep) => {
+    const dbs = dbService(app.dbClient);
+
+    if (!req.isMultipart()) {
+      return rep.code(400).send({
+        error: 'Invalid file type. Please upload an image.',
+      });
+    }
+
+    const options = { limits: { fileSize: MAX_IMAGE_SIZE, files: 1 } };
+    const data = await req.file(options);
+    if (!data) {
+      return rep.code(400).send({
+        error: 'Invalid file type. Please upload an image.',
+      });
+    }
+
+    // Check if it's an image
+    if (!data.mimetype.startsWith('image/')) {
+      return rep.code(400).send({
+        error: 'Invalid file type. Please upload an image.',
+      });
+    }
+
+    let buffer: Buffer;
+    try {
+      buffer = await data.toBuffer();
+    } catch {
+      rep.send(app.multipartErrors.RequestFileTooLargeError());
+      return;
+    }
+
+    const imageInfo = await sharp(buffer).metadata();
+
+    // Determine if resizing is needed
+    const needsResize =
+      (imageInfo.width || 0) > MAX_IMAGE_DIMENSION ||
+      (imageInfo.height || 0) > MAX_IMAGE_DIMENSION;
+
+    // Process image if needed
+    let processedBuffer = buffer;
+    if (needsResize) {
+      processedBuffer = await sharp(buffer)
+        .resize(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION, {
+          withoutEnlargement: true, // Don't upscale smaller images
+          fit: 'inside', // Maintain aspect ratio
+        })
+        .jpeg({ quality: JPEG_QUALITY }) // Convert to JPEG with good quality
+        .toBuffer();
+    }
+
+    const docId = `${Date.now()}_${data.filename}`;
+
+    const doc: FileModel = {
+      _id: docId,
+      originalName: data.filename,
+      originalMimetype: data.mimetype,
+      originalSize: buffer.length,
+      processedSize: processedBuffer.length,
+      originalDimensions: {
+        width: imageInfo.width ?? 0,
+        height: imageInfo.height ?? 0,
+      },
+      uploadedAt: new Date().toISOString(),
+    };
+
+    const rev = await dbs.insertFile(doc);
+
+    // Store the processed image
+    const stream = Readable.from(processedBuffer);
+
+    const attachment: FileAttachment = {
+      docId,
+      attachmentName: data.filename,
+      attachment: stream,
+      contentType: 'image/jpeg',
+      params: { rev },
+    };
+
+    await dbs.insertFileAttachment(attachment);
+
+    return {
+      success: true,
+      id: docId,
+      filename: data.filename,
+      originalSize: buffer.length,
+      processedSize: processedBuffer.length,
+      wasResized: needsResize,
+      url: `/uploads/${docId}/${data.filename}`,
+    };
+  });
+
+  app.get('/uploads/:id/:filename', async (request, reply) => {
+    const { id, filename } = request.params as { id: string; filename: string };
+
+    try {
+      const doc = await attachments.get(id);
+      const stream = await attachments.attachment.get(id, filename);
+
+      reply.type(doc.mimetype);
+      return stream;
+    } catch (err) {
+      request.log.error(err);
+      throw err;
+    }
+  });
 
   // Creates a page form
   app.get<{

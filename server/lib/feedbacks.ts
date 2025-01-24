@@ -21,7 +21,9 @@ type ErrorCodes =
   | 'E_MISSING_SETTINGS_DB'
   | 'E_UPDATING_SETTINGS'
   | 'E_UPLOAD_DATA_MISSING'
-  | 'E_UPLOAD_URL_PROBLEMATIC';
+  | 'E_UPLOAD_URL_PROBLEMATIC'
+  | 'E_MISSING_FILES_DB'
+  | 'E_CREATING_FILE';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -139,6 +141,14 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_UPLOAD_URL_PROBLEMATIC: {
     code: 122,
     message: 'The URL provided is not valid',
+  },
+  E_MISSING_FILES_DB: {
+    code: 123,
+    message: 'The files db is missing',
+  },
+  E_CREATING_FILE: {
+    code: 124,
+    message: 'An error occurred while inserting a file in the db',
   },
 } as const;
 
