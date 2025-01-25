@@ -19,11 +19,11 @@
 ### Primary (End) Goal
 Joongle aims to provide a modern alternative to tools like Atlassian Confluence, tailored for creating internal documentation in regulated environments requiring audit trails and robust access control (IAM). Unlike general-purpose website builders such as WordPress, Joongle focuses on:
 - **Hierarchical documentation organization**
-- **Basic but functional design** (limited resources for aesthetics)
+- **Basic but functional design** (limited resources for aesthetics at the moment)
 - **Theming and search capabilities**
 - **Ease of customization**
 
-Joongle is and will remain **Free Software**.
+Joongle is and will remain **Free Software**, currently using a MIT license.
 
 ### Secondary goal
 
@@ -36,12 +36,9 @@ I have been experimenting with several ideas during the development of Joongle a
 ## Missing Features for First Release
 
 ### No Authentication & Authorization
-Currently, Joongle lacks built-in login or user management features. Planned improvements include pluggable authentication and authorization systems. I want to lay out all the most important features before deciding who-can-do-what. This means that at this time Joongle **does not provide any login** capability. You use it for yourself, as you own Knowledge Base, or you would help me with adding that feature
+Currently, Joongle lacks built-in login or user management features. Planned improvements include pluggable authentication and authorization systems. I want to lay out all the most important features before deciding who-can-do-what. This means that at this time Joongle **does not provide any login** capability, and there is no concept of "user" whatsoever. You use it for yourself, as you own Knowledge Base, or you would help me with adding that feature
 
 In the interim, you can secure access using a reverse proxy (e.g., nginx) but note that Joongle won't distinguish between users once "logged in."
-
-### Media Support
-Support for embedding images or videos is not yet implemented and is envisioned as a pluggable feature.
 
 ### Configuration
 Configuration is rudimentary and spans multiple files. Default settings work out of the box for quick experimentation.
@@ -52,8 +49,8 @@ Configuration is rudimentary and spans multiple files. Default settings work out
 
 Despite its experimental nature, Joongle already includes:
 
-- **Content editing**: Powered by [TipTap](https://tiptap.dev/) for basic WYSIWYG functionality.
-- **Internationalization (i18n)**: Only English is supported at the moment.
+- **Content editing**: Powered by [TipTap](https://tiptap.dev/) for a intuitive WYSIWYG functionality. Joongle contains several custom extensions.
+- **Internationalization (i18n)**: Only English is supported at the moment, but the codebase doesn't use hardcode sentences
 - **Basic search capabilities**
 - **Page history tracking**: Includes revisions.
 - **Configurable settings**: Directly adjustable from the web UI.
@@ -61,6 +58,8 @@ Despite its experimental nature, Joongle already includes:
 - **Autoreload on file change**: Not HMR but the next best thing
 - **Page reordering using drag & drop**
 - **Editor's bubble menu for commands**
+- **Image upload support**
+- **Export and maintenance tasks** included
 
 ---
 
@@ -76,6 +75,7 @@ Despite its experimental nature, Joongle already includes:
 - [biome](https://biome.sh/)
 - [Bulma CSS](https://bulma.io)
 - [Sortablejs](https://github.com/SortableJS/Sortable)
+- [Heroicons](https://heroicons.com/)
 - TypeScript
 - Docker Compose
 
@@ -85,11 +85,13 @@ Despite its experimental nature, Joongle already includes:
 
 CouchDB was chosen to explore document-oriented, schema-less database architecture. Its built-in features like document revisions and history tracking make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
 
-I could have chosen several other alternatives of course, but I wanted to use this project to better understand how a document-oriented, schema-less database works. I have never had a lot of experience with any of those, and using a SQL database seemed a bit too comfortable for me. I wanted to look a bit outside of the box.
+CouchDB scales very well in case in the future we would like to see Joongle exposed on website using many users and documents.
 
-I initially chose Mongodb, but then I realized that its licensing terms are a bit problematic.
+Images are also saved directly in the database since CouchDB has also a nice support for binary content, like compression, digest, and streaming.
 
 Couchdb also offers, out-of-the-box, and administrative web interface (called Fauxston) at `http://localhost:5984/_utils`. That's _very_ handy indeed.
+
+The database operations are relatively well decoupled so a version with maybe less features but an easier installation could be present in the future. I am thinking SQLite for example. A completely db-less approach - using just the file system for storing data - could also be an option; in that hypothesis, we could use a "front matter" approach for storing metadata (this very approach is already used when we want to export all the html files).
 
 ---
 
@@ -98,15 +100,17 @@ Couchdb also offers, out-of-the-box, and administrative web interface (called Fa
 ### Prerequisites
 - nodejs 20+
 - docker
-- macOS (Linux support untested but likely functional)
+- macOS or linux (my installation uses Ubuntu 24.04)
 
 ### Setup
 1. Clone the repository
-2. Copy environment config: `cp dot.env .env` and edit the values if you feel like 3. Run `npm install`
-it, although the default should work already
+2. Copy environment config: `cp dot.env .env` and edit the values if you feel like
+3. Run `npm install`
 4. Start the database: `npm run db:start`
 5. Launch development server: `npm run dev`
 6. Access at http://localhost:3000
+
+For docker specific instructions, there is also a Docker.md in the docs/ directory where I have written some notes related to my own installation (in Ubuntu 24.04).
 
 ---
 

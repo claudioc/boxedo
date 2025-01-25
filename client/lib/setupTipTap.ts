@@ -231,6 +231,9 @@ type BubbleMenuCommands =
   | 'alignCenter'
   | 'alignRight'
   | 'image'
+  | 'sizeAuto'
+  | 'sizeSmall'
+  | 'sizeMedium'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -243,34 +246,33 @@ const addBubbleMenuHandlers = () => {
       evt.preventDefault();
       const command: BubbleMenuCommands = ((button as HTMLElement).dataset
         .command ?? '') as BubbleMenuCommands;
+      const chain = editor.chain().focus();
       switch (command) {
         case 'bold':
-          editor.chain().focus().toggleBold().run();
+          chain.toggleBold().run();
           break;
         case 'italic':
-          editor.chain().focus().toggleItalic().run();
+          chain.toggleItalic().run();
           break;
         case 'strike':
-          editor.chain().focus().toggleStrike().run();
+          chain.toggleStrike().run();
           break;
         case 'underline':
-          editor.chain().focus().toggleUnderline().run();
+          chain.toggleUnderline().run();
           break;
         case 'highlight':
-          editor.chain().focus().toggleHighlight().run();
+          chain.toggleHighlight().run();
           break;
         case 'code':
-          editor.chain().focus().toggleCode().run();
+          chain.toggleCode().run();
           break;
         case 'codeblock':
-          editor.chain().focus().toggleCodeBlock().run();
+          chain.toggleCodeBlock().run();
           break;
         case 'h1':
         case 'h2':
         case 'h3':
-          editor
-            .chain()
-            .focus()
+          chain
             .toggleHeading({
               // @ts-ignore
               level: Number.parseInt(command.charAt(1), 10),
@@ -278,7 +280,7 @@ const addBubbleMenuHandlers = () => {
             .run();
           break;
         case 'p':
-          editor.chain().focus().setParagraph().run();
+          chain.setParagraph().run();
           break;
         case 'link':
           addLink();
@@ -288,9 +290,10 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'alignLeft':
           {
-            const chain = editor.chain().focus();
             if (editor.isActive('image')) {
-              chain.updateAttributes('image', { alignment: 'left' }).run();
+              chain
+                .updateAttributes('image', { width: '50%', alignment: 'left' })
+                .run();
             } else {
               chain.setTextAlign('left').run();
             }
@@ -298,7 +301,6 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'alignCenter':
           {
-            const chain = editor.chain().focus();
             if (editor.isActive('image')) {
               chain.updateAttributes('image', { alignment: 'center' }).run();
             } else {
@@ -308,7 +310,6 @@ const addBubbleMenuHandlers = () => {
           break;
         case 'alignRight':
           {
-            const chain = editor.chain().focus();
             if (editor.isActive('image')) {
               chain.updateAttributes('image', { alignment: 'right' }).run();
             } else {
@@ -316,6 +317,16 @@ const addBubbleMenuHandlers = () => {
             }
           }
           break;
+        case 'sizeAuto':
+          chain.updateAttributes('image', { width: '100%' }).run();
+          break;
+        case 'sizeSmall':
+          chain.updateAttributes('image', { width: '25%' }).run();
+          break;
+        case 'sizeMedium':
+          chain.updateAttributes('image', { width: '50%' }).run();
+          break;
+
         default:
           console.warn(`Unknown command: ${command}`);
       }

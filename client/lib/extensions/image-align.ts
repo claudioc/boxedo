@@ -14,6 +14,18 @@ export const ImageAlign = Image.extend({
           };
         },
       },
+      width: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('width'),
+        renderHTML: (attributes) => {
+          if (!attributes.width) {
+            return {};
+          }
+          return {
+            width: attributes.width,
+          };
+        },
+      },
     };
   },
 });

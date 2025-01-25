@@ -153,6 +153,23 @@
     "insertImage": "Inserisci immagine",
     "alignCenter": "Allinea al centro",
     "alignLeft": "Allinea a sinistra",
-    "alignRight": "Allinea a destra"
+    "alignRight": "Allinea a destra",
+    "sizeAuto": "Dimensione auto",
+    "sizeSmall": "Dimensione piccola",
+    "sizeMedium": "Dimensione grande"
+  },
+
+  "ImageDialog": {
+    "uploadAction": "OK",
+    "title": "Inserisci immagine",
+    "enterUrl": "URL dell'immagine",
+    "enterUrlHelp": "URL dell'immagine da visualizzare, prefisso https:// incluso",
+    "uploadFile": "Carica un file",
+    "uploadFileHelp": "Il file da caricare deve essere un'immagine (JPG, PNG, GIF, SVG) e non deve eccedere i 20MB"
+  },
+
+  "common": {
+    "OK": "OK",
+    "cancel": "Cancella"
   }
 }

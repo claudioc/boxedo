@@ -180,3 +180,47 @@ export const RightIcon = ({ title }: IconProps) => (
     <line x1="21" x2="7" y1="18" y2="18" />
   </svg>
 );
+
+export const SmallIcon = ({ title = 'Small size' }) => (
+  <svg style={style} {...commonProps}>
+    <title>{title}</title>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M5 10v4a2 2 0 002 2h10a2 2 0 002-2v-4a2 2 0 00-2-2H7a2 2 0 00-2 2zm3 2h8m-4-2v4"
+    />
+  </svg>
+);
+
+export const LargeIcon = ({ title = 'Large size' }) => (
+  <svg style={style} {...commonProps}>
+    <title>{title}</title>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 8v8a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2zm5 5h8m-4-4v8"
+    />
+  </svg>
+);
+
+export const MediumIcon = ({ title = 'Medium size' }) => (
+  <svg style={style} {...commonProps}>
+    <title>{title}</title>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4 9v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2H6a2 2 0 00-2 2zm4 3h8m-4-3v6"
+    />
+  </svg>
+);
+
+export const AutoIcon = ({ title = 'Auto size' }) => (
+  <svg style={style} {...commonProps}>
+    <title>{title}</title>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 8l4 4 4-4m-8 8l4-4 4 4M4 9v6a2 2 0 002 2h12a2 2 0 002-2V9a2 2 0 00-2-2H6a2 2 0 00-2 2z"
+    />
+  </svg>
+);

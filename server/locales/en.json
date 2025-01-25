@@ -153,6 +153,23 @@
     "insertImage": "Insert image",
     "alignCenter": "Align center",
     "alignLeft": "Align left",
-    "alignRight": "Align right"
+    "alignRight": "Align right",
+    "sizeAuto": "Size auto",
+    "sizeSmall": "Size small",
+    "sizeMedium": "Size medium"
+  },
+
+  "ImageDialog": {
+    "uploadAction": "Submit",
+    "title": "Insert an image",
+    "enterUrl": "Enter an image URL",
+    "enterUrlHelp": "The URL of the image to display, including the https:// prefix",
+    "uploadFile": "Upload a file",
+    "uploadFileHelp": "The file to upload must be an image file (JPG, PNG, GIF, SVG) and must be less than 20MB"
+  },
+
+  "common": {
+    "OK": "OK",
+    "cancel": "Cancel"
   }
 }

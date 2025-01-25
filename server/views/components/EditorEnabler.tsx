@@ -15,6 +15,9 @@ import {
   CenterIcon,
   RightIcon,
   ImageIcon,
+  SmallIcon,
+  MediumIcon,
+  AutoIcon,
 } from '../icons/editorIcons';
 
 import styles from './EditorEnabler.module.css';
@@ -78,6 +81,18 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
           <button type="button" data-command="alignRight">
             <RightIcon title={i18n.t('EditIcons.alignRight')} />
           </button>
+          <div x-show="$store.editorState.isImage()">
+            <div aria-hidden="true" class={styles.separator} />
+            <button type="button" data-command="sizeAuto">
+              <AutoIcon title={i18n.t('EditIcons.sizeAuto')} />
+            </button>
+            <button type="button" data-command="sizeMedium">
+              <MediumIcon title={i18n.t('EditIcons.sizeMedium')} />
+            </button>
+            <button type="button" data-command="sizeSmall">
+              <SmallIcon title={i18n.t('EditIcons.sizeSmall')} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -101,12 +116,12 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
         class="card m-auto"
       >
         <form method="dialog" x-on:submit="App.validate">
-          <h3 class="title is-2">{i18n.t('Upload image')}</h3>
+          <h3 class="title is-2">{i18n.t('ImageDialog.title')}</h3>
 
           <div class="block">
             <div class="field">
               <label class="label" for="uploadUrl">
-                Enter URL
+                {i18n.t('ImageDialog.enterUrl')}
               </label>
               <div class="control">
                 <input
@@ -116,9 +131,7 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
                   type="text"
                 />
               </div>
-              <p class="help">
-                The URL of the image to display, including the https:// prefix
-              </p>
+              <p class="help">{i18n.t('ImageDialog.enterUrlHelp')}</p>
             </div>
           </div>
 
@@ -127,7 +140,7 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
           <div class="block">
             <div class="field">
               <label class="label" for="uploadFile">
-                Upload a file
+                {i18n.t('ImageDialog.uploadFile')}
               </label>
               <div class="control">
                 <input
@@ -137,12 +150,12 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
                   type="file"
                 />
               </div>
-              <p class="help">Upload an image from your computer</p>
+              <p class="help">{i18n.t('ImageDialog.uploadFileHelp')}</p>
             </div>
           </div>
           <div class="level">
             <button type="submit" class="button" value="default">
-              OK
+              {i18n.t('ImageDialog.uploadAction')}
             </button>
             <button
               type="button"
@@ -150,7 +163,7 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
               value="cancel"
               x-on:click="$refs.uploadDialog.close()"
             >
-              Cancel
+              {i18n.t('common.cancel')}
             </button>
           </div>
         </form>
