@@ -39,6 +39,11 @@ const PageIdFormat = {
   pattern: '^page:[0-9a-z]{2,32}$',
 } as const;
 
+const FileIdFormat = {
+  type: 'string',
+  pattern: '^file:[0-9a-z]{2,32}$',
+} as const;
+
 const PageSlugParamsSchema = {
   type: 'object',
   required: ['slug'],
@@ -70,6 +75,15 @@ const PageWithVersionParamsSchema = {
   properties: {
     pageId: PageIdFormat,
     version: { type: 'string', pattern: '^[0-9]+-[a-f0-9]+$' },
+  },
+} as const;
+
+const UploadParamsSchema = {
+  type: 'object',
+  required: ['fileId', 'filename'],
+  properties: {
+    fileId: FileIdFormat,
+    filename: { type: 'string' },
   },
 } as const;
 
@@ -131,20 +145,6 @@ const SettingsPageBodySchema = {
     siteDescription: { type: 'string' },
   },
 } as const;
-
-// const UploadImageBodySchema = {
-//   consumes: ['multipart/form-data'],
-//   // body: {
-//   //   type: 'object',
-//   //   properties: {
-//   //     image: {
-//   //       type: 'string',
-//   //       format: 'binary',
-//   //     },
-//   //   },
-//   //   required: ['image'],
-//   // },
-// } as const;
 
 /**
  * Encapsulates the routes
@@ -660,6 +660,13 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
+  // Decision: each upload will create a single "file" document in CouchDB, and each File document
+  // will have a single attachment, even though in theory CouchDB supports multiple attachments per document.
+  // Each attachment in a file document is identified by its filename and since there is only one attachment
+  // per file, the fileId is also a loose reference to the attachment itself.
+  // An alternative approach is to use the attachments for each _page_ document, but this would delete all the
+  // attachments if the page is deleted. This is not a problem for the current implementation (because there is
+  // now way at the moment to share an uploaded file), but in the future a media explorer could be implemented.
   app.post('/uploads', async (req, rep) => {
     const rs = redirectService(app, rep);
     const dbs = dbService(app.dbClient);
@@ -743,7 +750,7 @@ const router = async (app: FastifyInstance) => {
     const stream = Readable.from(processedBuffer);
 
     const attachment: FileAttachmentModel = {
-      docId: fileId,
+      fileId,
       attachmentName: data.filename,
       attachment: stream,
       contentType: finalMimeType,
@@ -768,31 +775,37 @@ const router = async (app: FastifyInstance) => {
   });
 
   // This same pattern is used in the extractFileRefsFrom helper
-  app.get('/uploads/:docId/:filename', async (req, rep) => {
-    const rs = redirectService(app, rep);
-    const dbs = dbService(app.dbClient);
+  app.get<{
+    Params: FromSchema<typeof UploadParamsSchema>;
+  }>(
+    '/uploads/:fileId/:filename',
+    {
+      schema: {
+        params: UploadParamsSchema,
+      },
+    },
+    async (req, rep) => {
+      const rs = redirectService(app, rep);
+      const dbs = dbService(app.dbClient);
 
-    const { docId, filename } = req.params as {
-      docId: string;
-      filename: string;
-    };
+      const { fileId, filename } = req.params;
 
-    try {
-      const doc = await dbs.getFileById(docId);
-      if (!doc) {
-        return rs.bailWithError(404, 'File not found');
+      try {
+        const file = await dbs.getFileById(fileId);
+        if (!file) {
+          return rs.bailWithError(404, 'File not found');
+        }
+
+        const stream = await dbs.getFileAttachment(fileId, filename);
+
+        rep.type(file.processedMimetype);
+        return stream;
+      } catch (err) {
+        return rs.bailWithError(500, err);
       }
-
-      const stream = await dbs.getFileAttachment(docId, filename);
-
-      rep.type(doc.processedMimetype);
-      return stream;
-    } catch (err) {
-      return rs.bailWithError(500, err);
     }
-  });
+  );
 
-  // Creates a page form
   app.get<{
     Querystring: FromSchema<typeof CreatePageQuerySchema>;
   }>(

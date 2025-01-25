@@ -52,7 +52,7 @@ export interface FileModel {
 }
 
 export interface FileAttachmentModel {
-  docId: string;
+  fileId: string;
   attachmentName: string;
   attachment: Buffer | NodeJS.ReadableStream;
   contentType: string;

@@ -40,6 +40,21 @@ const dbn = (name: 'pages' | 'settings' | 'files') => {
 const safeHtml = (str: string) =>
   sanitizeHtml(str, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      img: [
+        'src',
+        'srcset',
+        'alt',
+        'title',
+        'width',
+        'height',
+        'loading',
+        'class',
+        'style',
+        // Used by tiptap Image extension
+        'data-alignment',
+      ],
+    },
   });
 
 const safeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -401,7 +416,7 @@ export function dbService(client?: nano.ServerScope) {
       let att: DocumentInsertResponse;
       try {
         att = await filesDb.attachment.insert(
-          attachment.docId,
+          attachment.fileId,
           attachment.attachmentName,
           attachment.attachment,
           attachment.contentType,

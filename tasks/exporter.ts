@@ -2,7 +2,8 @@ import nano from 'nano';
 import fs from 'fs/promises';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import { PageModel } from '../types';
+import { PageModel, FileModel } from '../types';
+import { extractFileRefsFrom } from '../server/lib/helpers';
 
 interface Frontmatter
   extends Omit<
@@ -12,11 +13,15 @@ interface Frontmatter
 
 class PageExporter {
   private outputDir: string;
+  private filesDir: string;
   private couchdb: nano.ServerScope;
-  private db: nano.DocumentScope<PageModel>;
+  private pagesDb: nano.DocumentScope<PageModel>;
+  private filesDb: nano.DocumentScope<FileModel>;
 
   constructor(outputDir: string) {
     this.outputDir = outputDir;
+    this.filesDir = path.join(outputDir, 'files');
+
     this.couchdb = nano({
       url: process.env.COUCHDB_URL ?? '',
       requestDefaults: {
@@ -27,11 +32,16 @@ class PageExporter {
       },
     });
 
-    this.db = this.couchdb.use('pages');
+    this.pagesDb = this.couchdb.use('pages');
+    this.filesDb = this.couchdb.use('files');
+  }
+
+  private async ensureDirectories(): Promise<void> {
+    await fs.mkdir(this.outputDir, { recursive: true });
+    await fs.mkdir(this.filesDir, { recursive: true });
   }
 
   private createFrontmatter(page: PageModel): string {
-    // Create a metadata object with all relevant fields
     const metadata: Frontmatter = {
       _id: page._id,
       parentId: page.parentId,
@@ -47,8 +57,85 @@ ${JSON.stringify(metadata, null, 2)}
 -->`;
   }
 
-  private createHtmlDocument(page: PageModel): string {
+  private getOutputFilename(page: PageModel): string {
+    const filename = `${page.pageSlug}-${page._id.replace('page:', '')}.html`;
+    return sanitize(filename);
+  }
+
+  private async exportFile(
+    fileId: string,
+    originalFilename: string
+  ): Promise<string> {
+    try {
+      // Get file metadata
+      const fileDoc = await this.filesDb.get(fileId);
+      if (!fileDoc) {
+        console.warn(`File metadata not found for ${fileId}`);
+        return '';
+      }
+
+      // Get the actual attachment
+      const attachment = await this.filesDb.attachment.get(
+        fileId,
+        originalFilename
+      );
+      if (!attachment) {
+        console.warn(
+          `File attachment not found for ${fileId}/${originalFilename}`
+        );
+        return '';
+      }
+
+      // Create a sanitized filename that includes the file ID to ensure uniqueness
+      const sanitizedFilename = sanitize(`${fileId}-${originalFilename}`);
+      const outputPath = path.join(this.filesDir, sanitizedFilename);
+
+      // Write the file
+      await fs.writeFile(outputPath, attachment);
+      console.log(`Exported file: ${outputPath}`);
+
+      // Return the relative path from HTML files to the exported file
+      return path.join('files', sanitizedFilename);
+    } catch (error) {
+      console.error(
+        `Failed to export file ${fileId}/${originalFilename}:`,
+        error
+      );
+      return '';
+    }
+  }
+
+  private async processPageContent(content: string): Promise<string> {
+    // Get all file references from the content
+    const fileRefs = extractFileRefsFrom(content);
+
+    let processedContent = content;
+
+    // Process each file reference
+    for (const fileId of fileRefs) {
+      try {
+        // Get file metadata to find the original filename
+        const fileDoc = await this.filesDb.get(fileId);
+        if (!fileDoc) continue;
+
+        // Export the file and get its new local path
+        const localPath = await this.exportFile(fileId, fileDoc.originalName);
+        if (!localPath) continue;
+
+        // Replace all occurrences of the CouchDB URL pattern with the local path
+        const urlPattern = new RegExp(`/uploads/${fileId}/[^"'\\s]+`, 'g');
+        processedContent = processedContent.replace(urlPattern, localPath);
+      } catch (error) {
+        console.error(`Error processing file ${fileId}:`, error);
+      }
+    }
+
+    return processedContent;
+  }
+
+  private async createHtmlDocument(page: PageModel): Promise<string> {
     const frontmatter = this.createFrontmatter(page);
+    const processedContent = await this.processPageContent(page.pageContent);
 
     return `${frontmatter}
 <!DOCTYPE html>
@@ -56,32 +143,24 @@ ${JSON.stringify(metadata, null, 2)}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="CouchDB Page Exporter">
+    <meta name="generator" content="Joongle Page Exporter">
     <meta name="created" content="${page.createdAt}">
     <meta name="modified" content="${page.updatedAt}">
     <title>${page.pageTitle}</title>
 </head>
 <body>
-  ${page.pageContent}
+  ${processedContent}
 </body>
 </html>`;
   }
 
-  private getOutputFilename(page: PageModel): string {
-    // Combine slug and ID for unique filename
-    const filename = `${page.pageSlug}-${page._id.replace('page:', '')}.html`;
-    return sanitize(filename);
-  }
-
   async exportPages(): Promise<void> {
     try {
-      // Create output directory if it doesn't exist
-      await fs.mkdir(this.outputDir, { recursive: true });
+      // Ensure output directories exist
+      await this.ensureDirectories();
 
       // Fetch all pages in bulk
-      // Using include_docs: true to get full documents in one request
-      const response = await this.db.list({ include_docs: true });
-
+      const response = await this.pagesDb.list({ include_docs: true });
       const regularDocs = response.rows.filter(
         (row) => !row.id.startsWith('_design/')
       );
@@ -95,7 +174,7 @@ ${JSON.stringify(metadata, null, 2)}
         const page = row.doc;
         if (!page) return;
 
-        const htmlContent = this.createHtmlDocument(page);
+        const htmlContent = await this.createHtmlDocument(page);
         const outputPath = path.join(
           this.outputDir,
           this.getOutputFilename(page)
