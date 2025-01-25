@@ -435,22 +435,12 @@ export function dbService(client?: nano.ServerScope) {
         _rev: row.value.rev,
       }));
 
-      console.log('Used files:', usedFiles);
-      console.log('Files present:', files);
-
       const unusedFiles = files.filter((file) => !usedFiles.has(file._id));
 
       if (unusedFiles.length === 0) {
-        console.log('No unused files found');
         return 0;
       }
 
-      console.log(
-        `Found ${unusedFiles.length} unused files to delete`,
-        unusedFiles
-      );
-
-      // Delete files in batches to avoid overwhelming the database
       const BATCH_SIZE = 50;
       for (let i = 0; i < unusedFiles.length; i += BATCH_SIZE) {
         const batch = unusedFiles.slice(i, i + BATCH_SIZE);
@@ -463,7 +453,6 @@ export function dbService(client?: nano.ServerScope) {
 
         try {
           await filesDb.bulk({ docs: deleteOps });
-          console.log(`Deleted batch of ${batch.length} files`);
         } catch (error) {
           console.error(`Error deleting batch starting at index ${i}:`, error);
           throw error;
