@@ -27,3 +27,19 @@ export const isSameTimestamp = (date1: string, date2: string) => {
 
 export const isTopLevelPage = (page: PageModel) =>
   typeof page.parentId !== 'string';
+
+export const extractFileRefsFrom = (content: string) => {
+  // Match URLs like /uploads/123/image.jpg
+  const fileUrlPattern = /\/uploads\/([^\/]+)\/([^\"'\s]+)/g;
+  const fileRefs = new Set<string>();
+
+  let match: RegExpExecArray | null;
+  while (true) {
+    match = fileUrlPattern.exec(content);
+    if (match === null) break;
+    const [, fileId] = match;
+    fileRefs.add(fileId);
+  }
+
+  return fileRefs;
+};

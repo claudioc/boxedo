@@ -16,6 +16,8 @@ export interface WithApp {
   app: FastifyInstance;
 }
 
+export type ModelName = 'settings' | 'page' | 'file';
+
 export interface SettingsModel {
   _id: string;
   _rev?: string;
@@ -38,6 +40,15 @@ export interface FileModel {
     height: number;
   };
   uploadedAt: string;
+  _attachments?: {
+    [filename: string]: {
+      content_type: string;
+      digest: string;
+      length: number;
+      revpos: number;
+      stub: boolean;
+    };
+  };
 }
 
 export interface FileAttachmentModel {

@@ -2,6 +2,7 @@ import type {
   SettingsModel,
   PageModel,
   PageSelector,
+  ModelName,
   NavItem,
   PageRevInfo,
   PageModelWithRev,
@@ -17,7 +18,7 @@ import nano, {
   type DocumentScope,
   type ServerScope,
 } from 'nano';
-import { slugUrl } from '~/lib/helpers';
+import { slugUrl, extractFileRefsFrom } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
@@ -413,6 +414,65 @@ export function dbService(client?: nano.ServerScope) {
       return att;
     },
 
+    async cleanupOrphanedFiles() {
+      /* Our main assumption here is that each file has only one attachment,
+       * even though CouchDb allows multiple attachments per document.
+       * This simplifies the logic and is sufficient for our use case; in a more
+       * complex scenario we would have to consider which attachments are used.
+       */
+      const usedFiles = new Set<string>();
+      const { rows: pageRows } = await pagesDb.list({ include_docs: true });
+
+      pageRows.forEach((row) => {
+        extractFileRefsFrom(row.doc?.pageContent ?? '').forEach((ref) =>
+          usedFiles.add(ref)
+        );
+      });
+
+      const { rows: fileRows } = await filesDb.list();
+      const files = fileRows.map((row) => ({
+        _id: row.id,
+        _rev: row.value.rev,
+      }));
+
+      console.log('Used files:', usedFiles);
+      console.log('Files present:', files);
+
+      const unusedFiles = files.filter((file) => !usedFiles.has(file._id));
+
+      if (unusedFiles.length === 0) {
+        console.log('No unused files found');
+        return 0;
+      }
+
+      console.log(
+        `Found ${unusedFiles.length} unused files to delete`,
+        unusedFiles
+      );
+
+      // Delete files in batches to avoid overwhelming the database
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < unusedFiles.length; i += BATCH_SIZE) {
+        const batch = unusedFiles.slice(i, i + BATCH_SIZE);
+
+        const deleteOps = batch.map((file) => ({
+          _id: file._id,
+          _rev: file._rev,
+          _deleted: true,
+        }));
+
+        try {
+          await filesDb.bulk({ docs: deleteOps });
+          console.log(`Deleted batch of ${batch.length} files`);
+        } catch (error) {
+          console.error(`Error deleting batch starting at index ${i}:`, error);
+          throw error;
+        }
+      }
+
+      return unusedFiles.length;
+    },
+
     async getFileById(fileId: string): Promise<FileModel | null> {
       let file: FileModel | null = null;
       try {
@@ -525,7 +585,7 @@ export function dbService(client?: nano.ServerScope) {
 }
 
 // bulk-load uses the same logic
-dbService.generateId = () => `page:${createId()}`;
+dbService.generateIdFor = (model: ModelName) => `${model}:${createId()}`;
 
 dbService._createIndexes = async (client: nano.ServerScope) => {
   await client.db.use(dbn('pages')).createIndex({

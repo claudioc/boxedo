@@ -29,7 +29,6 @@ import {
   MAX_IMAGE_DIMENSION,
   MAX_IMAGE_SIZE,
   JPEG_QUALITY,
-  POSITION_GAP_SIZE,
   NAVIGATION_CACHE_KEY,
 } from '~/constants';
 import sharp from 'sharp';
@@ -717,10 +716,10 @@ const router = async (app: FastifyInstance) => {
       finalMimeType = 'image/jpeg';
     }
 
-    const docId = `${Date.now()}_${data.filename}`;
+    const fileId = dbService.generateIdFor('file');
 
     const doc: FileModel = {
-      _id: docId,
+      _id: fileId,
       originalName: data.filename,
       originalMimetype: data.mimetype,
       originalSize: buffer.length,
@@ -744,7 +743,7 @@ const router = async (app: FastifyInstance) => {
     const stream = Readable.from(processedBuffer);
 
     const attachment: FileAttachmentModel = {
-      docId,
+      docId: fileId,
       attachmentName: data.filename,
       attachment: stream,
       contentType: finalMimeType,
@@ -759,15 +758,16 @@ const router = async (app: FastifyInstance) => {
 
     return {
       success: true,
-      id: docId,
+      id: fileId,
       filename: data.filename,
       originalSize: buffer.length,
       processedSize: processedBuffer.length,
       wasResized: needsResize,
-      url: `/uploads/${docId}/${encodeURIComponent(data.filename)}`,
+      url: `/uploads/${fileId}/${encodeURIComponent(data.filename)}`,
     };
   });
 
+  // This same pattern is used in the extractFileRefsFrom helper
   app.get('/uploads/:docId/:filename', async (req, rep) => {
     const rs = redirectService(app, rep);
     const dbs = dbService(app.dbClient);
@@ -870,7 +870,7 @@ const router = async (app: FastifyInstance) => {
       let pageId: string;
 
       try {
-        pageId = dbService.generateId();
+        pageId = dbService.generateIdFor('page');
         await dbs.insertPage({
           _id: pageId,
           parentId,
@@ -996,6 +996,14 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
+  app.get('/admin/cleanup-orphaned-files', async () => {
+    const dbs = dbService(app.dbClient);
+
+    const deleted = await dbs.cleanupOrphanedFiles();
+
+    return `${deleted} file removed.`;
+  });
+
   // app.get('/admin/text-index', async () => {
   //   try {
   //     app.dbClient.db
@@ -1010,54 +1018,54 @@ const router = async (app: FastifyInstance) => {
   //   return 'Text index generated';
   // });
 
-  app.get('/admin/schema/add-position', async () => {
-    const dbs = dbService(app.dbClient);
-    const pageDb = dbs.getPageDb();
+  // app.get('/admin/schema/add-position', async () => {
+  //   const dbs = dbService(app.dbClient);
+  //   const pageDb = dbs.getPageDb();
 
-    // Get all pages without a position field
-    const result = await pageDb.find({
-      selector: {
-        position: { $exists: false }, // Find docs missing position
-      },
-    });
+  //   // Get all pages without a position field
+  //   const result = await pageDb.find({
+  //     selector: {
+  //       position: { $exists: false }, // Find docs missing position
+  //     },
+  //   });
 
-    const pagesByParent = new Map<string, PageModel[]>();
-    result.docs.forEach((doc) => {
-      const pages = pagesByParent.get(doc.parentId ?? 'null') || [];
-      pages.push(doc);
-      pagesByParent.set(doc.parentId ?? 'null', pages);
-    });
+  //   const pagesByParent = new Map<string, PageModel[]>();
+  //   result.docs.forEach((doc) => {
+  //     const pages = pagesByParent.get(doc.parentId ?? 'null') || [];
+  //     pages.push(doc);
+  //     pagesByParent.set(doc.parentId ?? 'null', pages);
+  //   });
 
-    // Update each group of siblings
-    const updates: PageModel[] = [];
-    for (const [_, siblings] of pagesByParent) {
-      siblings.forEach((doc, index) => {
-        updates.push({
-          ...doc,
-          position: (index + 1) * POSITION_GAP_SIZE,
-        });
-      });
-    }
+  //   // Update each group of siblings
+  //   const updates: PageModel[] = [];
+  //   for (const [_, siblings] of pagesByParent) {
+  //     siblings.forEach((doc, index) => {
+  //       updates.push({
+  //         ...doc,
+  //         position: (index + 1) * POSITION_GAP_SIZE,
+  //       });
+  //     });
+  //   }
 
-    // Bulk update if there are any documents to migrate
-    if (updates.length > 0) {
-      await pageDb.bulk({ docs: updates });
-      app.log.info(`Migrated ${updates.length} documents`);
-    } else {
-      app.log.info('No pages migrated');
-    }
+  //   // Bulk update if there are any documents to migrate
+  //   if (updates.length > 0) {
+  //     await pageDb.bulk({ docs: updates });
+  //     app.log.info(`Migrated ${updates.length} documents`);
+  //   } else {
+  //     app.log.info('No pages migrated');
+  //   }
 
-    try {
-      await pageDb.createIndex({
-        index: {
-          fields: ['parentId', 'position'],
-        },
-        name: 'pages-by-parent-position',
-      });
-    } catch {}
+  //   try {
+  //     await pageDb.createIndex({
+  //       index: {
+  //         fields: ['parentId', 'position'],
+  //       },
+  //       name: 'pages-by-parent-position',
+  //     });
+  //   } catch {}
 
-    return 'All done';
-  });
+  //   return 'All done';
+  // });
 
   app.setNotFoundHandler(async (_, rep) => {
     await rep
