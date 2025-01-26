@@ -4,6 +4,7 @@ Doing:
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
+  - collection of actions for audit purposes (log)
 
   NEXT
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
@@ -11,14 +12,12 @@ Doing:
   - better Mobile experience
   - What about https://demo.umodoc.com/editor ?
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
-  - the editor icons' title is not translated
-  - use a real dialog to set image url and dimension
+  - use couchdb for the cache (see /docs/CACHE.md)
 
   LATER
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider access implications to the history of docs
-  - collection of actions for audit purposes (log)
   - couchdb must be configured to run in production
   - we are always using 303 to redirect - check if that makes sense
   - do we need a "Revert to this version" for the history? (probably not)
@@ -77,3 +76,5 @@ Done
 - refactor the names of the routes, like '/edit/:pageId' => '/pages/:pageId/edit'
 - menu cache
 - add the bubble menu to images (align, set dimensions)
+- the editor icons' title is not translated
+- use a real dialog to set image url and dimension

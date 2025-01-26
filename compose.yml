@@ -1,9 +1,9 @@
 services:
   couchdb:
-    container_name: couchdb-joogle
+    container_name: couchdb-joongle
     image: couchdb:latest
     volumes:
-      - joongle_data:/data/db-couchdb
+      - couchdb_data:/opt/couchdb/data
       - ./scripts/couchdb/local.ini:/opt/couchdb/etc/local.ini
     ports:
       - '5984:5984'
@@ -11,4 +11,4 @@ services:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
 volumes:
-  joongle_data:
+  couchdb_data:
