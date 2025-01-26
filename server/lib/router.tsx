@@ -165,6 +165,7 @@ const router = async (app: FastifyInstance) => {
   app.get('/', async (req, rep) => {
     const dbs = dbService(app.dbClient);
     const isHtmx = req.headers['hx-request'];
+    const { settings } = app;
 
     // We consider 3 scenarios
     // 1. No pages at all (first installation): we show the welcome page
@@ -173,7 +174,6 @@ const router = async (app: FastifyInstance) => {
 
     // Do we have any page at all?
     const pageCount = await dbs.countPages();
-    const settings = await dbs.getSettings();
 
     let landingPage: PageModel | null = null;
     if (settings.landingPageId) {
@@ -261,7 +261,7 @@ const router = async (app: FastifyInstance) => {
 
     async (_, rep) => {
       const dbs = dbService(app.dbClient);
-      const settings = await dbs.getSettings();
+      const { settings } = app;
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {
@@ -289,8 +289,7 @@ const router = async (app: FastifyInstance) => {
       const { landingPageId, siteLang, siteTitle } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
-
-      const settings = await dbs.getSettings();
+      const { settings } = app;
 
       if (landingPageId) {
         if (settings.landingPageId !== landingPageId) {

@@ -7,7 +7,7 @@ import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
-import type { NodeEnv, SettingsModel } from '~/../types';
+import { ConfigEnvSchema, type NodeEnv, type SettingsModel } from '~/../types';
 import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
 import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';
@@ -50,23 +50,6 @@ if (process.env.NODE_ENV !== 'test') {
     ),
   };
 }
-
-const ConfigEnvSchema = {
-  type: 'object',
-  properties: {
-    ADDRESS: { type: 'string', default: 'localhost' },
-    PORT: { type: 'integer', default: 3000 },
-    NODE_ENV: { type: 'string', default: 'development' },
-    COUCHDB_URL: {
-      type: 'string',
-      default: 'http://localhost:5984',
-    },
-    COUCHDB_USER: { type: 'string' },
-    COUCHDB_PASSWORD: { type: 'string' },
-    LIVERELOAD_PORT: { type: 'integer', default: 8007 },
-    LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
-  },
-} as const;
 
 const envToLogger: Record<NodeEnv, PinoLoggerOptions | boolean> = {
   development: {
@@ -119,7 +102,7 @@ await app.register(fastifyI18n, {
 await app.register(fastifyFeedback);
 
 const dbs = await dbService(app.dbClient);
-const settings = await dbs.getSettings();
+const settings = await dbs.getSettings(app.config);
 app.i18n.switchTo(settings.siteLang);
 
 app.decorate('settings', settings);

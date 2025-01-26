@@ -7,6 +7,7 @@ import type {
   PageRevInfo,
   PageModelWithRev,
   NodeEnv,
+  ConfigEnvSchema,
   FileModel,
   FileAttachmentModel,
 } from '~/../types';
@@ -22,6 +23,7 @@ import { slugUrl, extractFileRefsFrom } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
+import type { FromSchema } from 'json-schema-to-ts';
 
 interface DbServiceInitParams {
   serverUrl: string;
@@ -80,7 +82,7 @@ export function dbService(client?: nano.ServerScope) {
       return pagesDb;
     },
 
-    async getSettings() {
+    async getSettings(config?: FromSchema<typeof ConfigEnvSchema>) {
       let settings: SettingsModel | null = null;
       try {
         settings = await settingsDb.get('settings');
@@ -90,14 +92,15 @@ export function dbService(client?: nano.ServerScope) {
         }
       }
 
-      // If settings are not found, create a new one
+      // FIXME check if the language is one of the supported ones
+      // If settings are not found, create a new one using the default values from the config (.env)
       if (!settings) {
         const newSettings: SettingsModel = {
           _id: 'settings',
           landingPageId: null,
-          siteTitle: 'Joongle',
-          siteDescription: 'Personal documentation CMS',
-          siteLang: 'en',
+          siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
+          siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
+          siteLang: config ? (config.SETTINGS_LANGUAGE ?? 'en') : 'en',
         };
 
         await settingsDb.insert(newSettings);

@@ -108,3 +108,26 @@ export interface Feedback {
   code: number;
   message: string;
 }
+
+export const ConfigEnvSchema = {
+  type: 'object',
+  properties: {
+    ADDRESS: { type: 'string', default: 'localhost' },
+    PORT: { type: 'integer', default: 3000 },
+    NODE_ENV: { type: 'string', default: 'development' },
+    COUCHDB_URL: {
+      type: 'string',
+      default: 'http://localhost:5984',
+    },
+    COUCHDB_USER: { type: 'string' },
+    COUCHDB_PASSWORD: { type: 'string' },
+    LIVERELOAD_PORT: { type: 'integer', default: 8007 },
+    LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
+    SETTINGS_LANGUAGE: { type: 'string', default: 'en' },
+    SETTINGS_DESCRIPTION: {
+      type: 'string',
+      default: 'Content management made easy',
+    },
+    SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+  },
+} as const;
