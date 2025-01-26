@@ -21,6 +21,7 @@
     "S_PAGE_DELETED": "Pagina eliminata",
     "S_PAGE_MOVED": "Pagina spostata in una nuova posizione",
     "S_SETTINGS_UPDATED": "Impostazioni aggiornate",
+    "S_MAGIC_LINK_SENT": "Magic link spedito",
     "E_INDEX_ALREADY_EXISTS": "Indice già esistente",
     "E_CREATING_INDEX": "Errore durante la creazione della pagina indice",
     "E_MISSING_PAGE": "Errore durante il caricamento della pagina",
@@ -41,7 +42,8 @@
     "E_MISSING_SETTINGS_DB": "Database \"Settings\" non trovato",
     "E_UPDATING_SETTINGS": "Errore durante l'aggiornamento delle impostazioni",
     "E_UPLOAD_DATA_MISSING": "L'indirizzo o il file è assente",
-    "E_UPLOAD_URL_PROBLEMATIC": "L'indirizzo fornito non è un URL valido"
+    "E_UPLOAD_URL_PROBLEMATIC": "L'indirizzo fornito non è un URL valido",
+    "E_USER_NOT_FOUND": "Nessun utente corrisponde a questa email"
   },
 
   "Error": {
@@ -168,8 +170,17 @@
     "uploadFileHelp": "Il file da caricare deve essere un'immagine (JPG, PNG, GIF, SVG) e non deve eccedere i 20MB"
   },
 
+  "Login": {
+    "sendMagicLink": "Spedisci il Magic Link",
+    "loginTo": "Login in %{siteTitle}",
+    "enterEmail": "Il tuo indirizzo email",
+    "helpEmail": "Se sei riconosciuto, riceverai un'email con un link magico",
+    "allGood": "OK! Controlla la tua posta e segui le istruzioni per l'accesso immediato."
+  },
+
   "common": {
     "OK": "OK",
-    "cancel": "Cancella"
+    "cancel": "Cancella",
+    "email": "Email"
   }
 }

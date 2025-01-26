@@ -24,14 +24,16 @@ type ErrorCodes =
   | 'E_UPLOAD_URL_PROBLEMATIC'
   | 'E_MISSING_FILES_DB'
   | 'E_CREATING_FILE'
-  | 'E_CREATING_ATTACHMENT';
+  | 'E_CREATING_ATTACHMENT'
+  | 'E_USER_NOT_FOUND';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
   | 'S_PAGE_UPDATED'
   | 'S_PAGE_DELETED'
   | 'S_PAGE_MOVED'
-  | 'S_SETTINGS_UPDATED';
+  | 'S_SETTINGS_UPDATED'
+  | 'S_MAGIC_LINK_SENT';
 
 type AnyCode = ErrorCodes | SuccessCodes;
 
@@ -57,6 +59,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   S_SETTINGS_UPDATED: {
     code: 5,
     message: 'Settings updated',
+  },
+  S_MAGIC_LINK_SENT: {
+    code: 6,
+    message: 'Magic link sent',
   },
   E_INDEX_ALREADY_EXISTS: {
     code: 100,
@@ -154,6 +160,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_CREATING_ATTACHMENT: {
     code: 125,
     message: 'An error occurred while inserting an attachment in the db',
+  },
+  E_USER_NOT_FOUND: {
+    code: 126,
+    message: 'No user is known with this email',
   },
 } as const;
 

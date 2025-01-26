@@ -541,6 +541,17 @@ export function dbService(client?: nano.ServerScope) {
       } as PageModel;
     },
 
+    async getUserByEmail(email: string) {
+      if (email === 'claudio.cicali@gmail.com') {
+        return {
+          _id: 'user:1',
+          name: 'Claudio Cicali',
+        };
+      }
+
+      return null;
+    },
+
     async nukeTests() {
       if (!isTestRun) return;
 

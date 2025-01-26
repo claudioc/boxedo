@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { slugUrl } from './helpers';
+import { pathWithFeedback, slugUrl } from './helpers';
 import type {
   PageModel,
   NavItem,
@@ -20,6 +20,7 @@ import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { NotFound } from '~/views/NotFound';
 import { ErrorPage } from '~/views/ErrorPage';
 import { EditPage } from '~/views/EditPage';
+import { LoginPage } from '~/views/LoginPage';
 import { CreatePage } from '~/views/CreatePage';
 import { MovePage } from '~/views/MovePage';
 import { Nav } from '~/views/components/Nav';
@@ -125,6 +126,14 @@ const MovePageBodySchema = {
   },
 } as const;
 
+const LoginBodySchema = {
+  type: 'object',
+  required: ['email'],
+  properties: {
+    email: { type: 'string', format: 'email' },
+  },
+} as const;
+
 const ReorderPageBodySchema = {
   type: 'object',
   required: ['targetIndex'],
@@ -196,6 +205,56 @@ const router = async (app: FastifyInstance) => {
       </>
     );
   });
+
+  app.get('/auth/login', async (_req, rep) => {
+    rep.html(<LoginPage app={app} token={rep.generateCsrf()} />);
+  });
+
+  app.post<{
+    Body: FromSchema<typeof LoginBodySchema>;
+  }>(
+    '/auth/login',
+    {
+      schema: {
+        body: LoginBodySchema,
+      },
+      preHandler: app.csrfProtection,
+    },
+    async (req, rep) => {
+      const { email } = req.body;
+      const dbs = dbService(app.dbClient);
+      // const rs = redirectService(app, rep);
+
+      // Check if user exists
+      const user = await dbs.getUserByEmail(email);
+      if (!user) {
+        return rep.redirect(
+          pathWithFeedback('/auth/login', Feedbacks.E_USER_NOT_FOUND)
+        );
+      }
+
+      return rep.redirect(
+        pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
+      );
+
+      // Generate magic link token
+      // const token = createId();
+      // const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      // await dbs.createMagicLink({
+      //   _id: `magic:${token}`,
+      //   token,
+      //   email,
+      //   expires: expires.toISOString(),
+      //   used: false,
+      // });
+
+      // Send email via Mailgun
+      // TODO: Add your Mailgun implementation here
+
+      // return rs.homeWithFeedback(Feedbacks.S_MAGIC_LINK_SENT);
+    }
+  );
 
   app.get(
     '/settings',

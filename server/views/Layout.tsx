@@ -1,6 +1,7 @@
-import { getBundleFilename, cssFile } from '~/lib/assets';
+import { getBundleFilename } from '~/lib/assets';
 import { Feedback } from './components/Feedback';
 import { Search } from './components/Search';
+import { Head } from './components/Head';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
 import type { PageModel, Context, WithApp } from '~/../types';
@@ -40,16 +41,7 @@ export const Layout = ({
 
   return (
     <html lang="en">
-      <head>
-        <meta charset="utf-8" />
-        <title>Joongle - {title}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Joongle is the ultimate CMS" />
-        {withEditor && <meta http-equiv="Cache-Control" content="no-store" />}
-        <link rel="stylesheet" href={cssFile} />
-        <script src="/a/vendor/htmx.min.js" />
-        <script src="/a/vendor/Sortable.min.js" />
-      </head>
+      <Head title={title} withEditor={withEditor} withVendorScripts app={app} />
       <body x-data="" {...onKeypress}>
         <script src={getBundleFilename('app')} />
         {withEditor && <script src={getBundleFilename('editor')} />}

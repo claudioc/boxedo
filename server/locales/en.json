@@ -29,6 +29,7 @@
     "S_PAGE_DELETED": "Page deleted",
     "S_PAGE_MOVED": "Page moved to a new parent",
     "S_SETTINGS_UPDATED": "Settings updated",
+    "S_MAGIC_LINK_SENT": "Magic link sent",
     "E_INDEX_ALREADY_EXISTS": "Index already exists",
     "E_CREATING_INDEX": "Error creating index page",
     "E_MISSING_PAGE": "Error loading the page",
@@ -49,7 +50,8 @@
     "E_MISSING_SETTINGS_DB": "Database \"Settings\" not found",
     "E_UPDATING_SETTINGS": "Error updating settings",
     "E_UPLOAD_DATA_MISSING": "Either the URL or the file is missing",
-    "E_UPLOAD_URL_PROBLEMATIC": "The URL provided is not valid"
+    "E_UPLOAD_URL_PROBLEMATIC": "The URL provided is not valid",
+    "E_USER_NOT_FOUND": "No user is known with this email"
   },
 
   "MovePage": {
@@ -168,8 +170,17 @@
     "uploadFileHelp": "The file to upload must be an image file (JPG, PNG, GIF, SVG) and must be less than 20MB"
   },
 
+  "Login": {
+    "sendMagicLink": "Send Magic Link",
+    "loginTo": "Login to %{siteTitle}",
+    "enterEmail": "Enter your email address",
+    "helpEmail": "If we know you, we will send you a magic link to login",
+    "allGood": "All good! Check your email and follow the instructions for immediate access."
+  },
+
   "common": {
     "OK": "OK",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "email": "Email"
   }
 }

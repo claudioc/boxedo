@@ -8,6 +8,7 @@ Doing:
 
   NEXT
   - magic link for logging in
+    - the error page uses the full layout (should use the mini). Try login with ss@nn
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
   - better Mobile experience
