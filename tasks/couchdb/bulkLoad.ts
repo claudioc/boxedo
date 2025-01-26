@@ -43,8 +43,8 @@ async function generatePages(numPages: number): Promise<nano.ServerScope> {
     url: process.env.COUCHDB_URL || '',
     requestDefaults: {
       auth: {
-        username: process.env.DB_USER || '',
-        password: process.env.DB_PASSWORD || '',
+        username: process.env.COUCHDB_USER || '',
+        password: process.env.COUCHDB_PASSWORD || '',
       },
     },
   });

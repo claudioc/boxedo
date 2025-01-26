@@ -12,8 +12,8 @@ curl -X PUT http://admin:password@localhost:5984/files-demo
 NODE_ENV=production
 PORT=3001
 COUCHDB_URL=http://localhost:5984
-DB_USER=admin
-DB_PASSWORD=
+COUCHDB_USER=admin
+COUCHDB_PASSWORD=
 DB_PREFIX=demo-
 ```
 

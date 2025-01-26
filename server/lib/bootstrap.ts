@@ -61,8 +61,8 @@ const ConfigEnvSchema = {
       type: 'string',
       default: 'http://localhost:5984',
     },
-    DB_USER: { type: 'string' },
-    DB_PASSWORD: { type: 'string' },
+    COUCHDB_USER: { type: 'string' },
+    COUCHDB_PASSWORD: { type: 'string' },
     LIVERELOAD_PORT: { type: 'integer', default: 8007 },
     LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
   },
@@ -88,8 +88,8 @@ try {
     'dbClient',
     await dbService.init({
       serverUrl: process.env.COUCHDB_URL ?? '',
-      username: process.env.DB_USER ?? '',
-      password: process.env.DB_PASSWORD ?? '',
+      username: process.env.COUCHDB_USER ?? '',
+      password: process.env.COUCHDB_PASSWORD ?? '',
       env: process.env.NODE_ENV as NodeEnv,
     })
   );
