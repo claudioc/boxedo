@@ -7,6 +7,7 @@ Doing:
   - collection of actions for audit purposes (log)
 
   NEXT
+  - magic link for logging in
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
   - better Mobile experience
