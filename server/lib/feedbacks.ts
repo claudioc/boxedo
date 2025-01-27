@@ -25,7 +25,8 @@ type ErrorCodes =
   | 'E_MISSING_FILES_DB'
   | 'E_CREATING_FILE'
   | 'E_CREATING_ATTACHMENT'
-  | 'E_USER_NOT_FOUND';
+  | 'E_USER_NOT_FOUND'
+  | 'E_MISSING_MAGICS_DB';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -164,6 +165,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_USER_NOT_FOUND: {
     code: 126,
     message: 'No user is known with this email',
+  },
+  E_MISSING_MAGICS_DB: {
+    code: 127,
+    message: 'The magics db is missing',
   },
 } as const;
 

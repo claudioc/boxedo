@@ -7,3 +7,4 @@ export const NAVIGATION_CACHE_KEY = 'navigation-tree';
 export const MAX_IMAGE_DIMENSION = 1600;
 export const MAX_IMAGE_SIZE = 10_000_000;
 export const JPEG_QUALITY = 85;
+export const MAGIC_TOKEN_EXPIRATION_MINUTES = 15;

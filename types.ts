@@ -16,7 +16,9 @@ export interface WithApp {
   app: FastifyInstance;
 }
 
-export type ModelName = 'settings' | 'page' | 'file';
+export type PluralName<T extends string> = T extends 'settings' ? T : `${T}s`;
+export type ModelName = 'settings' | 'page' | 'file' | 'magic';
+export type DbName = PluralName<ModelName>;
 
 export interface SettingsModel {
   _id: string;
@@ -57,6 +59,14 @@ export interface FileAttachmentModel {
   attachment: Buffer | NodeJS.ReadableStream;
   contentType: string;
   params?: { rev?: string };
+}
+
+export interface MagicModel {
+  _id: string;
+  email: string;
+  createdAt: string;
+  expiresAt: string;
+  used: boolean;
 }
 
 export interface PageModel {

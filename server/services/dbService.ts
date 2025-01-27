@@ -10,6 +10,8 @@ import type {
   ConfigEnvSchema,
   FileModel,
   FileAttachmentModel,
+  MagicModel,
+  DbName,
 } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
@@ -34,7 +36,7 @@ interface DbServiceInitParams {
 
 let isTestRun = false;
 
-const dbn = (name: 'pages' | 'settings' | 'files') => {
+const dbn = (name: DbName) => {
   return isTestRun ? `${name}-test` : name;
 };
 
@@ -76,6 +78,9 @@ export function dbService(client?: nano.ServerScope) {
 
   const filesDb: DocumentScope<FileModel> = client.db.use(dbn('files'));
   if (!filesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_FILES_DB);
+
+  const magicsDb: DocumentScope<MagicModel> = client.db.use(dbn('magics'));
+  if (!magicsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_MAGICS_DB);
 
   return {
     getPageDb() {
@@ -544,6 +549,46 @@ export function dbService(client?: nano.ServerScope) {
       } as PageModel;
     },
 
+    async createMagic(email: string, ttlMinutes: number) {
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + ttlMinutes * 60000);
+
+      const data: MagicModel = {
+        _id: dbService.generateIdFor('magic'),
+        email,
+        createdAt: now.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+        used: false,
+      };
+
+      await magicsDb.insert(data);
+      return data;
+    },
+
+    async validateMagic(magicId: string): Promise<boolean> {
+      const result = await magicsDb.find({
+        selector: {
+          _id: magicId,
+          used: false,
+          expiresAt: {
+            $gt: new Date().toISOString(),
+          },
+        },
+        limit: 1,
+      });
+
+      if (result.docs.length === 0) {
+        return false;
+      }
+
+      // Mark token as used
+      const magic = result.docs[0];
+      magic.used = true;
+      await magicsDb.insert(magic);
+
+      return true;
+    },
+
     async getUserByEmail(email: string) {
       if (email === 'claudio.cicali@gmail.com') {
         return {
@@ -563,7 +608,7 @@ export function dbService(client?: nano.ServerScope) {
       if (name.includes('-test')) {
         try {
           await client.db.destroy(name);
-          await client.db.create(dbn('pages'));
+          await client.db.create(name);
         } catch (error) {
           console.log(error);
         }
@@ -574,7 +619,7 @@ export function dbService(client?: nano.ServerScope) {
       if (name.includes('-test')) {
         try {
           await client.db.destroy(name);
-          await client.db.create(dbn('settings'));
+          await client.db.create(name);
           await this.getSettings();
         } catch (error) {
           console.log(error);
@@ -586,7 +631,18 @@ export function dbService(client?: nano.ServerScope) {
       if (name.includes('-test')) {
         try {
           await client.db.destroy(name);
-          await client.db.create(dbn('files'));
+          await client.db.create(name);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      name = dbn('magics');
+      // Ensure we are deleting the test database
+      if (name.includes('-test')) {
+        try {
+          await client.db.destroy(name);
+          await client.db.create(name);
         } catch (error) {
           console.log(error);
         }
@@ -686,6 +742,12 @@ dbService.init = async (params: DbServiceInitParams) => {
     await couchdb.db.get(dbn('files'));
   } catch {
     await couchdb.db.create(dbn('files'));
+  }
+
+  try {
+    await couchdb.db.get(dbn('magics'));
+  } catch {
+    await couchdb.db.create(dbn('magics'));
   }
 
   try {

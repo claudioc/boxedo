@@ -31,6 +31,7 @@ import {
   MAX_IMAGE_SIZE,
   JPEG_QUALITY,
   NAVIGATION_CACHE_KEY,
+  MAGIC_TOKEN_EXPIRATION_MINUTES,
 } from '~/constants';
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
@@ -233,26 +234,16 @@ const router = async (app: FastifyInstance) => {
         );
       }
 
+      const magicData = await dbs.createMagic(
+        email,
+        MAGIC_TOKEN_EXPIRATION_MINUTES
+      );
+
+      console.log('Magic link:', magicData);
+
       return rep.redirect(
         pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
       );
-
-      // Generate magic link token
-      // const token = createId();
-      // const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-
-      // await dbs.createMagicLink({
-      //   _id: `magic:${token}`,
-      //   token,
-      //   email,
-      //   expires: expires.toISOString(),
-      //   used: false,
-      // });
-
-      // Send email via Mailgun
-      // TODO: Add your Mailgun implementation here
-
-      // return rs.homeWithFeedback(Feedbacks.S_MAGIC_LINK_SENT);
     }
   );
 
