@@ -241,6 +241,18 @@ const router = async (app: FastifyInstance) => {
 
       console.log('Magic link:', magicData);
 
+      app.emailService.sendEmail({
+        from: {
+          name: app.settings.siteTitle,
+          email: app.config.EMAIL_FROM_EMAIL ?? '',
+        },
+        to: { name: user.name, email: user.email },
+        subject: app.i18n.t('Email.magicLinkSubject'),
+        text: app.i18n.t('Email.magicLinkText', {
+          magicLink: `${app.config.BASE_URL}/auth/magic/${magicData._id}`,
+        }),
+      });
+
       return rep.redirect(
         pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
       );

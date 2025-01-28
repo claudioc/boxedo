@@ -139,5 +139,35 @@ export const ConfigEnvSchema = {
       default: 'Content management made easy',
     },
     SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+    EMAIL_PROVIDER: { type: 'string', enum: ['sendgrid', 'mailgun', 'smtp'] },
+    EMAIL_API_KEY: { type: 'string' },
+    EMAIL_DOMAIN: { type: 'string' },
+    EMAIL_HOST: { type: 'string' },
+    EMAIL_PORT: { type: 'integer' },
+    EMAIL_FROM_EMAIL: { type: 'string' },
   },
 } as const;
+
+export interface EmailAddress {
+  email: string;
+  name?: string;
+}
+
+export interface EmailMessage {
+  to: EmailAddress;
+  from: EmailAddress;
+  subject: string;
+  text: string;
+  html?: string;
+}
+
+export interface EmailProviderConfig {
+  type: string;
+  [key: string]: unknown;
+}
+
+// Base interface for all email providers
+export interface EmailProvider {
+  initialize(config: EmailProviderConfig): Promise<void>;
+  sendEmail(message: EmailMessage): Promise<void>;
+}

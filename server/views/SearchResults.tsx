@@ -25,7 +25,7 @@ export const SearchResults = ({ app, query, results }: SearchResultsProps) => {
             <li class="content">
               <div class={styles.item}>
                 <DocumentIcon />
-                <a href={slugUrl(result.pageSlug)}>{result.pageTitle}!!</a>
+                <a href={slugUrl(result.pageSlug)}>{result.pageTitle}</a>
               </div>
               {result.pageContent && (
                 <blockquote class="ml-4">

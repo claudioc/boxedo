@@ -593,6 +593,7 @@ export function dbService(client?: nano.ServerScope) {
       if (email === 'claudio.cicali@gmail.com') {
         return {
           _id: 'user:1',
+          email: 'claudio.cicali@gmail.com',
           name: 'Claudio Cicali',
         };
       }

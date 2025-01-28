@@ -19,6 +19,7 @@ import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import multipart from '@fastify/multipart';
+import { EmailService } from '~/services/emailService';
 
 import en from '../locales/en.json';
 import it from '../locales/it.json';
@@ -32,6 +33,7 @@ declare module 'fastify' {
     i18n: i18nExtended;
     feedbackCode: number;
     cache: Cache;
+    emailService: EmailService;
   }
 }
 
@@ -66,6 +68,17 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
+const emailService = EmailService.getInstance();
+
+await emailService.initialize({
+  type: process.env.EMAIL_PROVIDER ?? '',
+  apiKey: process.env.EMAIL_API_KEY ?? '',
+  domain: process.env.EMAIL_DOMAIN ?? '',
+  host: process.env.EMAIL_HOST ?? '',
+});
+
+app.decorate('emailService', emailService);
+
 try {
   app.decorate(
     'dbClient',
@@ -80,16 +93,12 @@ try {
   throw new Error('Cannot establish a database connection.');
 }
 
-await app.register(fastifyCookie);
-
-await app.register(fastifyCache);
-
-// Register multipart plugin (file upload) with custom limits
-await app.register(multipart);
-
 if (process.env.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
+
+const dbs = await dbService(app.dbClient);
+const settings = await dbs.getSettings(app.config);
 
 await app.register(fastifyI18n, {
   defaultLocale: 'en',
@@ -98,11 +107,6 @@ await app.register(fastifyI18n, {
     it,
   },
 });
-
-await app.register(fastifyFeedback);
-
-const dbs = await dbService(app.dbClient);
-const settings = await dbs.getSettings(app.config);
 app.i18n.switchTo(settings.siteLang);
 
 app.decorate('settings', settings);
@@ -110,6 +114,10 @@ app.decorate('isDev', process.env.NODE_ENV !== 'production');
 
 await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
   app
+    .register(fastifyCookie)
+    .register(fastifyCache)
+    .register(multipart)
+    .register(fastifyFeedback)
     .register(fastifyFavicon, {
       path: './assets',
       name: 'favicon.ico',
