@@ -226,7 +226,6 @@ const router = async (app: FastifyInstance) => {
       const dbs = dbService(app.dbClient);
       // const rs = redirectService(app, rep);
 
-      // Check if user exists
       const user = await dbs.getUserByEmail(email);
       if (!user) {
         return rep.redirect(

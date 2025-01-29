@@ -1,8 +1,12 @@
 import { watch, rm } from 'node:fs/promises';
 import * as esbuild from 'esbuild';
-import { type ChildProcess, spawn } from 'node:child_process';
+import { type ChildProcess, spawn, exec } from 'node:child_process';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
+import { promisify } from 'node:util';
+import { setTimeout as delay } from 'node:timers/promises';
+
+const execAsync = promisify(exec);
 
 interface SseClient {
   id: number;
@@ -14,8 +18,6 @@ type TaskFn = (name: string, arg?: Target) => Promise<boolean>;
 type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
-
-let longTaskCount = 0;
 
 const parsePort = (input: string | undefined): string | undefined => {
   if (!input?.trim()) return;
@@ -40,7 +42,8 @@ const spawnWithPrefix = (command: string, args: string[], prefix: string) => {
   const proc = spawn(command, args, {
     env: { ...process.env, FORCE_COLOR: '2' },
     stdio: ['inherit', 'pipe', 'pipe'],
-    detached: false,
+    detached: true,
+    killSignal: 'SIGTERM',
   });
 
   const stdout = createInterface({ input: proc.stdout });
@@ -57,17 +60,11 @@ const spawnWithPrefix = (command: string, args: string[], prefix: string) => {
 };
 
 const killApiServer = async () => {
-  if (apiServer) {
-    apiServer.kill('SIGKILL');
-    // Wait for the API server to fully terminate
-    await new Promise<void>((resolve) => {
-      apiServer?.on('exit', () => {
-        apiServer = null;
-        console.log('[Hawk] API server terminated');
-        resolve();
-      });
-    });
+  if (!apiServer || !apiServer.pid) {
+    return;
   }
+
+  return apiServer.kill('SIGKILL');
 };
 
 const killSseServer = async () => {
@@ -84,7 +81,9 @@ const killSseServer = async () => {
 
 const startApiServer: TaskFn = async (name) => {
   if (apiServer) {
+    console.log('[Hawk] Stopping API server...');
     await killApiServer();
+    console.log('[Hawk] Stopped API server...');
   }
 
   console.log('[Hawk] Starting API server...');
@@ -100,10 +99,50 @@ const startApiServer: TaskFn = async (name) => {
       resolve(false);
     });
 
-    apiServer.on('spawn', (_) => {
+    // This event will fire after the spawn has been set up
+    apiServer.on('exit', (code) => {
+      if (code !== 0) {
+        console.error('[Hawk] API server failed to start');
+        apiServer = null;
+      }
+    });
+
+    apiServer.on('spawn', () => {
+      console.log('[Hawk] API server started');
       resolve(true);
     });
   });
+};
+
+const clearPort: TaskFn = async () => {
+  const port = process.env.PORT || 3000;
+
+  try {
+    // Check if any process is using the port
+    const { stdout } = await execAsync(`lsof -ti :${port}`);
+
+    if (stdout.trim()) {
+      console.log(`[Hawk] Found process using port ${port}, killing it…`);
+      await execAsync(`kill -9 $(lsof -ti :${port})`);
+      // Small delay to ensure port is fully released
+      await delay(1000);
+      console.log(`[Hawk] Port ${port} cleared`);
+    } else {
+      console.log(`[Hawk] Port ${port} is already clear`);
+    }
+
+    return true;
+  } catch (error) {
+    // If lsof returns nothing, it will throw an error, but that's fine
+    // it just means no process was found
+    if (error.code === 1) {
+      console.log(`[Hawk] Port ${port} is already clear`);
+      return true;
+    }
+
+    console.error(`[Hawk] Error clearing port ${port}:`, error);
+    return false;
+  }
 };
 
 const clean: TaskFn = async (_, target = 'client') => {
@@ -338,17 +377,6 @@ const ready: TaskFn = async (_) => {
   });
 };
 
-const longTask: TaskFn = async () => {
-  return new Promise((res) => {
-    const runId = ++longTaskCount;
-    console.log(`[Hawk LONG TASK] #${runId} started`);
-    setTimeout(() => {
-      console.log(`[Hawk LONG TASK] #${runId} finished`);
-      res(true);
-    }, 5000);
-  });
-};
-
 class Task {
   public status: TaskStatus = 'pending';
   private startTime = 0;
@@ -431,8 +459,6 @@ class TaskManager {
       process.exit(1);
     }
 
-    // this.logStats();
-
     return success;
   }
 
@@ -456,6 +482,7 @@ class TaskManager {
 
 const taskManager = new TaskManager();
 
+taskManager.registerTask('clear-port', clearPort);
 taskManager.registerTask('clean-client', clean, 'client');
 taskManager.registerTask('clean-server', clean, 'server');
 taskManager.registerTask('type-check-client', typeCheck, 'client');
@@ -468,7 +495,6 @@ taskManager.registerTask('start-sse-server', startSseServer);
 taskManager.registerTask('setup-file-watchers', setupFileWatchers);
 taskManager.registerTask('start-api-server', startApiServer);
 taskManager.registerTask('ready', ready);
-taskManager.registerTask('long-task', longTask);
 taskManager.registerTask('notify-client-update', notifyUpdates, 'client');
 taskManager.registerTask('notify-server-update', notifyUpdates, 'server');
 
@@ -480,6 +506,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   taskManager.run(
     [
+      'clear-port',
       'clean-client',
       'clean-server',
       'type-check-client',
