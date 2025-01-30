@@ -34,7 +34,8 @@ type SuccessCodes =
   | 'S_PAGE_DELETED'
   | 'S_PAGE_MOVED'
   | 'S_SETTINGS_UPDATED'
-  | 'S_MAGIC_LINK_SENT';
+  | 'S_MAGIC_LINK_SENT'
+  | 'S_LOGIN_SUCCESS';
 
 type AnyCode = ErrorCodes | SuccessCodes;
 
@@ -64,6 +65,10 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   S_MAGIC_LINK_SENT: {
     code: 6,
     message: 'Magic link sent',
+  },
+  S_LOGIN_SUCCESS: {
+    code: 7,
+    message: 'Login successful',
   },
   E_INDEX_ALREADY_EXISTS: {
     code: 100,

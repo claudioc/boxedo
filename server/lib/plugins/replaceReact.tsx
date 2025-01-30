@@ -2,7 +2,7 @@
 export function replaceReact(
   this: string,
   interpolationRegex: RegExp,
-  cb: (substring: string, ...args: unknown[]) => string,
+  cb: (substring: string, ...args: unknown[]) => string
 ) {
   let i = 0;
   const children = [];
@@ -15,10 +15,11 @@ export function replaceReact(
     children.push(cb(match[0], match[1]));
     i = match.index + match[0].length;
   });
+
   if (i < this.length) {
     children.push(this.substring(i));
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  return children as any;
+  return children.join('') as any;
 }

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
+import type { FromSchema } from 'json-schema-to-ts';
 
 export type NodeEnv = 'development' | 'production' | 'test';
 
@@ -122,8 +123,7 @@ export interface Feedback {
 export const ConfigEnvSchema = {
   type: 'object',
   properties: {
-    ADDRESS: { type: 'string', default: 'localhost' },
-    PORT: { type: 'integer', default: 3000 },
+    BASE_URL: { type: 'string', default: 'http://localhost:3000' },
     NODE_ENV: { type: 'string', default: 'development' },
     COUCHDB_URL: {
       type: 'string',
@@ -131,8 +131,7 @@ export const ConfigEnvSchema = {
     },
     COUCHDB_USER: { type: 'string' },
     COUCHDB_PASSWORD: { type: 'string' },
-    LIVERELOAD_PORT: { type: 'integer', default: 8007 },
-    LIVERELOAD_ADDRESS: { type: 'string', default: 'localhost' },
+    LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
     SETTINGS_LANGUAGE: { type: 'string', default: 'en' },
     SETTINGS_DESCRIPTION: {
       type: 'string',
@@ -147,6 +146,8 @@ export const ConfigEnvSchema = {
     EMAIL_FROM_EMAIL: { type: 'string' },
   },
 } as const;
+
+export type ConfigEnv = FromSchema<typeof ConfigEnvSchema>;
 
 export interface EmailAddress {
   email: string;
@@ -170,4 +171,13 @@ export interface EmailProviderConfig {
 export interface EmailProvider {
   initialize(config: EmailProviderConfig): Promise<void>;
   sendEmail(message: EmailMessage): Promise<void>;
+}
+
+export interface UrlParts {
+  protocol: string;
+  hostname: string;
+  port: number;
+  baseUrl: string;
+  host: string;
+  isLocalhost: boolean;
 }

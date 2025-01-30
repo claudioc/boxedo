@@ -55,7 +55,9 @@ const getEditorOptions = (): Partial<EditorOptions> => {
         defaultProtocol: 'https',
         // Remove target entirely so links open in current tab
         target: null,
+        rel: 'noopener noreferrer',
       },
+      validate: (href) => /^https?:\/\//.test(href),
     }),
     Typography,
     Highlight,
@@ -117,7 +119,8 @@ const getEditorOptions = (): Partial<EditorOptions> => {
 
 const addLink = () => {
   // Get URL from user
-  const url = window.prompt('Enter URL:');
+  const previousUrl = editor.getAttributes('link').href;
+  const url = window.prompt('Enter URL:', previousUrl);
 
   if (url === null) {
     // User cancelled the prompt
@@ -127,10 +130,27 @@ const addLink = () => {
   if (url === '') {
     // Empty URL, remove the link
     editor.chain().focus().extendMarkRange('link').unsetLink().run();
-  } else {
-    // Set or update the link
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    return;
   }
+
+  let validUrl: string;
+  try {
+    // Add https if protocol is missing
+    validUrl = url.match(/^https?:\/\//) ? url : `https://${url}`;
+    new URL(validUrl); // This will throw if URL is invalid
+  } catch {
+    window.alert('Please enter a valid URL');
+    return;
+  }
+
+  editor
+    .chain()
+    .focus()
+    .extendMarkRange('link')
+    .setLink({
+      href: validUrl,
+    })
+    .run();
 };
 
 let uploadDialog: HTMLDialogElement;

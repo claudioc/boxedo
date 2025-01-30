@@ -7,9 +7,13 @@ import type { PinoLoggerOptions } from 'fastify/types/logger';
 import fastifyEnv from '@fastify/env';
 import path from 'node:path';
 import router from './router';
-import { ConfigEnvSchema, type NodeEnv, type SettingsModel } from '~/../types';
+import {
+  ConfigEnvSchema,
+  type ConfigEnv,
+  type NodeEnv,
+  type SettingsModel,
+} from '~/../types';
 import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
-import type { FromSchema } from 'json-schema-to-ts';
 import { fileURLToPath } from 'node:url';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
@@ -26,7 +30,7 @@ import it from '../locales/it.json';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    config: FromSchema<typeof ConfigEnvSchema>;
+    config: ConfigEnv;
     isDev: boolean;
     settings: SettingsModel;
     dbClient: DbClient;

@@ -10,7 +10,7 @@ curl -X PUT http://admin:password@localhost:5984/files-demo
 
 ```sh
 NODE_ENV=production
-PORT=3001
+BASE_URL=http://localhost:3000
 COUCHDB_URL=http://localhost:5984
 COUCHDB_USER=admin
 COUCHDB_PASSWORD=

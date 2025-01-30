@@ -7,7 +7,7 @@ import type {
   PageRevInfo,
   PageModelWithRev,
   NodeEnv,
-  ConfigEnvSchema,
+  ConfigEnv,
   FileModel,
   FileAttachmentModel,
   MagicModel,
@@ -25,7 +25,6 @@ import { slugUrl, extractFileRefsFrom } from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
-import type { FromSchema } from 'json-schema-to-ts';
 
 interface DbServiceInitParams {
   serverUrl: string;
@@ -45,6 +44,7 @@ const safeHtml = (str: string) =>
   sanitizeHtml(str, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
     allowedAttributes: {
+      a: ['href', 'rel', 'target'],
       img: [
         'src',
         'srcset',
@@ -87,7 +87,7 @@ export function dbService(client?: nano.ServerScope) {
       return pagesDb;
     },
 
-    async getSettings(config?: FromSchema<typeof ConfigEnvSchema>) {
+    async getSettings(config?: ConfigEnv) {
       let settings: SettingsModel | null = null;
       try {
         settings = await settingsDb.get('settings');

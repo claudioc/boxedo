@@ -22,6 +22,7 @@
     "S_PAGE_MOVED": "Pagina spostata in una nuova posizione",
     "S_SETTINGS_UPDATED": "Impostazioni aggiornate",
     "S_MAGIC_LINK_SENT": "Magic link spedito",
+    "S_LOGIN_SUCCESS": "Login effettuato con successo, ben tornato!",
     "E_INDEX_ALREADY_EXISTS": "Indice già esistente",
     "E_CREATING_INDEX": "Errore durante la creazione della pagina indice",
     "E_MISSING_PAGE": "Errore durante il caricamento della pagina",
@@ -175,7 +176,9 @@
     "loginTo": "Login in %{siteTitle}",
     "enterEmail": "Il tuo indirizzo email",
     "helpEmail": "Se sei riconosciuto, riceverai un'email con un link magico",
-    "allGood": "OK! Controlla la tua posta e segui le istruzioni per l'accesso immediato."
+    "allGood": "OK! Controlla la tua posta e segui le istruzioni per l'accesso immediato.",
+    "emailMagicLinkSubject": "Il link magico per %{siteTitle}",
+    "emailMagicLinkText": "Usa il seguente link per accedere al sito come utente identificato: %{magicLink}"
   },
 
   "common": {

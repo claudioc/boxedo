@@ -1,4 +1,4 @@
-import type { Feedback, PageModel } from '~/../types';
+import type { Feedback, PageModel, UrlParts } from '~/../types';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/view/${slug}`;
@@ -42,4 +42,30 @@ export const extractFileRefsFrom = (content: string) => {
   }
 
   return fileRefs;
+};
+
+export const parseBaseUrl = (baseUrl: string): UrlParts | undefined => {
+  const trimmed = baseUrl.trim();
+  try {
+    const url = new URL(trimmed);
+
+    return {
+      protocol: url.protocol.replace(':', ''),
+      hostname: url.hostname,
+      port: parsePort(url.port) ?? (url.protocol === 'https:' ? 443 : 80),
+      baseUrl: baseUrl,
+      host: url.host,
+      isLocalhost: url.hostname === 'localhost' || url.hostname === '127.0.0.1',
+    };
+  } catch {
+    if (trimmed !== '') {
+      throw new Error(`Invalid base URL: ${baseUrl}`);
+    }
+  }
+};
+
+const parsePort = (input: string | undefined): number | undefined => {
+  if (!input?.trim()) return;
+  const port = Number.parseInt(input.trim(), 10);
+  return Number.isNaN(port) ? undefined : port;
 };

@@ -46,6 +46,19 @@ const FileIdFormat = {
   pattern: '^file:[0-9a-z]{2,32}$',
 } as const;
 
+const MagicIdFormat = {
+  type: 'string',
+  pattern: '^magic:[0-9a-z]{2,32}$',
+} as const;
+
+const MagicLinkParamsSchema = {
+  type: 'object',
+  required: ['magicId'],
+  properties: {
+    magicId: MagicIdFormat,
+  },
+} as const;
+
 const PageSlugParamsSchema = {
   type: 'object',
   required: ['slug'],
@@ -224,7 +237,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { email } = req.body;
       const dbs = dbService(app.dbClient);
-      // const rs = redirectService(app, rep);
+      const { i18n, settings, config } = app;
 
       const user = await dbs.getUserByEmail(email);
       if (!user) {
@@ -238,23 +251,40 @@ const router = async (app: FastifyInstance) => {
         MAGIC_TOKEN_EXPIRATION_MINUTES
       );
 
-      console.log('Magic link:', magicData);
-
-      app.emailService.sendEmail({
+      const emailMessage = {
         from: {
-          name: app.settings.siteTitle,
-          email: app.config.EMAIL_FROM_EMAIL ?? '',
+          name: settings.siteTitle,
+          email: config.EMAIL_FROM_EMAIL ?? '',
         },
         to: { name: user.name, email: user.email },
-        subject: app.i18n.t('Email.magicLinkSubject'),
-        text: app.i18n.t('Email.magicLinkText', {
-          magicLink: `${app.config.BASE_URL}/auth/magic/${magicData._id}`,
+        subject: i18n.t('Login.emailMagicLinkSubject', {
+          siteTitle: settings.siteTitle,
         }),
-      });
+        text: i18n.t('Login.emailMagicLinkText', {
+          magicLink: `${config.BASE_URL}/auth/magic/${magicData._id}`,
+        }),
+      };
+
+      app.emailService.sendEmail(emailMessage);
 
       return rep.redirect(
         pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
       );
+    }
+  );
+
+  app.get<{
+    Params: FromSchema<typeof MagicLinkParamsSchema>;
+  }>(
+    '/auth/magic/:magicId',
+    {
+      schema: {
+        params: MagicLinkParamsSchema,
+      },
+    },
+    async (_req, rep) => {
+      const rs = redirectService(app, rep);
+      return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
     }
   );
 

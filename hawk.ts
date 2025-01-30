@@ -5,6 +5,8 @@ import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
 import { promisify } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
+import type { ConfigEnv } from './types';
+import { parseBaseUrl } from './server/lib/helpers';
 
 const execAsync = promisify(exec);
 
@@ -19,21 +21,9 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
 
-const parsePort = (input: string | undefined): string | undefined => {
-  if (!input?.trim()) return;
-  const port = Number.parseInt(input.trim(), 10);
-  return Number.isNaN(port) ? undefined : String(port);
-};
-
-let { LIVERELOAD_PORT, LIVERELOAD_ADDRESS } = process.env;
-
-LIVERELOAD_ADDRESS = LIVERELOAD_ADDRESS?.trim();
-LIVERELOAD_PORT = parsePort(LIVERELOAD_PORT);
-
-const hasLiveReload = LIVERELOAD_ADDRESS && LIVERELOAD_PORT;
-const LIVERELOAD_URL = hasLiveReload
-  ? `http://${LIVERELOAD_ADDRESS}:${LIVERELOAD_PORT}/updates`
-  : '';
+const { LIVERELOAD_URL } = process.env as ConfigEnv;
+const liveReloadBaseUrl = parseBaseUrl(LIVERELOAD_URL);
+const hasLiveReload = liveReloadBaseUrl !== undefined;
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
@@ -190,6 +180,7 @@ const setupFileWatchers: TaskFn = async (_) => {
         if (event.filename?.match(/\.(ts|tsx|css)$/)) {
           console.log(`[Hawk] Server change: ${event.filename}`);
           taskManager.run([
+            'clear-port',
             'type-check-server',
             'lint-server',
             'clean-server',
@@ -286,7 +277,9 @@ const buildClient: TaskFn = async (_) => {
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',
     define: {
-      LIVERELOAD_URL: JSON.stringify(LIVERELOAD_URL),
+      LIVERELOAD_URL: JSON.stringify(
+        LIVERELOAD_URL ? `${LIVERELOAD_URL}/updates` : ''
+      ),
     },
     platform: 'browser',
     entryNames: '[dir]/[name]-[hash]',
@@ -361,7 +354,7 @@ const startSseServer: TaskFn = async () => {
     });
   });
 
-  sseServer.listen(Number(LIVERELOAD_PORT), LIVERELOAD_ADDRESS, () => {
+  sseServer.listen(liveReloadBaseUrl.port, liveReloadBaseUrl.hostname, () => {
     console.log(`[Hawk] SSE server started on ${LIVERELOAD_URL}`);
   });
 

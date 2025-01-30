@@ -1,11 +1,14 @@
 import bootstrap from './lib/bootstrap';
+import { parseBaseUrl } from './lib/helpers';
 
 const app = bootstrap();
 
+const baseUrl = parseBaseUrl(app.config.BASE_URL);
+
 try {
   await app.listen({
-    port: Number(process.env.PORT ?? 3000),
-    host: process.env.ADDRESS ?? 'localhost',
+    port: baseUrl?.port ?? 3000,
+    host: baseUrl?.hostname ?? 'localhost',
   });
 } catch (err) {
   app.log.error(err);
