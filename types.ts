@@ -140,7 +140,7 @@ export const ConfigEnvSchema = {
     SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
     EMAIL_PROVIDER: {
       type: 'string',
-      enum: ['sendgrid', 'mailgun', 'smtp', 'dummy'],
+      enum: ['sendgrid', 'mailgun', 'smtp', 'dummy', ''],
     },
     EMAIL_API_KEY: { type: 'string' },
     EMAIL_DOMAIN: { type: 'string' },
