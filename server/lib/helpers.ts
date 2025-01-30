@@ -44,8 +44,11 @@ export const extractFileRefsFrom = (content: string) => {
   return fileRefs;
 };
 
-export const parseBaseUrl = (baseUrl: string): UrlParts | undefined => {
-  const trimmed = baseUrl.trim();
+export const parseBaseUrl = (
+  baseUrl: string | undefined
+): UrlParts | undefined => {
+  const trimmed = baseUrl ? baseUrl.trim() : '';
+
   try {
     const url = new URL(trimmed);
 
@@ -53,7 +56,7 @@ export const parseBaseUrl = (baseUrl: string): UrlParts | undefined => {
       protocol: url.protocol.replace(':', ''),
       hostname: url.hostname,
       port: parsePort(url.port) ?? (url.protocol === 'https:' ? 443 : 80),
-      baseUrl: baseUrl,
+      baseUrl: trimmed,
       host: url.host,
       isLocalhost: url.hostname === 'localhost' || url.hostname === '127.0.0.1',
     };

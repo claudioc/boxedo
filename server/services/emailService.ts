@@ -6,6 +6,7 @@ import type {
 import { MailgunProvider } from './emailProviders/mailgun';
 import { SmtpProvider } from './emailProviders/smtp';
 import { SendgridProvider } from './emailProviders/sendgrid';
+import { DummyProvider } from './emailProviders/dummy';
 
 export class EmailService {
   private provider: EmailProvider | null = null;
@@ -28,13 +29,16 @@ export class EmailService {
   private async createProvider(
     config: EmailProviderConfig
   ): Promise<EmailProvider> {
-    switch (config.type) {
+    switch (config.type.trim().toLowerCase()) {
       case 'mailgun':
         return new MailgunProvider();
       case 'smtp':
         return new SmtpProvider();
       case 'sendgrid':
         return new SendgridProvider();
+      case '':
+      case 'dummy':
+        return new DummyProvider();
       default:
         throw new Error(`Unsupported email provider: ${config.type}`);
     }
