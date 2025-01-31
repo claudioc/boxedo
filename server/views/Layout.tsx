@@ -130,7 +130,10 @@ export const Layout = ({
               <span aria-hidden="true" />
               <span aria-hidden="true" />
             </button>
-            <div x-show="$store.has.some()">
+            <div
+              x-show="$store.has.some()"
+              x-init="setTimeout(() => $store.has.none(), 2000)"
+            >
               <Feedback app={app} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
             {/* #main-page-body is used as a hx-target */}

@@ -2,7 +2,6 @@ Doing:
   - magic link for logging in
 
   MVP
-  - the “Page updated” message needs to automatically disappears after a few seconds
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
@@ -82,3 +81,4 @@ Done
 - use a real dialog to set image url and dimension
 - better Mobile experience
 - the error page uses the full layout (should use the mini). Try login with ss@nn
+- the “Page updated” message needs to automatically disappears after a few seconds
