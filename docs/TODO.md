@@ -1,6 +1,5 @@
 Doing:
   - magic link for logging in
-    - the error page uses the full layout (should use the mini). Try login with ss@nn
 
   MVP
   - the “Page updated” message needs to automatically disappears after a few seconds
@@ -82,3 +81,4 @@ Done
 - the editor icons' title is not translated
 - use a real dialog to set image url and dimension
 - better Mobile experience
+- the error page uses the full layout (should use the mini). Try login with ss@nn

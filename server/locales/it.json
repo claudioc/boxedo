@@ -50,7 +50,7 @@
   "Error": {
     "requestFailed": "La richiesta non può essere completata",
     "unexpectedError": "Si è verificato un errore inatteso",
-    "invalidParameters": "I parametri della richiesta non sono validi.",
+    "invalidParameters": "I parametri della richiesta non sono validi",
     "unhandledError": "Errore non gestito",
     "pageNotFound": "Pagina non trovata"
   },

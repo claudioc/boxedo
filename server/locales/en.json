@@ -18,7 +18,7 @@
   "Error": {
     "requestFailed": "The request cannot be fullfilled",
     "unexpectedError": "An unexpected error occurred",
-    "invalidParameters": "Request parameters are not valid.",
+    "invalidParameters": "Request parameters are not valid",
     "unhandledError": "Unhandled error",
     "pageNotFound": "Page not found"
   },

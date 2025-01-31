@@ -1,5 +1,7 @@
 import type { WithApp } from '~/../types';
-import { Layout } from './Layout';
+import { LayoutMini } from './LayoutMini';
+import { OhNoIcon } from './icons/OhNoIcon';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 interface ErrorPageProps extends WithApp {
   title: string;
@@ -9,10 +11,21 @@ interface ErrorPageProps extends WithApp {
 export const ErrorPage = ({ app, title, error }: ErrorPageProps) => {
   const { i18n } = app;
   return (
-    <Layout app={app} title={title}>
-      <h1 class="title">{title}</h1>
-      <p>{i18n.t('Error.requestFailed')}</p>
-      <code>{String(error)}</code>
-    </Layout>
+    <LayoutMini app={app} title={title}>
+      <h1 class={['title', 'level', 'is-justify-content-start']}>
+        <OhNoIcon title={i18n.t('NotFound.title')} size={48} />
+        {title}
+      </h1>
+      <p class="block">{i18n.t('Error.requestFailed')}</p>
+      <p class="block">
+        <code>{String(error)}</code>
+      </p>
+      <p class="block">
+        <a class="button" href="/">
+          <ArrowLeftIcon title={'Back home'} />
+          &nbsp;Home
+        </a>
+      </p>
+    </LayoutMini>
   );
 };
