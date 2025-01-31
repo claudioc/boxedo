@@ -27,7 +27,6 @@
     "@biomejs/biome": "1.9.0",
     "@fastify/one-line-logger": "^2.0.1",
     "@types/alpinejs": "^3.13.6",
-    "@types/nano": "^7.0.0",
     "@types/node": "^22.10.2",
     "@types/node-polyglot": "^2.5.0",
     "@types/sanitize-filename": "^1.1.28",

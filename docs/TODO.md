@@ -1,17 +1,18 @@
 Doing:
+  - magic link for logging in
+    - the error page uses the full layout (should use the mini). Try login with ss@nn
 
   MVP
+  - the “Page updated” message needs to automatically disappears after a few seconds
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
 
   NEXT
-  - magic link for logging in
-    - the error page uses the full layout (should use the mini). Try login with ss@nn
+  - Fetch the preview for links?
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
-  - better Mobile experience
   - What about https://demo.umodoc.com/editor ?
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
   - use couchdb for the cache (see /docs/CACHE.md)
@@ -80,3 +81,4 @@ Done
 - add the bubble menu to images (align, set dimensions)
 - the editor icons' title is not translated
 - use a real dialog to set image url and dimension
+- better Mobile experience
