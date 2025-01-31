@@ -7,8 +7,7 @@
 
 @media screen and (max-width: 768px) {
   .mainContent {
-    margin-left: 0;
-    max-width: auto;
-    padding: 0 20px;
+    margin: 0;
+    padding: 0;
   }
 }

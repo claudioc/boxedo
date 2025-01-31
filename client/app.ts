@@ -122,7 +122,7 @@ class App {
 
   toggleNavbar() {
     const nav = document.querySelector('main > div');
-    nav?.classList.toggle('isClosed');
+    nav?.classList.toggle('isOpen');
   }
 
   livereload() {

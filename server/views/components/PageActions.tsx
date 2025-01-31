@@ -1,4 +1,6 @@
 import type { WithApp } from '~/../types';
+import { CancelIcon } from '../icons/CancelIcon';
+import { SaveIcon } from '../icons/SaveIcon';
 
 type PageAction = 'save' | 'cancel';
 
@@ -24,17 +26,25 @@ export const PageActions = ({
       <div class=" level-left is-size-5">{title}</div>
       <menu class="level-right m-0 is-flex-direction-row">
         {actions.includes('save') && (
-          <button class="button" type="submit">
-            {i18n.t('PageActions.saveAndClose')}
+          <button class="button is-text-mobile" type="submit">
+            <span class="is-hidden-mobile">
+              {i18n.t('PageActions.saveAndClose')}
+            </span>
+            <span class="is-hidden-tablet">
+              <SaveIcon title={i18n.t('PageActions.saveAndClose')} />
+            </span>
           </button>
         )}
         {actions.includes('cancel') && (
           <a
             href={cancelUrl}
-            class="button"
+            class="button is-text-mobile"
             x-on:click="window.onbeforeunload=null"
           >
-            {i18n.t('PageActions.cancel')}
+            <span class="is-hidden-mobile">{i18n.t('PageActions.cancel')}</span>
+            <span class="is-hidden-tablet">
+              <CancelIcon title={i18n.t('PageActions.cancel')} />
+            </span>
           </a>
         )}
       </menu>

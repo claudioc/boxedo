@@ -1,4 +1,3 @@
-/* This class is also explicitely refe */
 .mainLeft {
   background-color: var(--color-primary);
   min-height: 100vh;
@@ -14,12 +13,6 @@
   }
 }
 
-.mainRight {
-  .burgerToggle {
-    display: none;
-  }
-}
-
 @media screen and (max-width: 768px) {
   .mainLeft {
     position: fixed;
@@ -27,18 +20,12 @@
     bottom: 0;
     background: white;
     z-index: 40;
-    inset-inline-start: 0;
     transition: inset-inline-start 0.3s ease;
+    inset-inline-start: -100%;
 
-    /* We use :global because the 'isClosed' class is toggled via js */
-    &:global(.isClosed) {
-      inset-inline-start: -100%;
-    }
-  }
-
-  .mainRight {
-    .burgerToggle {
-      display: flex;
+    /* We use :global because the 'isOpen' class is toggled via js */
+    &:global(.isOpen) {
+      inset-inline-start: 0;
     }
   }
 }

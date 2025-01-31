@@ -72,7 +72,7 @@ export const Layout = ({
                     <a
                       href="/settings"
                       aria-label={i18n.t('Navigation.editSettings')}
-                      class=" has-text-grey-lighter"
+                      class="has-text-grey-lighter"
                     >
                       <CogIcon />
                     </a>
@@ -117,10 +117,10 @@ export const Layout = ({
             <button
               type="button"
               class={[
-                styles.burgerToggle,
                 'navbar-burger',
                 'level',
                 'level-right',
+                'is-hidden-tablet',
               ]}
               aria-label="menu"
               aria-expanded="false"

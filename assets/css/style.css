@@ -7,6 +7,21 @@
   }
 }
 
+/* Custom responsive modifier for Bulma button */
+@media screen and (max-width: 768px) {
+  .button.is-text-mobile {
+    background: none;
+    border: none;
+    padding: 0;
+    height: auto;
+    line-height: 0;
+  }
+
+  .button.is-text-mobile:hover {
+    background: none;
+  }
+}
+
 /* Placeholder (on every new line) */
 .tiptap .is-empty::before {
   content: attr(data-placeholder);

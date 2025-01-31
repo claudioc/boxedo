@@ -20,7 +20,8 @@
     "server:test": "vitest",
     "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
-    "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts"
+    "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts",
+    "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS ."
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",
@@ -32,6 +33,7 @@
     "@types/sanitize-filename": "^1.1.28",
     "@types/sanitize-html": "^2.11.0",
     "@types/sortablejs": "^1.15.8",
+    "cloc": "^2.2.0-cloc",
     "concurrently": "^9.1.0",
     "dotenv": "^16.4.5",
     "esbuild": "0.24.0",

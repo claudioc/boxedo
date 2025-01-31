@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { PageModel } from '~/../types';
+import { EllipsisIcon } from '../icons/EllipsisIcon';
 
 interface PageMenuProps {
   app: FastifyInstance;
@@ -17,12 +18,15 @@ export const PageMenu = ({ app, page }: PageMenuProps) => {
     <div class="dropdown is-right is-hoverable">
       <div class="dropdown-trigger">
         <button
-          class="button"
+          class="button is-text-mobile"
           aria-haspopup="true"
           aria-controls="dropdown-menu"
           type="button"
         >
-          <span>{i18n.t('PageMenu.actions')} …</span>
+          <span class="is-hidden-mobile">{i18n.t('PageMenu.actions')} …</span>
+          <span class="is-hidden-tablet">
+            <EllipsisIcon title={i18n.t('PageMenu.actions')} />
+          </span>
         </button>
       </div>
       <div class="dropdown-menu" id="dropdown-menu">
