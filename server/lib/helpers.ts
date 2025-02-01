@@ -29,16 +29,18 @@ export const isTopLevelPage = (page: PageModel) =>
   typeof page.parentId !== 'string';
 
 export const extractFileRefsFrom = (content: string) => {
-  // Match URLs like /uploads/123/image.jpg
-  const fileUrlPattern = /\/uploads\/([^\/]+)\/([^\"'\s]+)/g;
+  // Match URLs like /uploads/file:123/image.jpg - require both file: prefix and a following filename
+  const fileUrlPattern = /\/uploads\/(?:file:([0-9a-z]{2,32}))\/[^\"'\s]+/g;
   const fileRefs = new Set<string>();
 
   let match: RegExpExecArray | null;
   while (true) {
     match = fileUrlPattern.exec(content);
     if (match === null) break;
-    const [, fileId] = match;
-    fileRefs.add(fileId);
+    if (match[1]) {
+      // Only add if we captured the file ID
+      fileRefs.add(`file:${match[1]}`);
+    }
   }
 
   return fileRefs;
@@ -72,8 +74,3 @@ const parsePort = (input: string | undefined): number | undefined => {
   const port = Number.parseInt(input.trim(), 10);
   return Number.isNaN(port) ? undefined : port;
 };
-
-export const IdFormat = (prefix: string) => ({
-  type: 'string',
-  pattern: `^${prefix}:[0-9a-z]{2,32}$`,
-}) as const;

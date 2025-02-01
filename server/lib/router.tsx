@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { IdFormat, pathWithFeedback, slugUrl } from './helpers';
+import { pathWithFeedback, slugUrl } from './helpers';
 import type {
   PageModel,
   NavItem,
@@ -12,7 +12,7 @@ import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
-
+import { RouterSchemas as RS } from './routerSchemas';
 import { SearchResults } from '~/views/SearchResults';
 import { ReadPage } from '~/views/ReadPage';
 import { SettingsPage } from '~/views/SettingsPage';
@@ -35,128 +35,6 @@ import {
 } from '~/constants';
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
-
-const PageIdFormat = IdFormat('page');
-const FileIdFormat = IdFormat('file');
-const MagicIdFormat = IdFormat('magic');
-
-const MagicLinkParamsSchema = {
-  type: 'object',
-  required: ['magicId'],
-  properties: {
-    magicId: MagicIdFormat,
-  },
-} as const;
-
-const PageSlugParamsSchema = {
-  type: 'object',
-  required: ['slug'],
-  properties: {
-    slug: { type: 'string' },
-  },
-} as const;
-
-const PageParamsSchema = {
-  type: 'object',
-  required: ['pageId'],
-  properties: {
-    pageId: PageIdFormat,
-  },
-} as const;
-
-const PageParamsSchemaOptional = {
-  type: 'object',
-  properties: {
-    pageId: {
-      anyOf: [PageIdFormat, { type: 'null' }],
-    },
-  },
-} as const;
-
-const PageWithVersionParamsSchema = {
-  type: 'object',
-  required: ['pageId', 'version'],
-  properties: {
-    pageId: PageIdFormat,
-    version: { type: 'string', pattern: '^[0-9]+-[a-f0-9]+$' },
-  },
-} as const;
-
-const UploadParamsSchema = {
-  type: 'object',
-  required: ['fileId', 'filename'],
-  properties: {
-    fileId: FileIdFormat,
-    filename: { type: 'string' },
-  },
-} as const;
-
-const SearchQuerySchema = {
-  type: 'object',
-  required: ['q'],
-  properties: {
-    q: { type: 'string' },
-  },
-} as const;
-
-const CreatePageQuerySchema = {
-  type: 'object',
-  properties: {
-    parentPageId: {
-      anyOf: [PageIdFormat, { type: 'null' }],
-    },
-  },
-} as const;
-
-const PageBodySchema = {
-  type: 'object',
-  required: ['pageTitle', 'pageContent'],
-  properties: {
-    pageTitle: { type: 'string' },
-    pageContent: { type: 'string' },
-    rev: { type: 'string' },
-  },
-} as const;
-
-const MovePageBodySchema = {
-  type: 'object',
-  required: ['moveToTop'],
-  properties: {
-    newParentId: {
-      anyOf: [PageIdFormat, { type: 'null' }],
-    },
-    moveToTop: { type: 'string', enum: ['true', 'false'] },
-  },
-} as const;
-
-const LoginBodySchema = {
-  type: 'object',
-  required: ['email'],
-  properties: {
-    email: { type: 'string', format: 'email' },
-  },
-} as const;
-
-const ReorderPageBodySchema = {
-  type: 'object',
-  required: ['targetIndex'],
-  properties: {
-    targetIndex: { type: 'integer', minimum: 0 },
-  },
-} as const;
-
-const SettingsPageBodySchema = {
-  type: 'object',
-  required: ['siteLang', 'siteTitle'],
-  properties: {
-    landingPageId: {
-      anyOf: [PageIdFormat, { type: 'null' }],
-    },
-    siteLang: { type: 'string', enum: ['en', 'it'] },
-    siteTitle: { type: 'string' },
-    siteDescription: { type: 'string' },
-  },
-} as const;
 
 /**
  * Encapsulates the routes
@@ -214,12 +92,12 @@ const router = async (app: FastifyInstance) => {
   });
 
   app.post<{
-    Body: FromSchema<typeof LoginBodySchema>;
+    Body: FromSchema<typeof RS.LoginBody>;
   }>(
     '/auth/login',
     {
       schema: {
-        body: LoginBodySchema,
+        body: RS.LoginBody,
       },
       preHandler: app.csrfProtection,
     },
@@ -263,12 +141,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Params: FromSchema<typeof MagicLinkParamsSchema>;
+    Params: FromSchema<typeof RS.MagicLinkParams>;
   }>(
     '/auth/magic/:magicId',
     {
       schema: {
-        params: MagicLinkParamsSchema,
+        params: RS.MagicLinkParams,
       },
     },
     async (_req, rep) => {
@@ -298,12 +176,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof SettingsPageBodySchema>;
+    Body: FromSchema<typeof RS.SettingsPageBody>;
   }>(
     '/settings',
     {
       schema: {
-        body: SettingsPageBodySchema,
+        body: RS.SettingsPageBody,
       },
     },
     async (req, rep) => {
@@ -341,12 +219,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Querystring: FromSchema<typeof SearchQuerySchema>;
+    Querystring: FromSchema<typeof RS.SearchQuery>;
   }>(
     '/parts/titles',
     {
       schema: {
-        querystring: SearchQuerySchema,
+        querystring: RS.SearchQuery,
       },
     },
     async (req, rep) => {
@@ -363,11 +241,11 @@ const router = async (app: FastifyInstance) => {
   );
 
   /* Returns the navigation menu */
-  app.get<{ Params: FromSchema<typeof PageParamsSchemaOptional> }>(
+  app.get<{ Params: FromSchema<typeof RS.PageParamsOptional> }>(
     '/parts/nav/:pageId?',
     {
       schema: {
-        params: PageParamsSchemaOptional,
+        params: RS.PageParamsOptional,
       },
     },
     async (req, rep) => {
@@ -424,12 +302,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Params: FromSchema<typeof PageSlugParamsSchema>;
+    Params: FromSchema<typeof RS.PageSlugParams>;
   }>(
     '/view/:slug',
     {
       schema: {
-        params: PageSlugParamsSchema,
+        params: RS.PageSlugParams,
       },
     },
     async (req, rep) => {
@@ -463,11 +341,11 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+  app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/edit',
     {
       schema: {
-        params: PageParamsSchema,
+        params: RS.PageParams,
       },
     },
     async (req, rep) => {
@@ -489,14 +367,14 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof PageBodySchema>;
-    Params: FromSchema<typeof PageParamsSchema>;
+    Body: FromSchema<typeof RS.PageBody>;
+    Params: FromSchema<typeof RS.PageParams>;
   }>(
     '/pages/:pageId/edit',
     {
       schema: {
-        body: PageBodySchema,
-        params: PageParamsSchema,
+        body: RS.PageBody,
+        params: RS.PageParams,
       },
       preHandler: app.csrfProtection,
     },
@@ -568,11 +446,11 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+  app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/move',
     {
       schema: {
-        params: PageParamsSchema,
+        params: RS.PageParams,
       },
     },
     async (req, rep) => {
@@ -600,14 +478,14 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof MovePageBodySchema>;
-    Params: FromSchema<typeof PageParamsSchema>;
+    Body: FromSchema<typeof RS.MovePageBody>;
+    Params: FromSchema<typeof RS.PageParams>;
   }>(
     '/pages/:pageId/move',
     {
       schema: {
-        body: MovePageBodySchema,
-        params: PageParamsSchema,
+        body: RS.MovePageBody,
+        params: RS.PageParams,
       },
     },
     async (req, rep) => {
@@ -666,14 +544,14 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof ReorderPageBodySchema>;
-    Params: FromSchema<typeof PageParamsSchema>;
+    Body: FromSchema<typeof RS.ReorderPageBody>;
+    Params: FromSchema<typeof RS.PageParams>;
   }>(
     '/pages/:pageId/reorder',
     {
       schema: {
-        body: ReorderPageBodySchema,
-        params: PageParamsSchema,
+        body: RS.ReorderPageBody,
+        params: RS.PageParams,
       },
     },
     async (req, rep) => {
@@ -707,12 +585,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Params: FromSchema<typeof PageParamsSchema>;
+    Params: FromSchema<typeof RS.PageParams>;
   }>(
     '/pages/:pageId/delete',
     {
       schema: {
-        params: PageParamsSchema,
+        params: RS.PageParams,
       },
     },
 
@@ -855,12 +733,12 @@ const router = async (app: FastifyInstance) => {
 
   // This same pattern is used in the extractFileRefsFrom helper
   app.get<{
-    Params: FromSchema<typeof UploadParamsSchema>;
+    Params: FromSchema<typeof RS.UploadParams>;
   }>(
     '/uploads/:fileId/:filename',
     {
       schema: {
-        params: UploadParamsSchema,
+        params: RS.UploadParams,
       },
     },
     async (req, rep) => {
@@ -886,12 +764,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Querystring: FromSchema<typeof CreatePageQuerySchema>;
+    Querystring: FromSchema<typeof RS.CreatePageQuery>;
   }>(
     '/pages/create',
     {
       schema: {
-        querystring: CreatePageQuerySchema,
+        querystring: RS.CreatePageQuery,
       },
     },
     async (req, rep) => {
@@ -917,14 +795,14 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.post<{
-    Body: FromSchema<typeof PageBodySchema>;
-    Querystring: FromSchema<typeof CreatePageQuerySchema>;
+    Body: FromSchema<typeof RS.PageBody>;
+    Querystring: FromSchema<typeof RS.CreatePageQuery>;
   }>(
     '/pages/create',
     {
       schema: {
-        body: PageBodySchema,
-        querystring: CreatePageQuerySchema,
+        body: RS.PageBody,
+        querystring: RS.CreatePageQuery,
       },
       preHandler: app.csrfProtection,
     },
@@ -993,12 +871,12 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get<{
-    Querystring: FromSchema<typeof SearchQuerySchema>;
+    Querystring: FromSchema<typeof RS.SearchQuery>;
   }>(
     '/search',
     {
       schema: {
-        querystring: SearchQuerySchema,
+        querystring: RS.SearchQuery,
       },
     },
 
@@ -1030,11 +908,11 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get<{ Params: FromSchema<typeof PageParamsSchema> }>(
+  app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/history',
     {
       schema: {
-        params: PageParamsSchema,
+        params: RS.PageParams,
       },
     },
     async (req, rep) => {
@@ -1053,11 +931,11 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get<{ Params: FromSchema<typeof PageWithVersionParamsSchema> }>(
+  app.get<{ Params: FromSchema<typeof RS.PageWithVersionParams> }>(
     '/pages/:pageId/history/:version',
     {
       schema: {
-        params: PageWithVersionParamsSchema,
+        params: RS.PageWithVersionParams,
       },
     },
     async (req, rep) => {
