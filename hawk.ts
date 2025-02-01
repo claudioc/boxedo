@@ -1,14 +1,14 @@
 import { watch, rm } from 'node:fs/promises';
 import * as esbuild from 'esbuild';
-import { type ChildProcess, spawn, exec } from 'node:child_process';
+import { type ChildProcess, spawn, exec, fork } from 'node:child_process';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
-import { promisify } from 'node:util';
-import { setTimeout as delay } from 'node:timers/promises';
+// import { promisify } from 'node:util';
+// import { setTimeout as delay } from 'node:timers/promises';
 import type { ConfigEnv } from './types';
 import { parseBaseUrl } from './server/lib/helpers';
 
-const execAsync = promisify(exec);
+// const execAsync = promisify(exec);
 
 interface SseClient {
   id: number;
@@ -28,27 +28,6 @@ const hasLiveReload = liveReloadBaseUrl !== undefined;
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
 
-const spawnWithPrefix = (command: string, args: string[], prefix: string) => {
-  const proc = spawn(command, args, {
-    env: { ...process.env, FORCE_COLOR: '2' },
-    stdio: ['inherit', 'pipe', 'pipe'],
-    detached: true,
-    killSignal: 'SIGTERM',
-  });
-
-  const stdout = createInterface({ input: proc.stdout });
-  stdout.on('line', (line) => {
-    console.log(`[${prefix}] ${line}`);
-  });
-
-  const stderr = createInterface({ input: proc.stderr });
-  stderr.on('line', (line) => {
-    console.error(`[${prefix}] ${line}`);
-  });
-
-  return proc;
-};
-
 const killApiServer = async () => {
   if (!apiServer || !apiServer.pid) {
     return;
@@ -57,42 +36,89 @@ const killApiServer = async () => {
   return apiServer.kill('SIGKILL');
 };
 
+// const killApiServer = async () => {
+//   if (!apiServer) {
+//     return;
+//   }
+
+//   const killing = new Promise<void>((resolve) => {
+//     apiServer?.once('exit', () => {
+//       clearTimeout(forcedKill);
+//       apiServer = null;
+//       console.log('[Hawk] API server terminated');
+//       resolve();
+//     });
+
+//     // Force kill after 5 seconds if graceful shutdown fails
+//     const forcedKill: NodeJS.Timeout = setTimeout(() => {
+//       console.log('[Hawk] Force killing API server...');
+//       apiServer?.kill('SIGKILL');
+//     }, 5000);
+
+//     // Try graceful shutdown first
+//     apiServer?.send('shutdown');
+//     apiServer?.kill('SIGTERM');
+//   });
+
+//   return killing;
+// };
+
 const killSseServer = async () => {
-  if (sseServer) {
-    await new Promise<void>((resolve) => {
-      sseServer?.close(() => {
-        console.log('[Hawk] SSE server closed');
-        sseServer = null;
-        resolve();
-      });
-    });
+  if (!sseServer) {
+    return;
   }
+
+  return new Promise<void>((resolve) => {
+    sseServer?.close(() => {
+      console.log('[Hawk] SSE server closed');
+      sseServer = null;
+      resolve();
+    });
+  });
 };
 
-const startApiServer: TaskFn = async (name) => {
+const startApiServer: TaskFn = async (_name) => {
   if (apiServer) {
-    console.log('[Hawk] Stopping API server...');
+    console.log('[Hawk] Stopping API server…');
     await killApiServer();
-    console.log('[Hawk] Stopped API server...');
+    console.log('[Hawk] Stopped API server…');
   }
 
-  console.log('[Hawk] Starting API server...');
-  return new Promise((resolve) => {
-    apiServer = spawnWithPrefix(
-      'node',
-      ['--env-file=.env', './dist/server/app.js'],
-      name
-    );
+  console.log('[Hawk] Starting API server…');
 
-    apiServer.on('error', (err) => {
+  return new Promise((resolve) => {
+    apiServer = fork('./dist/server/app.js', {
+      env: { ...process.env, FORCE_COLOR: '2' },
+      stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
+    });
+
+    if (apiServer.stdout) {
+      const stdout = createInterface({ input: apiServer.stdout });
+      stdout.on('line', (line) => {
+        console.log(`[API Server] ${line}`);
+      });
+    }
+
+    if (apiServer.stderr) {
+      const stderr = createInterface({ input: apiServer.stderr });
+      stderr.on('line', (line) => {
+        console.error(`[API Server] ${line}`);
+      });
+    }
+
+    // biome-ignore lint/suspicious/noExplicitAny:
+    apiServer.on('error', (err: any) => {
+      if (err.code === 'ERR_IPC_CHANNEL_CLOSED') {
+        // Ignore IPC channel closure errors during shutdown
+        return;
+      }
       console.error('[Hawk] API server error:', err);
       resolve(false);
     });
 
-    // This event will fire after the spawn has been set up
     apiServer.on('exit', (code) => {
-      if (code !== 0) {
-        console.error('[Hawk] API server failed to start');
+      if (code) {
+        console.error('[Hawk] API server exited badly');
         apiServer = null;
       }
     });
@@ -104,36 +130,36 @@ const startApiServer: TaskFn = async (name) => {
   });
 };
 
-const clearPort: TaskFn = async () => {
-  const port = process.env.PORT || 3000;
+// const clearPort: TaskFn = async () => {
+//   const port = process.env.PORT || 3000;
 
-  try {
-    // Check if any process is using the port
-    const { stdout } = await execAsync(`lsof -ti :${port}`);
+//   try {
+//     // Check if any process is using the port
+//     const { stdout } = await execAsync(`lsof -ti :${port}`);
 
-    if (stdout.trim()) {
-      console.log(`[Hawk] Found process using port ${port}, killing it…`);
-      await execAsync(`kill -9 $(lsof -ti :${port})`);
-      // Small delay to ensure port is fully released
-      await delay(1000);
-      console.log(`[Hawk] Port ${port} cleared`);
-    } else {
-      console.log(`[Hawk] Port ${port} is already clear`);
-    }
+//     if (stdout.trim()) {
+//       console.log(`[Hawk] Found process using port ${port}, killing it…`);
+//       await execAsync(`kill -9 $(lsof -ti :${port})`);
+//       // Small delay to ensure port is fully released
+//       await delay(1000);
+//       console.log(`[Hawk] Port ${port} cleared`);
+//     } else {
+//       console.log(`[Hawk] Port ${port} is already clear`);
+//     }
 
-    return true;
-  } catch (error) {
-    // If lsof returns nothing, it will throw an error, but that's fine
-    // it just means no process was found
-    if (error.code === 1) {
-      console.log(`[Hawk] Port ${port} is already clear`);
-      return true;
-    }
+//     return true;
+//   } catch (error) {
+//     // If lsof returns nothing, it will throw an error, but that's fine
+//     // it just means no process was found
+//     if (error.code === 1) {
+//       console.log(`[Hawk] Port ${port} is already clear`);
+//       return true;
+//     }
 
-    console.error(`[Hawk] Error clearing port ${port}:`, error);
-    return false;
-  }
-};
+//     console.error(`[Hawk] Error clearing port ${port}:`, error);
+//     return false;
+//   }
+// };
 
 const clean: TaskFn = async (_, target = 'client') => {
   try {
@@ -180,7 +206,6 @@ const setupFileWatchers: TaskFn = async (_) => {
         if (event.filename?.match(/\.(ts|tsx|css)$/)) {
           console.log(`[Hawk] Server change: ${event.filename}`);
           taskManager.run([
-            'clear-port',
             'type-check-server',
             'lint-server',
             'clean-server',
@@ -475,7 +500,7 @@ class TaskManager {
 
 const taskManager = new TaskManager();
 
-taskManager.registerTask('clear-port', clearPort);
+// taskManager.registerTask('clear-port', clearPort);
 taskManager.registerTask('clean-client', clean, 'client');
 taskManager.registerTask('clean-server', clean, 'server');
 taskManager.registerTask('type-check-client', typeCheck, 'client');
@@ -499,7 +524,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   taskManager.run(
     [
-      'clear-port',
       'clean-client',
       'clean-server',
       'type-check-client',
