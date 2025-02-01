@@ -72,3 +72,8 @@ const parsePort = (input: string | undefined): number | undefined => {
   const port = Number.parseInt(input.trim(), 10);
   return Number.isNaN(port) ? undefined : port;
 };
+
+export const IdFormat = (prefix: string) => ({
+  type: 'string',
+  pattern: `^${prefix}:[0-9a-z]{2,32}$`,
+}) as const;

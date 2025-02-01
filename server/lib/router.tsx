@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { pathWithFeedback, slugUrl } from './helpers';
+import { IdFormat, pathWithFeedback, slugUrl } from './helpers';
 import type {
   PageModel,
   NavItem,
@@ -36,20 +36,9 @@ import {
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
 
-const PageIdFormat = {
-  type: 'string',
-  pattern: '^page:[0-9a-z]{2,32}$',
-} as const;
-
-const FileIdFormat = {
-  type: 'string',
-  pattern: '^file:[0-9a-z]{2,32}$',
-} as const;
-
-const MagicIdFormat = {
-  type: 'string',
-  pattern: '^magic:[0-9a-z]{2,32}$',
-} as const;
+const PageIdFormat = IdFormat('page');
+const FileIdFormat = IdFormat('file');
+const MagicIdFormat = IdFormat('magic');
 
 const MagicLinkParamsSchema = {
   type: 'object',
