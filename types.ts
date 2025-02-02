@@ -123,7 +123,8 @@ export interface Feedback {
 export const ConfigEnvSchema = {
   type: 'object',
   properties: {
-    BASE_URL: { type: 'string', default: 'http://localhost:3000' },
+    BASE_EXTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
+    BASE_INTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
     NODE_ENV: { type: 'string', default: 'development' },
     COUCHDB_URL: {
       type: 'string',

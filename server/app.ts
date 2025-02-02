@@ -3,7 +3,7 @@ import { parseBaseUrl } from './lib/helpers';
 
 const app = bootstrap();
 
-const baseUrl = parseBaseUrl(app.config.BASE_URL);
+const baseUrl = parseBaseUrl(app.config.BASE_INTERNAL_URL);
 
 try {
   await app.listen({

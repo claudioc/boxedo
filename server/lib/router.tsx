@@ -129,7 +129,7 @@ const router = async (app: FastifyInstance) => {
           siteTitle: settings.siteTitle,
         }),
         text: i18n.t('Login.emailMagicLinkText', {
-          magicLink: `${config.BASE_URL}/auth/magic/${magicData._id}`,
+          magicLink: `${config.BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`,
         }),
       };
 

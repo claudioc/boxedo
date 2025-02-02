@@ -61,7 +61,7 @@ export const parseBaseUrl = (
       baseUrl: trimmed,
       host: url.host,
       isLocalhost: url.hostname === 'localhost' || url.hostname === '127.0.0.1',
-    };
+    } as UrlParts;
   } catch {
     if (trimmed !== '') {
       throw new Error(`Invalid base URL: ${baseUrl}`);
