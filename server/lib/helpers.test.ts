@@ -7,7 +7,9 @@ import {
   isTopLevelPage,
   extractFileRefsFrom,
   parseBaseUrl,
+  getDefaultLanguage,
 } from './helpers';
+import type { ConfigEnv } from '~/../types';
 
 import { IdFormat } from './routerSchemas';
 
@@ -199,5 +201,42 @@ describe('IdFormat', () => {
     expect(regex.test('wrong:123')).toBe(false);
     expect(regex.test('page:a')).toBe(false);
     expect(regex.test(`page:${'a'.repeat(33)}`)).toBe(false);
+  });
+});
+
+describe('getDefaultLanguage', () => {
+  it('should return "en" when config is undefined', () => {
+    const result = getDefaultLanguage(undefined);
+    expect(result).toBe('en');
+  });
+
+  it('should return "en" when config has no SETTINGS_LANGUAGE', () => {
+    const config = {} as ConfigEnv;
+    const result = getDefaultLanguage(config);
+    expect(result).toBe('en');
+  });
+
+  it('should return the configured language when it is supported', () => {
+    const config = {
+      SETTINGS_LANGUAGE: 'it',
+    } as ConfigEnv;
+    const result = getDefaultLanguage(config);
+    expect(result).toBe('it');
+  });
+
+  it('should return "en" when configured language is not supported', () => {
+    const config = {
+      SETTINGS_LANGUAGE: 'bazooka', // assuming 'fr' is not in supportedLocales
+    } as ConfigEnv;
+    const result = getDefaultLanguage(config);
+    expect(result).toBe('en');
+  });
+
+  it('should return "en" when SETTINGS_LANGUAGE is empty string', () => {
+    const config = {
+      SETTINGS_LANGUAGE: '',
+    } as ConfigEnv;
+    const result = getDefaultLanguage(config);
+    expect(result).toBe('en');
   });
 });

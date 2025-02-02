@@ -24,9 +24,7 @@ import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import multipart from '@fastify/multipart';
 import { EmailService } from '~/services/emailService';
-
-import en from '../locales/en.json';
-import it from '../locales/it.json';
+import { phrases, type SupportedLocales } from '../locales/phrases';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -105,13 +103,10 @@ const dbs = await dbService(app.dbClient);
 const settings = await dbs.getSettings(app.config);
 
 await app.register(fastifyI18n, {
-  defaultLocale: 'en',
-  locales: {
-    en,
-    it,
-  },
+  defaultLocale: settings.siteLang as SupportedLocales,
+  phrases,
 });
-app.i18n.switchTo(settings.siteLang);
+app.i18n.switchTo(settings.siteLang as SupportedLocales);
 
 app.decorate('settings', settings);
 app.decorate('isDev', process.env.NODE_ENV !== 'production');

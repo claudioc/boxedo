@@ -122,6 +122,7 @@ export interface Feedback {
 
 export const ConfigEnvSchema = {
   type: 'object',
+  additionalProperties: false,
   properties: {
     BASE_EXTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
     BASE_INTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },

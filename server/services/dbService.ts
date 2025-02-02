@@ -21,7 +21,12 @@ import nano, {
   type DocumentScope,
   type ServerScope,
 } from 'nano';
-import { slugUrl, extractFileRefsFrom } from '~/lib/helpers';
+import {
+  slugUrl,
+  getDefaultLanguage,
+  extractFileRefsFrom,
+  ensureValidLanguage,
+} from '~/lib/helpers';
 import sanitizeHtml from 'sanitize-html';
 import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
@@ -97,7 +102,6 @@ export function dbService(client?: nano.ServerScope) {
         }
       }
 
-      // FIXME check if the language is one of the supported ones
       // If settings are not found, create a new one using the default values from the config (.env)
       if (!settings) {
         const newSettings: SettingsModel = {
@@ -105,7 +109,7 @@ export function dbService(client?: nano.ServerScope) {
           landingPageId: null,
           siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
           siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
-          siteLang: config ? (config.SETTINGS_LANGUAGE ?? 'en') : 'en',
+          siteLang: getDefaultLanguage(config),
         };
 
         await settingsDb.insert(newSettings);
@@ -116,6 +120,8 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async updateSettings(settings: SettingsModel) {
+      settings.siteLang = ensureValidLanguage(settings.siteLang);
+
       try {
         await settingsDb.insert(settings);
       } catch {

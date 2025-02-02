@@ -1,4 +1,5 @@
-import type { Feedback, PageModel, UrlParts } from '~/../types';
+import type { ConfigEnv, Feedback, PageModel, UrlParts } from '~/../types';
+import { type SupportedLocales, supportedLocales } from '../locales/phrases';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/view/${slug}`;
@@ -73,4 +74,19 @@ const parsePort = (input: string | undefined): number | undefined => {
   if (!input?.trim()) return;
   const port = Number.parseInt(input.trim(), 10);
   return Number.isNaN(port) ? undefined : port;
+};
+
+export const ensureValidLanguage = (candidate: string) =>
+  (supportedLocales.includes(candidate) ? candidate : 'en') as SupportedLocales;
+
+export const getDefaultLanguage = (
+  config: ConfigEnv | undefined
+): SupportedLocales => {
+  if (!config) {
+    return 'en';
+  }
+
+  const candidate = config.SETTINGS_LANGUAGE;
+
+  return ensureValidLanguage(candidate);
 };

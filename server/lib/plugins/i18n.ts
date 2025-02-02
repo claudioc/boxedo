@@ -2,16 +2,17 @@ import fp from 'fastify-plugin';
 import Polyglot from 'node-polyglot';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import { replaceReact } from './replaceReact';
+import type { SupportedLocales } from '~/locales/phrases';
 
 interface i18nPluginOptions {
-  defaultLocale: string;
-  locales: Record<string, string | object>;
+  defaultLocale: SupportedLocales;
+  phrases: Record<SupportedLocales, string | object>;
 }
 
 interface i18nExtended extends Polyglot {
-  locales: Record<string, string | object>;
-  defaultLocale: string;
-  switchTo: (locale: string) => void;
+  locales: Record<SupportedLocales, string | object>;
+  defaultLocale: SupportedLocales;
+  switchTo: (locale: SupportedLocales) => void;
 }
 
 const i18nPlugin: FastifyPluginCallback<i18nPluginOptions> = (
@@ -19,31 +20,31 @@ const i18nPlugin: FastifyPluginCallback<i18nPluginOptions> = (
   opts: i18nPluginOptions,
   next: (err?: Error) => void
 ) => {
-  const defaultLocale: string = opts.defaultLocale;
-  const locales = opts.locales;
+  const defaultLocale: SupportedLocales = opts.defaultLocale;
+  const phrases = opts.phrases;
 
-  if (Object.keys(locales).indexOf(defaultLocale) === -1) {
+  if (Object.keys(phrases).indexOf(defaultLocale) === -1) {
     next(new Error('Default locale not found in locales'));
     return;
   }
 
   const i18n = new Polyglot({
-    phrases: locales[defaultLocale],
+    phrases: phrases[defaultLocale],
     locale: defaultLocale,
     replace: replaceReact,
   });
 
-  const switchTo = (locale: string) => {
-    if (Object.keys(locales).indexOf(locale) === -1) {
+  const switchTo = (locale: SupportedLocales) => {
+    if (Object.keys(phrases).indexOf(locale) === -1) {
       throw new Error(`Locale ${locale} not found`);
     }
     i18n.locale(locale);
-    i18n.replace(locales[locale]);
+    i18n.replace(phrases[locale]);
   };
 
   const i18nExtended: i18nExtended = Object.assign(i18n, {
     ...i18n,
-    locales,
+    locales: phrases,
     defaultLocale,
     switchTo,
   });

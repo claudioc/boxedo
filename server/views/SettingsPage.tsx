@@ -5,6 +5,7 @@ import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { LanguageIcon } from './icons/Language';
 import { MainContent } from './components/MainContent';
+import { phraseDefinitions } from '~/locales/phrases';
 
 interface SettingsPageProps extends WithApp {
   settings: SettingsModel;
@@ -110,12 +111,14 @@ export const SettingsPage = ({
               <div class="control has-icons-left">
                 <span class="select">
                   <select name="siteLang">
-                    <option selected={siteLang === 'it'} value="it">
-                      Italiano
-                    </option>
-                    <option selected={siteLang === 'en'} value="en">
-                      English
-                    </option>
+                    {phraseDefinitions.map((def) => (
+                      <option
+                        selected={siteLang === def.language}
+                        value={def.language}
+                      >
+                        {def.name}
+                      </option>
+                    ))}
                   </select>
                 </span>
                 <span class="icon is-small is-left">

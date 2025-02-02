@@ -1,6 +1,5 @@
 Doing:
   - magic link for logging in
-  - supported languages for the ui
 
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
@@ -84,3 +83,4 @@ Done
 - the error page uses the full layout (should use the mini). Try login with ss@nn
 - the “Page updated” message needs to automatically disappears after a few seconds
 - better handling oif the base_url
+- supported languages for the ui
