@@ -42,17 +42,15 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
           <PageData page={page} debug={app.isDev} />
         </form>
 
-        <div class="level">
-          <div class="level-item level-right">
-            <button
-              type="button"
-              class="button is-danger is-light"
-              id="delete-page-button"
-              x-on:click="$refs.dialog.showModal()"
-            >
-              {i18n.t('EditPage.deletePage')}
-            </button>
-          </div>
+        <div class="level is-flex-direction-row is-justify-content-right">
+          <button
+            type="button"
+            class="button is-danger is-light"
+            id="delete-page-button"
+            x-on:click="$refs.dialog.showModal()"
+          >
+            {i18n.t('EditPage.deletePage')}
+          </button>
         </div>
 
         <dialog x-ref="dialog" class="card m-auto">

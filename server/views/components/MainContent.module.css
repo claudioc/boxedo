@@ -1,8 +1,17 @@
-.mainContent {
-  margin-left: 5%;
-  margin-right: 5%;
-  max-width: 900px;
-  padding: 0 5vw 10vh 5vw;
+/* normal screen styles */
+@media screen and (min-width: 769px) and (max-width: 1215px) {
+  .mainContent {
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+}
+
+/* large screen styles */
+@media screen and (min-width: 1216px) {
+  .mainContent {
+    margin-left: 15vw;
+    margin-right: 15vw;
+  }
 }
 
 @media screen and (max-width: 768px) {

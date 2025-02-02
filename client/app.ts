@@ -12,11 +12,6 @@ class App {
     document.addEventListener('DOMContentLoaded', () => {
       const cleanUrl: string = removeQueryParam(window.location.href, 'f');
       history.replaceState(null, '', cleanUrl);
-
-      const burgerToggle = document.querySelector('.navbar-burger');
-      if (burgerToggle) {
-        burgerToggle.addEventListener('click', () => window.App.toggleNavbar());
-      }
     });
   }
 

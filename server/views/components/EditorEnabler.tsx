@@ -117,7 +117,6 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
       >
         <form method="dialog" x-on:submit="App.validate">
           <h3 class="title is-2">{i18n.t('ImageDialog.title')}</h3>
-
           <div class="block">
             <div class="field">
               <label class="label" for="uploadUrl">
@@ -153,14 +152,21 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
               <p class="help">{i18n.t('ImageDialog.uploadFileHelp')}</p>
             </div>
           </div>
-          <div class="level">
-            <button type="submit" class="button" value="default">
+          <div class="level is-flex-direction-row">
+            <button
+              type="submit"
+              class="button"
+              value="default"
+              x-bind:disabled="$store.form.submitting"
+              x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
+            >
               {i18n.t('ImageDialog.uploadAction')}
             </button>
             <button
               type="button"
               class="button"
               value="cancel"
+              x-bind:disabled="$store.form.submitting"
               x-on:click="$refs.uploadDialog.close()"
             >
               {i18n.t('common.cancel')}

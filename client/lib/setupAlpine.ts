@@ -1,12 +1,16 @@
 import Alpine from 'alpinejs';
 
-export interface AppStore {
+interface AppStore {
   pageId: string;
   error: Record<string, boolean>;
   info: boolean;
   errorOn(key: string): boolean;
   some(): boolean;
   none(): void;
+}
+
+interface FormStore {
+  submitting: boolean;
 }
 
 Alpine.store('has', {
@@ -30,6 +34,10 @@ Alpine.store('editorState', {
     return !!window.App.getEditor()?.isActive('image');
   },
 });
+
+Alpine.store('form', {
+  submitting: false,
+} as FormStore);
 
 Alpine.start();
 

@@ -116,6 +116,7 @@ export const Layout = ({
           <div class={[styles.mainRight, 'column', 'p-3', 'pr-5']}>
             <button
               type="button"
+              x-on:click="window.App.toggleNavbar()"
               class={[
                 'navbar-burger',
                 'level',

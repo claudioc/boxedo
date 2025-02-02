@@ -26,7 +26,12 @@ export const PageActions = ({
       <div class=" level-left is-size-5">{title}</div>
       <menu class="level-right m-0 is-flex-direction-row">
         {actions.includes('save') && (
-          <button class="button is-text-mobile" type="submit">
+          <button
+            class="button is-text-mobile"
+            type="submit"
+            x-bind:disabled="$store.form.submitting"
+            x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
+          >
             <span class="is-hidden-mobile">
               {i18n.t('PageActions.saveAndClose')}
             </span>
@@ -39,6 +44,7 @@ export const PageActions = ({
           <a
             href={cancelUrl}
             class="button is-text-mobile"
+            x-bind:disabled="$store.form.submitting"
             x-on:click="window.onbeforeunload=null"
           >
             <span class="is-hidden-mobile">{i18n.t('PageActions.cancel')}</span>

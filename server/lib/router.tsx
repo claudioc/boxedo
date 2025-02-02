@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { pathWithFeedback, slugUrl } from './helpers';
+// import { setTimeout as delay } from 'node:timers/promises';
 import type {
   PageModel,
   NavItem,
@@ -287,7 +288,7 @@ const router = async (app: FastifyInstance) => {
       rep.header('Cache-Control', 'no-store');
 
       // Use this await to simulate a slow connection
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await delay(1000);
 
       rep.html(
         <Nav
@@ -427,6 +428,8 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
+
+      // await delay(2000);
 
       return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
 
@@ -652,10 +655,14 @@ const router = async (app: FastifyInstance) => {
       );
     }
 
+    // await delay(2000);
+
     let buffer: Buffer;
     try {
       buffer = await data.toBuffer();
-    } catch {
+    } catch (err) {
+      app.log.error('Something wrong reading the image buffer');
+      app.log.error(err);
       return rep.send(app.multipartErrors.RequestFileTooLargeError());
     }
 
