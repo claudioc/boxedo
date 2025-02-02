@@ -212,6 +212,8 @@ const addImageWithDialog = () => {
       window.App.resetForm();
     }
 
+    window.App.resetForm();
+
     return serverUrl;
   };
 
