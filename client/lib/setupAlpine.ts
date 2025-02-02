@@ -42,4 +42,5 @@ Alpine.store('form', {
 Alpine.start();
 
 const store = Alpine.store('has') as AppStore;
-export { store };
+const storeForm = Alpine.store('form') as FormStore;
+export { store, storeForm };

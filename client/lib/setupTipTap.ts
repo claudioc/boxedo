@@ -193,11 +193,13 @@ const addImageWithDialog = () => {
   const handleFileUpload = async (file: File): Promise<string> => {
     if (!file.type.startsWith('image/')) {
       alert('Only images can be uploaded');
+      window.App.resetForm();
       throw new Error('Please upload an image file');
     }
 
     if (file.size > 5 * 1024 * 1024) {
       alert('The file size exceed the 5MB limit');
+      window.App.resetForm();
       throw new Error('File size exceeds 5MB limit');
     }
 
@@ -207,6 +209,7 @@ const addImageWithDialog = () => {
     } catch (err) {
       console.error('Image upload failed:', err);
       alert('Failed saving image to server');
+      window.App.resetForm();
     }
 
     return serverUrl;

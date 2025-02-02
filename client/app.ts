@@ -1,4 +1,4 @@
-import { store } from './lib/setupAlpine';
+import { store, storeForm } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import type { TipTapEditor } from './lib/setupTipTap';
 import { removeQueryParam, isUrl } from './lib/helpers';
@@ -118,6 +118,12 @@ class App {
   toggleNavbar() {
     const nav = document.querySelector('main > div');
     nav?.classList.toggle('isOpen');
+  }
+
+  resetForm() {
+    setTimeout(() => {
+      storeForm.submitting = false;
+    }, 5);
   }
 
   livereload() {
