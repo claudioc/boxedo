@@ -52,14 +52,7 @@ export const Layout = ({
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
         <main class="columns mt-0 ml-0" data-context={context}>
           {/* "main > div" is referenced in App.ts */}
-          <div
-            class={[
-              styles.mainLeft,
-              'column',
-              'is-narrow',
-              'has-background-info-dark',
-            ]}
-          >
+          <div class={[styles.mainLeft, 'column', 'is-narrow']}>
             <header class={[styles.header, 'block']}>
               <div class="block">
                 <div class="level is-flex-direction-row">
@@ -88,7 +81,7 @@ export const Layout = ({
               <div class="block">
                 {/* The href and text is dynamically updated by our htmx extension */}
                 <a
-                  class="button"
+                  class="button is-outlined is-info"
                   href={createButtonLink}
                   data-labelNested={i18n.t('Navigation.createNestedPage')}
                 >

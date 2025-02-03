@@ -12,3 +12,6 @@ sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin dock
 sudo usermod -aG docker $USER
 sudo systemctl restart docker
 newgrp docker
+
+# Create the _users database in couchdb
+curl -X PUT http://admin:password@localhost:5984/_users

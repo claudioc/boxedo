@@ -153,24 +153,26 @@ export const EditorEnabler = ({ app }: EditorEnablerProps) => {
             </div>
           </div>
           <div class="level is-flex-direction-row">
-            <button
-              type="submit"
-              class="button"
-              value="default"
-              x-bind:disabled="$store.form.submitting"
-              x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
-            >
-              {i18n.t('ImageDialog.uploadAction')}
-            </button>
-            <button
-              type="button"
-              class="button"
-              value="cancel"
-              x-bind:disabled="$store.form.submitting"
-              x-on:click="$refs.uploadDialog.close()"
-            >
-              {i18n.t('common.cancel')}
-            </button>
+            <menu class="level-item level-right">
+              <button
+                type="submit"
+                class="button is-primary is-outlined"
+                value="default"
+                x-bind:disabled="$store.form.submitting"
+                x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
+              >
+                {i18n.t('ImageDialog.uploadAction')}
+              </button>
+              <button
+                type="button"
+                class="button is-danger is-outlined"
+                value="cancel"
+                x-bind:disabled="$store.form.submitting"
+                x-on:click="$refs.uploadDialog.close()"
+              >
+                {i18n.t('common.cancel')}
+              </button>
+            </menu>
           </div>
         </form>
       </dialog>

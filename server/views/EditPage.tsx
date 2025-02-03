@@ -45,7 +45,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
         <div class="level is-flex-direction-row is-justify-content-right">
           <button
             type="button"
-            class="button is-danger is-light"
+            class="button is-danger is-outlined"
             id="delete-page-button"
             x-on:click="$refs.dialog.showModal()"
           >
@@ -61,7 +61,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
               <menu class="level-item level-right">
                 <button
                   type="button"
-                  class="button"
+                  class="button is-primary is-outlined"
                   value="default"
                   x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
                 >
@@ -69,7 +69,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
                 </button>
                 <button
                   type="button"
-                  class="button"
+                  class="button is-danger is-outlined"
                   value="cancel"
                   x-on:click="$refs.dialog.close()"
                 >
@@ -86,7 +86,6 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
           method="post"
         />
       </PageFormWrapper>
-
       <EditorEnabler app={app} />
     </Layout>
   );

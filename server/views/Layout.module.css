@@ -1,5 +1,6 @@
 .mainLeft {
-  background-color: var(--color-primary);
+  /* background-color: #1a2234; */
+  background-color: #1e2a3b;
   min-height: 100vh;
   width: 280px !important;
 
