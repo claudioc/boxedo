@@ -150,9 +150,36 @@ const router = async (app: FastifyInstance) => {
         params: RS.MagicLinkParams,
       },
     },
-    async (_req, rep) => {
+    async (req, rep) => {
       const rs = redirectService(app, rep);
-      return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
+      const dbs = dbService(app.dbClient);
+      const magicId = req.params.magicId;
+      const { i18n } = app;
+
+      const pass = await dbs.validateMagic(magicId);
+
+      if (pass) {
+        return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
+      }
+
+      const error = i18n.t('Login.magicLinkInvalid', {
+        aNewOne: (
+          <a class="is-link" href="/auth/login">
+            {i18n.t('Login.aNewOne')}
+          </a>
+        ),
+      });
+
+      rep
+        .code(401)
+        .html(
+          <ErrorPage
+            app={app}
+            title={i18n.t('Error.unauthorized')}
+            error={error}
+            goHome={false}
+          />
+        );
     }
   );
 

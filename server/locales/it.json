@@ -52,7 +52,8 @@
     "unexpectedError": "Si è verificato un errore inatteso",
     "invalidParameters": "I parametri della richiesta non sono validi",
     "unhandledError": "Errore non gestito",
-    "pageNotFound": "Pagina non trovata"
+    "pageNotFound": "Pagina non trovata",
+    "unauthorized": "Non autorizzato"
   },
 
   "MovePage": {
@@ -178,7 +179,9 @@
     "helpEmail": "Se sei riconosciuto, riceverai un'email con un link magico",
     "allGood": "OK! Controlla la tua posta e segui le istruzioni per l'accesso immediato.",
     "emailMagicLinkSubject": "Il link magico per %{siteTitle}",
-    "emailMagicLinkText": "Usa il seguente link per accedere al sito come utente identificato: %{magicLink}"
+    "emailMagicLinkText": "Usa il seguente link per accedere al sito come utente identificato: %{magicLink}",
+    "magicLinkInvalid": "Il link che hai usato è invalido o scaduto ma puoi sempre richiederne %{aNewOne}",
+    "aNewOne": "uno nuovo"
   },
 
   "common": {

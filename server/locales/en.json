@@ -20,7 +20,8 @@
     "unexpectedError": "An unexpected error occurred",
     "invalidParameters": "Request parameters are not valid",
     "unhandledError": "Unhandled error",
-    "pageNotFound": "Page not found"
+    "pageNotFound": "Page not found",
+    "unauthorized": "Unauthorized"
   },
 
   "Feedbacks": {
@@ -178,7 +179,9 @@
     "helpEmail": "If we know you, we will send you a magic link to login",
     "allGood": "All good! Check your email and follow the instructions for immediate access.",
     "emailMagicLinkSubject": "Your magic link to %{siteTitle}",
-    "emailMagicLinkText": "Here is the link to follow to access the website as a logged in user: %{magicLink}"
+    "emailMagicLinkText": "Here is the link to follow to access the website as a logged in user: %{magicLink}",
+    "magicLinkInvalid": "The link you used is either invalid or expired, but you can always request %{aNewOne}",
+    "aNewOne": "a new one"
   },
 
   "common": {

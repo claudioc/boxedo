@@ -10,6 +10,11 @@
     "attributePosition": "auto",
     "ignore": ["dist", "assets"]
   },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
   "organizeImports": { "enabled": true },
   "linter": {
     "enabled": true,

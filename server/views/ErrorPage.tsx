@@ -6,26 +6,36 @@ import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 interface ErrorPageProps extends WithApp {
   title: string;
   error: Error | string;
+  goHome?: boolean;
 }
 
-export const ErrorPage = ({ app, title, error }: ErrorPageProps) => {
+export const ErrorPage = ({
+  app,
+  title,
+  error,
+  goHome = false,
+}: ErrorPageProps) => {
   const { i18n } = app;
   return (
     <LayoutMini app={app} title={title}>
       <h1 class={['title', 'level', 'is-justify-content-start']}>
-        <OhNoIcon title={i18n.t('NotFound.title')} size={48} />
+        <OhNoIcon title={title} size={48} />
         {title}
       </h1>
       <p class="block">{i18n.t('Error.requestFailed')}</p>
       <p class="block">
         <code>{String(error)}</code>
       </p>
-      <p class="block">
-        <a class="button" href="/">
-          <ArrowLeftIcon title={'Back home'} />
-          &nbsp;Home
-        </a>
-      </p>
+      {goHome ? (
+        <p class="block">
+          <a class="button" href="/">
+            <ArrowLeftIcon title={'Back home'} />
+            &nbsp;Home
+          </a>
+        </p>
+      ) : (
+        ''
+      )}
     </LayoutMini>
   );
 };

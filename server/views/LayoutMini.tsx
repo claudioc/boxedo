@@ -1,5 +1,6 @@
 import type { WithApp } from '~/../types';
 import { Head } from './components/Head';
+import styles from './Layout.module.css';
 
 interface LayoutMiniProps extends WithApp {
   title: string;
@@ -7,6 +8,8 @@ interface LayoutMiniProps extends WithApp {
 }
 
 export const LayoutMini = ({ app, title, children }: LayoutMiniProps) => {
+  const { settings } = app;
+
   return (
     <html lang="en">
       <Head
@@ -17,6 +20,14 @@ export const LayoutMini = ({ app, title, children }: LayoutMiniProps) => {
       />
       <body>
         <main class="hero is-fullheight">
+          <header class={[styles.header]}>
+            <div class={[styles.title, 'is-size-5']}>
+              <a href="/" class="has-text-warning">
+                {settings.siteTitle}
+              </a>
+            </div>
+          </header>
+
           <div class="hero-body">
             <div class="container">
               <div class="columns is-centered">
