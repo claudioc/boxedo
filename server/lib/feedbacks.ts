@@ -26,7 +26,10 @@ type ErrorCodes =
   | 'E_CREATING_FILE'
   | 'E_CREATING_ATTACHMENT'
   | 'E_USER_NOT_FOUND'
-  | 'E_MISSING_MAGICS_DB';
+  | 'E_MISSING_MAGICS_DB'
+  | 'E_MISSING_SESSIONS_DB'
+  | 'E_MISSING_USERS_DB'
+  | 'E_CREATING_SESSION';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -174,6 +177,18 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_MISSING_MAGICS_DB: {
     code: 127,
     message: 'The magics db is missing',
+  },
+  E_MISSING_SESSIONS_DB: {
+    code: 128,
+    message: 'The sessions db is missing',
+  },
+  E_MISSING_USERS_DB: {
+    code: 129,
+    message: 'The users db is missing',
+  },
+  E_CREATING_SESSION: {
+    code: 130,
+    message: 'An error occurred while creating a session',
   },
 } as const;
 

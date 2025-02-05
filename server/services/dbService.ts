@@ -1,6 +1,8 @@
 import type {
   SettingsModel,
   PageModel,
+  SessionModel,
+  UserModel,
   PageSelector,
   ModelName,
   NavItem,
@@ -86,6 +88,12 @@ export function dbService(client?: nano.ServerScope) {
 
   const magicsDb: DocumentScope<MagicModel> = client.db.use(dbn('magics'));
   if (!magicsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_MAGICS_DB);
+
+  const sessionDb: DocumentScope<SessionModel> = client.db.use(dbn('sessions'));
+  if (!sessionDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SESSIONS_DB);
+
+  const userDb: DocumentScope<UserModel> = client.db.use(dbn('users'));
+  if (!userDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_USERS_DB);
 
   return {
     getPageDb() {
@@ -263,6 +271,15 @@ export function dbService(client?: nano.ServerScope) {
       } catch (error) {
         console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
+      }
+    },
+
+    async createSession(session: SessionModel) {
+      try {
+        await sessionDb.insert(session);
+      } catch (error) {
+        console.log(error);
+        throw new ErrorWithFeedback(Feedbacks.E_CREATING_SESSION);
       }
     },
 
@@ -571,7 +588,7 @@ export function dbService(client?: nano.ServerScope) {
       return data;
     },
 
-    async validateMagic(magicId: string): Promise<boolean> {
+    async validateMagic(magicId: string): Promise<string | null> {
       const result = await magicsDb.find({
         selector: {
           _id: magicId,
@@ -584,7 +601,7 @@ export function dbService(client?: nano.ServerScope) {
       });
 
       if (result.docs.length === 0) {
-        return false;
+        return null;
       }
 
       // Mark token as used
@@ -592,7 +609,7 @@ export function dbService(client?: nano.ServerScope) {
       magic.used = true;
       await magicsDb.insert(magic);
 
-      return true;
+      return result.docs[0].email;
     },
 
     async getUserByEmail(email: string) {
@@ -610,56 +627,37 @@ export function dbService(client?: nano.ServerScope) {
     async nukeTests() {
       if (!isTestRun) return;
 
-      let name = dbn('pages');
-      // Ensure we are deleting the test database
-      if (name.includes('-test')) {
-        try {
-          await client.db.destroy(name);
-          await client.db.create(name);
-        } catch (error) {
-          console.log(error);
-        }
-      }
+      await this.safeNuke('pages');
 
-      name = dbn('settings');
-      // Ensure we are deleting the test database
-      if (name.includes('-test')) {
-        try {
-          await client.db.destroy(name);
-          await client.db.create(name);
-          await this.getSettings();
-        } catch (error) {
-          console.log(error);
-        }
-      }
+      await this.safeNuke('settings');
+      await this.getSettings();
 
-      name = dbn('files');
-      // Ensure we are deleting the test database
-      if (name.includes('-test')) {
-        try {
-          await client.db.destroy(name);
-          await client.db.create(name);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-
-      name = dbn('magics');
-      // Ensure we are deleting the test database
-      if (name.includes('-test')) {
-        try {
-          await client.db.destroy(name);
-          await client.db.create(name);
-        } catch (error) {
-          console.log(error);
-        }
-      }
+      await this.safeNuke('files');
+      await this.safeNuke('magics');
+      await this.safeNuke('sessions');
+      await this.safeNuke('users');
 
       try {
         await dbService._createIndexes(client);
         await dbService._createViews(client);
       } catch {
         // Index might already exist, that's fine
+      }
+    },
+
+    async safeNuke(dbName: DbName) {
+      const name = dbn(dbName);
+
+      // Ensure we are deleting the test database
+      if (!name.includes('-test')) {
+        return;
+      }
+
+      try {
+        await client.db.destroy(name);
+        await client.db.create(name);
+      } catch (error) {
+        console.log(error);
       }
     },
   };
@@ -755,6 +753,18 @@ dbService.init = async (params: DbServiceInitParams) => {
     await couchdb.db.get(dbn('magics'));
   } catch {
     await couchdb.db.create(dbn('magics'));
+  }
+
+  try {
+    await couchdb.db.get(dbn('sessions'));
+  } catch {
+    await couchdb.db.create(dbn('sessions'));
+  }
+
+  try {
+    await couchdb.db.get(dbn('users'));
+  } catch {
+    await couchdb.db.create(dbn('users'));
   }
 
   try {

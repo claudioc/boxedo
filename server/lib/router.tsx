@@ -33,6 +33,7 @@ import {
   JPEG_QUALITY,
   NAVIGATION_CACHE_KEY,
   MAGIC_TOKEN_EXPIRATION_MINUTES,
+  SEVEN_DAYS_IN_SECONDS,
 } from '~/constants';
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
@@ -156,9 +157,28 @@ const router = async (app: FastifyInstance) => {
       const magicId = req.params.magicId;
       const { i18n } = app;
 
-      const pass = await dbs.validateMagic(magicId);
+      const email = await dbs.validateMagic(magicId);
 
-      if (pass) {
+      if (email) {
+        const sessionId = dbService.generateIdFor('session');
+        await dbs.createSession({
+          _id: sessionId,
+          email,
+          created: new Date().toISOString(),
+          expires: new Date(
+            Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
+          ).toISOString(),
+        });
+
+        // Set session cookie
+        rep.setCookie('session', sessionId, {
+          path: '/',
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: SEVEN_DAYS_IN_SECONDS,
+        });
+
         return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
       }
 

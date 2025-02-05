@@ -4,14 +4,6 @@
 ```js
 // Add to router.tsx
 
-const AuthParamsSchema = {
-  type: 'object',
-  required: ['token'],
-  properties: {
-    token: { type: 'string', pattern: '^[a-z0-9]{24}$' },
-  },
-} as const;
-
 app.get<{ Params: FromSchema<typeof AuthParamsSchema> }>(
   '/auth/verify/:token',
   {
@@ -49,7 +41,7 @@ app.get<{ Params: FromSchema<typeof AuthParamsSchema> }>(
       _id: `session:${sessionId}`,
       email: result.email,
       created: new Date().toISOString(),
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+      expires: new Date(Date.now() + SEVEN_DAYS_IN_SECONDS * 1000).toISOString(), // 7 days
     });
 
     // Set session cookie
@@ -58,64 +50,13 @@ app.get<{ Params: FromSchema<typeof AuthParamsSchema> }>(
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: SEVEN_DAYS_IN_SECONDS, // 7 days
     });
 
     return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
   }
 );
 
-// Add login form route
-app.get('/auth/login', async (req, rep) => {
-  rep.html(
-    <LoginPage
-      app={app}
-      token={rep.generateCsrf()}
-      error={req.query.error}
-    />
-  );
-});
-
-// Add form submission handler
-app.post('/auth/login', {
-  schema: {
-    body: {
-      type: 'object',
-      required: ['email'],
-      properties: {
-        email: { type: 'string', format: 'email' },
-      },
-    },
-  },
-  preHandler: app.csrfProtection,
-}, async (req, rep) => {
-  const { email } = req.body;
-  const dbs = dbService(app.dbClient);
-  const rs = redirectService(app, rep);
-
-  // Check if user exists
-  const user = await dbs.getUserByEmail(email);
-  if (!user) {
-    return rs.redirectTo('/auth/login?error=unknown_user');
-  }
-
-  // Generate magic link token
-  const token = createId();
-  const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-
-  await dbs.createMagicLink({
-    _id: `magic:${token}`,
-    token,
-    email,
-    expires: expires.toISOString(),
-    used: false,
-  });
-
-  // Send email via Mailgun
-  // TODO: Add your Mailgun implementation here
-
-  return rs.homeWithFeedback(Feedbacks.S_MAGIC_LINK_SENT);
-});
 ```
 
 ## Middleware for protection
@@ -149,37 +90,6 @@ app.get('/settings', {
 });
 ```
 
-### Login component
-
-```jsx
-// Add to views/LoginPage.tsx
-const LoginPage = ({ app, token, error }: { app: FastifyInstance, token: string, error?: string }) => {
-  return (
-    <div class="container">
-      <h1 class="title">Login</h1>
-      {error && <div class="notification is-danger">Unknown email address</div>}
-      <form method="POST" action="/auth/login">
-        <input type="hidden" name="_csrf" value={token} />
-        <div class="field">
-          <label class="label">Email</label>
-          <div class="control">
-            <input
-              class="input"
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-        </div>
-        <button class="button is-primary" type="submit">
-          Send Magic Link
-        </button>
-      </form>
-    </div>
-  );
-};
-```
 
 ### dbservice updates
 

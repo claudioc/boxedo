@@ -18,7 +18,13 @@ export interface WithApp {
 }
 
 export type PluralName<T extends string> = T extends 'settings' ? T : `${T}s`;
-export type ModelName = 'settings' | 'page' | 'file' | 'magic';
+export type ModelName =
+  | 'settings'
+  | 'page'
+  | 'file'
+  | 'magic'
+  | 'session'
+  | 'user';
 export type DbName = PluralName<ModelName>;
 
 export interface SettingsModel {
@@ -68,6 +74,20 @@ export interface MagicModel {
   createdAt: string;
   expiresAt: string;
   used: boolean;
+}
+
+export interface SessionModel {
+  _id: string;
+  email: string;
+  created: string;
+  expires: string;
+}
+
+export interface UserModel {
+  _id: string;
+  email: string;
+  fullname: string;
+  created: string;
 }
 
 export interface PageModel {
