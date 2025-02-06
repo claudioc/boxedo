@@ -40,39 +40,28 @@ import sharp from 'sharp';
 import { Readable } from 'node:stream';
 
 export const createAuthHandler = (app: FastifyInstance) => {
-  return async (req: FastifyRequest, _rep: FastifyReply) => {
+  return async (req: FastifyRequest, rep: FastifyReply) => {
     const { config } = app;
 
-    // Bypass any auth check if in test
     if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
       return;
     }
 
-    console.log('RequireAuth - Request details:', {
-      url: req.url,
-      method: req.method,
-      cookies: req.cookies,
-      rawHeaders: req.headers,
-    });
-
     const sessionId = req.cookies.session;
-    console.log(sessionId);
 
-    return;
+    if (!sessionId) {
+      return rep.redirect('/auth/login');
+    }
+    const dbs = dbService(app.dbClient);
+    const session = await dbs.getSessionById(sessionId);
 
-    // if (!sessionId) {
-    //   return rep.redirect('/auth/login');
-    // }
-    // const dbs = dbService(app.dbClient);
-    // const session = await dbs.getSessionById(sessionId);
+    if (!session || new Date(session.expires) < new Date()) {
+      rep.clearCookie(SESSION_COOKIE_NAME);
+      return rep.redirect('/auth/login');
+    }
 
-    // if (!session || new Date(session.expires) < new Date()) {
-    //   rep.clearCookie(SESSION_COOKIE_NAME);
-    //   return rep.redirect('/auth/login');
-    // }
-
-    // // Add user to request for use in routes
-    // req.user = await dbs.getUserByEmail(session.email);
+    // Add user to request for use in routes
+    req.user = await dbs.getUserByEmail(session.email);
   };
 };
 
@@ -217,60 +206,16 @@ const router = async (app: FastifyInstance) => {
           ).toISOString(),
         });
 
-        const cookie = app.serializeCookie(SESSION_COOKIE_NAME, magicId, {
+        rep.setCookie(SESSION_COOKIE_NAME, sessionId, {
           path: '/',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'lax',
           maxAge: SEVEN_DAYS_IN_SECONDS,
         });
 
-        rep.header('Set-Cookie', cookie);
         return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
       }
-
-      // const email = await dbs.validateMagic(magicId);
-
-      // if (email) {
-      //   const sessionId = dbService.generateIdFor('session');
-      //   await dbs.createSession({
-      //     _id: sessionId,
-      //     email,
-      //     created: new Date().toISOString(),
-      //     expires: new Date(
-      //       Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
-      //     ).toISOString(),
-      //   });
-
-      //   // rep.setCookie(SESSION_COOKIE_NAME, sessionId, {
-      //   //   path: '/',
-      //   //   httpOnly: true,
-      //   //   secure: process.env.NODE_ENV === 'production',
-      //   //   sameSite: 'strict',
-      //   //   maxAge: SEVEN_DAYS_IN_SECONDS,
-      //   // });
-      //   const cookie = app.serializeCookie(SESSION_COOKIE_NAME, sessionId, {
-      //     path: '/',
-      //     httpOnly: true,
-      //     secure: process.env.NODE_ENV === 'production',
-      //     sameSite: 'strict',
-      //     maxAge: SEVEN_DAYS_IN_SECONDS,
-      //   });
-
-      //   rep.header('Set-Cookie', cookie);
-
-      //   console.log('Magic Link - Setting cookie:', {
-      //     sessionId,
-      //     cookies: rep.getHeader('set-cookie'),
-      //   });
-      //   console.log('Response headers:', rep.getHeaders());
-
-      //   rep.status(303);
-      //   rep.header('Location', '/');
-      //   return rep.send(''); // Force the response to be sent
-      //   // return await rep.redirect('/', 303);
-      //   // return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
-      // }
 
       const error = i18n.t('Login.magicLinkInvalid', {
         aNewOne: (

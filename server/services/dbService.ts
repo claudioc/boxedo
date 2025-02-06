@@ -287,9 +287,10 @@ export function dbService(client?: nano.ServerScope) {
       let session: SessionModel | null = null;
       try {
         session = await sessionDb.get(sessionId);
-      } catch (err: unknown) {
-        console.log(err);
-        // We don't care to manage this error
+      } catch (error: unknown) {
+        if ((error as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
       }
 
       return session;
