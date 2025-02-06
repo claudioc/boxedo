@@ -283,6 +283,34 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
+    async getSessionById(sessionId: string): Promise<SessionModel | null> {
+      let session: SessionModel | null = null;
+      try {
+        session = await sessionDb.get(sessionId);
+      } catch (err: unknown) {
+        console.log(err);
+        // We don't care to manage this error
+      }
+
+      return session;
+    },
+
+    async deleteSession(sessionId: string): Promise<void> {
+      const session = await this.getSessionById(sessionId);
+      if (!session) {
+        return;
+      }
+
+      try {
+        await sessionDb.destroy(sessionId, session._rev ?? '');
+      } catch (error) {
+        // If session doesn't exist (404) just ignore
+        if ((error as { statusCode?: number })?.statusCode !== 404) {
+          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        }
+      }
+    },
+
     async search(q: string) {
       const query = safeRegExp(q);
 
@@ -612,12 +640,13 @@ export function dbService(client?: nano.ServerScope) {
       return result.docs[0].email;
     },
 
-    async getUserByEmail(email: string) {
+    async getUserByEmail(email: string): Promise<UserModel | null> {
       if (email === 'claudio.cicali@gmail.com') {
         return {
           _id: 'user:1',
           email: 'claudio.cicali@gmail.com',
-          name: 'Claudio Cicali',
+          created: new Date().toISOString(),
+          fullname: 'Claudio Cicali',
         };
       }
 

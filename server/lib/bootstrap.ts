@@ -9,6 +9,7 @@ import path from 'node:path';
 import router from './router';
 import {
   ConfigEnvSchema,
+  type UserModel,
   type ConfigEnv,
   type NodeEnv,
   type SettingsModel,
@@ -28,14 +29,19 @@ import { phrases, type SupportedLocales } from '../locales/phrases';
 
 declare module 'fastify' {
   interface FastifyInstance {
+    // The config is automatically loaded by the fastifyEnv plugin
+    // and validated against the schema defined in types
     config: ConfigEnv;
-    isDev: boolean;
+    is: (env: NodeEnv) => boolean;
     settings: SettingsModel;
     dbClient: DbClient;
     i18n: i18nExtended;
     feedbackCode: number;
     cache: Cache;
     emailService: EmailService;
+  }
+  interface FastifyRequest {
+    user: UserModel | null;
   }
 }
 
@@ -70,13 +76,15 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
+await app.register(fastifyEnv, { schema: ConfigEnvSchema });
+
 const emailService = EmailService.getInstance();
 
 await emailService.initialize({
-  type: process.env.EMAIL_PROVIDER ?? '',
-  apiKey: process.env.EMAIL_API_KEY ?? '',
-  domain: process.env.EMAIL_DOMAIN ?? '',
-  host: process.env.EMAIL_HOST ?? '',
+  type: app.config.EMAIL_PROVIDER ?? '',
+  apiKey: app.config.EMAIL_API_KEY ?? '',
+  domain: app.config.EMAIL_DOMAIN ?? '',
+  host: app.config.EMAIL_HOST ?? '',
 });
 
 app.decorate('emailService', emailService);
@@ -85,22 +93,22 @@ try {
   app.decorate(
     'dbClient',
     await dbService.init({
-      serverUrl: process.env.COUCHDB_URL ?? '',
-      username: process.env.COUCHDB_USER ?? '',
-      password: process.env.COUCHDB_PASSWORD ?? '',
-      env: process.env.NODE_ENV as NodeEnv,
+      serverUrl: app.config.COUCHDB_URL ?? '',
+      username: app.config.COUCHDB_USER ?? '',
+      password: app.config.COUCHDB_PASSWORD ?? '',
+      env: app.config.NODE_ENV,
     })
   );
 } catch {
   throw new Error('Cannot establish a database connection.');
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
 const dbs = await dbService(app.dbClient);
-const settings = await dbs.getSettings(app.config);
+const settings = await dbs.getSettings();
 
 await app.register(fastifyI18n, {
   defaultLocale: settings.siteLang as SupportedLocales,
@@ -109,50 +117,50 @@ await app.register(fastifyI18n, {
 app.i18n.switchTo(settings.siteLang as SupportedLocales);
 
 app.decorate('settings', settings);
-app.decorate('isDev', process.env.NODE_ENV !== 'production');
+app.decorate('is', (env: NodeEnv) => env === app.config.NODE_ENV);
 
-await app.register(fastifyEnv, { schema: ConfigEnvSchema }).then(() => {
-  app
-    .register(fastifyCookie)
-    .register(fastifyCache)
-    .register(multipart)
-    .register(fastifyFeedback)
-    .register(fastifyFavicon, {
-      path: './assets',
-      name: 'favicon.ico',
-      maxAge: 3600,
-    })
-    .register(fastifyFormbody)
-    .register(kitaHtmlPlugin)
-    .register(helmet, {
-      referrerPolicy: {
-        policy: 'same-origin',
+await app
+  .register(fastifyCookie, {
+    hook: 'onRequest',
+  })
+  .register(fastifyCache)
+  .register(multipart)
+  .register(fastifyFeedback)
+  .register(fastifyFavicon, {
+    path: './assets',
+    name: 'favicon.ico',
+    maxAge: 3600,
+  })
+  .register(fastifyFormbody)
+  .register(kitaHtmlPlugin)
+  .register(helmet, {
+    referrerPolicy: {
+      policy: 'same-origin',
+    },
+    contentSecurityPolicy: {
+      // If you get stuck in CSP, try this: crossOriginEmbedderPolicy: false,
+      directives: {
+        'script-src': [
+          'http://localhost:35729/',
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+        ],
+        'img-src': ['http:', 'https:', 'data:', 'blob:'],
+        'connect-src': ['http:', "'self'", 'ws:'],
+        'default-src': ["'self'", 'ws:'],
       },
-      contentSecurityPolicy: {
-        // If you get stuck in CSP, try this: crossOriginEmbedderPolicy: false,
-        directives: {
-          'script-src': [
-            'http://localhost:35729/',
-            "'self'",
-            "'unsafe-inline'",
-            "'unsafe-eval'",
-          ],
-          'img-src': ['http:', 'https:', 'data:', 'blob:'],
-          'connect-src': ['http:', "'self'", 'ws:'],
-          'default-src': ["'self'", 'ws:'],
-        },
-      },
-      hsts: app.config.NODE_ENV === 'production',
-    })
-    .register(staticServe, {
-      root: path.join(__dirname, ASSETS_PATH),
-      prefix: `/${ASSETS_MOUNT_POINT}`,
-    })
-    .register(router)
-    .after(() => {
-      app.log.info('Application initialized.');
-    });
-});
+    },
+    hsts: app.config.NODE_ENV === 'production',
+  })
+  .register(staticServe, {
+    root: path.join(__dirname, ASSETS_PATH),
+    prefix: `/${ASSETS_MOUNT_POINT}`,
+  })
+  .register(router)
+  .after(() => {
+    app.log.info('Application initialized.');
+  });
 
 export default (isTestRun = false) => {
   // At the moment we use the same server for testing purposes

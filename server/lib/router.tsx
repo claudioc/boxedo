@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { pathWithFeedback, slugUrl } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
@@ -34,9 +34,47 @@ import {
   NAVIGATION_CACHE_KEY,
   MAGIC_TOKEN_EXPIRATION_MINUTES,
   SEVEN_DAYS_IN_SECONDS,
+  SESSION_COOKIE_NAME,
 } from '~/constants';
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
+
+export const createAuthHandler = (app: FastifyInstance) => {
+  return async (req: FastifyRequest, _rep: FastifyReply) => {
+    const { config } = app;
+
+    // Bypass any auth check if in test
+    if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
+      return;
+    }
+
+    console.log('RequireAuth - Request details:', {
+      url: req.url,
+      method: req.method,
+      cookies: req.cookies,
+      rawHeaders: req.headers,
+    });
+
+    const sessionId = req.cookies.session;
+    console.log(sessionId);
+
+    return;
+
+    // if (!sessionId) {
+    //   return rep.redirect('/auth/login');
+    // }
+    // const dbs = dbService(app.dbClient);
+    // const session = await dbs.getSessionById(sessionId);
+
+    // if (!session || new Date(session.expires) < new Date()) {
+    //   rep.clearCookie(SESSION_COOKIE_NAME);
+    //   return rep.redirect('/auth/login');
+    // }
+
+    // // Add user to request for use in routes
+    // req.user = await dbs.getUserByEmail(session.email);
+  };
+};
 
 /**
  * Encapsulates the routes
@@ -44,50 +82,58 @@ import { Readable } from 'node:stream';
  * @param {Object} options plugin options, refer to https://www.fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
 const router = async (app: FastifyInstance) => {
+  const requireAuth = createAuthHandler(app);
+
   // The home page, folks
-  app.get('/', async (req, rep) => {
-    const dbs = dbService(app.dbClient);
-    const isHtmx = req.headers['hx-request'];
-    const { settings } = app;
+  app.get(
+    '/',
+    {
+      preHandler: requireAuth,
+    },
+    async (req, rep) => {
+      const dbs = dbService(app.dbClient);
+      const isHtmx = req.headers['hx-request'];
+      const { settings } = app;
 
-    // We consider 3 scenarios
-    // 1. No pages at all (first installation): we show the welcome page
-    // 2. One or more pages exist but the landing page is not defined: we show the first page top-level page
-    // 3. The landing page exists: we show the landing page
+      // We consider 3 scenarios
+      // 1. No pages at all (first installation): we show the welcome page
+      // 2. One or more pages exist but the landing page is not defined: we show the first page top-level page
+      // 3. The landing page exists: we show the landing page
 
-    // Do we have any page at all?
-    const pageCount = await dbs.countPages();
+      // Do we have any page at all?
+      const pageCount = await dbs.countPages();
 
-    let landingPage: PageModel | null = null;
-    if (settings.landingPageId) {
-      landingPage = await dbs.getPageById(settings.landingPageId);
-    } else {
-      if (pageCount > 0) {
-        // Decision: if there is no landing page, we show the first page
-        const topLevels = await dbs.getTopLevelPages();
-        landingPage = topLevels[0] || null;
+      let landingPage: PageModel | null = null;
+      if (settings.landingPageId) {
+        landingPage = await dbs.getPageById(settings.landingPageId);
+      } else {
+        if (pageCount > 0) {
+          // Decision: if there is no landing page, we show the first page
+          const topLevels = await dbs.getTopLevelPages();
+          landingPage = topLevels[0] || null;
+        }
       }
-    }
 
-    rep.html(
-      <>
-        {landingPage && (
-          <ReadPage
-            app={app}
-            isFull={!isHtmx}
-            page={landingPage}
-            isLandingPage
-          />
-        )}
-        {!landingPage && pageCount === 0 && (
-          <ReadPage app={app} isFull={!isHtmx} isWelcome isLandingPage />
-        )}
-        {!landingPage && pageCount > 0 && (
-          <ReadPage app={app} isFull={!isHtmx} />
-        )}
-      </>
-    );
-  });
+      rep.html(
+        <>
+          {landingPage && (
+            <ReadPage
+              app={app}
+              isFull={!isHtmx}
+              page={landingPage}
+              isLandingPage
+            />
+          )}
+          {!landingPage && pageCount === 0 && (
+            <ReadPage app={app} isFull={!isHtmx} isWelcome isLandingPage />
+          )}
+          {!landingPage && pageCount > 0 && (
+            <ReadPage app={app} isFull={!isHtmx} />
+          )}
+        </>
+      );
+    }
+  );
 
   app.get('/auth/login', async (_req, rep) => {
     rep.html(<LoginPage app={app} token={rep.generateCsrf()} />);
@@ -125,7 +171,7 @@ const router = async (app: FastifyInstance) => {
           name: settings.siteTitle,
           email: config.EMAIL_FROM_EMAIL ?? '',
         },
-        to: { name: user.name, email: user.email },
+        to: { name: user.fullname, email: user.email },
         subject: i18n.t('Login.emailMagicLinkSubject', {
           siteTitle: settings.siteTitle,
         }),
@@ -159,8 +205,9 @@ const router = async (app: FastifyInstance) => {
 
       const email = await dbs.validateMagic(magicId);
 
+      const sessionId = dbService.generateIdFor('session');
+
       if (email) {
-        const sessionId = dbService.generateIdFor('session');
         await dbs.createSession({
           _id: sessionId,
           email,
@@ -170,8 +217,7 @@ const router = async (app: FastifyInstance) => {
           ).toISOString(),
         });
 
-        // Set session cookie
-        rep.setCookie('session', sessionId, {
+        const cookie = app.serializeCookie(SESSION_COOKIE_NAME, magicId, {
           path: '/',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
@@ -179,8 +225,52 @@ const router = async (app: FastifyInstance) => {
           maxAge: SEVEN_DAYS_IN_SECONDS,
         });
 
+        rep.header('Set-Cookie', cookie);
         return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
       }
+
+      // const email = await dbs.validateMagic(magicId);
+
+      // if (email) {
+      //   const sessionId = dbService.generateIdFor('session');
+      //   await dbs.createSession({
+      //     _id: sessionId,
+      //     email,
+      //     created: new Date().toISOString(),
+      //     expires: new Date(
+      //       Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
+      //     ).toISOString(),
+      //   });
+
+      //   // rep.setCookie(SESSION_COOKIE_NAME, sessionId, {
+      //   //   path: '/',
+      //   //   httpOnly: true,
+      //   //   secure: process.env.NODE_ENV === 'production',
+      //   //   sameSite: 'strict',
+      //   //   maxAge: SEVEN_DAYS_IN_SECONDS,
+      //   // });
+      //   const cookie = app.serializeCookie(SESSION_COOKIE_NAME, sessionId, {
+      //     path: '/',
+      //     httpOnly: true,
+      //     secure: process.env.NODE_ENV === 'production',
+      //     sameSite: 'strict',
+      //     maxAge: SEVEN_DAYS_IN_SECONDS,
+      //   });
+
+      //   rep.header('Set-Cookie', cookie);
+
+      //   console.log('Magic Link - Setting cookie:', {
+      //     sessionId,
+      //     cookies: rep.getHeader('set-cookie'),
+      //   });
+      //   console.log('Response headers:', rep.getHeaders());
+
+      //   rep.status(303);
+      //   rep.header('Location', '/');
+      //   return rep.send(''); // Force the response to be sent
+      //   // return await rep.redirect('/', 303);
+      //   // return rs.homeWithFeedback(Feedbacks.S_LOGIN_SUCCESS);
+      // }
 
       const error = i18n.t('Login.magicLinkInvalid', {
         aNewOne: (
@@ -202,6 +292,29 @@ const router = async (app: FastifyInstance) => {
         );
     }
   );
+
+  app.post('/auth/logout', async (req, rep) => {
+    const sessionId = req.cookies.session;
+    const dbs = dbService(app.dbClient);
+
+    if (sessionId) {
+      try {
+        await dbs.deleteSession(sessionId);
+      } catch (error) {
+        app.log.error('Error deleting session:', error);
+        // Continue with logout even if db operation fails
+      }
+    }
+
+    rep.clearCookie(SESSION_COOKIE_NAME, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    return rep.redirect('/auth/login');
+  });
 
   app.get(
     '/settings',

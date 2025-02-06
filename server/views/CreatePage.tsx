@@ -46,7 +46,7 @@ export const CreatePage = ({ app, parentPage, token }: CreatePageProps) => {
             <div id="editor-placeholder" class="block content" />
           </MainContent>
 
-          <PageData debug={app.isDev} />
+          <PageData debug={app.is('development')} />
         </form>
       </PageFormWrapper>
       <EditorEnabler app={app} />

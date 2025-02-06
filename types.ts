@@ -1,8 +1,21 @@
 import type { FastifyInstance } from 'fastify';
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
-import type { FromSchema } from 'json-schema-to-ts';
+import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-export type NodeEnv = 'development' | 'production' | 'test';
+export const nodeEnv = ['development', 'production', 'test'] as const;
+export type NodeEnv = (typeof nodeEnv)[number];
+
+export const authenticationTypes = ['none', 'magiclink'] as const;
+export type AuthenticationType = (typeof authenticationTypes)[number];
+
+export const emailProviderNames = [
+  'sendgrid',
+  'mailgun',
+  'smtp',
+  'dummy',
+  '',
+] as const;
+export type EmailProviderName = (typeof emailProviderNames)[number];
 
 export type Context =
   | 'none'
@@ -70,6 +83,7 @@ export interface FileAttachmentModel {
 
 export interface MagicModel {
   _id: string;
+  _rev?: string;
   email: string;
   createdAt: string;
   expiresAt: string;
@@ -78,6 +92,7 @@ export interface MagicModel {
 
 export interface SessionModel {
   _id: string;
+  _rev?: string;
   email: string;
   created: string;
   expires: string;
@@ -85,6 +100,7 @@ export interface SessionModel {
 
 export interface UserModel {
   _id: string;
+  _rev?: string;
   email: string;
   fullname: string;
   created: string;
@@ -140,13 +156,20 @@ export interface Feedback {
   message: string;
 }
 
+// Do not try to validate this function against JSONSchema because in that case
+// the FromSchema macro won't be able to extract the proper type.
 export const ConfigEnvSchema = {
   type: 'object',
   additionalProperties: false,
+  required: ['COUCHDB_USER', 'COUCHDB_PASSWORD'],
   properties: {
     BASE_EXTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
     BASE_INTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
-    NODE_ENV: { type: 'string', default: 'development' },
+    NODE_ENV: {
+      type: 'string',
+      default: 'development' satisfies NodeEnv,
+      enum: nodeEnv,
+    },
     COUCHDB_URL: {
       type: 'string',
       default: 'http://localhost:5984',
@@ -160,9 +183,15 @@ export const ConfigEnvSchema = {
       default: 'Content management made easy',
     },
     SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+    AUTHENTICATION_TYPE: {
+      type: 'string',
+      enum: authenticationTypes,
+      default: 'none' satisfies AuthenticationType,
+    },
     EMAIL_PROVIDER: {
       type: 'string',
-      enum: ['sendgrid', 'mailgun', 'smtp', 'dummy', ''],
+      enum: emailProviderNames,
+      default: 'dummy' satisfies EmailProviderName,
     },
     EMAIL_API_KEY: { type: 'string' },
     EMAIL_DOMAIN: { type: 'string' },
@@ -170,7 +199,26 @@ export const ConfigEnvSchema = {
     EMAIL_PORT: { type: 'integer' },
     EMAIL_FROM_EMAIL: { type: 'string' },
   },
-} as const;
+  if: {
+    properties: {
+      AUTHENTICATION_TYPE: {
+        not: { const: 'none' },
+      },
+    },
+  },
+  // biome-ignore lint/suspicious/noThenProperty:
+  then: {
+    properties: {
+      EMAIL_PROVIDER: {
+        type: 'string',
+        not: {
+          enum: ['', 'dummy'],
+        },
+      },
+    },
+    required: ['EMAIL_PROVIDER'],
+  },
+} as const satisfies JSONSchema;
 
 export type ConfigEnv = FromSchema<typeof ConfigEnvSchema>;
 

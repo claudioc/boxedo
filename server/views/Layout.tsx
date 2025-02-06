@@ -7,6 +7,7 @@ import styles from './Layout.module.css';
 import type { PageModel, Context, WithApp } from '~/../types';
 import { CogIcon } from './icons/CogIcon';
 import type { FastifyInstance } from 'fastify';
+import { LogoutIcon } from './icons/LogoutIcon';
 
 interface LayoutProps extends WithApp {
   app: FastifyInstance;
@@ -62,13 +63,27 @@ export const Layout = ({
                     </a>
                   </div>
                   <div class="level-right is-flex-direction-row">
-                    <a
-                      href="/settings"
-                      aria-label={i18n.t('Navigation.editSettings')}
-                      class="has-text-grey-lighter"
-                    >
-                      <CogIcon />
-                    </a>
+                    <menu class="level">
+                      <form method="post" action="/auth/logout">
+                        <button
+                          type="submit"
+                          aria-label={i18n.t('Login.logout')}
+                          class="has-text-grey-lighter"
+                          title={i18n.t('Login.logout')}
+                        >
+                          <LogoutIcon title={i18n.t('Login.logout')} />
+                        </button>
+                      </form>
+
+                      <a
+                        href="/settings"
+                        aria-label={i18n.t('Navigation.editSettings')}
+                        class="has-text-grey-lighter"
+                        title={i18n.t('Navigation.editSettings')}
+                      >
+                        <CogIcon />
+                      </a>
+                    </menu>
                   </div>
                 </div>
               </div>

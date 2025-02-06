@@ -181,7 +181,8 @@
     "emailMagicLinkSubject": "Il link magico per %{siteTitle}",
     "emailMagicLinkText": "Usa il seguente link per accedere al sito come utente identificato: %{magicLink}",
     "magicLinkInvalid": "Il link che hai usato è invalido o scaduto ma puoi sempre richiederne %{aNewOne}",
-    "aNewOne": "uno nuovo"
+    "aNewOne": "uno nuovo",
+    "logout": "Chiudi sessione"
   },
 
   "common": {

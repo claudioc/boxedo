@@ -1,5 +1,7 @@
 Doing:
   - magic link for logging in
+    - Add logout functionality if desired
+    - Consider rate limiting the magic link generation
 
   MVP
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object

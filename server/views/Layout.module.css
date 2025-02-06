@@ -1,5 +1,4 @@
 .mainLeft {
-  /* background-color: #1a2234; */
   background-color: #1e2a3b;
   min-height: 100vh;
   width: 280px !important;
@@ -14,8 +13,8 @@
   }
 }
 
-.mainRight {
-  height: 100vh;
+:global(#main-page-body) {
+  height: 100%;
 }
 
 @media screen and (max-width: 768px) {
@@ -23,7 +22,6 @@
     position: fixed;
     top: 0;
     bottom: 0;
-    background: white;
     z-index: 40;
     transition: inset-inline-start 0.3s ease;
     inset-inline-start: -100%;

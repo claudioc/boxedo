@@ -39,7 +39,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
               {page.pageContent}
             </div>
           </MainContent>
-          <PageData page={page} debug={app.isDev} />
+          <PageData page={page} debug={app.is('development')} />
         </form>
 
         <div class="level is-flex-direction-row is-justify-content-right">

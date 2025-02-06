@@ -181,7 +181,8 @@
     "emailMagicLinkSubject": "Your magic link to %{siteTitle}",
     "emailMagicLinkText": "Here is the link to follow to access the website as a logged in user: %{magicLink}",
     "magicLinkInvalid": "The link you used is either invalid or expired, but you can always request %{aNewOne}",
-    "aNewOne": "a new one"
+    "aNewOne": "a new one",
+    "logout": "Close session"
   },
 
   "common": {
