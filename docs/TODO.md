@@ -1,6 +1,6 @@
 Doing:
   - magic link for logging in
-    - Add logout functionality if desired
+    - find a way to pass the rep.user to the Layout
     - Consider rate limiting the magic link generation
 
   MVP
@@ -86,3 +86,4 @@ Done
 - the “Page updated” message needs to automatically disappears after a few seconds
 - better handling oif the base_url
 - supported languages for the ui
+- Add logout functionality if desired
