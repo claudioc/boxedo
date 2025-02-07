@@ -15,6 +15,7 @@ import type {
   MagicModel,
   DbName,
 } from '~/../types';
+import { DEFAULT_TEXT_SIZE } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
@@ -118,10 +119,16 @@ export function dbService(client?: nano.ServerScope) {
           siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
           siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
           siteLang: getDefaultLanguage(config),
+          textSize: config ? config?.SETTINGS_TEXT_SIZE : DEFAULT_TEXT_SIZE,
         };
 
         await settingsDb.insert(newSettings);
         return newSettings;
+      }
+
+      // Adds the future attributes
+      if (!settings.textSize) {
+        settings.textSize = DEFAULT_TEXT_SIZE;
       }
 
       return settings;
@@ -132,7 +139,8 @@ export function dbService(client?: nano.ServerScope) {
 
       try {
         await settingsDb.insert(settings);
-      } catch {
+      } catch (err) {
+        console.log(err);
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_SETTINGS);
       }
     },

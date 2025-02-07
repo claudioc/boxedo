@@ -133,7 +133,13 @@
     "newLandingPageIs": "New landing page is",
     "startTyping": "Start typing…",
     "siteTitle": "Short header title",
-    "siteTitleHelp": "This will appear at the very top left corner of the application"
+    "siteTitleHelp": "This will appear at the very top left corner of the application",
+    "textSize": "Text size of the pages",
+    "textSizeHelp": "Applies only to the content, not the UI",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "extraLarge": "Extra large"
   },
 
   "WelcomePage": {

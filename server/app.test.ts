@@ -113,6 +113,7 @@ describe('Settings', () => {
       siteLang: 'en',
       siteTitle: 'Joongle',
       siteDescription: '',
+      textSize: 'M',
     };
 
     await postUrl('/settings', settings as Record<string, string>);

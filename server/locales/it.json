@@ -133,7 +133,13 @@
     "newLandingPageIs": "La nuova pagina iniziale è",
     "startTyping": "Inizia a scrivere…",
     "siteTitle": "Breve titolo per la testata",
-    "siteTitleHelp": "Verrà visualizzato solo in alto a sinistra nell'applicazione"
+    "siteTitleHelp": "Verrà visualizzato solo in alto a sinistra nell'applicazione",
+    "textSize": "Dimensione del testo delle pagine",
+    "textSizeHelp": "Si applica solo alla dimensione del testo dei contenuti, non all'interfaccia utente",
+    "small": "Piccola",
+    "medium": "Media",
+    "large": "Grande",
+    "extraLarge": "Molto grande"
   },
 
   "WelcomePage": {

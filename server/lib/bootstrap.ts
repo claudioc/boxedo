@@ -76,6 +76,15 @@ const app = Fastify({
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
 
+if (process.env.NODE_ENV !== 'production') {
+  // Do not log assets requests
+  app.addHook('onRoute', (opts) => {
+    if (opts.path.includes('/a/')) {
+      opts.logLevel = 'silent';
+    }
+  });
+}
+
 await app.register(fastifyEnv, { schema: ConfigEnvSchema });
 
 const emailService = EmailService.getInstance();

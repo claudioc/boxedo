@@ -1,5 +1,5 @@
 import type { JSONSchema } from 'json-schema-to-ts';
-import type { ModelName } from '~/../types';
+import { supportedLanguages, textSizes, type ModelName } from '~/../types';
 
 export const IdFormat = (prefix: ModelName) =>
   ({
@@ -86,8 +86,9 @@ export const RouterSchemas = {
     landingPageId: {
       anyOf: [PageIdFormat, { type: 'null' }],
     },
-    siteLang: { type: 'string', enum: ['en', 'it'] },
+    siteLang: { type: 'string', enum: supportedLanguages },
     siteTitle: { type: 'string' },
     siteDescription: { type: 'string' },
+    textSize: { type: 'string', enum: textSizes },
   } as const),
 };

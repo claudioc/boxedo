@@ -1,4 +1,10 @@
-import type { ConfigEnv, Feedback, PageModel, UrlParts } from '~/../types';
+import {
+  DEFAULT_SUPPORTED_LANGUAGE,
+  type ConfigEnv,
+  type Feedback,
+  type PageModel,
+  type UrlParts,
+} from '~/../types';
 import { type SupportedLocales, supportedLocales } from '../locales/phrases';
 
 export const slugUrl = (slug: string) =>
@@ -15,6 +21,7 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
 export const formatDate = (date: string, def = '') => {
   if (!date) return def;
 
+  // FIXME this needs to be rethought according to the locale configuration
   return new Intl.DateTimeFormat('en-UK', {
     dateStyle: 'short',
     timeStyle: 'short',
@@ -77,13 +84,15 @@ const parsePort = (input: string | undefined): number | undefined => {
 };
 
 export const ensureValidLanguage = (candidate: string) =>
-  (supportedLocales.includes(candidate) ? candidate : 'en') as SupportedLocales;
+  (supportedLocales.includes(candidate)
+    ? candidate
+    : DEFAULT_SUPPORTED_LANGUAGE) as SupportedLocales;
 
 export const getDefaultLanguage = (
   config: ConfigEnv | undefined
 ): SupportedLocales => {
   if (!config) {
-    return 'en';
+    return DEFAULT_SUPPORTED_LANGUAGE;
   }
 
   const candidate = config.SETTINGS_LANGUAGE;

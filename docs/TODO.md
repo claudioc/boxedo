@@ -1,15 +1,16 @@
 Doing:
-  - magic link for logging in
-    - find a way to pass the rep.user to the Layout
-    - Consider rate limiting the magic link generation
+  - variable text size
 
   MVP
+  - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
 
   NEXT
+  - editing the page doesn't take into account the settings.textSize
+  - Consider rate limiting the magic link generation
   - Fetch the preview for links?
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
@@ -87,3 +88,6 @@ Done
 - better handling oif the base_url
 - supported languages for the ui
 - Add logout functionality if desired
+- find a way to pass the rep.user to the Layout
+- silence the logs for assets
+- magic link for logging in

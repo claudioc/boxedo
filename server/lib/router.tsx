@@ -180,6 +180,10 @@ const router = async (app: FastifyInstance) => {
 
       app.emailService.sendEmail(emailMessage);
 
+      if (app.is('development')) {
+        app.log.info(`${config.BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`);
+      }
+
       return rep.redirect(
         pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
       );
@@ -309,10 +313,10 @@ const router = async (app: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const { landingPageId, siteLang, siteTitle } = req.body;
+      const { landingPageId, siteLang, siteTitle, textSize } = req.body;
       const dbs = dbService(app.dbClient);
       const rs = redirectService(app, rep);
-      const { settings } = app;
+      const settings = await dbs.getSettings();
 
       if (landingPageId) {
         if (settings.landingPageId !== landingPageId) {
@@ -327,6 +331,7 @@ const router = async (app: FastifyInstance) => {
 
       settings.siteLang = siteLang;
       settings.siteTitle = siteTitle;
+      settings.textSize = textSize;
 
       app.i18n.switchTo(siteLang);
 

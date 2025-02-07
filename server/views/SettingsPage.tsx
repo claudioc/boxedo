@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { SettingsModel, PageModel, WithCtx } from '~/../types';
+import type { SettingsModel, PageModel, WithCtx, TextSize } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
@@ -106,6 +106,55 @@ export const SettingsPage = ({
               class="block results"
               x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
             />
+
+            <div class="block">
+              <div class="field">
+                <div class="label">{i18n.t('SettingsPage.textSize')}</div>
+                <div class="radios control">
+                  <label class="radio">
+                    <input
+                      type="radio"
+                      name="textSize"
+                      class="mr-1"
+                      value={'S' satisfies TextSize}
+                      checked={settings.textSize === 'S'}
+                    />
+                    {i18n.t('SettingsPage.small')}
+                  </label>
+                  <label class="radio">
+                    <input
+                      type="radio"
+                      name="textSize"
+                      class="mr-1"
+                      value={'M' satisfies TextSize}
+                      checked={settings.textSize === 'M'}
+                    />
+                    {i18n.t('SettingsPage.medium')}
+                  </label>
+                  <label class="radio">
+                    <input
+                      type="radio"
+                      name="textSize"
+                      class="mr-1"
+                      value={'L' satisfies TextSize}
+                      checked={settings.textSize === 'L'}
+                    />
+                    {i18n.t('SettingsPage.large')}
+                  </label>
+                  <label class="radio">
+                    <input
+                      type="radio"
+                      name="textSize"
+                      class="mr-1"
+                      value={'XL' satisfies TextSize}
+                      checked={settings.textSize === 'XL'}
+                    />
+                    {i18n.t('SettingsPage.extraLarge')}
+                  </label>
+                </div>
+                <p class="help">{i18n.t('SettingsPage.textSizeHelp')}</p>
+              </div>
+            </div>
 
             <div class="field">
               <label class="label" for="search">

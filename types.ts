@@ -17,6 +17,14 @@ export const emailProviderNames = [
 ] as const;
 export type EmailProviderName = (typeof emailProviderNames)[number];
 
+export const textSizes = ['S', 'M', 'L', 'XL'] as const;
+export type TextSize = (typeof textSizes)[number];
+export const DEFAULT_TEXT_SIZE: TextSize = 'M';
+
+export const supportedLanguages = ['en', 'it'] as const;
+export type SupportedLanguage = (typeof supportedLanguages)[number];
+export const DEFAULT_SUPPORTED_LANGUAGE: SupportedLanguage = 'en';
+
 export type Ctx = {
   app: FastifyInstance;
   user?: UserModel | null;
@@ -52,6 +60,7 @@ export interface SettingsModel {
   siteTitle: string;
   siteDescription: string;
   siteLang: string;
+  textSize: TextSize;
 }
 
 export interface FileModel {
@@ -182,12 +191,20 @@ export const ConfigEnvSchema = {
     COUCHDB_USER: { type: 'string' },
     COUCHDB_PASSWORD: { type: 'string' },
     LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
-    SETTINGS_LANGUAGE: { type: 'string', default: 'en' },
+    SETTINGS_LANGUAGE: {
+      type: 'string',
+      default: DEFAULT_SUPPORTED_LANGUAGE satisfies SupportedLanguage,
+    },
     SETTINGS_DESCRIPTION: {
       type: 'string',
       default: 'Content management made easy',
     },
     SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+    SETTINGS_TEXT_SIZE: {
+      type: 'string',
+      enum: textSizes,
+      default: DEFAULT_TEXT_SIZE satisfies TextSize,
+    },
     AUTHENTICATION_TYPE: {
       type: 'string',
       enum: authenticationTypes,
