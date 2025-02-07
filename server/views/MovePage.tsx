@@ -9,9 +9,10 @@ import { MainContent } from './components/MainContent';
 export interface MovePageProps extends WithCtx {
   page: PageModel;
   parent: PageModel | null;
+  token: string;
 }
 
-export const MovePage = ({ ctx, page, parent }: MovePageProps) => {
+export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
   const { i18n } = ctx.app;
 
   return (
@@ -49,6 +50,7 @@ export const MovePage = ({ ctx, page, parent }: MovePageProps) => {
 
             <input type="hidden" name="moveToTop" x-model="moveToTop" />
             <input type="hidden" name="newParentId" x-model="newParentId" />
+            <input type="hidden" name="_csrf" value={token} />
           </form>
 
           <div class="block">

@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -19,7 +19,7 @@ export type EmailProviderName = (typeof emailProviderNames)[number];
 
 export type Ctx = {
   app: FastifyInstance;
-  req: FastifyRequest;
+  user?: UserModel | null;
 };
 
 export type Context =

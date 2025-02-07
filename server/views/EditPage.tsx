@@ -84,7 +84,9 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
           x-ref="deleteForm"
           action={`/pages/${page._id}/delete`}
           method="post"
-        />
+        >
+          <input type="hidden" name="_csrf" value={token} />
+        </form>
       </PageFormWrapper>
       <EditorEnabler ctx={ctx} />
     </Layout>

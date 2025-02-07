@@ -43,6 +43,8 @@ export const createAuthHandler = (app: FastifyInstance) => {
   return async (req: FastifyRequest, rep: FastifyReply) => {
     const { config } = app;
 
+    req.user = null;
+
     if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
       return;
     }
@@ -107,7 +109,7 @@ const router = async (app: FastifyInstance) => {
         <>
           {landingPage && (
             <ReadPage
-              ctx={{ app, req }}
+              ctx={{ app, user: req.user }}
               isFull={!isHtmx}
               page={landingPage}
               isLandingPage
@@ -115,14 +117,14 @@ const router = async (app: FastifyInstance) => {
           )}
           {!landingPage && pageCount === 0 && (
             <ReadPage
-              ctx={{ app, req }}
+              ctx={{ app, user: req.user }}
               isFull={!isHtmx}
               isWelcome
               isLandingPage
             />
           )}
           {!landingPage && pageCount > 0 && (
-            <ReadPage ctx={{ app, req }} isFull={!isHtmx} />
+            <ReadPage ctx={{ app, user: req.user }} isFull={!isHtmx} />
           )}
         </>
       );
@@ -130,7 +132,9 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get('/auth/login', async (req, rep) => {
-    rep.html(<LoginPage ctx={{ app, req }} token={rep.generateCsrf()} />);
+    rep.html(
+      <LoginPage ctx={{ app, user: req.user }} token={rep.generateCsrf()} />
+    );
   });
 
   app.post<{
@@ -234,7 +238,7 @@ const router = async (app: FastifyInstance) => {
         .code(401)
         .html(
           <ErrorPage
-            ctx={{ app, req }}
+            ctx={{ app, user: req.user }}
             title={i18n.t('Error.unauthorized')}
             error={error}
             goHome={false}
@@ -268,6 +272,9 @@ const router = async (app: FastifyInstance) => {
 
   app.get(
     '/settings',
+    {
+      preHandler: requireAuth,
+    },
 
     async (req, rep) => {
       const dbs = dbService(app.dbClient);
@@ -282,9 +289,10 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <SettingsPage
-          ctx={{ app, req }}
+          ctx={{ app, user: req.user }}
           settings={settings}
           landingPage={landingPage}
+          token={rep.generateCsrf()}
         />
       );
     }
@@ -295,6 +303,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/settings',
     {
+      preHandler: [requireAuth, app.csrfProtection],
       schema: {
         body: RS.SettingsPageBody,
       },
@@ -338,6 +347,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/parts/titles',
     {
+      preHandler: requireAuth,
       schema: {
         querystring: RS.SearchQuery,
       },
@@ -359,6 +369,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParamsOptional> }>(
     '/parts/nav/:pageId?',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageParamsOptional,
       },
@@ -421,6 +432,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/view/:slug',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageSlugParams,
       },
@@ -439,7 +451,11 @@ const router = async (app: FastifyInstance) => {
         rep.header('x-rev', page._rev);
 
         return rep.html(
-          <ReadPage ctx={{ app, req }} isFull={!isHtmx} page={page} />
+          <ReadPage
+            ctx={{ app, user: req.user }}
+            isFull={!isHtmx}
+            page={page}
+          />
         );
       }
 
@@ -456,7 +472,7 @@ const router = async (app: FastifyInstance) => {
         .code(404)
         .html(
           <NotFound
-            ctx={{ app, req }}
+            ctx={{ app, user: req.user }}
             title={app.i18n.t('Error.pageNotFound')}
           />
         );
@@ -466,6 +482,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/edit',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageParams,
       },
@@ -484,7 +501,9 @@ const router = async (app: FastifyInstance) => {
 
       rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 
-      rep.html(<EditPage ctx={{ app, req }} page={page} token={token} />);
+      rep.html(
+        <EditPage ctx={{ app, user: req.user }} page={page} token={token} />
+      );
     }
   );
 
@@ -498,7 +517,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         params: RS.PageParams,
       },
-      preHandler: app.csrfProtection,
+      preHandler: [requireAuth, app.csrfProtection],
     },
     async (req, rep) => {
       const { pageId } = req.params;
@@ -573,6 +592,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/move',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageParams,
       },
@@ -597,7 +617,14 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      rep.html(<MovePage ctx={{ app, req }} page={page} parent={parent} />);
+      rep.html(
+        <MovePage
+          ctx={{ app, user: req.user }}
+          page={page}
+          parent={parent}
+          token={rep.generateCsrf()}
+        />
+      );
     }
   );
 
@@ -607,6 +634,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/move',
     {
+      preHandler: [requireAuth, app.csrfProtection],
       schema: {
         body: RS.MovePageBody,
         params: RS.PageParams,
@@ -673,6 +701,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/reorder',
     {
+      preHandler: requireAuth,
       schema: {
         body: RS.ReorderPageBody,
         params: RS.PageParams,
@@ -713,6 +742,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/delete',
     {
+      preHandler: [requireAuth, app.csrfProtection],
       schema: {
         params: RS.PageParams,
       },
@@ -748,116 +778,122 @@ const router = async (app: FastifyInstance) => {
   // An alternative approach is to use the attachments for each _page_ document, but this would delete all the
   // attachments if the page is deleted. This is not a problem for the current implementation (because there is
   // now way at the moment to share an uploaded file), but in the future a media explorer could be implemented.
-  app.post('/uploads', async (req, rep) => {
-    const rs = redirectService(app, rep);
-    const dbs = dbService(app.dbClient);
+  app.post(
+    '/uploads',
+    {
+      preHandler: requireAuth,
+    },
+    async (req, rep) => {
+      const rs = redirectService(app, rep);
+      const dbs = dbService(app.dbClient);
 
-    if (!req.isMultipart()) {
-      return rs.bailWithError(
-        400,
-        'Invalid file type. Please upload an image.'
-      );
+      if (!req.isMultipart()) {
+        return rs.bailWithError(
+          400,
+          'Invalid file type. Please upload an image.'
+        );
+      }
+
+      const options = { limits: { fileSize: MAX_IMAGE_SIZE, files: 1 } };
+      const data = await req.file(options);
+      if (!data) {
+        return rs.bailWithError(
+          400,
+          'Invalid file type. Please upload an image.'
+        );
+      }
+
+      // Check if it's an image
+      if (!data.mimetype.startsWith('image/')) {
+        return rs.bailWithError(
+          400,
+          'Invalid file type. Please upload an image.'
+        );
+      }
+
+      // await delay(2000);
+
+      let buffer: Buffer;
+      try {
+        buffer = await data.toBuffer();
+      } catch (err) {
+        app.log.error('Something wrong reading the image buffer');
+        app.log.error(err);
+        return rep.send(app.multipartErrors.RequestFileTooLargeError());
+      }
+
+      const imageInfo = await sharp(buffer).metadata();
+
+      // Determine if resizing is needed
+      const needsResize =
+        (imageInfo.width || 0) > MAX_IMAGE_DIMENSION ||
+        (imageInfo.height || 0) > MAX_IMAGE_DIMENSION;
+
+      // Process image if needed
+      let processedBuffer = buffer;
+      let finalMimeType = data.mimetype;
+      if (needsResize) {
+        processedBuffer = await sharp(buffer)
+          .resize(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION, {
+            withoutEnlargement: true, // Don't upscale smaller images
+            fit: 'inside', // Maintain aspect ratio
+          })
+          .jpeg({ quality: JPEG_QUALITY }) // Convert to JPEG with good quality
+          .toBuffer();
+        finalMimeType = 'image/jpeg';
+      }
+
+      const fileId = dbService.generateIdFor('file');
+
+      const doc: FileModel = {
+        _id: fileId,
+        originalName: data.filename,
+        originalMimetype: data.mimetype,
+        originalSize: buffer.length,
+        processedSize: processedBuffer.length,
+        processedMimetype: finalMimeType,
+        originalDimensions: {
+          width: imageInfo.width ?? 0,
+          height: imageInfo.height ?? 0,
+        },
+        uploadedAt: new Date().toISOString(),
+      };
+
+      let fileRev: string;
+      try {
+        const { rev } = await dbs.insertFile(doc);
+        fileRev = rev;
+      } catch (err) {
+        return rs.bailWithError(500, err);
+      }
+
+      const stream = Readable.from(processedBuffer);
+
+      const attachment: FileAttachmentModel = {
+        fileId,
+        attachmentName: data.filename,
+        attachment: stream,
+        contentType: finalMimeType,
+        params: { rev: fileRev },
+      };
+
+      try {
+        await dbs.insertFileAttachment(attachment);
+      } catch (err) {
+        return rs.bailWithError(500, err);
+      }
+
+      return {
+        success: true,
+        id: fileId,
+        filename: data.filename,
+        originalSize: buffer.length,
+        processedSize: processedBuffer.length,
+        wasResized: needsResize,
+        url: `/uploads/${fileId}/${encodeURIComponent(data.filename)}`,
+      };
     }
-
-    const options = { limits: { fileSize: MAX_IMAGE_SIZE, files: 1 } };
-    const data = await req.file(options);
-    if (!data) {
-      return rs.bailWithError(
-        400,
-        'Invalid file type. Please upload an image.'
-      );
-    }
-
-    // Check if it's an image
-    if (!data.mimetype.startsWith('image/')) {
-      return rs.bailWithError(
-        400,
-        'Invalid file type. Please upload an image.'
-      );
-    }
-
-    // await delay(2000);
-
-    let buffer: Buffer;
-    try {
-      buffer = await data.toBuffer();
-    } catch (err) {
-      app.log.error('Something wrong reading the image buffer');
-      app.log.error(err);
-      return rep.send(app.multipartErrors.RequestFileTooLargeError());
-    }
-
-    const imageInfo = await sharp(buffer).metadata();
-
-    // Determine if resizing is needed
-    const needsResize =
-      (imageInfo.width || 0) > MAX_IMAGE_DIMENSION ||
-      (imageInfo.height || 0) > MAX_IMAGE_DIMENSION;
-
-    // Process image if needed
-    let processedBuffer = buffer;
-    let finalMimeType = data.mimetype;
-    if (needsResize) {
-      processedBuffer = await sharp(buffer)
-        .resize(MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION, {
-          withoutEnlargement: true, // Don't upscale smaller images
-          fit: 'inside', // Maintain aspect ratio
-        })
-        .jpeg({ quality: JPEG_QUALITY }) // Convert to JPEG with good quality
-        .toBuffer();
-      finalMimeType = 'image/jpeg';
-    }
-
-    const fileId = dbService.generateIdFor('file');
-
-    const doc: FileModel = {
-      _id: fileId,
-      originalName: data.filename,
-      originalMimetype: data.mimetype,
-      originalSize: buffer.length,
-      processedSize: processedBuffer.length,
-      processedMimetype: finalMimeType,
-      originalDimensions: {
-        width: imageInfo.width ?? 0,
-        height: imageInfo.height ?? 0,
-      },
-      uploadedAt: new Date().toISOString(),
-    };
-
-    let fileRev: string;
-    try {
-      const { rev } = await dbs.insertFile(doc);
-      fileRev = rev;
-    } catch (err) {
-      return rs.bailWithError(500, err);
-    }
-
-    const stream = Readable.from(processedBuffer);
-
-    const attachment: FileAttachmentModel = {
-      fileId,
-      attachmentName: data.filename,
-      attachment: stream,
-      contentType: finalMimeType,
-      params: { rev: fileRev },
-    };
-
-    try {
-      await dbs.insertFileAttachment(attachment);
-    } catch (err) {
-      return rs.bailWithError(500, err);
-    }
-
-    return {
-      success: true,
-      id: fileId,
-      filename: data.filename,
-      originalSize: buffer.length,
-      processedSize: processedBuffer.length,
-      wasResized: needsResize,
-      url: `/uploads/${fileId}/${encodeURIComponent(data.filename)}`,
-    };
-  });
+  );
 
   // This same pattern is used in the extractFileRefsFrom helper
   app.get<{
@@ -865,6 +901,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/uploads/:fileId/:filename',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.UploadParams,
       },
@@ -896,6 +933,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/create',
     {
+      preHandler: requireAuth,
       schema: {
         querystring: RS.CreatePageQuery,
       },
@@ -919,7 +957,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       rep.html(
-        <CreatePage ctx={{ app, req }} parentPage={parentPage} token={token} />
+        <CreatePage
+          ctx={{ app, user: req.user }}
+          parentPage={parentPage}
+          token={token}
+        />
       );
     }
   );
@@ -934,7 +976,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         querystring: RS.CreatePageQuery,
       },
-      preHandler: app.csrfProtection,
+      preHandler: [requireAuth, app.csrfProtection],
     },
     async (req, rep) => {
       const { parentPageId } = req.query;
@@ -1005,6 +1047,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/search',
     {
+      preHandler: requireAuth,
       schema: {
         querystring: RS.SearchQuery,
       },
@@ -1035,7 +1078,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       rep.html(
-        <SearchResults ctx={{ app, req }} query={q} results={results} />
+        <SearchResults
+          ctx={{ app, user: req.user }}
+          query={q}
+          results={results}
+        />
       );
     }
   );
@@ -1043,6 +1090,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/history',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageParams,
       },
@@ -1060,7 +1108,11 @@ const router = async (app: FastifyInstance) => {
       const history = await dbs.getPageHistory(page);
 
       rep.html(
-        <PageHistory ctx={{ app, req }} page={page} history={history} />
+        <PageHistory
+          ctx={{ app, user: req.user }}
+          page={page}
+          history={history}
+        />
       );
     }
   );
@@ -1068,6 +1120,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageWithVersionParams> }>(
     '/pages/:pageId/history/:version',
     {
+      preHandler: requireAuth,
       schema: {
         params: RS.PageWithVersionParams,
       },
@@ -1091,7 +1144,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <ReadPageVersion
-          ctx={{ app, req }}
+          ctx={{ app, user: req.user }}
           page={page}
           item={historyItem}
           version={version}
@@ -1175,7 +1228,10 @@ const router = async (app: FastifyInstance) => {
     await rep
       .code(404)
       .html(
-        <NotFound ctx={{ app, req }} title={app.i18n.t('Error.pageNotFound')} />
+        <NotFound
+          ctx={{ app, user: req.user }}
+          title={app.i18n.t('Error.pageNotFound')}
+        />
       );
   });
 
@@ -1197,7 +1253,7 @@ const router = async (app: FastifyInstance) => {
       rep.code(400);
       rep.html(
         <ErrorPage
-          ctx={{ app, req }}
+          ctx={{ app, user: req.user }}
           title={app.i18n.t('Error.invalidParameters')}
           error={err}
         />
@@ -1208,7 +1264,7 @@ const router = async (app: FastifyInstance) => {
     rep.code(500);
     rep.html(
       <ErrorPage
-        ctx={{ app, req }}
+        ctx={{ app, user: req.user }}
         title={app.i18n.t('Error.unhandledError')}
         error={err}
       />

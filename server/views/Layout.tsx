@@ -29,6 +29,8 @@ export const Layout = ({
   withCreateButton = true,
 }: LayoutProps) => {
   const { feedbackCode, i18n, settings } = ctx.app;
+  const user = ctx.user;
+
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -62,16 +64,20 @@ export const Layout = ({
                   </div>
                   <div class="level-right is-flex-direction-row">
                     <menu class="level">
-                      <form method="post" action="/auth/logout">
-                        <button
-                          type="submit"
-                          aria-label={i18n.t('Login.logout')}
-                          class="has-text-grey-lighter"
-                          title={i18n.t('Login.logout')}
-                        >
-                          <LogoutIcon title={i18n.t('Login.logout')} />
-                        </button>
-                      </form>
+                      {user ? (
+                        <form method="post" action="/auth/logout">
+                          <button
+                            type="submit"
+                            aria-label={i18n.t('Login.logout')}
+                            class="has-text-grey-lighter"
+                            title={i18n.t('Login.logout')}
+                          >
+                            <LogoutIcon title={i18n.t('Login.logout')} />
+                          </button>
+                        </form>
+                      ) : (
+                        ''
+                      )}
 
                       <a
                         href="/settings"

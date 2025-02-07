@@ -10,12 +10,14 @@ import { phraseDefinitions } from '~/locales/phrases';
 interface SettingsPageProps extends WithCtx {
   settings: SettingsModel;
   landingPage: PageModel | null;
+  token: string;
 }
 
 export const SettingsPage = ({
   ctx,
   settings,
   landingPage,
+  token,
 }: SettingsPageProps) => {
   const { i18n } = ctx.app;
   const { siteLang } = settings;
@@ -61,6 +63,7 @@ export const SettingsPage = ({
             </div>
 
             <input type="hidden" name="landingPageId" x-model="landingPageId" />
+            <input type="hidden" name="_csrf" value={token} />
 
             <div class="block">
               <p>
