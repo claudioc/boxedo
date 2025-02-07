@@ -4,13 +4,11 @@ import { Search } from './components/Search';
 import { Head } from './components/Head';
 import { getFeedbackByCode } from '~/lib/feedbacks';
 import styles from './Layout.module.css';
-import type { PageModel, Context, WithApp } from '~/../types';
+import type { PageModel, Context, WithCtx } from '~/../types';
 import { CogIcon } from './icons/CogIcon';
-import type { FastifyInstance } from 'fastify';
 import { LogoutIcon } from './icons/LogoutIcon';
 
-interface LayoutProps extends WithApp {
-  app: FastifyInstance;
+interface LayoutProps extends WithCtx {
   title: string;
   page?: PageModel | null;
   children: string | JSX.Element[] | JSX.Element;
@@ -21,7 +19,7 @@ interface LayoutProps extends WithApp {
 }
 
 export const Layout = ({
-  app,
+  ctx,
   title,
   page,
   children,
@@ -30,7 +28,7 @@ export const Layout = ({
   withEditor = false,
   withCreateButton = true,
 }: LayoutProps) => {
-  const { feedbackCode, i18n, settings } = app;
+  const { feedbackCode, i18n, settings } = ctx.app;
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
   };
@@ -42,7 +40,7 @@ export const Layout = ({
 
   return (
     <html lang="en">
-      <Head title={title} withEditor={withEditor} withVendorScripts app={app} />
+      <Head title={title} withEditor={withEditor} withVendorScripts ctx={ctx} />
       <body x-data="" {...onKeypress}>
         <script src={getBundleFilename('app')} />
         {withEditor && <script src={getBundleFilename('editor')} />}
@@ -88,7 +86,7 @@ export const Layout = ({
                 </div>
               </div>
               <div class="block">
-                <Search app={app} />
+                <Search ctx={ctx} />
               </div>
             </header>
 
@@ -143,7 +141,7 @@ export const Layout = ({
               x-show="$store.has.some()"
               x-init="setTimeout(() => $store.has.none(), 2000)"
             >
-              <Feedback app={app} feedback={getFeedbackByCode(feedbackCode)} />
+              <Feedback ctx={ctx} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
             {/* #main-page-body is used as a hx-target */}
             <div id="main-page-body">{children}</div>

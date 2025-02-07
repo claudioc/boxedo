@@ -1,22 +1,22 @@
 import { Layout } from './Layout';
-import type { PageModel, WithApp } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { MainContent } from './components/MainContent';
 
-export interface MovePageProps extends WithApp {
+export interface MovePageProps extends WithCtx {
   page: PageModel;
   parent: PageModel | null;
 }
 
-export const MovePage = ({ app, page, parent }: MovePageProps) => {
-  const { i18n } = app;
+export const MovePage = ({ ctx, page, parent }: MovePageProps) => {
+  const { i18n } = ctx.app;
 
   return (
     <Layout
-      app={app}
+      ctx={ctx}
       title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
       page={page}
       context="moving page"
@@ -24,12 +24,12 @@ export const MovePage = ({ app, page, parent }: MovePageProps) => {
       <MainContent>
         <div x-data="{newParentId: '', newParentTitle: '', moveToTop: false}">
           <div x-show="$store.has.errorOn('newParentId')">
-            <Feedback app={app} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
+            <Feedback ctx={ctx} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
           </div>
 
           <form action="" method="post" x-on:submit="App.validate">
             <PageActions
-              app={app}
+              ctx={ctx}
               title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
               actions={['save', 'cancel']}
               cancelUrl={slugUrl(page.pageSlug)}

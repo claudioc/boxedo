@@ -1,14 +1,12 @@
-import type { FastifyInstance } from 'fastify';
-import type { PageModel } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { EllipsisIcon } from '../icons/EllipsisIcon';
 
-interface PageMenuProps {
-  app: FastifyInstance;
+interface PageMenuProps extends WithCtx {
   page?: PageModel;
 }
 
-export const PageMenu = ({ app, page }: PageMenuProps) => {
-  const { i18n } = app;
+export const PageMenu = ({ ctx, page }: PageMenuProps) => {
+  const { i18n } = ctx.app;
 
   if (!page) {
     return null;

@@ -1,4 +1,4 @@
-import type { Feedback as FeedbackType, WithApp } from '~/../types';
+import type { Feedback as FeedbackType, WithCtx } from '~/../types';
 import {
   Feedbacks,
   isFeedbackError,
@@ -6,12 +6,12 @@ import {
 } from '~/lib/feedbacks';
 import styles from './Feedback.module.css';
 
-interface FeedbackProps extends WithApp {
+interface FeedbackProps extends WithCtx {
   feedback?: FeedbackType;
 }
 
-export const Feedback = ({ app, feedback }: FeedbackProps) => {
-  const { i18n } = app;
+export const Feedback = ({ ctx, feedback }: FeedbackProps) => {
+  const { i18n } = ctx.app;
 
   if (!feedback) {
     return null;

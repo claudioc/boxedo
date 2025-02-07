@@ -1,25 +1,24 @@
-import type { FastifyInstance } from 'fastify';
 import { LayoutMini } from './LayoutMini';
 import { getFeedbackByCode, isFeedbackError } from '~/lib/feedbacks';
 import { Feedback } from './components/Feedback';
+import type { WithCtx } from '~/../types';
 
-interface LoginPageProps {
-  app: FastifyInstance;
+interface LoginPageProps extends WithCtx {
   token: string;
 }
 
-export const LoginPage = ({ app, token }: LoginPageProps) => {
-  const { i18n, settings, feedbackCode } = app;
+export const LoginPage = ({ ctx, token }: LoginPageProps) => {
+  const { i18n, settings, feedbackCode } = ctx.app;
 
   const feedback = getFeedbackByCode(feedbackCode);
 
   return (
     <LayoutMini
-      app={app}
+      ctx={ctx}
       title={i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}
     >
       <div class="container">
-        <Feedback app={app} feedback={feedback} />
+        <Feedback ctx={ctx} feedback={feedback} />
 
         <h1 class="title">
           {i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}

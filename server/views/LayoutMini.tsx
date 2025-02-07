@@ -1,14 +1,14 @@
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 import { Head } from './components/Head';
 import styles from './Layout.module.css';
 
-interface LayoutMiniProps extends WithApp {
+interface LayoutMiniProps extends WithCtx {
   title: string;
   children: string | JSX.Element[] | JSX.Element;
 }
 
-export const LayoutMini = ({ app, title, children }: LayoutMiniProps) => {
-  const { settings } = app;
+export const LayoutMini = ({ ctx, title, children }: LayoutMiniProps) => {
+  const { settings } = ctx.app;
 
   return (
     <html lang="en">
@@ -16,7 +16,7 @@ export const LayoutMini = ({ app, title, children }: LayoutMiniProps) => {
         title={title}
         withEditor={false}
         withVendorScripts={false}
-        app={app}
+        ctx={ctx}
       />
       <body>
         <main class="hero is-fullheight">

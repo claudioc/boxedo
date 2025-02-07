@@ -1,10 +1,10 @@
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 import { CancelIcon } from '../icons/CancelIcon';
 import { SaveIcon } from '../icons/SaveIcon';
 
 type PageAction = 'save' | 'cancel';
 
-interface PageActionsProps extends WithApp {
+interface PageActionsProps extends WithCtx {
   actions: PageAction[];
   cancelUrl: string;
   title: string;
@@ -14,12 +14,12 @@ interface PageActionsProps extends WithApp {
  * The menu that shows up at the top of any form page (edit / create)
  */
 export const PageActions = ({
-  app,
+  ctx,
   actions,
   cancelUrl,
   title,
 }: PageActionsProps) => {
-  const { i18n } = app;
+  const { i18n } = ctx.app;
 
   return (
     <div class="level is-flex-direction-row">

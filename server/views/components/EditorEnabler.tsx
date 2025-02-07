@@ -1,4 +1,4 @@
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 import {
   BoldIcon,
   ItalicIcon,
@@ -22,10 +22,10 @@ import {
 
 import styles from './EditorEnabler.module.css';
 
-interface EditorEnablerProps extends WithApp {}
+interface EditorEnablerProps extends WithCtx {}
 
-export const EditorEnabler = ({ app }: EditorEnablerProps) => {
-  const { i18n } = app;
+export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
+  const { i18n } = ctx.app;
 
   return (
     <>

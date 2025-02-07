@@ -1,15 +1,15 @@
 import { ValidationErrors } from '~/views/components/ValidationErrors';
-import type { WithApp } from '../../../types';
+import type { WithCtx } from '../../../types';
 
-interface PageFormWrapperProps extends WithApp {
+interface PageFormWrapperProps extends WithCtx {
   children: string | JSX.Element[] | JSX.Element;
 }
 
-export const PageFormWrapper = ({ app, children }: PageFormWrapperProps) => (
+export const PageFormWrapper = ({ ctx, children }: PageFormWrapperProps) => (
   <div
-    x-init={`window.onbeforeunload=${app.is('development') ? 'null' : 'function() { return true };'}`}
+    x-init={`window.onbeforeunload=${ctx.app.is('development') ? 'null' : 'function() { return true };'}`}
   >
-    <ValidationErrors app={app} />
+    <ValidationErrors ctx={ctx} />
     {children}
   </div>
 );

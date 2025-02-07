@@ -1,19 +1,19 @@
 import { cssFile } from '~/lib/assets';
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 
-interface HeadProps extends WithApp {
+interface HeadProps extends WithCtx {
   title: string;
   withEditor: boolean;
   withVendorScripts?: boolean;
 }
 
 export const Head = ({
-  app,
+  ctx,
   title,
   withEditor,
   withVendorScripts = true,
 }: HeadProps) => {
-  const { settings } = app;
+  const { settings } = ctx.app;
 
   return (
     <head>

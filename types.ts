@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -17,6 +17,11 @@ export const emailProviderNames = [
 ] as const;
 export type EmailProviderName = (typeof emailProviderNames)[number];
 
+export type Ctx = {
+  app: FastifyInstance;
+  req: FastifyRequest;
+};
+
 export type Context =
   | 'none'
   | 'editing page'
@@ -26,8 +31,8 @@ export type Context =
 
 type WithoutId<T> = Omit<T, '_id' | '_rev'>;
 
-export interface WithApp {
-  app: FastifyInstance;
+export interface WithCtx {
+  ctx: Ctx;
 }
 
 export type PluralName<T extends string> = T extends 'settings' ? T : `${T}s`;

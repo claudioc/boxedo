@@ -1,8 +1,8 @@
 import { SearchIcon } from '~/views/icons/SearchIcon';
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 
-export const Search = ({ app }: WithApp) => {
-  const { i18n } = app;
+export const Search = ({ ctx }: WithCtx) => {
+  const { i18n } = ctx.app;
 
   return (
     <form action="/search" method="get">

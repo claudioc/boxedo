@@ -1,18 +1,18 @@
-import type { PageModel, WithApp } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
 
-interface PageHistoryProps extends WithApp {
+interface PageHistoryProps extends WithCtx {
   page: PageModel;
   history: PageModel[];
 }
 
-export const PageHistory = ({ app, page, history }: PageHistoryProps) => {
-  const { i18n } = app;
+export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
+  const { i18n } = ctx.app;
   const len = history.length;
 
   return (
-    <Layout app={app} title="Page history" page={page}>
+    <Layout ctx={ctx} title="Page history" page={page}>
       <h1 class="title">
         <span class="has-text-grey is-size-4">
           {i18n.t('PageHistory.historyOf')}:

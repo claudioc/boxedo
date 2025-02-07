@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { SettingsModel, PageModel, WithApp } from '~/../types';
+import type { SettingsModel, PageModel, WithCtx } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
@@ -7,26 +7,26 @@ import { LanguageIcon } from './icons/Language';
 import { MainContent } from './components/MainContent';
 import { phraseDefinitions } from '~/locales/phrases';
 
-interface SettingsPageProps extends WithApp {
+interface SettingsPageProps extends WithCtx {
   settings: SettingsModel;
   landingPage: PageModel | null;
 }
 
 export const SettingsPage = ({
-  app,
+  ctx,
   settings,
   landingPage,
 }: SettingsPageProps) => {
-  const { i18n } = app;
+  const { i18n } = ctx.app;
   const { siteLang } = settings;
 
   return (
-    <Layout app={app} title={i18n.t('SettingsPage.title')}>
+    <Layout ctx={ctx} title={i18n.t('SettingsPage.title')}>
       <div
         x-data={`{landingPageId: '${landingPage ? landingPage._id : ''}', newLandingPageTitle: '', error: {landingPageId: false}}`}
       >
         <div x-show="error && error.landingPageId" class="block">
-          <Feedback app={app} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
+          <Feedback ctx={ctx} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
         <form
@@ -36,7 +36,7 @@ export const SettingsPage = ({
           x-on:submit="App.validate"
         >
           <PageActions
-            app={app}
+            ctx={ctx}
             title={i18n.t('SettingsPage.title')}
             actions={['save', 'cancel']}
             cancelUrl="/"

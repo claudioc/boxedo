@@ -1,5 +1,5 @@
 import { Layout } from './Layout';
-import type { PageModel, WithApp } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { PageActions } from './components/PageActions';
 import { PageData } from './components/PageData';
 import { EditorEnabler } from './components/EditorEnabler';
@@ -7,28 +7,28 @@ import { PageFormWrapper } from './components/PageFormWrapper';
 import { slugUrl } from '~/lib/helpers';
 import { MainContent } from './components/MainContent';
 
-export interface EditPageProps extends WithApp {
+export interface EditPageProps extends WithCtx {
   page: PageModel;
   token: string;
 }
 
-export const EditPage = ({ app, page, token }: EditPageProps) => {
-  const { i18n } = app;
+export const EditPage = ({ ctx, page, token }: EditPageProps) => {
+  const { i18n } = ctx.app;
 
   return (
     <Layout
-      app={app}
+      ctx={ctx}
       title={i18n.t('EditPage.editingPage', { title: page.pageTitle })}
       page={page}
       withEditor
       context="editing page"
     >
-      <PageFormWrapper app={app}>
+      <PageFormWrapper ctx={ctx}>
         <form action="" method="post" class="block" x-on:submit="App.validate">
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
           <PageActions
-            app={app}
+            ctx={ctx}
             actions={['save', 'cancel']}
             cancelUrl={slugUrl(page.pageSlug)}
             title={i18n.t('EditPage.title')}
@@ -39,7 +39,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
               {page.pageContent}
             </div>
           </MainContent>
-          <PageData page={page} debug={app.is('development')} />
+          <PageData page={page} debug={ctx.app.is('development')} />
         </form>
 
         <div class="level is-flex-direction-row is-justify-content-right">
@@ -86,7 +86,7 @@ export const EditPage = ({ app, page, token }: EditPageProps) => {
           method="post"
         />
       </PageFormWrapper>
-      <EditorEnabler app={app} />
+      <EditorEnabler ctx={ctx} />
     </Layout>
   );
 };

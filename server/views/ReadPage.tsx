@@ -1,11 +1,11 @@
 import { Layout } from './Layout';
-import type { PageModel, WithApp } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { formatDate, isSameTimestamp } from '~/lib/helpers';
 import { PageMenu } from './components/PageMenu';
 import { PageBody } from './components/PageBody';
 import { MainContent } from './components/MainContent';
 
-export interface ReadPageProps extends WithApp {
+export interface ReadPageProps extends WithCtx {
   page?: PageModel;
   // There are no pages in the database so we show a nicer welcome page
   isWelcome?: boolean;
@@ -23,13 +23,13 @@ const welcomePage: PageModelPartial = {
 };
 
 export const ReadPage = ({
-  app,
+  ctx,
   page,
   isFull = true,
   isWelcome = false,
   isLandingPage = false,
 }: ReadPageProps) => {
-  const { i18n } = app;
+  const { i18n } = ctx.app;
 
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
@@ -61,7 +61,7 @@ export const ReadPage = ({
           {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
           {!isSameTimestamp(page.updatedAt, page.createdAt) &&
             ` (${formatDate(page.updatedAt)})`}
-          <PageMenu app={app} page={page} />
+          <PageMenu ctx={ctx} page={page} />
         </div>
       )}
       <MainContent>
@@ -72,7 +72,7 @@ export const ReadPage = ({
 
   return isFull ? (
     <Layout
-      app={app}
+      ctx={ctx}
       context="viewing page"
       title={actualPage.pageTitle}
       page={showPage ? page : undefined}

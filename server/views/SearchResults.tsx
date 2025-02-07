@@ -1,20 +1,20 @@
 import { Layout } from './Layout';
-import type { PageModel, WithApp } from '~/../types';
+import type { PageModel, WithCtx } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import styles from './SearchResults.module.css';
 import { DocumentIcon } from './icons/DocumentIcon';
 
-interface SearchResultsProps extends WithApp {
+interface SearchResultsProps extends WithCtx {
   query: string;
   results?: PageModel[];
 }
 
-export const SearchResults = ({ app, query, results }: SearchResultsProps) => {
-  const { i18n } = app;
+export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
+  const { i18n } = ctx.app;
   const hasResults = results && results.length > 0;
 
   return (
-    <Layout app={app} title="Search Results">
+    <Layout ctx={ctx} title="Search Results">
       <h1 class="title">{i18n.t('SearchResults.title')}</h1>
       <p class="is-size-4 block">
         {i18n.t('SearchResults.resultsForQuery')}: <em>{query}</em>

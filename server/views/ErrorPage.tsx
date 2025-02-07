@@ -1,23 +1,23 @@
-import type { WithApp } from '~/../types';
+import type { WithCtx } from '~/../types';
 import { LayoutMini } from './LayoutMini';
 import { OhNoIcon } from './icons/OhNoIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
-interface ErrorPageProps extends WithApp {
+interface ErrorPageProps extends WithCtx {
   title: string;
   error: Error | string;
   goHome?: boolean;
 }
 
 export const ErrorPage = ({
-  app,
+  ctx,
   title,
   error,
   goHome = false,
 }: ErrorPageProps) => {
-  const { i18n } = app;
+  const { i18n } = ctx.app;
   return (
-    <LayoutMini app={app} title={title}>
+    <LayoutMini ctx={ctx} title={title}>
       <h1 class={['title', 'level', 'is-justify-content-start']}>
         <OhNoIcon title={title} size={48} />
         {title}
