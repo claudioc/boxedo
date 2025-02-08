@@ -152,11 +152,11 @@ const router = async (app: FastifyInstance) => {
         }),
       };
 
-      app.emailService.sendEmail(emailMessage);
-
       if (app.is('development')) {
         app.log.info(`${config.BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`);
       }
+
+      app.emailService.sendEmail(emailMessage);
 
       return rep.redirect(
         pathWithFeedback('/auth/login', Feedbacks.S_MAGIC_LINK_SENT)
@@ -187,8 +187,8 @@ const router = async (app: FastifyInstance) => {
         await dbs.createSession({
           _id: sessionId,
           email,
-          created: new Date().toISOString(),
-          expires: new Date(
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date(
             Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
           ).toISOString(),
         });

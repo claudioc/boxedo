@@ -29,7 +29,10 @@ type ErrorCodes =
   | 'E_MISSING_MAGICS_DB'
   | 'E_MISSING_SESSIONS_DB'
   | 'E_MISSING_USERS_DB'
-  | 'E_CREATING_SESSION';
+  | 'E_CREATING_SESSION'
+  | 'E_CREATING_USER'
+  | 'E_UPDATING_USER'
+  | 'E_DELETING_USER';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -189,6 +192,18 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   E_CREATING_SESSION: {
     code: 130,
     message: 'An error occurred while creating a session',
+  },
+  E_CREATING_USER: {
+    code: 131,
+    message: 'Error creating user',
+  },
+  E_UPDATING_USER: {
+    code: 132,
+    message: 'Error updating user',
+  },
+  E_DELETING_USER: {
+    code: 133,
+    message: 'Error deleting user',
   },
 } as const;
 

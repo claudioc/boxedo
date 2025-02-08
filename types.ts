@@ -108,8 +108,8 @@ export interface SessionModel {
   _id: string;
   _rev?: string;
   email: string;
-  created: string;
-  expires: string;
+  createdAt: string;
+  expiresAt: string;
 }
 
 export interface UserModel {
@@ -117,7 +117,7 @@ export interface UserModel {
   _rev?: string;
   email: string;
   fullname: string;
-  created: string;
+  createdAt: string;
 }
 
 export interface PageModel {

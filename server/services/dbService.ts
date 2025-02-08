@@ -654,12 +654,55 @@ export function dbService(client?: nano.ServerScope) {
         return {
           _id: 'user:1',
           email: 'claudio.cicali@gmail.com',
-          created: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
           fullname: 'Claudio Cicali',
         };
       }
 
       return null;
+    },
+
+    async getAllUsers(): Promise<UserModel[]> {
+      try {
+        const result = await userDb.list({ include_docs: true });
+        return result.rows
+          .filter((row) => !row.id.startsWith('_')) // Skip design docs
+          .map((row) => row.doc) as UserModel[];
+      } catch (err) {
+        console.log(err);
+        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+      }
+    },
+
+    async insertUser(user: UserModel): Promise<void> {
+      try {
+        await userDb.insert(user);
+      } catch (err) {
+        console.log(err);
+        throw new ErrorWithFeedback(Feedbacks.E_CREATING_USER);
+      }
+    },
+
+    async updateUser(user: UserModel): Promise<void> {
+      try {
+        await userDb.insert(user);
+      } catch (err) {
+        console.log(err);
+        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_USER);
+      }
+    },
+
+    async deleteUser(userId: string): Promise<void> {
+      try {
+        const user = await userDb.get(userId);
+        await userDb.destroy(userId, user._rev);
+      } catch (error) {
+        // If user doesn't exist (404) just ignore
+        if ((error as { statusCode?: number })?.statusCode !== 404) {
+          console.log(error);
+          throw new ErrorWithFeedback(Feedbacks.E_DELETING_USER);
+        }
+      }
     },
 
     async nukeTests() {

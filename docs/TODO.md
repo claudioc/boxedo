@@ -1,5 +1,4 @@
 Doing:
-  - variable text size
 
   MVP
   - formatDate needs to be aware of the current locale
@@ -91,3 +90,4 @@ Done
 - find a way to pass the rep.user to the Layout
 - silence the logs for assets
 - magic link for logging in
+- variable text size

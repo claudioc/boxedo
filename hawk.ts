@@ -21,10 +21,10 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
 
-const { LIVERELOAD_URL, BASE_INTERNAL_URL } = process.env as ConfigEnv;
-const liveReloadBaseUrl: UrlParts = parseBaseUrl(LIVERELOAD_URL);
+const { LIVERELOAD_URL, BASE_INTERNAL_URL } = process.env;
+const liveReloadBaseUrl: UrlParts | undefined = parseBaseUrl(LIVERELOAD_URL);
 const hasLiveReload = liveReloadBaseUrl !== undefined;
-const apiServerBaseUrl: UrlParts = parseBaseUrl(BASE_INTERNAL_URL);
+const apiServerBaseUrl: UrlParts | undefined = parseBaseUrl(BASE_INTERNAL_URL);
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
@@ -105,6 +105,10 @@ const startApiServer: TaskFn = async (_name) => {
 };
 
 const clearPort: TaskFn = async () => {
+  if (!apiServerBaseUrl) {
+    return true;
+  }
+
   const port = apiServerBaseUrl.port;
 
   try {

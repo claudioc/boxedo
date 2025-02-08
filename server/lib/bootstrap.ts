@@ -26,6 +26,7 @@ import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import multipart from '@fastify/multipart';
 import { EmailService } from '~/services/emailService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
+import { syncUsers } from './syncUsers';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -118,6 +119,12 @@ if (app.config.NODE_ENV !== 'test') {
 
 const dbs = await dbService(app.dbClient);
 const settings = await dbs.getSettings();
+
+if (app.config.AUTHENTICATION_TYPE === 'magiclink') {
+  await syncUsers(app, dbs, {
+    dryRun: true,
+  });
+}
 
 await app.register(fastifyI18n, {
   defaultLocale: settings.siteLang as SupportedLocales,
