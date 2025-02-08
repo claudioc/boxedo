@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { pathWithFeedback, slugUrl } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
@@ -38,34 +38,7 @@ import {
 } from '~/constants';
 import sharp from 'sharp';
 import { Readable } from 'node:stream';
-
-export const createAuthHandler = (app: FastifyInstance) => {
-  return async (req: FastifyRequest, rep: FastifyReply) => {
-    const { config } = app;
-
-    req.user = null;
-
-    if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
-      return;
-    }
-
-    const sessionId = req.cookies.session;
-
-    if (!sessionId) {
-      return rep.redirect('/auth/login');
-    }
-    const dbs = dbService(app.dbClient);
-    const session = await dbs.getSessionById(sessionId);
-
-    if (!session || new Date(session.expires) < new Date()) {
-      rep.clearCookie(SESSION_COOKIE_NAME);
-      return rep.redirect('/auth/login');
-    }
-
-    // Add user to request for use in routes
-    req.user = await dbs.getUserByEmail(session.email);
-  };
-};
+import { createRequireAuth, createRequireCsrf } from './routerPreHandlers';
 
 /**
  * Encapsulates the routes
@@ -73,7 +46,8 @@ export const createAuthHandler = (app: FastifyInstance) => {
  * @param {Object} options plugin options, refer to https://www.fastify.dev/docs/latest/Reference/Plugins/#plugin-options
  */
 const router = async (app: FastifyInstance) => {
-  const requireAuth = createAuthHandler(app);
+  const requireAuth = createRequireAuth(app);
+  const requireCsrf = createRequireCsrf(app);
 
   // The home page, folks
   app.get(
@@ -145,7 +119,7 @@ const router = async (app: FastifyInstance) => {
       schema: {
         body: RS.LoginBody,
       },
-      preHandler: app.csrfProtection,
+      preHandler: requireCsrf,
     },
     async (req, rep) => {
       const { email } = req.body;
@@ -307,7 +281,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/settings',
     {
-      preHandler: [requireAuth, app.csrfProtection],
+      preHandler: [requireAuth, requireCsrf],
       schema: {
         body: RS.SettingsPageBody,
       },
@@ -522,7 +496,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         params: RS.PageParams,
       },
-      preHandler: [requireAuth, app.csrfProtection],
+      preHandler: [requireAuth, requireCsrf],
     },
     async (req, rep) => {
       const { pageId } = req.params;
@@ -639,7 +613,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/move',
     {
-      preHandler: [requireAuth, app.csrfProtection],
+      preHandler: [requireAuth, requireCsrf],
       schema: {
         body: RS.MovePageBody,
         params: RS.PageParams,
@@ -747,7 +721,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/delete',
     {
-      preHandler: [requireAuth, app.csrfProtection],
+      preHandler: [requireAuth, requireCsrf],
       schema: {
         params: RS.PageParams,
       },
@@ -981,7 +955,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         querystring: RS.CreatePageQuery,
       },
-      preHandler: [requireAuth, app.csrfProtection],
+      preHandler: [requireAuth, requireCsrf],
     },
     async (req, rep) => {
       const { parentPageId } = req.query;

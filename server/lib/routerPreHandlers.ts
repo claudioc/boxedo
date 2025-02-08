@@ -1,0 +1,51 @@
+import type {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+} from 'fastify';
+import { dbService } from '~/services/dbService';
+import { SESSION_COOKIE_NAME } from '~/constants';
+
+export const createRequireAuth = (app: FastifyInstance) => {
+  return async (req: FastifyRequest, rep: FastifyReply) => {
+    const { config } = app;
+
+    req.user = null;
+
+    if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
+      return;
+    }
+
+    const sessionId = req.cookies.session;
+
+    if (!sessionId) {
+      return rep.redirect('/auth/login');
+    }
+    const dbs = dbService(app.dbClient);
+    const session = await dbs.getSessionById(sessionId);
+
+    if (!session || new Date(session.expires) < new Date()) {
+      rep.clearCookie(SESSION_COOKIE_NAME);
+      return rep.redirect('/auth/login');
+    }
+
+    // Add user to request for use in routes
+    req.user = await dbs.getUserByEmail(session.email);
+  };
+};
+
+export const createRequireCsrf = (app: FastifyInstance) => {
+  return (
+    req: FastifyRequest,
+    rep: FastifyReply,
+    done: HookHandlerDoneFunction
+  ) => {
+    if (app.is('test')) {
+      done();
+      return;
+    }
+
+    return app.csrfProtection.call(app, req, rep, done);
+  };
+};

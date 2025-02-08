@@ -4,7 +4,7 @@ import {
   type Feedback,
   type PageModel,
   type UrlParts,
-} from '~/../types';
+} from '../../types';
 import { type SupportedLocales, supportedLocales } from '../locales/phrases';
 
 export const slugUrl = (slug: string) =>
