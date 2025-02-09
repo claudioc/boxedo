@@ -120,9 +120,9 @@ if (app.config.NODE_ENV !== 'test') {
 const dbs = await dbService(app.dbClient);
 const settings = await dbs.getSettings();
 
-if (app.config.AUTHENTICATION_TYPE === 'magiclink') {
+if (app.config.AUTHENTICATION_TYPE !== 'none') {
   await syncUsers(app, dbs, {
-    dryRun: true,
+    dryRun: app.config.NODE_ENV === 'test',
   });
 }
 

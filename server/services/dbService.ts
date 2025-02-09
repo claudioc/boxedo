@@ -650,16 +650,17 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async getUserByEmail(email: string): Promise<UserModel | null> {
-      if (email === 'claudio.cicali@gmail.com') {
-        return {
-          _id: 'user:1',
-          email: 'claudio.cicali@gmail.com',
-          createdAt: new Date().toISOString(),
-          fullname: 'Claudio Cicali',
-        };
-      }
+      try {
+        const result = await userDb.find({
+          selector: { email },
+          limit: 1,
+        });
 
-      return null;
+        return result.docs[0] || null;
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
     },
 
     async getAllUsers(): Promise<UserModel[]> {

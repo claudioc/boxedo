@@ -30,8 +30,15 @@ export const createRequireAuth = (app: FastifyInstance) => {
       return rep.redirect('/auth/login');
     }
 
+    const user = await dbs.getUserByEmail(session.email);
+
+    if (!user) {
+      rep.clearCookie(SESSION_COOKIE_NAME);
+      return rep.redirect('/auth/login');
+    }
+
     // Add user to request for use in routes
-    req.user = await dbs.getUserByEmail(session.email);
+    req.user = user;
   };
 };
 

@@ -12,7 +12,7 @@ const UsersYamlSchema = {
   additionalProperties: false,
   properties: {
     users: {
-      type: 'array',
+      type: ['array', 'null'],
       items: {
         type: 'object',
         required: ['email'],
@@ -67,7 +67,6 @@ export async function syncUsers(
         app.log.error('YAML validation failed for unknown reason!');
         return;
       }
-      console.log(err);
 
       if (err[0].instancePath === '') {
         app.log.error(`Users YAML validation failed: ${err[0].message}`);
@@ -82,7 +81,10 @@ export async function syncUsers(
 
     const data = rawData as YamlConfig;
 
-    console.log(data.users);
+    // This happens if there is only the string "users:" in users.yaml
+    if (data.users === null) {
+      data.users = [];
+    }
 
     const existingUsers = await dbs.getAllUsers();
     const existingEmails = new Set(existingUsers.map((u) => u.email));
