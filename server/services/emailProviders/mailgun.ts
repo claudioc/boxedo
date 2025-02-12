@@ -35,7 +35,7 @@ export class MailgunProvider implements EmailProvider {
       `https://api.mailgun.net/v3/${this.domain}/messages`,
       {
         method: 'POST',
-        body: form,
+        body: form as unknown as BodyInit,
         headers: {
           Authorization: `Basic ${Buffer.from(`api:${this.apiKey}`).toString('base64')}`,
         },

@@ -298,13 +298,24 @@ const buildServer: TaskFn = async (_) => {
     entryPoints: ['./server/app.ts'],
     bundle: true,
     platform: 'node',
+    sourcemap: process.env.NODE_ENV !== 'production',
     format: 'esm',
     logLevel: 'info',
     outdir: './dist/server',
     // This banner is required for a workaround in __dirname/__filename and fastify
     banner: {
-      js: 'import { createRequire } from "module";const require = createRequire(import.meta.url);',
+      js: `
+      import { createRequire } from "module";
+      const require = createRequire(import.meta.url);
+      import { fileURLToPath } from 'url';
+      const __filename = fileURLToPath(import.meta.url);
+      import { dirname } from 'path';
+      const __dirname = dirname(__filename);`,
     },
+    external: [
+      // This module brings in all sort of crap
+      'pouchdb-adapter-node-websql',
+    ],
   });
   return true;
 };

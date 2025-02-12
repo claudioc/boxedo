@@ -5,7 +5,6 @@ import { pathWithFeedback, slugUrl } from './helpers';
 import type {
   PageModel,
   NavItem,
-  PageModelWithRev,
   FileModel,
   FileAttachmentModel,
 } from '~/../types';
@@ -185,6 +184,7 @@ const router = async (app: FastifyInstance) => {
 
       if (email) {
         await dbs.createSession({
+          type: 'session',
           _id: sessionId,
           email,
           createdAt: new Date().toISOString(),
@@ -739,7 +739,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       try {
-        await dbs.deletePage(page as PageModelWithRev);
+        await dbs.deletePage(page);
       } catch (error) {
         return rs.homeWithError(error);
       }
@@ -825,6 +825,7 @@ const router = async (app: FastifyInstance) => {
       const fileId = dbService.generateIdFor('file');
 
       const doc: FileModel = {
+        type: 'file',
         _id: fileId,
         originalName: data.filename,
         originalMimetype: data.mimetype,
@@ -993,6 +994,7 @@ const router = async (app: FastifyInstance) => {
       try {
         pageId = dbService.generateIdFor('page');
         await dbs.insertPage({
+          type: 'page',
           _id: pageId,
           parentId,
           pageTitle,

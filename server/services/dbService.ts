@@ -1,29 +1,30 @@
+import PouchDB from 'pouchdb-core';
+// PouchFind provides a simple, MongoDB-inspired query language that accomplishes
+// the same thing as the map/reduce API, but with far less code.
+import PouchFind from 'pouchdb-find';
+import PouchAdapterSqlite from 'pouchdb-adapter-node-websql';
+import PouchAdapterMemory from 'pouchdb-adapter-memory';
+import PouchHttp from 'pouchdb-adapter-http';
+import PouchReduce from 'pouchdb-mapreduce';
+
 import type {
   SettingsModel,
   PageModel,
   SessionModel,
   UserModel,
-  PageSelector,
   ModelName,
   NavItem,
-  PageRevInfo,
-  PageModelWithRev,
+  DocumentModel,
   NodeEnv,
   ConfigEnv,
   FileModel,
   FileAttachmentModel,
   MagicModel,
-  DbName,
 } from '~/../types';
 import { DEFAULT_TEXT_SIZE } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
 import { ErrorWithFeedback } from '~/lib/errors';
 import slugify from 'slugify';
-import nano, {
-  type DocumentInsertResponse,
-  type DocumentScope,
-  type ServerScope,
-} from 'nano';
 import {
   slugUrl,
   getDefaultLanguage,
@@ -35,17 +36,12 @@ import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
 
 interface DbServiceInitParams {
-  serverUrl: string;
-  username: string;
-  password: string;
+  type: 'remote' | 'local' | 'memory';
+  serverUrl?: string;
+  username?: string;
+  password?: string;
   env: NodeEnv;
 }
-
-let isTestRun = false;
-
-const dbn = (name: DbName) => {
-  return isTestRun ? `${name}-test` : name;
-};
 
 // https://github.com/apostrophecms/sanitize-html
 const safeHtml = (str: string) =>
@@ -70,75 +66,67 @@ const safeHtml = (str: string) =>
   });
 
 const safeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const isTestRun = process.env.NODE_ENV === 'test';
 
-export type { ServerScope as DbClient };
+const streamToBuffer = async (
+  stream: NodeJS.ReadableStream
+): Promise<Buffer> => {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+};
 
-export function dbService(client?: nano.ServerScope) {
+export type DbClient = PouchDB.Database<DocumentModel>;
+
+export function dbService(client?: DbClient) {
   if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
 
-  const pagesDb: DocumentScope<PageModel> = client.db.use(dbn('pages'));
-  if (!pagesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_PAGES_DB);
-
-  const settingsDb: DocumentScope<SettingsModel> = client.db.use(
-    dbn('settings')
-  );
-  if (!settingsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SETTINGS_DB);
-
-  const filesDb: DocumentScope<FileModel> = client.db.use(dbn('files'));
-  if (!filesDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_FILES_DB);
-
-  const magicsDb: DocumentScope<MagicModel> = client.db.use(dbn('magics'));
-  if (!magicsDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_MAGICS_DB);
-
-  const sessionDb: DocumentScope<SessionModel> = client.db.use(dbn('sessions'));
-  if (!sessionDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_SESSIONS_DB);
-
-  const userDb: DocumentScope<UserModel> = client.db.use(dbn('users'));
-  if (!userDb) throw new ErrorWithFeedback(Feedbacks.E_MISSING_USERS_DB);
-
   return {
-    getPageDb() {
-      return pagesDb;
-    },
+    db: client,
+    // Unused
+    // getPageDb() {
+    //   return pagesDb;
+    // },
 
     async getSettings(config?: ConfigEnv) {
-      let settings: SettingsModel | null = null;
       try {
-        settings = await settingsDb.get('settings');
-      } catch (err: unknown) {
-        if ((err as { statusCode?: number })?.statusCode !== 404) {
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        const settings = await this.db.get<SettingsModel>('settings');
+
+        // Adds the future attributes
+        if (!settings.textSize) {
+          settings.textSize = DEFAULT_TEXT_SIZE;
+          await this.db.put(settings);
         }
+
+        return settings;
+      } catch (err) {
+        if ((err as PouchDB.Core.Error)?.status === 404) {
+          const newSettings: SettingsModel = {
+            _id: 'settings',
+            type: 'settings',
+            landingPageId: null,
+            siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
+            siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
+            siteLang: getDefaultLanguage(config),
+            textSize: config ? config?.SETTINGS_TEXT_SIZE : DEFAULT_TEXT_SIZE,
+          };
+          await this.db.put(newSettings);
+          // Refetch it to be sure we have the _rev
+          return await this.db.get<SettingsModel>('settings');
+        }
+
+        console.error(err);
+        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
       }
-
-      // If settings are not found, create a new one using the default values from the config (.env)
-      if (!settings) {
-        const newSettings: SettingsModel = {
-          _id: 'settings',
-          landingPageId: null,
-          siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
-          siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
-          siteLang: getDefaultLanguage(config),
-          textSize: config ? config?.SETTINGS_TEXT_SIZE : DEFAULT_TEXT_SIZE,
-        };
-
-        await settingsDb.insert(newSettings);
-        return newSettings;
-      }
-
-      // Adds the future attributes
-      if (!settings.textSize) {
-        settings.textSize = DEFAULT_TEXT_SIZE;
-      }
-
-      return settings;
     },
 
     async updateSettings(settings: SettingsModel) {
       settings.siteLang = ensureValidLanguage(settings.siteLang);
 
       try {
-        await settingsDb.insert(settings);
+        await this.db.put(settings);
       } catch (err) {
         console.log(err);
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_SETTINGS);
@@ -147,65 +135,67 @@ export function dbService(client?: nano.ServerScope) {
 
     async countPages(): Promise<number> {
       try {
-        const result = await pagesDb.view('pages', 'count', { reduce: true });
-
-        // Check if we have results and a valid value
-        if (result?.rows?.[0]?.value != null) {
-          return Number(result.rows[0].value);
-        }
-
-        return 0; // Default if no results or invalid structure
+        const result = await this.db.query('pages/count', { reduce: true });
+        return result.rows[0]?.value || 0;
       } catch (error) {
         console.error('Error counting pages:', error);
-        return 0; // Default on error
+        return 0;
       }
     },
 
     async getPageById(pageId: string): Promise<PageModel | null> {
-      let page: PageModel | null = null;
       try {
-        page = await pagesDb.get(pageId);
-      } catch (err: unknown) {
-        if ((err as { statusCode?: number })?.statusCode !== 404) {
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        const doc = await this.db.get(pageId);
+        // Only return if it's actually a page
+        return doc.type === 'page' ? doc : null;
+      } catch (err) {
+        if ((err as PouchDB.Core.Error).status !== 404) {
+          return null;
         }
+        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
       }
-
-      return page;
     },
 
-    async getPageBySlug(slug: string) {
-      const result = await pagesDb.find({
-        selector: { pageSlug: slug } as PageSelector,
-        limit: 1,
-      });
-
-      return result.docs.length > 0 ? result.docs[0] : null;
-    },
-
-    async lookupPageBySlug(slug: string) {
-      const result = await pagesDb.find({
+    async getPageBySlug(slug: string): Promise<PageModel | null> {
+      const result = await this.db.find({
         selector: {
-          pageSlugs: {
-            $in: [slug],
-          },
-        } as PageSelector,
+          type: 'page',
+          pageSlug: slug,
+        },
         limit: 1,
       });
 
-      return result.docs.length > 0 ? result.docs[0] : null;
+      return result.docs.length > 0 ? (result.docs[0] as PageModel) : null;
     },
 
-    async generateUniqueSlug(title: string) {
+    async lookupPageBySlug(slug: string): Promise<PageModel | null> {
+      const result = await this.db.find({
+        selector: {
+          type: 'page',
+          pageSlugs: {
+            $elemMatch: { $eq: slug },
+          },
+        },
+        limit: 1,
+      });
+
+      return result.docs.length > 0 ? (result.docs[0] as PageModel) : null;
+    },
+
+    async generateUniqueSlug(title: string): Promise<string> {
       let slug = slugify(title.trim(), { lower: true });
       let uniqueSlugFound = false;
       let counter = 1;
 
       while (!uniqueSlugFound) {
-        const result = await pagesDb.find({
+        const result = await this.db.find({
           selector: {
-            $or: [{ pageSlug: slug }, { pageSlugs: { $in: [slug] } }],
-          } as PageSelector,
+            type: 'page',
+            $or: [
+              { pageSlug: slug },
+              { pageSlugs: { $elemMatch: { $eq: slug } } },
+            ],
+          },
           limit: 1,
         });
 
@@ -223,7 +213,7 @@ export function dbService(client?: nano.ServerScope) {
 
     // Helper to get siblings of a page sorted by position
     async getSiblingPages(parentId: string) {
-      const result = await pagesDb.view('pages', 'by_parent_position', {
+      const result = await this.db.query('pages/by_parent_position', {
         startkey: [parentId],
         endkey: [parentId, {}],
         include_docs: true,
@@ -238,14 +228,19 @@ export function dbService(client?: nano.ServerScope) {
       targetIndex = Number.POSITIVE_INFINITY,
       pageId?: string
     ): Promise<number> {
-      const siblings = await pagesDb.view('pages', 'by_parent_position', {
-        startkey: [parentId],
-        endkey: [parentId, {}],
-        include_docs: true,
-      });
-      let pages = siblings.rows.map((row) => row.doc) as PageModel[];
+      const siblings = await this.db.query<PageModel>(
+        'pages/by_parent_position',
+        {
+          startkey: [parentId],
+          endkey: [parentId, {}],
+          include_docs: true,
+        }
+      );
+
+      // biome-ignore lint/style/noNonNullAssertion:
+      let pages = siblings.rows.map((row) => row.doc!);
       if (pageId) {
-        pages = pages.filter((page) => page._id !== pageId);
+        pages = pages.filter((page) => page?._id !== pageId);
       }
 
       // No siblings - first page
@@ -275,7 +270,7 @@ export function dbService(client?: nano.ServerScope) {
       page.contentUpdated = true;
 
       try {
-        await pagesDb.insert(page);
+        await this.db.put(page);
       } catch (error) {
         console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
@@ -284,7 +279,7 @@ export function dbService(client?: nano.ServerScope) {
 
     async createSession(session: SessionModel) {
       try {
-        await sessionDb.insert(session);
+        await this.db.put(session);
       } catch (error) {
         console.log(error);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_SESSION);
@@ -292,16 +287,14 @@ export function dbService(client?: nano.ServerScope) {
     },
 
     async getSessionById(sessionId: string): Promise<SessionModel | null> {
-      let session: SessionModel | null = null;
       try {
-        session = await sessionDb.get(sessionId);
-      } catch (error: unknown) {
-        if ((error as { statusCode?: number })?.statusCode !== 404) {
+        return await this.db.get<SessionModel>(sessionId);
+      } catch (err) {
+        if ((err as PouchDB.Core.Error).status !== 404) {
           throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
         }
+        return null;
       }
-
-      return session;
     },
 
     async deleteSession(sessionId: string): Promise<void> {
@@ -311,70 +304,74 @@ export function dbService(client?: nano.ServerScope) {
       }
 
       try {
-        await sessionDb.destroy(sessionId, session._rev ?? '');
+        // biome-ignore lint/style/noNonNullAssertion:
+        await this.db.remove(session._id, session._rev!);
       } catch (error) {
-        // If session doesn't exist (404) just ignore
-        if ((error as { statusCode?: number })?.statusCode !== 404) {
+        if ((error as PouchDB.Core.Error).status !== 404) {
           throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
         }
       }
     },
 
-    async search(q: string) {
+    async search(q: string): Promise<PageModel[]> {
       const query = safeRegExp(q);
 
-      const result = await pagesDb.find({
+      const result = await this.db.find({
         selector: {
           pageTitle: {
-            $regex: `(?i)${query}`,
+            $regex: query,
           },
         },
         limit: 25,
       });
 
-      return result.docs;
+      return result.docs as PageModel[];
     },
 
     // Couchdb doesn't support full-text search without Lucene
-    async searchText(q: string) {
-      const query = safeRegExp(q);
+    async searchText(q: string): Promise<PageModel[]> {
+      const query = safeRegExp(q.toLowerCase());
 
-      const result = await pagesDb.find({
+      const result = (await this.db.find({
         selector: {
+          type: 'page',
           $or: [
             {
               pageTitle: {
-                $regex: `(?i)${query}`,
+                $regex: query,
               },
             },
             {
               pageContent: {
-                $regex: `(?i)${query}`,
+                $regex: query,
               },
             },
           ],
         },
         limit: 25,
-      });
+      })) as PouchDB.Find.FindResponse<PageModel>;
 
       return result.docs;
     },
 
     async getTopLevelPages(): Promise<PageModel[]> {
-      const result = await pagesDb.find({
+      const result = (await this.db.find({
         selector: {
+          type: 'page',
           parentId: null,
-        } as PageSelector,
+          position: { $gte: 0 },
+        },
         sort: [{ position: 'asc' }],
-      });
+      })) as PouchDB.Find.FindResponse<PageModel>;
 
       return result.docs;
     },
 
     async buildMenuTree(parentId: string | null): Promise<NavItem[]> {
-      const result = await pagesDb.find({
+      const result = await this.db.find({
         selector: {
-          parentId: parentId ?? { $eq: null },
+          type: 'page',
+          parentId: parentId ?? null,
           position: { $gte: 0 },
         },
         fields: ['_id', 'pageTitle', 'pageSlug', 'position'],
@@ -382,7 +379,7 @@ export function dbService(client?: nano.ServerScope) {
       });
 
       const menuTree = await Promise.all(
-        result.docs.map(async (page) => {
+        (result.docs as PageModel[]).map(async (page) => {
           const menuItem: NavItem = {
             pageId: page._id,
             title: page.pageTitle,
@@ -394,6 +391,7 @@ export function dbService(client?: nano.ServerScope) {
           return menuItem;
         })
       );
+
       return menuTree;
     },
 
@@ -412,7 +410,7 @@ export function dbService(client?: nano.ServerScope) {
       }
 
       try {
-        await pagesDb.insert(updatedPage);
+        await this.db.put(updatedPage);
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
@@ -430,7 +428,7 @@ export function dbService(client?: nano.ServerScope) {
         parentId: newParentId,
       };
       try {
-        await pagesDb.insert(updatedPage);
+        await this.db.put(updatedPage);
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
       }
@@ -438,7 +436,7 @@ export function dbService(client?: nano.ServerScope) {
 
     async updatePagePosition(page: PageModel, position: number) {
       try {
-        await pagesDb.insert({
+        await this.db.put({
           ...page,
           contentUpdated: false,
           position,
@@ -448,53 +446,66 @@ export function dbService(client?: nano.ServerScope) {
       }
     },
 
-    async deletePage(page: PageModelWithRev) {
+    async deletePage(page: PageModel): Promise<void> {
       try {
-        await pagesDb.destroy(page._id, page._rev);
+        // First delete the page
+        await this.db.remove(page as Required<PageModel>);
 
-        // Update child pages
-        const childPages = await pagesDb.find({
-          selector: { parentId: page._id } as PageSelector,
-        });
+        // Find all child pages
+        const result = (await this.db.find({
+          selector: {
+            type: 'page',
+            parentId: page._id,
+          },
+        })) as PouchDB.Find.FindResponse<PageModel>;
 
-        for (const childPage of childPages.docs) {
-          childPage.parentId = page.parentId;
-          childPage.contentUpdated = false;
-          await pagesDb.insert(childPage);
+        // Update each child page's parent
+        for await (const childPage of result.docs) {
+          this.db.put({
+            ...childPage,
+            parentId: page.parentId,
+            contentUpdated: false,
+          });
         }
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_DELETING_PAGE);
       }
     },
 
-    async insertFile(file: FileModel) {
-      let doc: DocumentInsertResponse;
+    async insertFile(file: FileModel): Promise<PouchDB.Core.Response> {
       try {
-        // const { rev } = await filesDb.insert(file);
-        // doc = rev;
-        doc = await filesDb.insert(file);
+        return await this.db.put(file);
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_FILE);
       }
-
-      return doc;
     },
 
-    async insertFileAttachment(attachment: FileAttachmentModel) {
-      let att: DocumentInsertResponse;
+    async insertFileAttachment(
+      attachment: FileAttachmentModel
+    ): Promise<PouchDB.Core.Response> {
       try {
-        att = await filesDb.attachment.insert(
+        // Get the current rev of the document
+        const doc = await this.db.get(attachment.fileId);
+
+        // Convert stream to buffer if needed
+        const buffer =
+          attachment.attachment instanceof Buffer
+            ? attachment.attachment
+            : await streamToBuffer(
+                attachment.attachment as NodeJS.ReadableStream
+              );
+
+        // In PouchDB we attach directly to the document
+        return await this.db.putAttachment(
           attachment.fileId,
           attachment.attachmentName,
-          attachment.attachment,
-          attachment.contentType,
-          attachment.params
+          doc._rev,
+          buffer,
+          attachment.contentType
         );
       } catch {
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_ATTACHMENT);
       }
-
-      return att;
     },
 
     async cleanupOrphanedFiles() {
@@ -504,38 +515,47 @@ export function dbService(client?: nano.ServerScope) {
        * complex scenario we would have to consider which attachments are used.
        */
       const usedFiles = new Set<string>();
-      const { rows: pageRows } = await pagesDb.list({ include_docs: true });
+      const pagesResult = (await this.db.find({
+        selector: {
+          type: 'page',
+        },
+      })) as PouchDB.Find.FindResponse<PageModel>;
 
-      pageRows.forEach((row) => {
-        extractFileRefsFrom(row.doc?.pageContent ?? '').forEach((ref) =>
+      // Extract file references from all pages
+      pagesResult.docs.forEach((doc) => {
+        extractFileRefsFrom(doc.pageContent ?? '').forEach((ref) =>
           usedFiles.add(ref)
         );
       });
 
-      const { rows: fileRows } = await filesDb.list();
-      const files = fileRows.map((row) => ({
-        _id: row.id,
-        _rev: row.value.rev,
-      }));
+      const filesResult = (await this.db.find({
+        selector: {
+          type: 'file',
+        },
+      })) as PouchDB.Find.FindResponse<FileModel>;
 
-      const unusedFiles = files.filter((file) => !usedFiles.has(file._id));
+      // Find unused files
+      const unusedFiles = filesResult.docs.filter(
+        (file) => !usedFiles.has(file._id)
+      );
 
       if (unusedFiles.length === 0) {
         return 0;
       }
 
-      const BATCH_SIZE = 50;
-      for (let i = 0; i < unusedFiles.length; i += BATCH_SIZE) {
-        const batch = unusedFiles.slice(i, i + BATCH_SIZE);
-
-        const deleteOps = batch.map((file) => ({
-          _id: file._id,
-          _rev: file._rev,
+      const deleteOps: PouchDB.Core.PutDocument<FileModel>[] = unusedFiles.map(
+        (file) => ({
+          ...file,
           _deleted: true,
-        }));
+        })
+      );
 
+      // Delete in batches of 50
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < deleteOps.length; i += BATCH_SIZE) {
+        const batch = deleteOps.slice(i, i + BATCH_SIZE);
         try {
-          await filesDb.bulk({ docs: deleteOps });
+          await this.db.bulkDocs(batch);
         } catch (error) {
           console.error(`Error deleting batch starting at index ${i}:`, error);
           throw error;
@@ -548,9 +568,10 @@ export function dbService(client?: nano.ServerScope) {
     async getFileById(fileId: string): Promise<FileModel | null> {
       let file: FileModel | null = null;
       try {
-        file = await filesDb.get(fileId);
-      } catch (err: unknown) {
-        if ((err as { statusCode?: number })?.statusCode !== 404) {
+        file = await this.db.get(fileId);
+      } catch (err) {
+        if ((err as PouchDB.Core.Error)?.status !== 404) {
+          console.log(err);
           throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
         }
       }
@@ -558,30 +579,33 @@ export function dbService(client?: nano.ServerScope) {
       return file;
     },
 
-    async getFileAttachment(fileId: string, attachmentName: string) {
-      let attachment: Buffer | null = null;
+    async getFileAttachment(
+      fileId: string,
+      attachmentName: string
+    ): Promise<Blob | Buffer<ArrayBufferLike>> {
       try {
-        attachment = await filesDb.attachment.get(fileId, attachmentName);
+        return await this.db.getAttachment(fileId, attachmentName);
       } catch (err: unknown) {
-        if ((err as { statusCode?: number })?.statusCode !== 404) {
+        if ((err as PouchDB.Core.Error).status !== 404) {
           throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
         }
+        throw err;
       }
-
-      return attachment;
     },
 
     async getPageHistory(page: PageModel): Promise<PageModel[]> {
-      const doc = await pagesDb.get(page._id, { revs_info: true });
+      const doc = await this.db.get(page._id, { revs_info: true });
 
       if (!doc._revs_info) return [];
 
       const history = (
-        (await Promise.all(
-          (doc._revs_info as PageRevInfo[]).map(async (rev) => {
+        await Promise.all(
+          (doc._revs_info as PouchDB.Core.RevisionInfo[]).map(async (rev) => {
             if (rev.status !== 'available') return null;
             if (rev.rev === doc._rev) return null;
-            const revisionDoc = await pagesDb.get(page._id, { rev: rev.rev });
+            const revisionDoc = (await this.db.get(page._id, {
+              rev: rev.rev,
+            })) as PageModel;
             if (!revisionDoc.contentUpdated) return null;
             return {
               pageTitle: revisionDoc.pageTitle,
@@ -589,8 +613,8 @@ export function dbService(client?: nano.ServerScope) {
               _rev: revisionDoc._rev,
             };
           })
-        )) as PageModel[]
-      ).filter((item) => item !== null);
+        )
+      ).filter((item): item is Required<PageModel> => item !== null);
 
       return history;
     },
@@ -599,7 +623,9 @@ export function dbService(client?: nano.ServerScope) {
       page: PageModel,
       version: string
     ): Promise<PageModel> {
-      const revisionDoc = await pagesDb.get(page._id, { rev: version });
+      const revisionDoc = (await this.db.get(page._id, {
+        rev: version,
+      })) as PageModel;
 
       return {
         pageTitle: revisionDoc.pageTitle,
@@ -609,25 +635,27 @@ export function dbService(client?: nano.ServerScope) {
       } as PageModel;
     },
 
-    async createMagic(email: string, ttlMinutes: number) {
+    async createMagic(email: string, ttlMinutes: number): Promise<MagicModel> {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + ttlMinutes * 60000);
 
       const data: MagicModel = {
         _id: dbService.generateIdFor('magic'),
+        type: 'magic',
         email,
         createdAt: now.toISOString(),
         expiresAt: expiresAt.toISOString(),
         used: false,
       };
 
-      await magicsDb.insert(data);
+      await this.db.put(data);
       return data;
     },
 
     async validateMagic(magicId: string): Promise<string | null> {
-      const result = await magicsDb.find({
+      const result = (await this.db.find({
         selector: {
+          type: 'magic',
           _id: magicId,
           used: false,
           expiresAt: {
@@ -635,7 +663,7 @@ export function dbService(client?: nano.ServerScope) {
           },
         },
         limit: 1,
-      });
+      })) as PouchDB.Find.FindResponse<MagicModel>;
 
       if (result.docs.length === 0) {
         return null;
@@ -644,17 +672,20 @@ export function dbService(client?: nano.ServerScope) {
       // Mark token as used
       const magic = result.docs[0];
       magic.used = true;
-      await magicsDb.insert(magic);
+      await this.db.put(magic);
 
-      return result.docs[0].email;
+      return magic.email;
     },
 
     async getUserByEmail(email: string): Promise<UserModel | null> {
       try {
-        const result = await userDb.find({
-          selector: { email },
+        const result = (await this.db.find({
+          selector: {
+            type: 'user',
+            email,
+          },
           limit: 1,
-        });
+        })) as PouchDB.Find.FindResponse<UserModel>;
 
         return result.docs[0] || null;
       } catch (err) {
@@ -665,10 +696,13 @@ export function dbService(client?: nano.ServerScope) {
 
     async getAllUsers(): Promise<UserModel[]> {
       try {
-        const result = await userDb.list({ include_docs: true });
-        return result.rows
-          .filter((row) => !row.id.startsWith('_')) // Skip design docs
-          .map((row) => row.doc) as UserModel[];
+        const result = (await this.db.find({
+          selector: {
+            type: 'user',
+          },
+        })) as PouchDB.Find.FindResponse<UserModel>;
+
+        return result.docs;
       } catch (err) {
         console.log(err);
         throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
@@ -677,7 +711,7 @@ export function dbService(client?: nano.ServerScope) {
 
     async insertUser(user: UserModel): Promise<void> {
       try {
-        await userDb.insert(user);
+        await this.db.put(user);
       } catch (err) {
         console.log(err);
         throw new ErrorWithFeedback(Feedbacks.E_CREATING_USER);
@@ -686,7 +720,7 @@ export function dbService(client?: nano.ServerScope) {
 
     async updateUser(user: UserModel): Promise<void> {
       try {
-        await userDb.insert(user);
+        await this.db.put(user);
       } catch (err) {
         console.log(err);
         throw new ErrorWithFeedback(Feedbacks.E_UPDATING_USER);
@@ -695,12 +729,12 @@ export function dbService(client?: nano.ServerScope) {
 
     async deleteUser(userId: string): Promise<void> {
       try {
-        const user = await userDb.get(userId);
-        await userDb.destroy(userId, user._rev);
-      } catch (error) {
+        const user = await this.db.get(`user:${userId}`);
+        await this.db.remove(user);
+      } catch (err) {
         // If user doesn't exist (404) just ignore
-        if ((error as { statusCode?: number })?.statusCode !== 404) {
-          console.log(error);
+        if ((err as PouchDB.Core.Error).status !== 404) {
+          console.log(err);
           throw new ErrorWithFeedback(Feedbacks.E_DELETING_USER);
         }
       }
@@ -709,37 +743,24 @@ export function dbService(client?: nano.ServerScope) {
     async nukeTests() {
       if (!isTestRun) return;
 
-      await this.safeNuke('pages');
+      const allDocs = await this.db.allDocs({ include_docs: true });
 
-      await this.safeNuke('settings');
-      await this.getSettings();
+      const deletions = allDocs.rows
+        .filter((row) => row.doc)
+        .map((row) => ({
+          ...row.doc,
+          _deleted: true,
+        }));
 
-      await this.safeNuke('files');
-      await this.safeNuke('magics');
-      await this.safeNuke('sessions');
-      await this.safeNuke('users');
+      if (deletions.length > 0) {
+        await this.db.bulkDocs(deletions as DocumentModel[]);
+      }
 
       try {
-        await dbService._createIndexes(client);
-        await dbService._createViews(client);
+        await dbService._createIndexes(this.db);
+        await dbService._createViews(this.db);
       } catch {
         // Index might already exist, that's fine
-      }
-    },
-
-    async safeNuke(dbName: DbName) {
-      const name = dbn(dbName);
-
-      // Ensure we are deleting the test database
-      if (!name.includes('-test')) {
-        return;
-      }
-
-      try {
-        await client.db.destroy(name);
-        await client.db.create(name);
-      } catch (error) {
-        console.log(error);
       }
     },
   };
@@ -748,37 +769,40 @@ export function dbService(client?: nano.ServerScope) {
 // bulk-load uses the same logic
 dbService.generateIdFor = (model: ModelName) => `${model}:${createId()}`;
 
-dbService._createIndexes = async (client: nano.ServerScope) => {
-  await client.db.use(dbn('pages')).createIndex({
+dbService._createIndexes = async (db: PouchDB.Database) => {
+  await db.createIndex({
     index: {
-      fields: ['parentId', 'createdAt'],
+      fields: ['type', 'parentId', 'createdAt'],
     },
   });
 
-  await client.db.use(dbn('pages')).createIndex({
+  await db.createIndex({
     index: {
-      fields: ['parentId', 'position'],
+      fields: ['position'],
+    },
+  });
+
+  await db.createIndex({
+    index: {
+      fields: ['type', 'position', 'parentId'],
     },
   });
 };
 
-dbService._createViews = async (client: nano.ServerScope) => {
-  const db = await client.db.use(dbn('pages'));
-
+dbService._createViews = async (db: PouchDB.Database) => {
   const designDoc = {
     _id: '_design/pages',
     views: {
       by_parent_position: {
         map: `function(doc) {
-          if (doc.position !== undefined) {
+          if (doc.type === 'page' && doc.position !== undefined) {
             emit([doc.parentId || null, doc.position], null);
           }
         }`,
       },
-
       count: {
-        map: `function(doc) {
-          if (!doc._id.startsWith('_design/')) {
+        map: `function (doc) {
+          if (doc.type === 'page') {
             emit(null, 1);
           }
         }`,
@@ -788,73 +812,47 @@ dbService._createViews = async (client: nano.ServerScope) => {
   };
 
   try {
-    const existing = await db.get('_design/pages');
-    const updatedDoc = { ...designDoc, _rev: existing._rev };
-    await db.insert(updatedDoc);
+    await db.put(designDoc);
   } catch (err) {
-    if ((err as { statusCode?: number })?.statusCode === 404) {
-      await db.insert(designDoc);
-    } else {
+    if ((err as PouchDB.Core.Error).status !== 409) {
+      console.error('Error creating design doc:', err);
       throw err;
     }
   }
 };
 
-dbService.init = async (params: DbServiceInitParams) => {
-  const couchdb = nano({
-    url: params.serverUrl,
-    requestDefaults: {
-      auth: {
-        username: params.username,
-        password: params.password,
-      },
-    },
-  });
+dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
+  const dbName = 'joongle';
+  let db: DbClient;
 
-  isTestRun = params.env === 'test';
+  switch (true) {
+    case params.type === 'memory' || params.env === 'test' || isTestRun:
+      PouchDB.plugin(PouchFind).plugin(PouchReduce).plugin(PouchAdapterMemory);
+      db = new PouchDB<DocumentModel>(dbName);
+      break;
 
-  try {
-    await couchdb.db.get(dbn('pages'));
-  } catch {
-    await couchdb.db.create(dbn('pages'));
+    case params.type === 'remote' && !!params.serverUrl:
+      PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
+      db = new PouchDB(`${params.serverUrl}/${dbName}`, {
+        auth: {
+          username: params.username,
+          password: params.password,
+        },
+      });
+      break;
+
+    default:
+      PouchDB.plugin(PouchAdapterSqlite).plugin(PouchFind).plugin(PouchReduce);
+      db = new PouchDB<DocumentModel>(dbName);
+      break;
   }
 
   try {
-    await couchdb.db.get(dbn('settings'));
-  } catch {
-    await couchdb.db.create(dbn('settings'));
-  }
-
-  try {
-    await couchdb.db.get(dbn('files'));
-  } catch {
-    await couchdb.db.create(dbn('files'));
-  }
-
-  try {
-    await couchdb.db.get(dbn('magics'));
-  } catch {
-    await couchdb.db.create(dbn('magics'));
-  }
-
-  try {
-    await couchdb.db.get(dbn('sessions'));
-  } catch {
-    await couchdb.db.create(dbn('sessions'));
-  }
-
-  try {
-    await couchdb.db.get(dbn('users'));
-  } catch {
-    await couchdb.db.create(dbn('users'));
-  }
-
-  try {
-    await dbService._createIndexes(couchdb);
-    await dbService._createViews(couchdb);
+    await dbService._createIndexes(db);
+    await dbService._createViews(db);
   } catch {
     // Index might already exist, that's fine
   }
 
-  return couchdb;
+  return db;
 };

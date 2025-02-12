@@ -15,7 +15,7 @@ import {
   type SettingsModel,
 } from '~/../types';
 import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
-import { fileURLToPath } from 'node:url';
+// import { fileURLToPath } from 'node:url';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
@@ -46,8 +46,8 @@ declare module 'fastify' {
   }
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 // Fix thread-stream error due to __dirname in pino
 if (process.env.NODE_ENV !== 'test') {
@@ -103,6 +103,7 @@ try {
   app.decorate(
     'dbClient',
     await dbService.init({
+      type: 'remote',
       serverUrl: app.config.COUCHDB_URL ?? '',
       username: app.config.COUCHDB_USER ?? '',
       password: app.config.COUCHDB_PASSWORD ?? '',

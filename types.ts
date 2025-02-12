@@ -51,11 +51,17 @@ export type ModelName =
   | 'magic'
   | 'session'
   | 'user';
-export type DbName = PluralName<ModelName>;
 
-export interface SettingsModel {
+type DocumentType = 'settings' | 'file' | 'magic' | 'session' | 'user' | 'page';
+
+export interface BaseModel {
   _id: string;
   _rev?: string;
+  type: DocumentType;
+}
+
+export interface SettingsModel extends BaseModel {
+  type: 'settings';
   landingPageId: string | null;
   siteTitle: string;
   siteDescription: string;
@@ -63,9 +69,8 @@ export interface SettingsModel {
   textSize: TextSize;
 }
 
-export interface FileModel {
-  _id: string;
-  _rev?: string;
+export interface FileModel extends BaseModel {
+  type: 'file';
   originalName: string;
   originalMimetype: string;
   originalSize: number;
@@ -77,13 +82,7 @@ export interface FileModel {
   };
   uploadedAt: string;
   _attachments?: {
-    [filename: string]: {
-      content_type: string;
-      digest: string;
-      length: number;
-      revpos: number;
-      stub: boolean;
-    };
+    [filename: string]: PouchDB.Core.Attachment;
   };
 }
 
@@ -95,34 +94,30 @@ export interface FileAttachmentModel {
   params?: { rev?: string };
 }
 
-export interface MagicModel {
-  _id: string;
-  _rev?: string;
+export interface MagicModel extends BaseModel {
+  type: 'magic';
   email: string;
   createdAt: string;
   expiresAt: string;
   used: boolean;
 }
 
-export interface SessionModel {
-  _id: string;
-  _rev?: string;
+export interface SessionModel extends BaseModel {
+  type: 'session';
   email: string;
   createdAt: string;
   expiresAt: string;
 }
 
-export interface UserModel {
-  _id: string;
-  _rev?: string;
+export interface UserModel extends BaseModel {
+  type: 'user';
   email: string;
   fullname: string;
   createdAt: string;
 }
 
-export interface PageModel {
-  _id: string;
-  _rev?: string;
+export interface PageModel extends BaseModel {
+  type: 'page';
   parentId?: string | null;
   pageTitle: string;
   pageSlug: string;
@@ -134,9 +129,17 @@ export interface PageModel {
   updatedAt: string;
 }
 
-export interface PageModelWithRev extends PageModel {
-  _rev: string;
-}
+export type DocumentModel =
+  | SettingsModel
+  | FileModel
+  | MagicModel
+  | SessionModel
+  | UserModel
+  | PageModel;
+
+// export interface PageModelWithRev extends PageModel {
+//   _rev: string;
+// }
 
 export type SettingsModelWithoutId = WithoutId<SettingsModel>;
 export type PageModelWithoutId = WithoutId<PageModel>;

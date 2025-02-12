@@ -4,11 +4,7 @@ import {
   CLIENT_BUNDLE_LOCATION,
 } from '~/constants';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { readdirSync } from 'node:fs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/style.css?_=${CACHE_BUSTER}`;
 type Bundle = 'app' | 'editor';

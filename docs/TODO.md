@@ -1,6 +1,8 @@
 Doing:
 
   MVP
+  - we need to be sure to fix the 409s
+  - the search is not case sensitive, the title and the body must be lowercased
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object

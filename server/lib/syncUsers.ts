@@ -115,6 +115,7 @@ export async function syncUsers(
     for (const user of usersToAdd) {
       const userId = dbService.generateIdFor('user');
       await dbs.insertUser({
+        type: 'user',
         _id: userId,
         email: user.email,
         fullname: user.fullname,

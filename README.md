@@ -139,6 +139,14 @@ For docker specific instructions, there is also a Docker.md in the docs/ directo
 
 ---
 
+## Troubleshooting
+
+If the npm install fails because of some weird issue with node-gyp and PouchDB, is it possible that either you don't have the `xcode-select` toolchain installed or its installation is somehow problematic (this could happen after a macOS major release upgrade).
+
+Either run a `xcode-select --install` or even `sudo rm -rf /Library/Developer/CommandLineTools` before that ([source](https://github.com/nodejs/node/issues/55023#issuecomment-2363342176)).
+
+---
+
 ## Mandatory screenshots
 
 ### Reading a page
