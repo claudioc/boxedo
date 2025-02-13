@@ -15,10 +15,10 @@
     "start": "NODE_ENV=production node --env-file=.env ./dist/server/app.js",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
-    "db:reset": "./tasks/resetDb.sh",
+    "db:reset": "./tasks/couchdb/couchdb-reset.sh",
     "db:export": "tsx --no-deprecation --env-file=.env --tsconfig ./server/tsconfig.json ./tasks/exporter.ts",
     "server:test": "vitest",
-    "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
+    "bulk-load": "tsx  --no-deprecation --tsconfig ./server/tsconfig.json --env-file=.env tasks/bulkLoad.ts",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
     "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts",
     "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS ."
