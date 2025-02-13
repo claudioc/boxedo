@@ -149,9 +149,10 @@ export function dbService(client?: DbClient) {
         // Only return if it's actually a page
         return doc.type === 'page' ? doc : null;
       } catch (err) {
-        if ((err as PouchDB.Core.Error).status !== 404) {
+        if ((err as PouchDB.Core.Error).status === 404) {
           return null;
         }
+
         throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
@@ -744,7 +745,6 @@ export function dbService(client?: DbClient) {
       if (!isTestRun) return;
 
       const allDocs = await this.db.allDocs({ include_docs: true });
-
       const deletions = allDocs.rows
         .filter((row) => row.doc)
         .map((row) => ({

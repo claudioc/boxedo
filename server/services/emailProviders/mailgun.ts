@@ -38,6 +38,7 @@ export class MailgunProvider implements EmailProvider {
         body: form as unknown as BodyInit,
         headers: {
           Authorization: `Basic ${Buffer.from(`api:${this.apiKey}`).toString('base64')}`,
+          ...form.getHeaders(),
         },
       }
     );

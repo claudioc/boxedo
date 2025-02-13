@@ -3,8 +3,8 @@ import bootstrap from './lib/bootstrap';
 import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
 import { dbService } from './services/dbService';
-import type { SettingsModelWithoutId } from '../types';
 import { POSITION_GAP_SIZE } from './constants';
+import type { SettingsModel } from '../types';
 
 let app: FastifyInstance;
 
@@ -107,7 +107,8 @@ describe('Settings', () => {
     response = await createPage('Another page, actually');
     const pageId = extractIdFrom(response);
 
-    const settings: SettingsModelWithoutId = {
+    const settings: SettingsModel = {
+      _id: 'settings',
       type: 'settings',
       landingPageId: pageId,
       siteLang: 'en',
@@ -116,7 +117,7 @@ describe('Settings', () => {
       textSize: 'M',
     };
 
-    await postUrl('/settings', settings as Record<string, string>);
+    await postUrl('/settings', settings as unknown as Record<string, string>);
 
     const $ = await getContent('/');
 
@@ -137,12 +138,13 @@ describe('Creating page', () => {
   });
 
   it('should show a feedback when a code is passed', async () => {
+    await createPage('First and only page');
     const $ = await getContent('/?f=1');
     expect($('[role="status"]').text()).toContain('Page created');
   });
 });
 
-describe.skip('Editing page', () => {
+describe('Editing page', () => {
   it('should change the title of a page', async () => {
     const resp = await createPage('First and only page');
     const pageId = extractIdFrom(resp);
@@ -156,7 +158,7 @@ describe.skip('Editing page', () => {
   });
 });
 
-describe.skip('Navigation', () => {
+describe('Navigation', () => {
   it('should return no navigation items', async () => {
     const $ = await getContent('/parts/nav/');
     expect($('body').text()).toBe('');
@@ -191,7 +193,7 @@ describe.skip('Navigation', () => {
   });
 });
 
-describe.skip('Deleting pages', () => {
+describe('Deleting pages', () => {
   it('should delete a page', async () => {
     let resp = await createPage('First page');
     const pageId = extractIdFrom(resp);
@@ -212,7 +214,7 @@ describe.skip('Deleting pages', () => {
   });
 });
 
-describe.skip('Moving pages', () => {
+describe('Moving pages', () => {
   it('should move a page to the top level', async () => {
     await createPage('First page');
     let resp = await createPage('Second page');
@@ -255,7 +257,7 @@ describe.skip('Moving pages', () => {
   });
 });
 
-describe.skip('Reordering pages', () => {
+describe('Reordering pages', () => {
   it('should return tree navigation items, and change the order of the first one', async () => {
     const pageIds = [];
 
@@ -322,7 +324,7 @@ describe.skip('Reordering pages', () => {
   });
 });
 
-describe.skip('Searching titles', () => {
+describe('Searching titles', () => {
   it('should return matching titles', async () => {
     await createPage('First and only page');
     await createPage('Second and only page');

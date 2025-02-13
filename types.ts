@@ -1,5 +1,4 @@
 import type { FastifyInstance } from 'fastify';
-import type { MangoOperator, MangoSelector, MangoValue } from 'nano';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export const nodeEnv = ['development', 'production', 'test'] as const;
@@ -36,8 +35,6 @@ export type Context =
   | 'viewing page'
   | 'moving page'
   | 'uploading file';
-
-type WithoutId<T> = Omit<T, '_id' | '_rev'>;
 
 export interface WithCtx {
   ctx: Ctx;
@@ -136,22 +133,6 @@ export type DocumentModel =
   | SessionModel
   | UserModel
   | PageModel;
-
-// export interface PageModelWithRev extends PageModel {
-//   _rev: string;
-// }
-
-export type SettingsModelWithoutId = WithoutId<SettingsModel>;
-export type PageModelWithoutId = WithoutId<PageModel>;
-export type PageModelWithoutRev = Omit<PageModel, '_rev'>;
-
-export type PageSelector = {
-  [K in MangoOperator | keyof PageModel]:
-    | MangoSelector
-    | MangoSelector[]
-    | MangoValue
-    | MangoValue[];
-};
 
 export interface PageRevInfo {
   rev: string;
