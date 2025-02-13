@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export const nodeEnv = ['development', 'production', 'test'] as const;
@@ -23,6 +23,21 @@ export const DEFAULT_TEXT_SIZE: TextSize = 'M';
 export const supportedLanguages = ['en', 'it'] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 export const DEFAULT_SUPPORTED_LANGUAGE: SupportedLanguage = 'en';
+
+export const dbBackends = ['local', 'remote', 'memory'] as const;
+export type DbBackend = (typeof dbBackends)[number];
+export const DEFAULT_DB_BACKEND: DbBackend = 'local';
+
+export interface DbServiceInitParams {
+  backend: DbBackend;
+  dbName: string;
+  localPath?: string;
+  serverUrl?: string;
+  username?: string;
+  password?: string;
+  env: NodeEnv;
+  logger: FastifyBaseLogger;
+}
 
 export type Ctx = {
   app: FastifyInstance;
@@ -159,7 +174,6 @@ export interface Feedback {
 export const ConfigEnvSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['COUCHDB_USER', 'COUCHDB_PASSWORD'],
   properties: {
     BASE_EXTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
     BASE_INTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
@@ -168,12 +182,24 @@ export const ConfigEnvSchema = {
       default: 'development' satisfies NodeEnv,
       enum: nodeEnv,
     },
-    COUCHDB_URL: {
+    DB_BACKEND: {
+      type: 'string',
+      enum: dbBackends,
+      default: DEFAULT_DB_BACKEND satisfies DbBackend,
+    },
+    DB_NAME: {
+      type: 'string',
+      default: 'joongle',
+    },
+    DB_REMOTE_URL: {
       type: 'string',
       default: 'http://localhost:5984',
     },
-    COUCHDB_USER: { type: 'string' },
-    COUCHDB_PASSWORD: { type: 'string' },
+    DB_LOCAL_PATH: {
+      type: 'string',
+    },
+    DB_REMOTE_USER: { type: 'string', default: '' },
+    DB_REMOTE_PASSWORD: { type: 'string', default: '' },
     LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
     SETTINGS_LANGUAGE: {
       type: 'string',

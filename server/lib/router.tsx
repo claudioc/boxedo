@@ -2,42 +2,42 @@ import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { pathWithFeedback, slugUrl } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
-import type {
-  PageModel,
-  NavItem,
-  FileModel,
-  FileAttachmentModel,
-} from '~/../types';
-import { Feedbacks } from './feedbacks';
 import { load } from 'cheerio';
-import { dbService } from '~/services/dbService';
-import { redirectService } from '~/services/redirectService';
-import { RouterSchemas as RS } from './routerSchemas';
-import { SearchResults } from '~/views/SearchResults';
-import { ReadPage } from '~/views/ReadPage';
-import { SettingsPage } from '~/views/SettingsPage';
-import { ReadPageVersion } from '~/views/ReadPageVersion';
-import { NotFound } from '~/views/NotFound';
-import { ErrorPage } from '~/views/ErrorPage';
-import { EditPage } from '~/views/EditPage';
-import { LoginPage } from '~/views/LoginPage';
-import { CreatePage } from '~/views/CreatePage';
-import { MovePage } from '~/views/MovePage';
-import { Nav } from '~/views/components/Nav';
-import { PageHistory } from '~/views/PageHistory';
-import { TitlesList } from '~/views/components/TitlesList';
+import { Readable } from 'node:stream';
+import sharp from 'sharp';
+import type {
+  FileAttachmentModel,
+  FileModel,
+  NavItem,
+  PageModel,
+} from '~/../types';
 import {
+  JPEG_QUALITY,
+  MAGIC_TOKEN_EXPIRATION_MINUTES,
   MAX_IMAGE_DIMENSION,
   MAX_IMAGE_SIZE,
-  JPEG_QUALITY,
   NAVIGATION_CACHE_KEY,
-  MAGIC_TOKEN_EXPIRATION_MINUTES,
-  SEVEN_DAYS_IN_SECONDS,
   SESSION_COOKIE_NAME,
+  SEVEN_DAYS_IN_SECONDS,
 } from '~/constants';
-import sharp from 'sharp';
-import { Readable } from 'node:stream';
+import { dbService } from '~/services/dbService';
+import { redirectService } from '~/services/redirectService';
+import { CreatePage } from '~/views/CreatePage';
+import { EditPage } from '~/views/EditPage';
+import { ErrorPage } from '~/views/ErrorPage';
+import { LoginPage } from '~/views/LoginPage';
+import { MovePage } from '~/views/MovePage';
+import { NotFound } from '~/views/NotFound';
+import { PageHistory } from '~/views/PageHistory';
+import { ReadPage } from '~/views/ReadPage';
+import { ReadPageVersion } from '~/views/ReadPageVersion';
+import { SearchResults } from '~/views/SearchResults';
+import { SettingsPage } from '~/views/SettingsPage';
+import { Nav } from '~/views/components/Nav';
+import { TitlesList } from '~/views/components/TitlesList';
+import { Feedbacks } from './feedbacks';
 import { createRequireAuth, createRequireCsrf } from './routerPreHandlers';
+import { RouterSchemas as RS } from './routerSchemas';
 
 /**
  * Encapsulates the routes

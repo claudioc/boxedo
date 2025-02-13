@@ -1,9 +1,9 @@
-import nano from 'nano';
 import fs from 'fs/promises';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import { PageModel, FileModel } from '../types';
-import { extractFileRefsFrom } from '../server/lib/helpers';
+import { extractFileRefsFrom, loadConfig } from '../server/lib/helpers';
+import { DbService, dbService } from '../server/services/dbService';
+import { FileModel, PageModel } from '../types';
 
 interface Frontmatter
   extends Omit<
@@ -14,26 +14,28 @@ interface Frontmatter
 class PageExporter {
   private outputDir: string;
   private filesDir: string;
-  private couchdb: nano.ServerScope;
-  private pagesDb: nano.DocumentScope<PageModel>;
-  private filesDb: nano.DocumentScope<FileModel>;
+  private dbs: DbService;
 
-  constructor(outputDir: string) {
+  constructor(outputDir: string, dbs: DbService) {
     this.outputDir = outputDir;
     this.filesDir = path.join(outputDir, 'files');
+    this.dbs = dbs;
+  }
 
-    this.couchdb = nano({
-      url: process.env.COUCHDB_URL ?? '',
-      requestDefaults: {
-        auth: {
-          username: process.env.COUCHDB_USER ?? '',
-          password: process.env.COUCHDB_PASSWORD ?? '',
-        },
-      },
+  static async create(outputDir: string): Promise<PageExporter> {
+    const config = loadConfig();
+    const dbClient = await dbService.init({
+      logger: console,
+      backend: config.DB_BACKEND,
+      dbName: config.DB_NAME,
+      localPath: config.DB_LOCAL_PATH,
+      serverUrl: config.DB_REMOTE_URL,
+      username: config.DB_REMOTE_USER,
+      password: config.DB_REMOTE_PASSWORD,
+      env: config.NODE_ENV,
     });
 
-    this.pagesDb = this.couchdb.use('pages');
-    this.filesDb = this.couchdb.use('files');
+    return new PageExporter(outputDir, dbService(dbClient));
   }
 
   private async ensureDirectories(): Promise<void> {
@@ -43,6 +45,7 @@ class PageExporter {
 
   private createFrontmatter(page: PageModel): string {
     const metadata: Frontmatter = {
+      type: 'page',
       _id: page._id,
       parentId: page.parentId,
       pageTitle: page.pageTitle,
@@ -68,14 +71,14 @@ ${JSON.stringify(metadata, null, 2)}
   ): Promise<string> {
     try {
       // Get file metadata
-      const fileDoc = await this.filesDb.get(fileId);
+      const fileDoc = await this.dbs.db.get<FileModel>(fileId);
       if (!fileDoc) {
         console.warn(`File metadata not found for ${fileId}`);
         return '';
       }
 
       // Get the actual attachment
-      const attachment = await this.filesDb.attachment.get(
+      const attachment = await this.dbs.db.getAttachment(
         fileId,
         originalFilename
       );
@@ -90,8 +93,14 @@ ${JSON.stringify(metadata, null, 2)}
       const sanitizedFilename = sanitize(`${fileId}-${originalFilename}`);
       const outputPath = path.join(this.filesDir, sanitizedFilename);
 
+      // Convert Blob/Buffer to Buffer if needed
+      const buffer =
+        attachment instanceof Buffer
+          ? attachment
+          : Buffer.from(await (attachment as Blob).arrayBuffer());
+
       // Write the file
-      await fs.writeFile(outputPath, attachment);
+      await fs.writeFile(outputPath, buffer);
       console.log(`Exported file: ${outputPath}`);
 
       // Return the relative path from HTML files to the exported file
@@ -114,15 +123,15 @@ ${JSON.stringify(metadata, null, 2)}
     // Process each file reference
     for (const fileId of fileRefs) {
       try {
-        // Get file metadata to find the original filename
-        const fileDoc = await this.filesDb.get(fileId);
+        // Get file metadata from the document
+        const fileDoc = await this.dbs.db.get<FileModel>(fileId);
         if (!fileDoc) continue;
 
         // Export the file and get its new local path
         const localPath = await this.exportFile(fileId, fileDoc.originalName);
         if (!localPath) continue;
 
-        // Replace all occurrences of the CouchDB URL pattern with the local path
+        // Replace all occurrences of the server URL pattern with the local path
         const urlPattern = new RegExp(`/uploads/${fileId}/[^"'\\s]+`, 'g');
         processedContent = processedContent.replace(urlPattern, localPath);
       } catch (error) {
@@ -136,6 +145,7 @@ ${JSON.stringify(metadata, null, 2)}
   private async createHtmlDocument(page: PageModel): Promise<string> {
     const frontmatter = this.createFrontmatter(page);
     const processedContent = await this.processPageContent(page.pageContent);
+    const settings = await this.dbs.getSettings();
 
     return `${frontmatter}
 <!DOCTYPE html>
@@ -143,7 +153,7 @@ ${JSON.stringify(metadata, null, 2)}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="Joongle Page Exporter">
+    <meta name="generator" content="${settings.siteTitle}">
     <meta name="created" content="${page.createdAt}">
     <meta name="modified" content="${page.updatedAt}">
     <title>${page.pageTitle}</title>
@@ -159,25 +169,28 @@ ${JSON.stringify(metadata, null, 2)}
       // Ensure output directories exist
       await this.ensureDirectories();
 
-      // Fetch all pages in bulk
-      const response = await this.pagesDb.list({ include_docs: true });
-      const regularDocs = response.rows.filter(
-        (row) => !row.id.startsWith('_design/')
-      );
+      // Fetch all pages using find() instead of list()
+      const response = await this.dbs.db.find({
+        selector: {
+          type: 'page',
+          _id: {
+            $regex: '^page:', // Only get documents that start with page:
+          },
+        },
+        // No need to use include_docs with find() as it always includes full docs
+      });
 
-      console.log(
-        `Found ${regularDocs.length} pages to export (excluding design documents).`
-      );
+      const pages = response.docs;
+      console.log(`Found ${pages.length} pages to export.`);
 
       // Process each page
-      const exports = regularDocs.map(async (row) => {
-        const page = row.doc;
+      const exports = pages.map(async (page) => {
         if (!page) return;
 
-        const htmlContent = await this.createHtmlDocument(page);
+        const htmlContent = await this.createHtmlDocument(page as PageModel);
         const outputPath = path.join(
           this.outputDir,
-          this.getOutputFilename(page)
+          this.getOutputFilename(page as PageModel)
         );
 
         await fs.writeFile(outputPath, htmlContent, 'utf8');
@@ -197,7 +210,7 @@ ${JSON.stringify(metadata, null, 2)}
 
 // Usage example
 async function main() {
-  const exporter = new PageExporter('./exportedPages');
+  const exporter = await PageExporter.create('./exportedPages');
 
   try {
     await exporter.exportPages();

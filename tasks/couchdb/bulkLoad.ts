@@ -1,5 +1,4 @@
-import { PageModel, PageModelWithoutRev } from '../../server/types';
-import nano, { DocumentScope, DocumentBulkResponse } from 'nano';
+import { PageModel } from '../../server/types';
 import { load } from 'cheerio';
 import fs from 'fs';
 import { createId } from '@paralleldrive/cuid2';
@@ -10,7 +9,7 @@ type ExistingPage = {
   pageSlug: string;
 };
 
-const pages: PageModelWithoutRev[] = [];
+const pages: PageModel[] = [];
 const existingPages: ExistingPage[] = [];
 
 function getRandomElement<T>(arr: T[]): T {
@@ -40,11 +39,11 @@ const generateUniqueSlug = (title: string) => {
 
 async function generatePages(numPages: number): Promise<nano.ServerScope> {
   const client = nano({
-    url: process.env.COUCHDB_URL || '',
+    url: process.env.DB_REMOTE_URL || '',
     requestDefaults: {
       auth: {
-        username: process.env.COUCHDB_USER || '',
-        password: process.env.COUCHDB_PASSWORD || '',
+        username: process.env.DB_REMOTE_USER || '',
+        password: process.env.DB_REMOTE_PASSWORD || '',
       },
     },
   });

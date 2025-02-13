@@ -1,31 +1,30 @@
-import Fastify from 'fastify';
-import helmet from '@fastify/helmet';
-import staticServe from '@fastify/static';
+import fastifyCookie from '@fastify/cookie';
+import csrfProtection from '@fastify/csrf-protection';
+import fastifyEnv from '@fastify/env';
 import fastifyFormbody from '@fastify/formbody';
+import helmet from '@fastify/helmet';
+import multipart from '@fastify/multipart';
+import staticServe from '@fastify/static';
+import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
+import Fastify from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
 import type { PinoLoggerOptions } from 'fastify/types/logger';
-import fastifyEnv from '@fastify/env';
 import path from 'node:path';
-import router from './router';
 import {
   ConfigEnvSchema,
-  type UserModel,
   type ConfigEnv,
   type NodeEnv,
   type SettingsModel,
+  type UserModel,
 } from '~/../types';
-import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
-// import { fileURLToPath } from 'node:url';
-import csrfProtection from '@fastify/csrf-protection';
-import fastifyCookie from '@fastify/cookie';
 import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
-import { dbService, type DbClient } from '~/services/dbService';
-import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
-import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
-import multipart from '@fastify/multipart';
+import fastifyFeedback from '~/lib/plugins/feedback';
+import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
+import { dbService, type DbClient } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
+import router from './router';
 import { syncUsers } from './syncUsers';
 
 declare module 'fastify' {
@@ -45,9 +44,6 @@ declare module 'fastify' {
     user: UserModel | null;
   }
 }
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
 
 // Fix thread-stream error due to __dirname in pino
 if (process.env.NODE_ENV !== 'test') {
@@ -103,10 +99,13 @@ try {
   app.decorate(
     'dbClient',
     await dbService.init({
-      type: 'remote',
-      serverUrl: app.config.COUCHDB_URL ?? '',
-      username: app.config.COUCHDB_USER ?? '',
-      password: app.config.COUCHDB_PASSWORD ?? '',
+      logger: app.log,
+      backend: app.config.DB_BACKEND,
+      dbName: app.config.DB_NAME,
+      localPath: app.config.DB_LOCAL_PATH,
+      serverUrl: app.config.DB_REMOTE_URL,
+      username: app.config.DB_REMOTE_USER,
+      password: app.config.DB_REMOTE_PASSWORD,
       env: app.config.NODE_ENV,
     })
   );
@@ -119,7 +118,7 @@ if (app.config.NODE_ENV !== 'test') {
 }
 
 const dbs = await dbService(app.dbClient);
-const settings = await dbs.getSettings();
+const settings = await dbs.getSettings(app.config);
 
 if (app.config.AUTHENTICATION_TYPE !== 'none') {
   await syncUsers(app, dbs, {

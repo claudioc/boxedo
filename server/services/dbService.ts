@@ -1,47 +1,42 @@
 import PouchDB from 'pouchdb-core';
 // PouchFind provides a simple, MongoDB-inspired query language that accomplishes
 // the same thing as the map/reduce API, but with far less code.
-import PouchFind from 'pouchdb-find';
-import PouchAdapterSqlite from 'pouchdb-adapter-node-websql';
-import PouchAdapterMemory from 'pouchdb-adapter-memory';
+import { access, mkdir } from 'node:fs/promises';
+
 import PouchHttp from 'pouchdb-adapter-http';
+import PouchAdapterMemory from 'pouchdb-adapter-memory';
+import PouchAdapterSqlite from 'pouchdb-adapter-node-websql';
+import PouchFind from 'pouchdb-find';
 import PouchReduce from 'pouchdb-mapreduce';
 
+import { createId } from '@paralleldrive/cuid2';
+import path from 'node:path';
+import sanitizeHtml from 'sanitize-html';
+import slugify from 'slugify';
 import type {
-  SettingsModel,
-  PageModel,
-  SessionModel,
-  UserModel,
+  ConfigEnv,
+  DbServiceInitParams,
+  DocumentModel,
+  FileAttachmentModel,
+  FileModel,
+  MagicModel,
   ModelName,
   NavItem,
-  DocumentModel,
-  NodeEnv,
-  ConfigEnv,
-  FileModel,
-  FileAttachmentModel,
-  MagicModel,
+  PageModel,
+  SessionModel,
+  SettingsModel,
+  UserModel,
 } from '~/../types';
 import { DEFAULT_TEXT_SIZE } from '~/../types';
-import { Feedbacks } from '~/lib/feedbacks';
-import { ErrorWithFeedback } from '~/lib/errors';
-import slugify from 'slugify';
-import {
-  slugUrl,
-  getDefaultLanguage,
-  extractFileRefsFrom,
-  ensureValidLanguage,
-} from '~/lib/helpers';
-import sanitizeHtml from 'sanitize-html';
-import { createId } from '@paralleldrive/cuid2';
 import { POSITION_GAP_SIZE } from '~/constants';
-
-interface DbServiceInitParams {
-  type: 'remote' | 'local' | 'memory';
-  serverUrl?: string;
-  username?: string;
-  password?: string;
-  env: NodeEnv;
-}
+import { ErrorWithFeedback } from '~/lib/errors';
+import { Feedbacks } from '~/lib/feedbacks';
+import {
+  ensureValidLanguage,
+  extractFileRefsFrom,
+  getDefaultLanguage,
+  slugUrl,
+} from '~/lib/helpers';
 
 // https://github.com/apostrophecms/sanitize-html
 const safeHtml = (str: string) =>
@@ -79,8 +74,9 @@ const streamToBuffer = async (
 };
 
 export type DbClient = PouchDB.Database<DocumentModel>;
+export type DbService = ReturnType<typeof dbService>;
 
-export function dbService(client?: DbClient) {
+export const dbService = (client?: DbClient) => {
   if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
 
   return {
@@ -90,7 +86,7 @@ export function dbService(client?: DbClient) {
     //   return pagesDb;
     // },
 
-    async getSettings(config?: ConfigEnv) {
+    async getSettings(config?: ConfigEnv): Promise<SettingsModel> {
       try {
         const settings = await this.db.get<SettingsModel>('settings');
 
@@ -764,7 +760,7 @@ export function dbService(client?: DbClient) {
       }
     },
   };
-}
+};
 
 // bulk-load uses the same logic
 dbService.generateIdFor = (model: ModelName) => `${model}:${createId()}`;
@@ -822,16 +818,16 @@ dbService._createViews = async (db: PouchDB.Database) => {
 };
 
 dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
-  const dbName = 'joongle';
+  const dbName = params.dbName;
   let db: DbClient;
 
   switch (true) {
-    case params.type === 'memory' || params.env === 'test' || isTestRun:
+    case params.backend === 'memory' || params.env === 'test' || isTestRun:
       PouchDB.plugin(PouchFind).plugin(PouchReduce).plugin(PouchAdapterMemory);
       db = new PouchDB<DocumentModel>(dbName);
       break;
 
-    case params.type === 'remote' && !!params.serverUrl:
+    case params.backend === 'remote' && !!params.serverUrl:
       PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
       db = new PouchDB(`${params.serverUrl}/${dbName}`, {
         auth: {
@@ -841,10 +837,37 @@ dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
       });
       break;
 
-    default:
-      PouchDB.plugin(PouchAdapterSqlite).plugin(PouchFind).plugin(PouchReduce);
-      db = new PouchDB<DocumentModel>(dbName);
+    case params.backend === 'local':
+      {
+        const dbPath = params.localPath || '.';
+
+        try {
+          await access(dbPath);
+          params.logger.info(`Using existing database directory: ${dbPath}`);
+        } catch {
+          try {
+            await mkdir(dbPath, { recursive: true });
+            console.log(`Using existing database directory: ${dbPath}`);
+          } catch (error) {
+            throw new Error(
+              `Failed to create database directory at ${dbPath}: ${(error as Error).message}`
+            );
+          }
+        }
+
+        PouchDB.plugin(PouchAdapterSqlite)
+          .plugin(PouchFind)
+          .plugin(PouchReduce);
+        db = new PouchDB<DocumentModel>(path.join(dbPath, `${dbName}.db`), {
+          adapter: 'websql',
+        });
+      }
       break;
+
+    default:
+      throw new Error(
+        'Database configuration inconsistent or unknown. Cannot continue.'
+      );
   }
 
   try {

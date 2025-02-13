@@ -1,11 +1,14 @@
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import {
+  ConfigEnvSchema,
   DEFAULT_SUPPORTED_LANGUAGE,
   type ConfigEnv,
   type Feedback,
   type PageModel,
   type UrlParts,
 } from '../../types';
-import { type SupportedLocales, supportedLocales } from '../locales/phrases';
+import { supportedLocales, type SupportedLocales } from '../locales/phrases';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/view/${slug}`;
@@ -98,4 +101,25 @@ export const getDefaultLanguage = (
   const candidate = config.SETTINGS_LANGUAGE;
 
   return ensureValidLanguage(candidate);
+};
+
+// This helper is for the tasks that need to validate and load the config
+// but don't have access to Fastify (which does it automatically via a plugin)
+export const loadConfig = (): ConfigEnv => {
+  const ajv = new Ajv({
+    useDefaults: true,
+    removeAdditional: true, // or 'all' or 'failing'
+  });
+  addFormats(ajv);
+
+  const validate = ajv.compile(ConfigEnvSchema);
+  const config = process.env;
+
+  if (!validate(config)) {
+    throw new Error(
+      `Config validation failed: ${JSON.stringify(validate.errors)}`
+    );
+  }
+
+  return config as unknown as ConfigEnv;
 };

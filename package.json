@@ -10,13 +10,13 @@
     "node": ">=20.6.0"
   },
   "scripts": {
-    "dev": "NODE_ENV=development tsx --tsconfig ./tsconfig.base.json --env-file=.env hawk.ts",
+    "dev": "NODE_ENV=development tsx --no-deprecation --tsconfig ./tsconfig.base.json --env-file=.env hawk.ts",
     "build": "NODE_ENV=production tsx --env-file=.env hawk.ts",
     "start": "NODE_ENV=production node --env-file=.env ./dist/server/app.js",
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
     "db:reset": "./tasks/resetDb.sh",
-    "db:export": "tsx --env-file=.env ./tasks/exporter.ts",
+    "db:export": "tsx --no-deprecation --env-file=.env --tsconfig ./server/tsconfig.json ./tasks/exporter.ts",
     "server:test": "vitest",
     "bulk-load": "npm run db:reset && sleep 2 && tsx --env-file=.env tasks/couchdb/bulkLoad.ts",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
