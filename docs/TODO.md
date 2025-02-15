@@ -1,6 +1,7 @@
 Doing:
 
   MVP
+  - rebuild index on create/delete/update and fix the things in LUNR.md
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object

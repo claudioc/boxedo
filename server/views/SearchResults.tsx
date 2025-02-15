@@ -24,11 +24,11 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
           {results.map((result) => (
             <li class="content">
               <div class="block">
-                <div class={styles.item}>
+                <div class={[styles.item, 'block', 'is-size-5']}>
                   <DocumentIcon />
                   <a href={slugUrl(result.pageSlug)}>{result.title}</a>
                 </div>
-                <div class="level level-right is-size-7">
+                <div class="block level level-right is-size-7 is-flex-direction-row">
                   {i18n.t('SearchResults.matches')}
                   {result.terms.map((term) => (
                     <span class="tag is-info">{term}</span>
@@ -60,7 +60,7 @@ const HighlightedSnippet = ({ snippet }: { snippet: SearchContentSnippet }) => {
       parts.push(text.slice(lastIndex, start));
     }
 
-    parts.push(<strong>{text.slice(start, start + length)}</strong>);
+    parts.push(<mark>{text.slice(start, start + length)}</mark>);
 
     lastIndex = start + length;
   });
