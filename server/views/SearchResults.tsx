@@ -1,12 +1,12 @@
-import { Layout } from './Layout';
-import type { PageModel, WithCtx } from '~/../types';
+import type { SearchContentSnippet, SearchResult, WithCtx } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
+import { Layout } from './Layout';
 import styles from './SearchResults.module.css';
 import { DocumentIcon } from './icons/DocumentIcon';
 
 interface SearchResultsProps extends WithCtx {
   query: string;
-  results?: PageModel[];
+  results?: SearchResult[];
 }
 
 export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
@@ -23,15 +23,23 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
         <ul>
           {results.map((result) => (
             <li class="content">
-              <div class={styles.item}>
-                <DocumentIcon />
-                <a href={slugUrl(result.pageSlug)}>{result.pageTitle}</a>
+              <div class="block">
+                <div class={styles.item}>
+                  <DocumentIcon />
+                  <a href={slugUrl(result.pageSlug)}>{result.title}</a>
+                </div>
+                <div class="level level-right is-size-7">
+                  {i18n.t('SearchResults.matches')}
+                  {result.terms.map((term) => (
+                    <span class="tag is-info">{term}</span>
+                  ))}
+                </div>
               </div>
-              {result.pageContent && (
+              {result.snippets.map((snippet) => (
                 <blockquote class="ml-4">
-                  <HighlightPhrase text={result.pageContent} phrase={query} />
+                  <HighlightedSnippet snippet={snippet} />
                 </blockquote>
-              )}
+              ))}
             </li>
           ))}
         </ul>
@@ -42,23 +50,24 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
   );
 };
 
-interface HighlightPhraseProps {
-  text: string;
-  phrase: string;
-}
+const HighlightedSnippet = ({ snippet }: { snippet: SearchContentSnippet }) => {
+  const { text, positions } = snippet;
+  const parts: JSX.Element[] = [];
+  let lastIndex = 0;
 
-const HighlightPhrase = ({ text, phrase }: HighlightPhraseProps) => {
-  const parts = text.split(new RegExp(`(${phrase})`, 'gi'));
+  positions.forEach(([start, length], _index) => {
+    if (start > lastIndex) {
+      parts.push(text.slice(lastIndex, start));
+    }
 
-  return (
-    <span>
-      {parts.map((part) =>
-        part.toLowerCase() === phrase.toLowerCase() ? (
-          <strong>{part}</strong>
-        ) : (
-          part
-        )
-      )}
-    </span>
-  );
+    parts.push(<strong>{text.slice(start, start + length)}</strong>);
+
+    lastIndex = start + length;
+  });
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return <span>{parts}</span>;
 };

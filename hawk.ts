@@ -1,12 +1,12 @@
-import { watch, rm } from 'node:fs/promises';
 import * as esbuild from 'esbuild';
-import { type ChildProcess, spawn, exec, fork } from 'node:child_process';
+import { type ChildProcess, exec, fork, spawn } from 'node:child_process';
+import { rm, watch } from 'node:fs/promises';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
-import { promisify } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { ConfigEnv, UrlParts } from './types';
+import { promisify } from 'node:util';
 import { parseBaseUrl } from './server/lib/helpers';
+import type { UrlParts } from './types';
 
 const execAsync = promisify(exec);
 

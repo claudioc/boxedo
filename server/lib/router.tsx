@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
 import { pathWithFeedback, slugUrl } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
-import { load } from 'cheerio';
 import { Readable } from 'node:stream';
 import sharp from 'sharp';
 import type {
@@ -22,6 +21,7 @@ import {
 } from '~/constants';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
+import { SearchService } from '~/services/searchService';
 import { CreatePage } from '~/views/CreatePage';
 import { EditPage } from '~/views/EditPage';
 import { ErrorPage } from '~/views/ErrorPage';
@@ -55,7 +55,7 @@ const router = async (app: FastifyInstance) => {
       preHandler: requireAuth,
     },
     async (req, rep) => {
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const isHtmx = req.headers['hx-request'];
       const { settings } = app;
 
@@ -122,7 +122,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { email } = req.body;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const { i18n, settings, config } = app;
 
       const user = await dbs.getUserByEmail(email);
@@ -174,7 +174,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const magicId = req.params.magicId;
       const { i18n } = app;
 
@@ -227,7 +227,7 @@ const router = async (app: FastifyInstance) => {
 
   app.post('/auth/logout', async (req, rep) => {
     const sessionId = req.cookies.session;
-    const dbs = dbService(app.dbClient);
+    const dbs = app.dbService;
 
     if (sessionId) {
       try {
@@ -255,7 +255,7 @@ const router = async (app: FastifyInstance) => {
     },
 
     async (req, rep) => {
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const { settings } = app;
 
       let landingPage: PageModel | null = null;
@@ -288,7 +288,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { landingPageId, siteLang, siteTitle, textSize } = req.body;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
       const settings = await dbs.getSettings();
 
@@ -332,13 +332,14 @@ const router = async (app: FastifyInstance) => {
       },
     },
     async (req, rep) => {
+      const dbs = app.dbService;
       const { q } = req.query;
 
       if (q.length < 3 || q.length > 50) {
         return '';
       }
 
-      const results = await dbService(app.dbClient).search(q);
+      const results = await dbs.search(q);
 
       rep.html(<TitlesList results={results} i18n={app.i18n} />);
     }
@@ -355,7 +356,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
 
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
@@ -418,7 +419,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { slug } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const isHtmx = req.headers['hx-request'];
 
       const page = await dbs.getPageBySlug(slug);
@@ -468,7 +469,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
@@ -501,7 +502,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { pageTitle, pageContent, rev } = req.body;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       if (pageTitle.trim() === '') {
@@ -578,7 +579,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       const page = await dbs.getPageById(pageId);
@@ -622,7 +623,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { newParentId, moveToTop } = req.body;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       let parentId = newParentId ?? null;
@@ -689,7 +690,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { targetIndex } = req.body;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       const page = await dbs.getPageById(pageId);
@@ -730,7 +731,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const rs = redirectService(app, rep);
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
 
       const page = await dbs.getPageById(pageId);
 
@@ -764,7 +765,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
 
       if (!req.isMultipart()) {
         return rs.bailWithError(
@@ -888,7 +889,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
 
       const { fileId, filename } = req.params;
 
@@ -920,7 +921,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { parentPageId } = req.query;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
@@ -962,7 +963,7 @@ const router = async (app: FastifyInstance) => {
       const { parentPageId } = req.query;
       const { pageTitle, pageContent } = req.body;
       const rs = redirectService(app, rep);
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
 
       if (pageTitle.trim() === '') {
         return rs.homeWithFeedback(Feedbacks.E_EMPTY_TITLE);
@@ -1036,33 +1037,12 @@ const router = async (app: FastifyInstance) => {
 
     async (req, rep) => {
       const { q } = req.query;
-      const dbs = dbService(app.dbClient);
-
-      const results = await dbs.searchText(q);
-
-      if (results) {
-        const snippetSize = 200;
-        results.forEach((result) => {
-          const textContent = load(result.pageContent).text().toLowerCase();
-          const matchIndex = textContent.indexOf(q.toLowerCase());
-          if (matchIndex < 0) {
-            return;
-          }
-          let start = matchIndex - snippetSize / 2;
-          let end = matchIndex + snippetSize / 2 + q.length;
-          start = start < 0 ? 0 : start;
-          end = end > textContent.length ? textContent.length : end;
-          result.pageContent =
-            textContent.substring(start, end) +
-            (end < textContent.length ? '…' : '');
-        });
-      }
 
       rep.html(
         <SearchResults
           ctx={{ app, user: req.user }}
           query={q}
-          results={results}
+          results={await (await SearchService.getInstance()).search(q)}
         />
       );
     }
@@ -1078,7 +1058,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       const page = await dbs.getPageById(pageId);
@@ -1108,7 +1088,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId, version } = req.params;
-      const dbs = dbService(app.dbClient);
+      const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
       const page = await dbs.getPageById(pageId);
@@ -1135,7 +1115,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get('/admin/cleanup-orphaned-files', async () => {
-    const dbs = dbService(app.dbClient);
+    const dbs = app.dbService;
 
     const deleted = await dbs.cleanupOrphanedFiles();
 

@@ -316,39 +316,13 @@ export const dbService = (client?: DbClient) => {
       const result = await this.db.find({
         selector: {
           pageTitle: {
-            $regex: query,
+            $regex: RegExp(query, 'i'),
           },
         },
         limit: 25,
       });
 
       return result.docs as PageModel[];
-    },
-
-    // Couchdb doesn't support full-text search without Lucene
-    async searchText(q: string): Promise<PageModel[]> {
-      const query = safeRegExp(q.toLowerCase());
-
-      const result = (await this.db.find({
-        selector: {
-          type: 'page',
-          $or: [
-            {
-              pageTitle: {
-                $regex: query,
-              },
-            },
-            {
-              pageContent: {
-                $regex: query,
-              },
-            },
-          ],
-        },
-        limit: 25,
-      })) as PouchDB.Find.FindResponse<PageModel>;
-
-      return result.docs;
     },
 
     async getTopLevelPages(): Promise<PageModel[]> {
@@ -492,7 +466,6 @@ export const dbService = (client?: DbClient) => {
                 attachment.attachment as NodeJS.ReadableStream
               );
 
-        // In PouchDB we attach directly to the document
         return await this.db.putAttachment(
           attachment.fileId,
           attachment.attachmentName,

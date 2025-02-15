@@ -1,9 +1,6 @@
 Doing:
 
   MVP
-  - can't we just use the dbService in the App instead of the dbClient?
-  - we need to be sure to fix the 409s because they should not happen
-  - the search is not case sensitive, the title and the body must be lowercased
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
@@ -96,3 +93,6 @@ Done
 - magic link for logging in
 - variable text size
 - bulkLoad and exporter needs partial rewrite
+- can't we just use the dbService in the App instead of the dbClient?
+- we need to be sure to fix the 409s because they should not happen
+- the search is not case sensitive, the title and the body must be lowercased

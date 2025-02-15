@@ -4,7 +4,6 @@ import type {
   FastifyRequest,
   HookHandlerDoneFunction,
 } from 'fastify';
-import { dbService } from '~/services/dbService';
 import { SESSION_COOKIE_NAME } from '~/constants';
 
 export const createRequireAuth = (app: FastifyInstance) => {
@@ -22,7 +21,7 @@ export const createRequireAuth = (app: FastifyInstance) => {
     if (!sessionId) {
       return rep.redirect('/auth/login');
     }
-    const dbs = dbService(app.dbClient);
+    const dbs = app.dbService;
     const session = await dbs.getSessionById(sessionId);
 
     if (!session || new Date(session.expiresAt) < new Date()) {

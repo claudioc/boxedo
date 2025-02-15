@@ -121,7 +121,8 @@
   "SearchResults": {
     "title": "Risultati della ricerca",
     "resultsForQuery": "Hai cercato",
-    "noResults": "Nessun risultato trovato."
+    "noResults": "Nessun risultato trovato.",
+    "matches": "Trovato"
   },
 
   "SettingsPage": {

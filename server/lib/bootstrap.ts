@@ -21,8 +21,9 @@ import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
-import { dbService, type DbClient } from '~/services/dbService';
+import { dbService, type DbService } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
+import { SearchService } from '~/services/searchService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
 import router from './router';
 import { syncUsers } from './syncUsers';
@@ -34,7 +35,7 @@ declare module 'fastify' {
     config: ConfigEnv;
     is: (env: NodeEnv) => boolean;
     settings: SettingsModel;
-    dbClient: DbClient;
+    dbService: DbService;
     i18n: i18nExtended;
     feedbackCode: number;
     cache: Cache;
@@ -95,9 +96,9 @@ await emailService.initialize({
 
 app.decorate('emailService', emailService);
 
+let dbs: DbService;
 try {
-  app.decorate(
-    'dbClient',
+  dbs = dbService(
     await dbService.init({
       logger: app.log,
       backend: app.config.DB_BACKEND,
@@ -109,15 +110,18 @@ try {
       env: app.config.NODE_ENV,
     })
   );
+  app.decorate('dbService', dbs);
 } catch {
   throw new Error('Cannot establish a database connection.');
 }
+
+// Initializes the search service instance, starting indexing the documents
+await SearchService.getInstance(dbs);
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
-const dbs = await dbService(app.dbClient);
 const settings = await dbs.getSettings(app.config);
 
 if (app.config.AUTHENTICATION_TYPE !== 'none') {

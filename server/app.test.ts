@@ -1,10 +1,9 @@
-import { it, expect, describe, beforeAll, afterAll, beforeEach } from 'vitest';
-import bootstrap from './lib/bootstrap';
-import type { FastifyInstance } from 'fastify';
 import { type CheerioAPI, load } from 'cheerio';
-import { dbService } from './services/dbService';
-import { POSITION_GAP_SIZE } from './constants';
+import type { FastifyInstance } from 'fastify';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { SettingsModel } from '../types';
+import { POSITION_GAP_SIZE } from './constants';
+import bootstrap from './lib/bootstrap';
 
 let app: FastifyInstance;
 
@@ -12,11 +11,10 @@ type InjectResponse = Awaited<ReturnType<typeof app.inject>>;
 
 beforeAll(async () => {
   app = await bootstrap(true);
-  // await dbService(app.dbClient).nukeTests();
 });
 
 beforeEach(async () => {
-  await dbService(app.dbClient).nukeTests();
+  await app.dbService.nukeTests();
 });
 
 afterAll(async () => {

@@ -286,3 +286,19 @@ export interface UrlParts {
   host: string;
   isLocalhost: boolean;
 }
+
+export type SearchHitPosition = [number, number]; // [start, length]
+
+export interface SearchContentSnippet {
+  text: string;
+  positions: SearchHitPosition[]; // Positions relative to the snippet
+}
+
+export interface SearchResult {
+  pageId: string;
+  pageSlug: string;
+  title: string;
+  titleHasMatch: boolean;
+  terms: string[];
+  snippets: SearchContentSnippet[];
+}
