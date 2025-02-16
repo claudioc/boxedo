@@ -1,4 +1,3 @@
-import { createId } from '@paralleldrive/cuid2';
 import { load } from 'cheerio';
 import fs from 'fs';
 import slugify from 'slugify';
@@ -110,7 +109,7 @@ class BulkLoader {
         slug = this.generateUniqueSlug(pageTitle);
       }
 
-      const pageId: string = `page:${createId()}`;
+      const pageId: string = dbService.generateIdFor('page');
       this.pages.push({
         type: 'page',
         _id: pageId,
@@ -130,12 +129,14 @@ class BulkLoader {
 
     await this.dbs.db.bulkDocs(this.pages);
 
+    await loader.dbs.db.close();
+
     return;
   }
 }
 
 const loader = await BulkLoader.create();
+const howMany = 100;
+await loader.generatePages(howMany);
 
-await loader.generatePages(100);
-
-console.log('Pages generated successfully');
+console.log(`Pages generated successfully ${howMany}`);

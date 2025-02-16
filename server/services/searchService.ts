@@ -5,7 +5,7 @@ import type {
   SearchHitPosition,
   SearchResult,
 } from '~/../types';
-import { SEARCH_SNIPPET_LENGTH } from '~/constants';
+import { MAX_INDEXABLE_DOCUMENTS, SEARCH_SNIPPET_LENGTH } from '~/constants';
 import type { DbService } from './dbService';
 
 // Pick<PageModel, 'pageTitle' | 'pageContent' | 'pageSlug'>;
@@ -31,6 +31,8 @@ export class SearchService {
   private idx: lunr.Index | null = null;
   private indexBuilt: Promise<void>;
   private resolveIndexBuilt!: () => void;
+  private isRebuilding = false;
+  private pendingRebuild = false;
 
   private constructor(dbs: DbService) {
     this.dbs = dbs;
@@ -67,9 +69,18 @@ export class SearchService {
       const allDocs = (
         await this.dbs.db.find({
           selector: { type: 'page' },
-          limit: 100000,
+          // On the development mac, the limit is around 2000 quite big docs (around 100MB)
+          limit: MAX_INDEXABLE_DOCUMENTS,
         })
       ).docs;
+
+      const totalSize = allDocs.reduce(
+        (acc, doc) =>
+          acc +
+          (doc as PageModel).pageTitle.length +
+          (doc as PageModel).pageContent.length,
+        0
+      );
 
       this.idx = lunr(function (this: lunr.Builder) {
         this.ref('_id');
@@ -80,7 +91,9 @@ export class SearchService {
         allDocs.forEach((doc) => this.add(doc));
       });
 
-      console.log('🔍 Lunr index built with', allDocs.length, 'documents');
+      console.log(
+        `🔍 Lunr index built with ${allDocs.length} documents with a ${totalSize} overall size`
+      );
       this.resolveIndexBuilt();
     } catch (err) {
       console.error('Failed to build index:', err);
@@ -97,10 +110,29 @@ export class SearchService {
   }
 
   public async rebuildIndex(): Promise<void> {
-    this.indexBuilt = new Promise((resolve) => {
-      this.resolveIndexBuilt = resolve;
-    });
-    await this.buildIndex();
+    if (this.isRebuilding) {
+      // Mark that we need another rebuild after this one
+      this.pendingRebuild = true;
+      return;
+    }
+
+    try {
+      this.isRebuilding = true;
+      this.indexBuilt = new Promise((resolve) => {
+        this.resolveIndexBuilt = resolve;
+      });
+
+      await this.buildIndex();
+
+      // Check if another rebuild was requested while we were building
+      if (this.pendingRebuild) {
+        this.pendingRebuild = false;
+        // Start another rebuild
+        await this.rebuildIndex();
+      }
+    } finally {
+      this.isRebuilding = false;
+    }
   }
 
   private normalizeMetadata(
@@ -239,8 +271,6 @@ export class SearchService {
     const searchResults: SearchResult[] = [];
     for await (const result of results) {
       const match = this.normalizeMetadata(result.matchData.metadata);
-      // console.log(JSON.stringify(result, null, 2));
-      // console.log(JSON.stringify(match, null, 2));
 
       const page = await this.dbs.getPageById(result.ref);
 
@@ -254,8 +284,6 @@ export class SearchService {
         );
       }
     }
-
-    // console.log(searchResults);
 
     return searchResults;
   }

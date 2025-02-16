@@ -1,11 +1,12 @@
-import PouchDB from 'pouchdb-core';
-// PouchFind provides a simple, MongoDB-inspired query language that accomplishes
-// the same thing as the map/reduce API, but with far less code.
 import { access, mkdir } from 'node:fs/promises';
+import PouchDB from 'pouchdb-core';
 
 import PouchHttp from 'pouchdb-adapter-http';
+// Remember to exclude this one from bundling in esbuild
+import PouchAdapterLevelDb from 'pouchdb-adapter-leveldb';
 import PouchAdapterMemory from 'pouchdb-adapter-memory';
-import PouchAdapterSqlite from 'pouchdb-adapter-node-websql';
+// PouchFind provides a simple, MongoDB-inspired query language that accomplishes
+// the same thing as the map/reduce API, but with far less code.
 import PouchFind from 'pouchdb-find';
 import PouchReduce from 'pouchdb-mapreduce';
 
@@ -81,10 +82,6 @@ export const dbService = (client?: DbClient) => {
 
   return {
     db: client,
-    // Unused
-    // getPageDb() {
-    //   return pagesDb;
-    // },
 
     async getSettings(config?: ConfigEnv): Promise<SettingsModel> {
       try {
@@ -820,7 +817,7 @@ dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
         } catch {
           try {
             await mkdir(dbPath, { recursive: true });
-            console.log(`Using existing database directory: ${dbPath}`);
+            console.log(`Created database directory: ${dbPath}`);
           } catch (error) {
             throw new Error(
               `Failed to create database directory at ${dbPath}: ${(error as Error).message}`
@@ -828,11 +825,12 @@ dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
           }
         }
 
-        PouchDB.plugin(PouchAdapterSqlite)
+        PouchDB.plugin(PouchAdapterLevelDb)
           .plugin(PouchFind)
           .plugin(PouchReduce);
+
         db = new PouchDB<DocumentModel>(path.join(dbPath, `${dbName}.db`), {
-          adapter: 'websql',
+          adapter: 'leveldb',
         });
       }
       break;

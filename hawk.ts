@@ -312,10 +312,7 @@ const buildServer: TaskFn = async (_) => {
       import { dirname } from 'path';
       const __dirname = dirname(__filename);`,
     },
-    external: [
-      // This module brings in all sort of crap
-      'pouchdb-adapter-node-websql',
-    ],
+    external: ['pouchdb-adapter-leveldb'],
   });
   return true;
 };

@@ -9,6 +9,7 @@ import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
 import Fastify from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
 import type { PinoLoggerOptions } from 'fastify/types/logger';
+import osUtils from 'node-os-utils';
 import path from 'node:path';
 import {
   ConfigEnvSchema,
@@ -83,6 +84,14 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+setInterval(async () => {
+  const cpu = await osUtils.cpu.usage();
+  const mem = await osUtils.mem.info();
+  app.log.info(
+    `cpu: ${cpu}% - memory: ${mem.usedMemPercentage}% / ${mem.freeMemMb}`
+  );
+}, 30000);
+
 await app.register(fastifyEnv, { schema: ConfigEnvSchema });
 
 const emailService = EmailService.getInstance();
@@ -116,7 +125,7 @@ try {
 }
 
 // Initializes the search service instance, starting indexing the documents
-await SearchService.getInstance(dbs);
+SearchService.getInstance(dbs);
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);

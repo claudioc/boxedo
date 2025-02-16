@@ -1,13 +1,13 @@
 Doing:
 
   MVP
-  - rebuild index on create/delete/update and fix the things in LUNR.md
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
+  - the couchdb scripts and compose file must be more parametric
 
   NEXT
   - editing the page doesn't take into account the settings.textSize
@@ -97,3 +97,4 @@ Done
 - can't we just use the dbService in the App instead of the dbClient?
 - we need to be sure to fix the 409s because they should not happen
 - the search is not case sensitive, the title and the body must be lowercased
+- rebuild index on create/delete/update and fix the things in LUNR.md

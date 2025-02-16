@@ -24,7 +24,8 @@ Some feature highlights:
 - **Page history tracking** - using CouchDB's native support for revisions, it's always possible to see what changed over time in any document (but we don't offer "diff" representation at the moment)
 - **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile
 - **Advanced WYSIWYG editor** - Joongle's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
-- **Search capabilities** - search is there, but is currently limited to what Couchdb offers out of the box. In bigger installations, adding something like OpenSearch (formerly ElasticSearch) should be pretty easy given the replication feature of CouchDB
+- **Multi-database backend** - at his core Joongle uses a document model database and the flavour I chose is CouchDB. Joongle uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Joongle! With PouchDB, you can run Joongle with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
+- **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Lunr](https://lunrjs.com/). It is not an ideal solution but it works very well for relatively small amount of documents (±200). Other, more scalable options are considered for the medium term
 - **Support tools** - the repository comes with tools for backing up, restoring and exporting the db. Additionally, other tools are present to provide a nice development experience, like translations keys managers and pm2 helpers
 - **Internationalization (i18n)** - only English is supported at the moment, but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
 - **Developer-friendly** - Designed for easy hacking from the ground-up
@@ -85,15 +86,17 @@ CouchDB scales very well in case in the future we would like to see Joongle expo
 
 Images are also saved directly in the database since CouchDB has also a nice support for binary content, like compression, digest, and streaming.
 
-Couchdb also offers, out-of-the-box, and administrative web interface (called Fauxston) at `http://localhost:5984/_utils`. That's _very_ handy indeed.
+Couchdb also offers, out-of-the-box, and administrative web interface (called Fauxston) at `http://localhost:5984/_utils`. That's _very_ handy indeed. Note that this is only supported if you use Couchdb and not another PouchDB driver (like LevelDB).
 
-The database operations are relatively well decoupled so a version with maybe less features but an easier installation could be present in the future. I am thinking SQLite for example. A completely db-less approach - using just the file system for storing data - could also be an option; in that hypothesis, we could use a "front matter" approach for storing metadata (this very approach is already used when we want to export all the html files).
+The database operations are relatively well decoupled so a version with maybe less features but an easier installation could be present in the future. A completely db-less approach - using just the file system for storing data - could also be an option; in that hypothesis, we could use a "front matter" approach for storing metadata (this very approach is already used when we want to export all the html files).
 
 ## Technical Stack
 
 - [Fastify](https://www.fastify.io/)
 - [CouchDB](https://couchdb.apache.org/)
+- [PouchDB](https://pouchdb.com/)
 - [TipTap](https://tiptap.dev/)
+- [Lunr](https://lunrjs.com)
 - Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
 - [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
 - CSS Modules
@@ -111,14 +114,14 @@ The database operations are relatively well decoupled so a version with maybe le
 
 ### Prerequisites
 - nodejs 20+
-- docker
+- docker (only if you want to use the real Couchdb interface and not Pouchdb with a local db)
 - macOS or linux (my personal deployment uses Ubuntu 24.04)
 
 ### Setup
 1. Clone the repository
 2. Copy environment config: `cp dot.env .env` and edit the values if you feel like
 3. Run `npm install`
-4. Start the database: `npm run db:start`
+4. Optional: Start the database: `npm run db:start` (this is only needed if you use couchdb as the backend for Pouchdb)
 5. Launch development server: `npm run dev`
 6. Access at http://localhost:3000
 

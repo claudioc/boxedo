@@ -551,6 +551,11 @@ const router = async (app: FastifyInstance) => {
 
       // await delay(2000);
 
+      // We don't await
+      setTimeout(async () => {
+        (await SearchService.getInstance()).rebuildIndex();
+      }, 1);
+
       return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
 
       // If the title is the same as the current page, we keep the slug
@@ -746,6 +751,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
+
+      // We don't await
+      setTimeout(async () => {
+        (await SearchService.getInstance()).rebuildIndex();
+      }, 1);
 
       return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
@@ -1014,6 +1024,11 @@ const router = async (app: FastifyInstance) => {
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
       const page = await dbs.getPageById(pageId);
+
+      // We don't await
+      setTimeout(async () => {
+        (await SearchService.getInstance()).rebuildIndex();
+      }, 1);
 
       // These are useful for testing purposes
       rep.header('x-page-id', pageId);
