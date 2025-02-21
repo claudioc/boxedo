@@ -1,4 +1,4 @@
-import type { SearchContentSnippet, SearchResult, WithCtx } from '~/../types';
+import type { SearchResult, SearchSnippet, WithCtx } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import { Layout } from './Layout';
 import styles from './SearchResults.module.css';
@@ -26,16 +26,24 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
               <div class="block">
                 <div class={[styles.item, 'block', 'is-size-5']}>
                   <DocumentIcon />
-                  <a href={slugUrl(result.pageSlug)}>{result.title}</a>
+                  <a href={slugUrl(result.pageSlug)}>
+                    {result.snippets.title.length > 0 ? (
+                      <HighlightedSnippet snippet={result.snippets.title[0]} />
+                    ) : (
+                      result.title
+                    )}
+                  </a>
                 </div>
+
+                {/* Feature not available with Flexsearch
                 <div class="block level level-right is-size-7 is-flex-direction-row">
                   {i18n.t('SearchResults.matches')}
                   {result.terms.map((term) => (
                     <span class="tag is-info">{term}</span>
                   ))}
-                </div>
+                </div> */}
               </div>
-              {result.snippets.map((snippet) => (
+              {result.snippets.content.map((snippet) => (
                 <blockquote class="ml-4">
                   <HighlightedSnippet snippet={snippet} />
                 </blockquote>
@@ -50,7 +58,7 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
   );
 };
 
-const HighlightedSnippet = ({ snippet }: { snippet: SearchContentSnippet }) => {
+const HighlightedSnippet = ({ snippet }: { snippet: SearchSnippet }) => {
   const { text, positions } = snippet;
   const parts: JSX.Element[] = [];
   let lastIndex = 0;

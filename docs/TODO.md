@@ -1,13 +1,15 @@
 Doing:
 
   MVP
+  - search: use cheerio to remove html from the content
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
-  - the couchdb scripts and compose file must be more parametric
+  - the couchdb scripts and compose file must be even more parametric
+  - add a classification to the documents (like 'Internal only', 'Public'...)
 
   NEXT
   - editing the page doesn't take into account the settings.textSize

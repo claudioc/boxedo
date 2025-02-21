@@ -289,7 +289,7 @@ export interface UrlParts {
 
 export type SearchHitPosition = [number, number]; // [start, length]
 
-export interface SearchContentSnippet {
+export interface SearchSnippet {
   text: string;
   positions: SearchHitPosition[]; // Positions relative to the snippet
 }
@@ -298,7 +298,9 @@ export interface SearchResult {
   pageId: string;
   pageSlug: string;
   title: string;
-  titleHasMatch: boolean;
   terms: string[];
-  snippets: SearchContentSnippet[];
+  snippets: {
+    title: SearchSnippet[];
+    content: SearchSnippet[];
+  };
 }

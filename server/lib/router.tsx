@@ -21,7 +21,9 @@ import {
 } from '~/constants';
 import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
-import { SearchService } from '~/services/searchService';
+import { SearchService } from '~/services/SearchService';
+import { Nav } from '~/views/components/Nav';
+import { TitlesList } from '~/views/components/TitlesList';
 import { CreatePage } from '~/views/CreatePage';
 import { EditPage } from '~/views/EditPage';
 import { ErrorPage } from '~/views/ErrorPage';
@@ -33,8 +35,6 @@ import { ReadPage } from '~/views/ReadPage';
 import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
 import { SettingsPage } from '~/views/SettingsPage';
-import { Nav } from '~/views/components/Nav';
-import { TitlesList } from '~/views/components/TitlesList';
 import { Feedbacks } from './feedbacks';
 import { createRequireAuth, createRequireCsrf } from './routerPreHandlers';
 import { RouterSchemas as RS } from './routerSchemas';
@@ -535,7 +535,6 @@ const router = async (app: FastifyInstance) => {
       }
 
       const newSlug = await maybeNewSlug();
-
       try {
         await dbs.updatePageContent(page, {
           pageTitle: req.body.pageTitle,
@@ -547,16 +546,16 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
-      app.cache.reset(NAVIGATION_CACHE_KEY);
+      const updatedPage = await dbs.getPageById(pageId);
 
       // await delay(2000);
+      if (updatedPage) {
+        app.cache.reset(NAVIGATION_CACHE_KEY);
+        (await SearchService.getInstance()).updateDocument(updatedPage);
+        return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
+      }
 
-      // We don't await
-      setTimeout(async () => {
-        (await SearchService.getInstance()).rebuildIndex();
-      }, 1);
-
-      return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
+      return rs.slugWithFeedback(newSlug, Feedbacks.E_UPDATING_PAGE);
 
       // If the title is the same as the current page, we keep the slug
       // Otherwise, we generate a new one
@@ -752,10 +751,7 @@ const router = async (app: FastifyInstance) => {
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
-      // We don't await
-      setTimeout(async () => {
-        (await SearchService.getInstance()).rebuildIndex();
-      }, 1);
+      (await SearchService.getInstance()).removeDocument(pageId);
 
       return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
@@ -1025,17 +1021,18 @@ const router = async (app: FastifyInstance) => {
 
       const page = await dbs.getPageById(pageId);
 
-      // We don't await
-      setTimeout(async () => {
-        (await SearchService.getInstance()).rebuildIndex();
-      }, 1);
+      if (page) {
+        (await SearchService.getInstance()).addDocument(page);
 
-      // These are useful for testing purposes
-      rep.header('x-page-id', pageId);
-      rep.header('x-parent-id', parentId ?? '');
-      rep.header('x-rev', page?._rev);
+        // These are useful for testing purposes
+        rep.header('x-page-id', pageId);
+        rep.header('x-parent-id', parentId ?? '');
+        rep.header('x-rev', page?._rev);
 
-      return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
+        return rs.slugWithFeedback(slug, Feedbacks.S_PAGE_CREATED);
+      }
+
+      return rs.slugWithFeedback(slug, Feedbacks.E_CREATING_PAGE);
     }
   );
 

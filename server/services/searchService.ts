@@ -1,9 +1,13 @@
-import lunr from 'lunr';
+import { Document as DocumentIndex } from 'flexsearch';
+// The import below should be useless but I can't find a way to
+// tell flexsearch to use it automatically
+// @ts-ignore
+import * as flexsearchLangSettings from 'flexsearch/src/lang/en';
 import type {
   PageModel,
-  SearchContentSnippet,
   SearchHitPosition,
   SearchResult,
+  SearchSnippet,
 } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS, SEARCH_SNIPPET_LENGTH } from '~/constants';
 import type { DbService } from './dbService';
@@ -16,19 +20,11 @@ const SEARCH_FIELDS = {
   TITLE: 'pageTitle',
 } as const;
 
-type SearchField = (typeof SEARCH_FIELDS)[keyof typeof SEARCH_FIELDS];
-
-type SearchMatchHits = Record<SearchField, SearchHitPosition[]>;
-
-type SearchMetadata = Record<
-  string, // Each searched terms
-  Partial<Record<SearchField, { position: SearchHitPosition[] }>>
->;
-
 export class SearchService {
   private static instance: SearchService | null = null;
   private dbs: DbService;
-  private idx: lunr.Index | null = null;
+  private idx: DocumentIndex<PageModel, string[]>;
+
   private indexBuilt: Promise<void>;
   private resolveIndexBuilt!: () => void;
   private isRebuilding = false;
@@ -36,10 +32,39 @@ export class SearchService {
 
   private constructor(dbs: DbService) {
     this.dbs = dbs;
+
+    this.idx = new DocumentIndex({
+      charset: 'latin:default',
+      filter: flexsearchLangSettings.filter,
+      stemmer: flexsearchLangSettings.stemmer,
+      matcher: flexsearchLangSettings.matcher,
+      language: 'en',
+      document: {
+        id: '_id',
+        index: [
+          {
+            field: SEARCH_FIELDS.TITLE,
+            tokenize: 'strict',
+            optimize: true,
+            resolution: 5,
+          },
+          {
+            field: SEARCH_FIELDS.CONTENT,
+            tokenize: 'strict',
+            optimize: true,
+            resolution: 5,
+          },
+        ],
+        store: ['pageSlug', 'pageTitle'], // Store minimal info to avoid fetching for common cases
+      },
+      cache: 100,
+    });
+
     // Create a promise we can await to know when the index is built
     this.indexBuilt = new Promise((resolve) => {
       this.resolveIndexBuilt = resolve;
     });
+
     this.buildIndex();
   }
 
@@ -72,7 +97,7 @@ export class SearchService {
           // On the development mac, the limit is around 2000 quite big docs (around 100MB)
           limit: MAX_INDEXABLE_DOCUMENTS,
         })
-      ).docs;
+      ).docs as PageModel[];
 
       const totalSize = allDocs.reduce(
         (acc, doc) =>
@@ -82,17 +107,12 @@ export class SearchService {
         0
       );
 
-      this.idx = lunr(function (this: lunr.Builder) {
-        this.ref('_id');
-        this.field(SEARCH_FIELDS.TITLE);
-        this.field(SEARCH_FIELDS.CONTENT);
-        this.metadataWhitelist = ['position', 'index'];
-
-        allDocs.forEach((doc) => this.add(doc));
-      });
+      for (const doc of allDocs) {
+        this.idx.add(doc);
+      }
 
       console.log(
-        `🔍 Lunr index built with ${allDocs.length} documents with a ${totalSize} overall size`
+        `🔍 FlexSearch index built with ${allDocs.length} documents with a ${totalSize} overall size`
       );
       this.resolveIndexBuilt();
     } catch (err) {
@@ -101,12 +121,19 @@ export class SearchService {
     }
   }
 
-  public async getIndex(): Promise<lunr.Index> {
+  public async addDocument(doc: PageModel): Promise<void> {
     await this.indexBuilt;
-    if (!this.idx) {
-      throw new Error('Index not built');
-    }
-    return this.idx;
+    this.idx.add(doc);
+  }
+
+  public async removeDocument(id: string): Promise<void> {
+    await this.indexBuilt;
+    this.idx.remove(id);
+  }
+
+  public async updateDocument(doc: PageModel): Promise<void> {
+    await this.indexBuilt;
+    this.idx.update(doc);
   }
 
   public async rebuildIndex(): Promise<void> {
@@ -135,58 +162,59 @@ export class SearchService {
     }
   }
 
-  private normalizeMetadata(
-    metadata: lunr.MatchData['metadata']
-  ): SearchMetadata {
-    // The metadata object is encoded in a weird way and despite
-    // a potential hit on performance, it's worth simplifying the
-    // normalization with JSON
-    return JSON.parse(JSON.stringify(metadata));
+  private extractPositionsFromMatches(
+    text: string,
+    term: string
+  ): SearchHitPosition[] {
+    const positions: SearchHitPosition[] = [];
+    const termLower = term.toLowerCase();
+    const textLower = text.toLowerCase();
+
+    let pos = 0;
+    // biome-ignore lint/suspicious/noAssignInExpressions:
+    while ((pos = textLower.indexOf(termLower, pos)) !== -1) {
+      positions.push([pos, term.length]);
+      pos += term.length;
+    }
+
+    return positions;
   }
 
-  private collectHits(metadata: SearchMetadata): SearchMatchHits {
-    const hits: SearchMatchHits = {
-      [SEARCH_FIELDS.TITLE]: [] as SearchHitPosition[],
-      [SEARCH_FIELDS.CONTENT]: [] as SearchHitPosition[],
-    };
+  private createSearchResults(page: PageModel, terms: string[]): SearchResult {
+    const contentPositions: SearchHitPosition[] = [];
+    const titlePositions: SearchHitPosition[] = [];
 
-    Object.values(metadata).forEach((term) => {
-      // biome-ignore lint/suspicious/noExplicitAny:
-      Object.entries(term as any).forEach(([field, data]) => {
-        if (field === SEARCH_FIELDS.TITLE || field === SEARCH_FIELDS.CONTENT) {
-          hits[field].push(
-            ...(data as { position: SearchHitPosition[] }).position
-          );
-        }
-      });
-    });
+    for (const term of terms) {
+      contentPositions.push(
+        ...this.extractPositionsFromMatches(page.pageContent, term)
+      );
+      titlePositions.push(
+        ...this.extractPositionsFromMatches(page.pageTitle, term)
+      );
+    }
 
-    // Sort each array by start position
-    hits[SEARCH_FIELDS.TITLE].sort((a, b) => a[0] - b[0]);
-    hits[SEARCH_FIELDS.CONTENT].sort((a, b) => a[0] - b[0]);
+    contentPositions.sort((a, b) => a[0] - b[0]);
+    titlePositions.sort((a, b) => a[0] - b[0]);
 
-    // console.log(JSON.stringify(hits, null, 2));
+    const contentSnippets =
+      contentPositions.length > 0
+        ? this.createSnippets(page.pageContent, contentPositions)
+        : [];
 
-    return hits;
-  }
-
-  private createSearchResults(
-    page: PageModel,
-    terms: string[],
-    hits: SearchMatchHits
-  ): SearchResult {
-    const snippets =
-      hits.pageContent.length > 0
-        ? this.createSnippets(page.pageContent, hits.pageContent)
+    const titleSnippets =
+      titlePositions.length > 0
+        ? [{ text: page.pageTitle, positions: titlePositions }]
         : [];
 
     return {
       pageId: page._id,
       pageSlug: page.pageSlug,
       title: page.pageTitle,
-      titleHasMatch: false,
       terms,
-      snippets,
+      snippets: {
+        title: titleSnippets,
+        content: contentSnippets,
+      },
     };
   }
 
@@ -195,11 +223,11 @@ export class SearchService {
     positions: SearchHitPosition[],
     snippetLength = SEARCH_SNIPPET_LENGTH,
     maxSnippets = 25
-  ): SearchContentSnippet[] {
+  ): SearchSnippet[] {
     if (positions.length === 0) return [];
 
-    const snippets: SearchContentSnippet[] = [];
-    let currentSnippet: SearchContentSnippet | null = null;
+    const snippets: SearchSnippet[] = [];
+    let currentSnippet: SearchSnippet | null = null;
     const PADDING = Math.floor(Math.min(snippetLength / 2, text.length / 2));
 
     for (const [start, length] of positions) {
@@ -263,25 +291,41 @@ export class SearchService {
   }
 
   public async search(q: string): Promise<SearchResult[]> {
-    const results = (await this.getIndex()).search(q).slice(0, 25);
-    if (results.length === 0) {
+    await this.indexBuilt;
+
+    if (!q.trim()) {
       return [];
     }
 
+    // Break query into terms for highlighting
+    const terms = q
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((term) => !flexsearchLangSettings.filter.includes(term));
+
+    const allResults = await this.idx.search(q, {
+      index: [SEARCH_FIELDS.TITLE, SEARCH_FIELDS.CONTENT],
+      limit: 50,
+    });
+
+    const foundIds = new Set<string>();
+    for (const hit of allResults) {
+      for (const id of hit.result.map(String)) {
+        foundIds.add(id);
+      }
+    }
+
+    // Process results into SearchResult format
     const searchResults: SearchResult[] = [];
-    for await (const result of results) {
-      const match = this.normalizeMetadata(result.matchData.metadata);
+    if (foundIds.size > 0) {
+      const pages = await Promise.all(
+        [...foundIds].map((id) => this.dbs.getPageById(id))
+      );
 
-      const page = await this.dbs.getPageById(result.ref);
-
-      if (page) {
-        searchResults.push(
-          this.createSearchResults(
-            page,
-            Object.keys(match),
-            this.collectHits(match)
-          )
-        );
+      for (const page of pages) {
+        if (page) {
+          searchResults.push(await this.createSearchResults(page, terms));
+        }
       }
     }
 

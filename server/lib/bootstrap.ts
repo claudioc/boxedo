@@ -24,7 +24,7 @@ import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import { dbService, type DbService } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
-import { SearchService } from '~/services/searchService';
+import { SearchService } from '~/services/SearchService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
 import router from './router';
 import { syncUsers } from './syncUsers';

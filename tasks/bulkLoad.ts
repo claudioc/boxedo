@@ -135,8 +135,23 @@ class BulkLoader {
   }
 }
 
+const args = process.argv.slice(2);
+let howMany = 100; // Default value
+
+if (args.length > 0) {
+  const parsedCount = parseInt(args[0], 10);
+
+  // Validate that the parameter is a number
+  if (isNaN(parsedCount)) {
+    console.error('Error: Parameter must be a number');
+    console.log('Usage: node bulkLoad.js [count]');
+    process.exit(1);
+  }
+
+  howMany = parsedCount;
+}
+
 const loader = await BulkLoader.create();
-const howMany = 100;
 await loader.generatePages(howMany);
 
 console.log(`Pages generated successfully ${howMany}`);

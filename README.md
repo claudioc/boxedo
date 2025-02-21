@@ -25,7 +25,7 @@ Some feature highlights:
 - **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile
 - **Advanced WYSIWYG editor** - Joongle's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
 - **Multi-database backend** - at his core Joongle uses a document model database and the flavour I chose is CouchDB. Joongle uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Joongle! With PouchDB, you can run Joongle with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
-- **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Lunr](https://lunrjs.com/). It is not an ideal solution but it works very well for relatively small amount of documents (±200). Other, more scalable options are considered for the medium term
+- **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Flexsearch](https://github.com/nextapps-de/flexsearch). It is still not an ideal solution but it works very well for relatively small amount of documents (up to ±1000, but beware of memory). Other, more scalable options are considered for the medium term
 - **Support tools** - the repository comes with tools for backing up, restoring and exporting the db. Additionally, other tools are present to provide a nice development experience, like translations keys managers and pm2 helpers
 - **Internationalization (i18n)** - only English is supported at the moment, but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
 - **Developer-friendly** - Designed for easy hacking from the ground-up
@@ -90,13 +90,25 @@ Couchdb also offers, out-of-the-box, and administrative web interface (called Fa
 
 The database operations are relatively well decoupled so a version with maybe less features but an easier installation could be present in the future. A completely db-less approach - using just the file system for storing data - could also be an option; in that hypothesis, we could use a "front matter" approach for storing metadata (this very approach is already used when we want to export all the html files).
 
+## Limits of the search
+
+One of the aim of Joongle is to offer a great user experience, and part of it is of course a good full-test search engine. Since Couchdb doesn't provide anything like that out-of-the-box, during the development several approaches have been tried:
+
+- Couchdb/Pouchdb (native): search the documents using just regular expressions: too limited and not really a full text search (no stemming, no stopwords)
+- Using Lunrjs: uses a lot of memory if the document are above several hundreds. Cannot add/remove documents dynamically and cannot export the index (which is then rebuilt at each server restart). Quite reach query language, messy output that needs normalization but also returns each (stemmed) matched term, with its position (very useful for highlighting)
+- Using Flexsearch (current solution): very small memory footprint and super fast (probably the fastest out there). Can export/import the index once built and allow to dynamically edit the docs in the index. Very poor query language, very poor documentation, very poor result output
+
+For the moment the tradeoff is using Flexsearch, sacrifying an advanced query language for quick search with reasonable memory footprint.
+
+Other options to try, Minisearch and Lucene (not really…);
+
 ## Technical Stack
 
 - [Fastify](https://www.fastify.io/)
 - [CouchDB](https://couchdb.apache.org/)
 - [PouchDB](https://pouchdb.com/)
 - [TipTap](https://tiptap.dev/)
-- [Lunr](https://lunrjs.com)
+- [Flexsearch](https://github.com/nextapps-de/flexsearch)
 - Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
 - [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
 - CSS Modules
@@ -114,7 +126,7 @@ The database operations are relatively well decoupled so a version with maybe le
 
 ### Prerequisites
 - nodejs 20+
-- docker (only if you want to use the real Couchdb interface and not Pouchdb with a local db)
+- docker (but only if you want to use the real Couchdb interface and not Pouchdb with a local db)
 - macOS or linux (my personal deployment uses Ubuntu 24.04)
 
 ### Setup
