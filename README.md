@@ -97,6 +97,8 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 - Couchdb/Pouchdb (native): search the documents using just regular expressions: too limited and not really a full text search (no stemming, no stopwords)
 - Using Lunrjs: uses a lot of memory if the document are above several hundreds. Cannot add/remove documents dynamically and cannot export the index (which is then rebuilt at each server restart). Quite reach query language, messy output that needs normalization but also returns each (stemmed) matched term, with its position (very useful for highlighting)
 - Using Flexsearch (current solution): very small memory footprint and super fast (probably the fastest out there). Can export/import the index once built and allow to dynamically edit the docs in the index. Very poor query language, very poor documentation, very poor result output
+- CouchDB search plugin (Clouseau)[https://docs.couchdb.org/en/stable/install/search.html]: it needs Java and also an old version of it. Installing that plugin can be done in Docker but it will also only work with the CouchDB backend
+- [Sqlite FTS5](https://www.sqlite.org/fts5.html) is the almost perfect solution, since it has everything I wish for except... it must store a copy of anything that's indexed, so if you index the content of the document, a copy of that content will also be stored in the sql fts database (size and security concern). Mitigation is to save and index only a part of the content but... yeah.
 
 For the moment the tradeoff is using Flexsearch, sacrifying an advanced query language for quick search with reasonable memory footprint.
 
@@ -105,8 +107,9 @@ Other options to try, Minisearch and Lucene (not really…);
 ## Technical Stack
 
 - [Fastify](https://www.fastify.io/)
-- [CouchDB](https://couchdb.apache.org/)
+- [CouchDB](https://couchdb.apache.org/) (optional)
 - [PouchDB](https://pouchdb.com/)
+- [LevelDB](https://github.com/google/leveldb) (optional)
 - [TipTap](https://tiptap.dev/)
 - [Flexsearch](https://github.com/nextapps-de/flexsearch)
 - Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
@@ -126,14 +129,14 @@ Other options to try, Minisearch and Lucene (not really…);
 
 ### Prerequisites
 - nodejs 20+
-- docker (but only if you want to use the real Couchdb interface and not Pouchdb with a local db)
-- macOS or linux (my personal deployment uses Ubuntu 24.04)
+- docker (optional - only if you want to use the real Couchdb interface and not Pouchdb with a local db)
+- macOS or linux (my personal deployment uses Ubuntu 24.04). Windows is totally untested.
 
 ### Setup
 1. Clone the repository
 2. Copy environment config: `cp dot.env .env` and edit the values if you feel like
 3. Run `npm install`
-4. Optional: Start the database: `npm run db:start` (this is only needed if you use couchdb as the backend for Pouchdb)
+4. Optional: start the database with `npm run db:start` (this is only needed if you use couchdb as the backend for Pouchdb)
 5. Launch development server: `npm run dev`
 6. Access at http://localhost:3000
 

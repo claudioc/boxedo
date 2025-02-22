@@ -12,6 +12,7 @@ Doing:
   - add a classification to the documents (like 'Internal only', 'Public'...)
 
   NEXT
+  - Consider using [minisearch](https://github.com/lucaong/minisearch)
   - editing the page doesn't take into account the settings.textSize
   - Consider rate limiting the magic link generation
   - Fetch the preview for links?
