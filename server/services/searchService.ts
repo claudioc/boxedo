@@ -1,7 +1,11 @@
 import Database from 'better-sqlite3';
 import type { ConfigEnv, PageModel, SearchResult } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
-import { stopwords } from '~/locales/stopwords.en';
+import {
+  compressTextForSearch,
+  highlightPhrase,
+  prepareFTSQuery,
+} from '~/lib/helpers';
 import type { DbService } from './dbService';
 
 interface SearchRow {
@@ -10,78 +14,6 @@ interface SearchRow {
   content_snippet: string | null; // SQLite might return null
   slug: string;
 }
-
-const compressTextForSearch = (html: string): string => {
-  // We also have cheerio available for html stripping but regexp are faster
-  // and it's OK if they are inaccurate
-  return html
-    .replace(/<[^>]*>/g, ' ') // Replace tags with space
-    .replace(/&nbsp;/g, ' ') // Replace &nbsp;
-    .replace(/&[a-z]+;/g, ' ') // Replace other entities
-    .toLowerCase() // Convert to lowercase
-    .replace(/[\s\n\r\t]+/g, ' ') // Normalize whitespace
-    .split(' ')
-    .filter(
-      (word) =>
-        word.length > 2 && // Keep only words longer than 2 chars
-        !stopwords.has(word) && // Remove stop words
-        !/^\d+$/.test(word) // Remove pure number words
-    )
-    .join(' ')
-    .trim();
-};
-
-// This is inspired by Datasette's quote_fts() function ported to js and used in search
-const prepareFTSQuery = (query: string): string => {
-  let escaped = query.trim().replace(/\s+/g, ' ');
-
-  const wasQuoted = escaped.startsWith('"') && escaped.endsWith('"');
-
-  // Quoted queries normalization are more relaxed, matching the intent of the user "I know what I am doing"
-  if (!wasQuoted) {
-    escaped = escaped.replace(/\b(or|and|not)\b/gi, (match) =>
-      match.toUpperCase()
-    );
-
-    escaped = escaped
-      .replace(/[\^|/\\'\[\](){}]/g, ' ') // Remove special chars
-      .replace(/\s+/g, ' ') // Normalize whitespace again
-      .trim();
-
-    // Check for boolean-only query first (would raise an error)
-    if (/^(AND|OR|NOT)$/i.test(escaped)) {
-      return '';
-    }
-  }
-
-  // Look for unbalanced quotes
-  if ((escaped.match(/"/g) || []).length % 2) {
-    escaped += '"';
-  }
-
-  escaped = escaped.replace(/"/g, '""');
-
-  return escaped;
-};
-
-// We use our own highlighter because sqlite FTS cannot highlight fields
-// that are not indexed and we want to index the full title with the stopwords
-// because we use it to display the results
-const highlightPhrase = (query: string, title: string): string => {
-  // Normalize the query: remove special characters and split into words
-  const queryWords = prepareFTSQuery(query)
-    .toLowerCase()
-    .split(/\s+/) // Split on whitespace
-    .filter((word) => !stopwords.has(word) && word.length > 0); // Remove stopwords
-
-  if (queryWords.length === 0) return title;
-
-  // Create a regex pattern that matches any of the query words
-  const pattern = new RegExp(`(${queryWords.join('|')})`, 'gi');
-
-  // Replace matches with marked version
-  return title.replace(pattern, '<mark>$1</mark>');
-};
 
 export class SearchService {
   private static instance: SearchService | null = null;
@@ -126,10 +58,11 @@ export class SearchService {
 
       this.prepareStatements();
 
-      // Always rebuild the index in production, as the server bootstraps
-      this.buildIndex(this.config.NODE_ENV === 'production');
-
-      this.setupChangeListener();
+      if (this.config.NODE_ENV !== 'test') {
+        // Always rebuild the index in production, as the server bootstraps
+        this.buildIndex(this.config.NODE_ENV === 'production');
+        this.setupChangeListener();
+      }
     } catch (err) {
       console.error('Failed to initialize SQLite database:', err);
       throw err;

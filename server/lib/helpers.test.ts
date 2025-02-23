@@ -1,17 +1,33 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { ConfigEnv } from '~/../types';
 import {
-  slugUrl,
-  pathWithFeedback,
+  compressTextForSearch,
+  extractFileRefsFrom,
   formatDate,
+  getDefaultLanguage,
+  highlightPhrase,
   isSameTimestamp,
   isTopLevelPage,
-  extractFileRefsFrom,
   parseBaseUrl,
-  getDefaultLanguage,
+  pathWithFeedback,
+  prepareFTSQuery,
+  slugUrl,
 } from './helpers';
-import type { ConfigEnv } from '~/../types';
 
 import { IdFormat } from './routerSchemas';
+
+// Simple list of stopwords, not the real one
+const stopwords = new Set([
+  'the',
+  'and',
+  'or',
+  'but',
+  'is',
+  'on',
+  'in',
+  'to',
+  'it',
+]);
 
 describe('slugUrl', () => {
   it('returns / for empty and root slug', () => {
@@ -238,5 +254,274 @@ describe('getDefaultLanguage', () => {
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
+  });
+});
+
+describe('compressTextForSearch', () => {
+  it('removes HTML tags', () => {
+    const input = '<p>Hello <b>World</b>!</p>';
+    expect(compressTextForSearch(input, stopwords)).toBe('hello world');
+  });
+
+  it('replaces common HTML entities', () => {
+    const input = 'Hello&nbsp;World &amp; Universe';
+    expect(compressTextForSearch(input, stopwords)).toBe(
+      'hello world universe'
+    );
+  });
+
+  it('converts text to lowercase', () => {
+    const input = 'HeLLo WoRLD';
+    expect(compressTextForSearch(input, stopwords)).toBe('hello world');
+  });
+
+  it('removes multiple spaces and new lines', () => {
+    const input = 'Hello    World \n\n This\tis  a test';
+    expect(compressTextForSearch(input, stopwords)).toBe(
+      'hello world this test'
+    );
+  });
+
+  it('removes words shorter than 3 characters', () => {
+    const input = 'I am an AI system';
+    expect(compressTextForSearch(input, stopwords)).toBe('system');
+  });
+
+  it('removes stopwords', () => {
+    const input = 'The quick brown fox jumps over the lazy dog';
+    expect(compressTextForSearch(input, stopwords)).toBe(
+      'quick brown fox jumps over lazy dog'
+    );
+  });
+
+  it('removes numbers', () => {
+    const input = 'This is a test 123 with numbers 456';
+    expect(compressTextForSearch(input, stopwords)).toBe(
+      'this test with numbers'
+    );
+  });
+
+  it('handles empty input', () => {
+    expect(compressTextForSearch('', stopwords)).toBe('');
+  });
+
+  it('handles input with only HTML tags', () => {
+    expect(compressTextForSearch('<div></div><p></p>', stopwords)).toBe('');
+  });
+
+  it('handles input with only numbers and short words', () => {
+    expect(compressTextForSearch('12 34 a bc', stopwords)).toBe('');
+  });
+
+  it('keeps non-stop words and valid words', () => {
+    const input = 'Artificial Intelligence (AI) is amazing!';
+    expect(compressTextForSearch(input, stopwords)).toBe(
+      'artificial intelligence (ai) amazing!'
+    );
+  });
+});
+
+describe('prepareFTSQuery', () => {
+  it('trims leading and trailing spaces', () => {
+    expect(prepareFTSQuery('  hello world  ')).toBe('hello world');
+  });
+
+  it('normalizes multiple spaces', () => {
+    expect(prepareFTSQuery('hello     world')).toBe('hello world');
+  });
+
+  it('converts boolean operators to uppercase', () => {
+    expect(prepareFTSQuery('hello or world')).toBe('hello OR world');
+    expect(prepareFTSQuery('hello and world')).toBe('hello AND world');
+    expect(prepareFTSQuery('hello not world')).toBe('hello NOT world');
+  });
+
+  it('removes special characters', () => {
+    expect(prepareFTSQuery('hello ^world')).toBe('hello world');
+    expect(prepareFTSQuery("hello /world's [test]")).toBe('hello world s test');
+  });
+
+  it('handles quoted queries (keeps original intent)', () => {
+    expect(prepareFTSQuery('"hello world"')).toBe('""hello world""');
+  });
+
+  it('fixes unbalanced quotes by adding a closing quote', () => {
+    expect(prepareFTSQuery('"hello world')).toBe('""hello world""');
+  });
+
+  it('escapes existing quotes by doubling them', () => {
+    expect(prepareFTSQuery('"hello "world""')).toBe('""hello ""world""""');
+  });
+
+  it('prevents boolean-only queries', () => {
+    expect(prepareFTSQuery('AND')).toBe('');
+    expect(prepareFTSQuery('OR')).toBe('');
+    expect(prepareFTSQuery('NOT')).toBe('');
+  });
+
+  it('handles mixed boolean operators with other words', () => {
+    expect(prepareFTSQuery('hello OR NOT world')).toBe('hello OR NOT world');
+  });
+
+  it('handles empty query gracefully', () => {
+    expect(prepareFTSQuery('')).toBe('');
+  });
+
+  it('handles special characters only (should be empty)', () => {
+    expect(prepareFTSQuery('^ / \\ [ ] ( ) { }')).toBe('');
+  });
+
+  it('does not modify correctly formatted queries', () => {
+    expect(prepareFTSQuery('"this is a test" AND world')).toBe(
+      '""this is a test"" AND world'
+    );
+  });
+
+  it('does not allow unbalanced single quote at the end', () => {
+    expect(prepareFTSQuery("hello world'")).toBe('hello world');
+  });
+});
+
+describe('highlightPhrase', () => {
+  it('should highlight a single word match', () => {
+    const result = highlightPhrase(
+      'test',
+      'This is a test sentence',
+      stopwords
+    );
+    expect(result).toBe('This is a <mark>test</mark> sentence');
+  });
+
+  it('should highlight multiple occurrences of the same word', () => {
+    const result = highlightPhrase(
+      'test',
+      'test this test that test',
+      stopwords
+    );
+    expect(result).toBe(
+      '<mark>test</mark> this <mark>test</mark> that <mark>test</mark>'
+    );
+  });
+
+  it('should highlight multiple different words from query', () => {
+    const result = highlightPhrase(
+      'quick brown',
+      'The quick brown fox',
+      stopwords
+    );
+    expect(result).toBe('The <mark>quick</mark> <mark>brown</mark> fox');
+  });
+
+  // Case sensitivity tests
+  it('should match case-insensitively', () => {
+    const result = highlightPhrase(
+      'TEST',
+      'This is a test sentence',
+      stopwords
+    );
+    expect(result).toBe('This is a <mark>test</mark> sentence');
+  });
+
+  it('should preserve original case in output', () => {
+    const result = highlightPhrase(
+      'test',
+      'This is a TEST sentence',
+      stopwords
+    );
+    expect(result).toBe('This is a <mark>TEST</mark> sentence');
+  });
+
+  // Special characters and whitespace tests
+  it('should handle special characters in query', () => {
+    const result = highlightPhrase(
+      'test!@#$%',
+      'This is a test sentence',
+      stopwords
+    );
+    expect(result).toBe('This is a <mark>test</mark> sentence');
+  });
+
+  it('should handle multiple whitespace in query', () => {
+    const result = highlightPhrase(
+      'quick    brown',
+      'The quick brown fox',
+      stopwords
+    );
+    expect(result).toBe('The <mark>quick</mark> <mark>brown</mark> fox');
+  });
+
+  // Stopword tests
+  it('should ignore stopwords in query', () => {
+    const result = highlightPhrase(
+      'the quick and brown',
+      'The quick brown fox',
+      stopwords
+    );
+    expect(result).toBe('The <mark>quick</mark> <mark>brown</mark> fox');
+  });
+
+  // Edge cases
+  it('should return original title for empty query', () => {
+    const result = highlightPhrase('', 'Test title', stopwords);
+    expect(result).toBe('Test title');
+  });
+
+  it('should return original title for query with only stopwords', () => {
+    const result = highlightPhrase('the and or', 'Test title', stopwords);
+    expect(result).toBe('Test title');
+  });
+
+  it('should handle empty title', () => {
+    const result = highlightPhrase('test', '', stopwords);
+    expect(result).toBe('');
+  });
+
+  it('should handle whitespace-only title', () => {
+    const result = highlightPhrase('test', '   ', stopwords);
+    expect(result).toBe('   ');
+  });
+
+  // Partial word matching tests
+  it('should not highlight partial word matches', () => {
+    const result = highlightPhrase('cat', 'The category is animals', stopwords);
+    expect(result).toBe('The category is animals');
+  });
+
+  // Multiple word boundary tests
+  it('should handle word boundaries correctly', () => {
+    const result = highlightPhrase(
+      'test',
+      'testing test tested tests',
+      stopwords
+    );
+    expect(result).toBe('testing <mark>test</mark> tested tests');
+  });
+
+  // Special HTML cases
+  it('should handle titles containing HTML', () => {
+    const result = highlightPhrase('test', '<p>This is a test</p>', stopwords);
+    expect(result).toBe('<p>This is a <mark>test</mark></p>');
+  });
+
+  it('should escape HTML in query terms', () => {
+    const result = highlightPhrase(
+      '<script>test</script>',
+      'This is a test',
+      stopwords
+    );
+    expect(result).toBe('This is a <mark>test</mark>');
+  });
+
+  // Performance edge cases
+  it('should handle long titles efficiently', () => {
+    const longTitle = 'test '.repeat(1000).trim();
+    const result = highlightPhrase('test', longTitle, stopwords);
+    expect(result).toBe('<mark>test</mark> '.repeat(1000).trim());
+  });
+
+  it('should handle long queries efficiently', () => {
+    const longQuery = 'test '.repeat(100);
+    const result = highlightPhrase(longQuery, 'This is a test sentence');
+    expect(result).toBe('This is a <mark>test</mark> sentence');
   });
 });
