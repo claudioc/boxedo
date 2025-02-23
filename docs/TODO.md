@@ -9,9 +9,9 @@ Doing:
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
   - the couchdb scripts and compose file must be even more parametric
-  - add a classification to the documents (like 'Internal only', 'Public'...)
 
   NEXT
+  - add a classification to the documents (like 'Internal only', 'Public'...)
   - Consider using [minisearch](https://github.com/lucaong/minisearch)
   - editing the page doesn't take into account the settings.textSize
   - Consider rate limiting the magic link generation

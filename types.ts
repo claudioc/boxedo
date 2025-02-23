@@ -298,9 +298,5 @@ export interface SearchResult {
   pageId: string;
   pageSlug: string;
   title: string;
-  terms: string[];
-  snippets: {
-    title: SearchSnippet[];
-    content: SearchSnippet[];
-  };
+  snippets: string;
 }
