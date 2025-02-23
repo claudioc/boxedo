@@ -1,6 +1,5 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { stopwords } from '~/locales/stopwords.en';
 import {
   ConfigEnvSchema,
   DEFAULT_SUPPORTED_LANGUAGE,
@@ -10,6 +9,7 @@ import {
   type UrlParts,
 } from '../../types';
 import { supportedLocales, type SupportedLocales } from '../locales/phrases';
+import { stopwords } from '../locales/stopwords.en';
 
 export const slugUrl = (slug: string) =>
   slug === '/' || slug === '' ? '/' : `/view/${slug}`;
@@ -128,10 +128,10 @@ export const loadConfig = (): ConfigEnv => {
 export const compressTextForSearch = (
   html: string,
   stopWords: Set<string> = stopwords
-): string => {
+): string =>
   // We also have cheerio available for html stripping but regexp are faster
   // and it's OK if they are inaccurate
-  return html
+  html
     .replace(/<[^>]*>/g, ' ') // Replace tags with space
     .replace(/&nbsp;/g, ' ') // Replace &nbsp;
     .replace(/&[a-z]+;/g, ' ') // Replace other entities
@@ -146,10 +146,12 @@ export const compressTextForSearch = (
     )
     .join(' ')
     .trim();
-};
 
 // This is inspired by Datasette's quote_fts() function ported to js and used in search
-export const prepareFTSQuery = (query: string): string => {
+export const prepareFTSQuery = (
+  query: string,
+  stopWords: Set<string> = stopwords
+): string => {
   let escaped = query.trim().replace(/\s+/g, ' ');
 
   const wasQuoted = escaped.startsWith('"') && escaped.endsWith('"');
@@ -163,12 +165,25 @@ export const prepareFTSQuery = (query: string): string => {
     escaped = escaped
       .replace(/[\^|/\\'\[\](){}]/g, ' ') // Remove special chars
       .replace(/\s+/g, ' ') // Normalize whitespace again
+      .split(' ')
+      .filter(
+        (word) =>
+          !stopWords.has(word) ||
+          ['and', 'or', 'not'].includes(word.toLowerCase())
+      )
+      .join(' ')
       .trim();
 
     // Check for boolean-only query first (would raise an error)
     if (/^(AND|OR|NOT)$/i.test(escaped)) {
       return '';
     }
+
+    escaped = escaped
+      .replace(/^(?:AND|OR|NOT)\s+/gi, '') // Remove single boolean at start
+      .replace(/^(?:AND|OR|NOT\s+)+/gi, '') // Handle multiple booleans at start
+      .replace(/\s+(?:AND|OR|NOT)$/gi, '') // Remove single boolean at end
+      .replace(/(?:\s+(?:AND|OR|NOT))+$/gi, ''); // Handle multiple booleans at end
   }
 
   // Look for unbalanced quotes

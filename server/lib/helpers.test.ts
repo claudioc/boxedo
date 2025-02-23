@@ -323,62 +323,82 @@ describe('compressTextForSearch', () => {
 
 describe('prepareFTSQuery', () => {
   it('trims leading and trailing spaces', () => {
-    expect(prepareFTSQuery('  hello world  ')).toBe('hello world');
+    expect(prepareFTSQuery('  hello world  ', stopwords)).toBe('hello world');
   });
 
   it('normalizes multiple spaces', () => {
-    expect(prepareFTSQuery('hello     world')).toBe('hello world');
+    expect(prepareFTSQuery('hello     world', stopwords)).toBe('hello world');
   });
 
   it('converts boolean operators to uppercase', () => {
-    expect(prepareFTSQuery('hello or world')).toBe('hello OR world');
-    expect(prepareFTSQuery('hello and world')).toBe('hello AND world');
-    expect(prepareFTSQuery('hello not world')).toBe('hello NOT world');
+    expect(prepareFTSQuery('hello or world', stopwords)).toBe('hello OR world');
+    expect(prepareFTSQuery('hello and world', stopwords)).toBe(
+      'hello AND world'
+    );
+    expect(prepareFTSQuery('hello not world', stopwords)).toBe(
+      'hello NOT world'
+    );
   });
 
   it('removes special characters', () => {
-    expect(prepareFTSQuery('hello ^world')).toBe('hello world');
-    expect(prepareFTSQuery("hello /world's [test]")).toBe('hello world s test');
+    expect(prepareFTSQuery('hello ^world', stopwords)).toBe('hello world');
+    expect(prepareFTSQuery("hello /world's [test]", stopwords)).toBe(
+      'hello world s test'
+    );
   });
 
   it('handles quoted queries (keeps original intent)', () => {
-    expect(prepareFTSQuery('"hello world"')).toBe('""hello world""');
+    expect(prepareFTSQuery('"hello world"', stopwords)).toBe('""hello world""');
   });
 
   it('fixes unbalanced quotes by adding a closing quote', () => {
-    expect(prepareFTSQuery('"hello world')).toBe('""hello world""');
+    expect(prepareFTSQuery('"hello world', stopwords)).toBe('""hello world""');
   });
 
   it('escapes existing quotes by doubling them', () => {
-    expect(prepareFTSQuery('"hello "world""')).toBe('""hello ""world""""');
+    expect(prepareFTSQuery('"hello "world""', stopwords)).toBe(
+      '""hello ""world""""'
+    );
   });
 
   it('prevents boolean-only queries', () => {
-    expect(prepareFTSQuery('AND')).toBe('');
-    expect(prepareFTSQuery('OR')).toBe('');
-    expect(prepareFTSQuery('NOT')).toBe('');
+    expect(prepareFTSQuery('AND', stopwords)).toBe('');
+    expect(prepareFTSQuery('OR', stopwords)).toBe('');
+    expect(prepareFTSQuery('NOT', stopwords)).toBe('');
   });
 
   it('handles mixed boolean operators with other words', () => {
-    expect(prepareFTSQuery('hello OR NOT world')).toBe('hello OR NOT world');
+    expect(prepareFTSQuery('hello OR NOT world', stopwords)).toBe(
+      'hello OR NOT world'
+    );
+  });
+
+  it('handles boolean operators at the beginning', () => {
+    expect(prepareFTSQuery('OR NOT world', stopwords)).toBe('world');
+  });
+
+  it('handles boolean operators at the beginning', () => {
+    expect(prepareFTSQuery('something that OR NOT', stopwords)).toBe(
+      'something that'
+    );
   });
 
   it('handles empty query gracefully', () => {
-    expect(prepareFTSQuery('')).toBe('');
+    expect(prepareFTSQuery('', stopwords)).toBe('');
   });
 
   it('handles special characters only (should be empty)', () => {
-    expect(prepareFTSQuery('^ / \\ [ ] ( ) { }')).toBe('');
+    expect(prepareFTSQuery('^ / \\ [ ] ( ) { }', stopwords)).toBe('');
   });
 
   it('does not modify correctly formatted queries', () => {
-    expect(prepareFTSQuery('"this is a test" AND world')).toBe(
-      '""this is a test"" AND world'
+    expect(prepareFTSQuery('"this is a test" AND world', stopwords)).toBe(
+      '""this a test"" AND world'
     );
   });
 
   it('does not allow unbalanced single quote at the end', () => {
-    expect(prepareFTSQuery("hello world'")).toBe('hello world');
+    expect(prepareFTSQuery("hello world'", stopwords)).toBe('hello world');
   });
 });
 

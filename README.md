@@ -25,9 +25,9 @@ Some feature highlights:
 - **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile
 - **Advanced WYSIWYG editor** - Joongle's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
 - **Multi-database backend** - at his core Joongle uses a document model database and the flavour I chose is CouchDB. Joongle uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Joongle! With PouchDB, you can run Joongle with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
-- **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Flexsearch](https://github.com/nextapps-de/flexsearch). It is still not an ideal solution but it works very well for relatively small amount of documents (up to ±1000, but beware of memory). Other, more scalable options are considered for the medium term
+- **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Sqlite FTS5](https://www.sqlite.org/fts5.html)
 - **Support tools** - the repository comes with tools for backing up, restoring and exporting the db. Additionally, other tools are present to provide a nice development experience, like translations keys managers and pm2 helpers
-- **Internationalization (i18n)** - only English is supported at the moment, but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
+- **Internationalization (i18n)** - only English is supported at the moment (also in terms of search stemming), but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
 - **Developer-friendly** - Designed for easy hacking from the ground-up
 - **Image upload support** - images are also transparently saved in CouchDB. A support script exists to remove unused images
 - **Magic link authentication** - You can optionally use an authentication layer, but you don't have to maintain any credentials (see below for more details)
@@ -96,22 +96,21 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 
 - Couchdb/Pouchdb (native): search the documents using just regular expressions: too limited and not really a full text search (no stemming, no stopwords)
 - Using Lunrjs: uses a lot of memory if the document are above several hundreds. Cannot add/remove documents dynamically and cannot export the index (which is then rebuilt at each server restart). Quite reach query language, messy output that needs normalization but also returns each (stemmed) matched term, with its position (very useful for highlighting)
-- Using Flexsearch (current solution): very small memory footprint and super fast (probably the fastest out there). Can export/import the index once built and allow to dynamically edit the docs in the index. Very poor query language, very poor documentation, very poor result output
+- Using Flexsearch: very small memory footprint and super fast (probably the fastest out there). Can export/import the index once built and allow to dynamically edit the docs in the index. Very poor query language, very poor documentation, very poor result output and still uses memory for the live index
 - CouchDB search plugin (Clouseau)[https://docs.couchdb.org/en/stable/install/search.html]: it needs Java and also an old version of it. Installing that plugin can be done in Docker but it will also only work with the CouchDB backend
-- [Sqlite FTS5](https://www.sqlite.org/fts5.html) is the almost perfect solution, since it has everything I wish for except... it must store a copy of anything that's indexed, so if you index the content of the document, a copy of that content will also be stored in the sql fts database (size and security concern). Mitigation is to save and index only a part of the content but... yeah.
+- [Sqlite FTS5](https://www.sqlite.org/fts5.html) (current solution) is the almost perfect solution, since it has everything I wish for except... it must store a copy of anything that's indexed, so if you index the content of the document, a copy of that content will also be stored in the sql fts database (size and security concern). At the moment this is the tradeoff
 
-For the moment the tradeoff is using Flexsearch, sacrifying an advanced query language for quick search with reasonable memory footprint.
-
-Other options to try, Minisearch and Lucene (not really…);
+> [!CAUTION]
+> The current search engine, Sqlite FT5, copies the content in its index (although heavily redacted for performances). This means that if you need to know where exactly your content is, remember that there is another (partial) copy in there. Sqlite runs alongside your application server, so as long as your application server is secure, you should be fine also with the sqlite database: the theory here is that if you can get access to the application server, the security of your content is compromized anyway.
 
 ## Technical Stack
 
 - [Fastify](https://www.fastify.io/)
-- [CouchDB](https://couchdb.apache.org/) (optional)
 - [PouchDB](https://pouchdb.com/)
-- [LevelDB](https://github.com/google/leveldb) (optional)
+  - [CouchDB](https://couchdb.apache.org/) (optional)
+  - [LevelDB](https://github.com/google/leveldb) (optional)
 - [TipTap](https://tiptap.dev/)
-- [Flexsearch](https://github.com/nextapps-de/flexsearch)
+- [Sqlite FTS5](https://www.sqlite.org/fts5.html)
 - Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
 - [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
 - CSS Modules
