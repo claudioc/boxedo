@@ -31,17 +31,70 @@ const compressTextForSearch = (html: string): string => {
     .trim();
 };
 
+// This is inspired by Datasette's quote_fts() function ported to js and used in search
+const prepareFTSQuery = (query: string): string => {
+  let escaped = query.trim().replace(/\s+/g, ' ');
+
+  const wasQuoted = escaped.startsWith('"') && escaped.endsWith('"');
+
+  // Quoted queries normalization are more relaxed, matching the intent of the user "I know what I am doing"
+  if (!wasQuoted) {
+    escaped = escaped.replace(/\b(or|and|not)\b/gi, (match) =>
+      match.toUpperCase()
+    );
+
+    escaped = escaped
+      .replace(/[\^|/\\'\[\](){}]/g, ' ') // Remove special chars
+      .replace(/\s+/g, ' ') // Normalize whitespace again
+      .trim();
+
+    // Check for boolean-only query first (would raise an error)
+    if (/^(AND|OR|NOT)$/i.test(escaped)) {
+      return '';
+    }
+  }
+
+  // Look for unbalanced quotes
+  if ((escaped.match(/"/g) || []).length % 2) {
+    escaped += '"';
+  }
+
+  escaped = escaped.replace(/"/g, '""');
+
+  return escaped;
+};
+
+// We use our own highlighter because sqlite FTS cannot highlight fields
+// that are not indexed and we want to index the full title with the stopwords
+// because we use it to display the results
+const highlightPhrase = (query: string, title: string): string => {
+  // Normalize the query: remove special characters and split into words
+  const queryWords = prepareFTSQuery(query)
+    .toLowerCase()
+    .split(/\s+/) // Split on whitespace
+    .filter((word) => !stopwords.has(word) && word.length > 0); // Remove stopwords
+
+  if (queryWords.length === 0) return title;
+
+  // Create a regex pattern that matches any of the query words
+  const pattern = new RegExp(`(${queryWords.join('|')})`, 'gi');
+
+  // Replace matches with marked version
+  return title.replace(pattern, '<mark>$1</mark>');
+};
+
 export class SearchService {
   private static instance: SearchService | null = null;
   private db: Database.Database;
   private indexBuilt: Promise<void>;
   private resolveIndexBuilt!: () => void;
   private statements!: {
-    insert: Database.Statement;
     update: Database.Statement;
     delete: Database.Statement;
     search: Database.Statement;
   };
+  // biome-ignore lint/suspicious/noExplicitAny:
+  private changeListener: PouchDB.Core.Changes<any> | null = null;
 
   private constructor(
     private dbs: DbService,
@@ -75,17 +128,41 @@ export class SearchService {
 
       // Always rebuild the index in production, as the server bootstraps
       this.buildIndex(this.config.NODE_ENV === 'production');
+
+      this.setupChangeListener();
     } catch (err) {
       console.error('Failed to initialize SQLite database:', err);
       throw err;
     }
   }
 
+  private setupChangeListener() {
+    this.changeListener = this.dbs.db
+      .changes({
+        since: 'now',
+        live: true,
+        include_docs: true,
+      })
+      .on('change', async (change) => {
+        if (change?.doc?.type === 'page') {
+          // We cannot really distinguish between inserts and updates
+          // See also https://pouchdb.com/guides/changes.html
+          if (change.deleted) {
+            await this.removeDocument(change.id);
+          } else {
+            await this.updateDocument(change.doc);
+          }
+        }
+      })
+      .on('error', (err) => {
+        console.error('Error in changes feed:', err);
+        // Maybe try to reconnect after a delay
+        setTimeout(() => this.setupChangeListener(), 5000);
+      });
+  }
+
   private prepareStatements() {
     this.statements = {
-      insert: this.db.prepare(
-        'INSERT INTO pages_fts(id, title, content, slug, title_full) VALUES (?, ?, ?, ?, ?)'
-      ),
       update: this.db.prepare(
         'INSERT OR REPLACE INTO pages_fts(id, title, content, slug, title_full) VALUES (?, ?, ?, ?, ?)'
       ),
@@ -155,7 +232,7 @@ export class SearchService {
 
         // Insert all documents
         for (const doc of docs) {
-          this.statements.insert.run(
+          this.statements.update.run(
             doc._id,
             compressTextForSearch(doc.pageTitle),
             compressTextForSearch(doc.pageContent),
@@ -176,16 +253,6 @@ export class SearchService {
     }
   }
 
-  public async addDocument(doc: PageModel): Promise<void> {
-    await this.indexBuilt;
-    this.statements.insert.run(
-      doc._id,
-      doc.pageTitle,
-      compressTextForSearch(doc.pageContent),
-      doc.pageSlug
-    );
-  }
-
   public async removeDocument(id: string): Promise<void> {
     await this.indexBuilt;
     this.statements.delete.run(id);
@@ -195,21 +262,25 @@ export class SearchService {
     await this.indexBuilt;
     this.statements.update.run(
       doc._id,
-      doc.pageTitle,
+      compressTextForSearch(doc.pageTitle),
       compressTextForSearch(doc.pageContent),
-      doc.pageSlug
+      doc.pageSlug,
+      doc.pageTitle
     );
   }
 
   public async search(q: string): Promise<SearchResult[]> {
     await this.indexBuilt;
 
-    if (!q.trim()) {
+    const query = prepareFTSQuery(q);
+
+    if (query === '') {
       return [];
     }
 
     try {
-      const rows = this.statements.search.all(q) as SearchRow[];
+      // Booleans are only considered when uppercase, so this is what we do
+      const rows = this.statements.search.all(query) as SearchRow[];
       const searchResults: SearchResult[] = [];
 
       for (const row of rows) {
@@ -219,7 +290,7 @@ export class SearchService {
         searchResults.push({
           pageId: row.id,
           pageSlug: row.slug,
-          title: this.highlightTitle(q, page.pageTitle),
+          title: highlightPhrase(q, page.pageTitle),
           snippets: row.content_snippet || '',
         });
       }
@@ -231,27 +302,11 @@ export class SearchService {
     }
   }
 
-  // We use our own highlighter because sqlite FTS cannot highlight fields
-  // that are not indexed and we want to index the full title with the stopwords
-  // because we use it to display the results
-  private highlightTitle(query: string, title: string): string {
-    // Normalize the query: remove special characters and split into words
-    const queryWords = query
-      .toLowerCase()
-      .replace(/[\^+\-"]/g, '') // Remove common FTS query syntax
-      .split(/\s+/) // Split on whitespace
-      .filter((word) => !stopwords.has(word) && word.length > 0); // Remove stopwords
-
-    if (queryWords.length === 0) return title;
-
-    // Create a regex pattern that matches any of the query words
-    const pattern = new RegExp(`(${queryWords.join('|')})`, 'gi');
-
-    // Replace matches with marked version
-    return title.replace(pattern, '<mark>$1</mark>');
-  }
-
   public close(): void {
+    if (this.changeListener) {
+      this.changeListener.cancel();
+      this.changeListener = null;
+    }
     if (this.db) {
       this.db.close();
     }

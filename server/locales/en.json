@@ -121,7 +121,7 @@
   "SearchResults": {
     "title": "Search Results",
     "resultsForQuery": "You have searched for",
-    "noResults": "No results found.",
+    "noResults": "No matches found",
     "matches": "Matches"
   },
 

@@ -551,7 +551,6 @@ const router = async (app: FastifyInstance) => {
       // await delay(2000);
       if (updatedPage) {
         app.cache.reset(NAVIGATION_CACHE_KEY);
-        (await SearchService.getInstance()).updateDocument(updatedPage);
         return rs.slugWithFeedback(newSlug, Feedbacks.S_PAGE_UPDATED);
       }
 
@@ -750,8 +749,6 @@ const router = async (app: FastifyInstance) => {
       }
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
-
-      (await SearchService.getInstance()).removeDocument(pageId);
 
       return rs.homeWithFeedback(Feedbacks.S_PAGE_DELETED);
     }
@@ -1022,8 +1019,6 @@ const router = async (app: FastifyInstance) => {
       const page = await dbs.getPageById(pageId);
 
       if (page) {
-        (await SearchService.getInstance()).addDocument(page);
-
         // These are useful for testing purposes
         rep.header('x-page-id', pageId);
         rep.header('x-parent-id', parentId ?? '');
