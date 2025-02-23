@@ -1,23 +1,24 @@
 import type { WithCtx } from '~/../types';
 import {
+  AutoIcon,
   BoldIcon,
-  ItalicIcon,
-  StrikeIcon,
-  UnderlineIcon,
-  HighlightIcon,
-  CodeIcon,
+  CenterIcon,
   CodeBlockIcon,
+  CodeIcon,
   H2Icon,
   H3Icon,
-  ParagraphIcon,
-  LinkIcon,
-  LeftIcon,
-  CenterIcon,
-  RightIcon,
+  HighlightIcon,
+  HrIcon,
   ImageIcon,
-  SmallIcon,
+  ItalicIcon,
+  LeftIcon,
+  LinkIcon,
   MediumIcon,
-  AutoIcon,
+  ParagraphIcon,
+  RightIcon,
+  SmallIcon,
+  StrikeIcon,
+  UnderlineIcon,
 } from '../icons/editorIcons';
 
 import styles from './EditorEnabler.module.css';
@@ -106,6 +107,9 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
         </button>
         <button type="button" data-command="image">
           <ImageIcon title={i18n.t('EditIcons.insertImage')} />
+        </button>
+        <button type="button" data-command="hr">
+          <HrIcon title={i18n.t('EditIcons.insertHr')} />
         </button>
       </div>
 

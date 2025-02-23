@@ -1,6 +1,6 @@
-import type { NavItem, Context } from '~/../types';
-import styles from './Nav.module.css';
+import type { Context, NavItem } from '~/../types';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
+import styles from './Nav.module.css';
 import { SortableEnabler } from './SortableEnabler';
 
 interface NavProps {

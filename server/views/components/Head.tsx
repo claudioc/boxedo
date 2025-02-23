@@ -1,5 +1,5 @@
-import { cssFile } from '~/lib/assets';
 import type { WithCtx } from '~/../types';
+import { cssFile } from '~/lib/assets';
 
 interface HeadProps extends WithCtx {
   title: string;

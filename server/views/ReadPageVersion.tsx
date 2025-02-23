@@ -1,9 +1,8 @@
-import { Layout } from './Layout';
 import type { PageModel, WithCtx } from '~/../types';
-import { slugUrl } from '~/lib/helpers';
-import { PageBody } from './components/PageBody';
-import { formatDate } from '~/lib/helpers';
+import { formatDate, slugUrl } from '~/lib/helpers';
 import { MainContent } from './components/MainContent';
+import { PageBody } from './components/PageBody';
+import { Layout } from './Layout';
 
 export interface ReadPageVersionProps extends WithCtx {
   page: PageModel;

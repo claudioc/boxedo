@@ -1,7 +1,7 @@
 import type { WithCtx } from '~/../types';
 import { LayoutMini } from './LayoutMini';
-import { OhNoIcon } from './icons/OhNoIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import { OhNoIcon } from './icons/OhNoIcon';
 
 interface ErrorPageProps extends WithCtx {
   title: string;

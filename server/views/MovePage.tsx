@@ -1,10 +1,10 @@
-import { Layout } from './Layout';
 import type { PageModel, WithCtx } from '~/../types';
-import { PageActions } from './components/PageActions';
 import { slugUrl } from '~/lib/helpers';
-import { Feedback, Feedbacks } from './components/Feedback';
 import { SearchIcon } from '~/views/icons/SearchIcon';
+import { Feedback, Feedbacks } from './components/Feedback';
 import { MainContent } from './components/MainContent';
+import { PageActions } from './components/PageActions';
+import { Layout } from './Layout';
 
 export interface MovePageProps extends WithCtx {
   page: PageModel;

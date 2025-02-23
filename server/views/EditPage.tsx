@@ -1,11 +1,11 @@
-import { Layout } from './Layout';
 import type { PageModel, WithCtx } from '~/../types';
+import { slugUrl } from '~/lib/helpers';
+import { EditorEnabler } from './components/EditorEnabler';
+import { MainContent } from './components/MainContent';
 import { PageActions } from './components/PageActions';
 import { PageData } from './components/PageData';
-import { EditorEnabler } from './components/EditorEnabler';
 import { PageFormWrapper } from './components/PageFormWrapper';
-import { slugUrl } from '~/lib/helpers';
-import { MainContent } from './components/MainContent';
+import { Layout } from './Layout';
 
 export interface EditPageProps extends WithCtx {
   page: PageModel;

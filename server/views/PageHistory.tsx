@@ -1,6 +1,6 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { Layout } from './Layout';
 import { formatDate } from '~/lib/helpers';
+import { Layout } from './Layout';
 
 interface PageHistoryProps extends WithCtx {
   page: PageModel;

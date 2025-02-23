@@ -1,5 +1,5 @@
-import { Feedback, Feedbacks } from '~/views/components/Feedback';
 import type { WithCtx } from '~/../types';
+import { Feedback, Feedbacks } from '~/views/components/Feedback';
 
 export const ValidationErrors = ({ ctx }: WithCtx) => (
   <>

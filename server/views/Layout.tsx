@@ -1,12 +1,12 @@
+import type { Context, PageModel, WithCtx } from '~/../types';
 import { getBundleFilename } from '~/lib/assets';
-import { Feedback } from './components/Feedback';
-import { Search } from './components/Search';
-import { Head } from './components/Head';
 import { getFeedbackByCode } from '~/lib/feedbacks';
-import styles from './Layout.module.css';
-import type { PageModel, Context, WithCtx } from '~/../types';
+import { Feedback } from './components/Feedback';
+import { Head } from './components/Head';
+import { Search } from './components/Search';
 import { CogIcon } from './icons/CogIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
+import styles from './Layout.module.css';
 
 interface LayoutProps extends WithCtx {
   title: string;

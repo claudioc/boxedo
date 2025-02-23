@@ -167,7 +167,8 @@
     "alignRight": "Align right",
     "sizeAuto": "Size auto",
     "sizeSmall": "Size small",
-    "sizeMedium": "Size medium"
+    "sizeMedium": "Size medium",
+    "insertHr": "Insert horizontal rule"
   },
 
   "ImageDialog": {

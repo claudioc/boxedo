@@ -1,11 +1,11 @@
-import { Layout } from './Layout';
-import type { SettingsModel, PageModel, WithCtx, TextSize } from '~/../types';
-import { PageActions } from './components/PageActions';
-import { Feedback, Feedbacks } from './components/Feedback';
-import { SearchIcon } from '~/views/icons/SearchIcon';
-import { LanguageIcon } from './icons/Language';
-import { MainContent } from './components/MainContent';
+import type { PageModel, SettingsModel, TextSize, WithCtx } from '~/../types';
 import { phraseDefinitions } from '~/locales/phrases';
+import { SearchIcon } from '~/views/icons/SearchIcon';
+import { Feedback, Feedbacks } from './components/Feedback';
+import { MainContent } from './components/MainContent';
+import { PageActions } from './components/PageActions';
+import { LanguageIcon } from './icons/Language';
+import { Layout } from './Layout';
 
 interface SettingsPageProps extends WithCtx {
   settings: SettingsModel;

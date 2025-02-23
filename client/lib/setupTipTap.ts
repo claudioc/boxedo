@@ -1,18 +1,18 @@
 // https://tiptap.dev/docs/editor/extensions/functionality/starterkit
-import StarterKit from '@tiptap/starter-kit';
+import { Editor, type EditorOptions, type Extensions } from '@tiptap/core';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
 import Document from '@tiptap/extension-document';
-import Placeholder from '@tiptap/extension-placeholder';
-import Typography from '@tiptap/extension-typography';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 import Highlight from '@tiptap/extension-highlight';
-import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
+import Placeholder from '@tiptap/extension-placeholder';
+import TextAlign from '@tiptap/extension-text-align';
+import Typography from '@tiptap/extension-typography';
 import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
-import { Editor, type Extensions, type EditorOptions } from '@tiptap/core';
-import BubbleMenu from '@tiptap/extension-bubble-menu';
-import FloatingMenu from '@tiptap/extension-floating-menu';
-import { ImageMacro } from './extensions/image-macro';
+import StarterKit from '@tiptap/starter-kit';
 import { ImageAlign } from './extensions/image-align';
+import { ImageMacro } from './extensions/image-macro';
 
 // The one and only Editor instance
 let editor: Editor;
@@ -259,6 +259,7 @@ type BubbleMenuCommands =
   | 'sizeAuto'
   | 'sizeSmall'
   | 'sizeMedium'
+  | 'hr'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -273,6 +274,9 @@ const addBubbleMenuHandlers = () => {
         .command ?? '') as BubbleMenuCommands;
       const chain = editor.chain().focus();
       switch (command) {
+        case 'hr':
+          chain.setHorizontalRule().run();
+          break;
         case 'bold':
           chain.toggleBold().run();
           break;

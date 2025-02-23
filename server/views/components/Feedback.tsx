@@ -1,8 +1,8 @@
 import type { Feedback as FeedbackType, WithCtx } from '~/../types';
 import {
   Feedbacks,
-  isFeedbackError,
   getFeedbackKeyByCode,
+  isFeedbackError,
 } from '~/lib/feedbacks';
 import styles from './Feedback.module.css';
 

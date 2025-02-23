@@ -167,7 +167,8 @@
     "alignRight": "Allinea a destra",
     "sizeAuto": "Dimensione auto",
     "sizeSmall": "Dimensione piccola",
-    "sizeMedium": "Dimensione grande"
+    "sizeMedium": "Dimensione grande",
+    "insertHr": "Inserisci riga orizzontale"
   },
 
   "ImageDialog": {

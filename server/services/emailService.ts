@@ -1,12 +1,12 @@
 import type {
+  EmailMessage,
   EmailProvider,
   EmailProviderConfig,
-  EmailMessage,
 } from '~/../types';
-import { MailgunProvider } from './emailProviders/mailgun';
-import { SmtpProvider } from './emailProviders/smtp';
-import { SendgridProvider } from './emailProviders/sendgrid';
 import { DummyProvider } from './emailProviders/dummy';
+import { MailgunProvider } from './emailProviders/mailgun';
+import { SendgridProvider } from './emailProviders/sendgrid';
+import { SmtpProvider } from './emailProviders/smtp';
 
 export class EmailService {
   private provider: EmailProvider | null = null;

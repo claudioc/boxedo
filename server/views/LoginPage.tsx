@@ -1,7 +1,7 @@
-import { LayoutMini } from './LayoutMini';
+import type { WithCtx } from '~/../types';
 import { getFeedbackByCode, isFeedbackError } from '~/lib/feedbacks';
 import { Feedback } from './components/Feedback';
-import type { WithCtx } from '~/../types';
+import { LayoutMini } from './LayoutMini';
 
 interface LoginPageProps extends WithCtx {
   token: string;

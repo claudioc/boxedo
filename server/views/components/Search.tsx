@@ -1,5 +1,5 @@
-import { SearchIcon } from '~/views/icons/SearchIcon';
 import type { WithCtx } from '~/../types';
+import { SearchIcon } from '~/views/icons/SearchIcon';
 
 export const Search = ({ ctx }: WithCtx) => {
   const { i18n } = ctx.app;

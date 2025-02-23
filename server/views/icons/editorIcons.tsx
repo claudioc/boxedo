@@ -224,3 +224,10 @@ export const AutoIcon = ({ title = 'Auto size' }) => (
     />
   </svg>
 );
+
+export const HrIcon = ({ title = 'Horizontal rule' }) => (
+  <svg style={style} {...commonProps}>
+    <title>{title}</title>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+  </svg>
+);

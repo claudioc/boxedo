@@ -1,10 +1,10 @@
+import { readdirSync } from 'node:fs';
+import path from 'node:path';
 import {
   ASSETS_MOUNT_POINT,
   CACHE_BUSTER,
   CLIENT_BUNDLE_LOCATION,
 } from '~/constants';
-import path from 'node:path';
-import { readdirSync } from 'node:fs';
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/style.css?_=${CACHE_BUSTER}`;
 type Bundle = 'app' | 'editor';

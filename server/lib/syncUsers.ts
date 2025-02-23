@@ -1,10 +1,10 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import yaml from 'yaml';
-import { readFile } from 'node:fs/promises';
 import type { FastifyInstance } from 'fastify';
-import { dbService } from '~/services/dbService';
 import type { JSONSchema } from 'json-schema-to-ts';
+import { readFile } from 'node:fs/promises';
+import yaml from 'yaml';
+import { dbService } from '~/services/dbService';
 
 const UsersYamlSchema = {
   type: 'object',
