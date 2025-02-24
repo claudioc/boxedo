@@ -1,4 +1,3 @@
-import { access, mkdir } from 'node:fs/promises';
 import PouchDB from 'pouchdb-core';
 
 import PouchHttp from 'pouchdb-adapter-http';
@@ -788,50 +787,41 @@ dbService._createViews = async (db: PouchDB.Database) => {
 };
 
 dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
-  const dbName = params.dbName;
+  const { config } = params;
+  const dbName = config.DB_NAME;
   let db: DbClient;
 
   switch (true) {
-    case params.backend === 'memory' || params.env === 'test' || isTestRun:
+    case config.DB_BACKEND === 'memory' ||
+      config.NODE_ENV === 'test' ||
+      isTestRun:
       PouchDB.plugin(PouchFind).plugin(PouchReduce).plugin(PouchAdapterMemory);
       db = new PouchDB<DocumentModel>(dbName);
       break;
 
-    case params.backend === 'remote' && !!params.serverUrl:
+    case config.DB_BACKEND === 'remote' && !!config.DB_REMOTE_URL:
       PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
-      db = new PouchDB(`${params.serverUrl}/${dbName}`, {
+      db = new PouchDB(`${config.DB_REMOTE_URL}/${dbName}`, {
         auth: {
-          username: params.username,
-          password: params.password,
+          username: config.DB_REMOTE_USER,
+          password: config.DB_REMOTE_PASSWORD,
         },
       });
       break;
 
-    case params.backend === 'local':
+    case config.DB_BACKEND === 'local':
       {
-        const dbPath = params.localPath || '.';
-
-        try {
-          await access(dbPath);
-          params.logger.info(`Using existing database directory: ${dbPath}`);
-        } catch {
-          try {
-            await mkdir(dbPath, { recursive: true });
-            console.log(`Created database directory: ${dbPath}`);
-          } catch (error) {
-            throw new Error(
-              `Failed to create database directory at ${dbPath}: ${(error as Error).message}`
-            );
-          }
-        }
-
         PouchDB.plugin(PouchAdapterLevelDb)
           .plugin(PouchFind)
           .plugin(PouchReduce);
 
-        db = new PouchDB<DocumentModel>(path.join(dbPath, `${dbName}.db`), {
-          adapter: 'leveldb',
-        });
+        // Note: bootstrap is taking care of creating the directory if it doesn't exist
+        db = new PouchDB<DocumentModel>(
+          path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
+          {
+            adapter: 'leveldb',
+          }
+        );
       }
       break;
 

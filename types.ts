@@ -29,14 +29,8 @@ export type DbBackend = (typeof dbBackends)[number];
 export const DEFAULT_DB_BACKEND: DbBackend = 'local';
 
 export interface DbServiceInitParams {
-  backend: DbBackend;
-  dbName: string;
-  localPath?: string;
-  serverUrl?: string;
-  username?: string;
-  password?: string;
-  env: NodeEnv;
   logger: FastifyBaseLogger;
+  config: ConfigEnv;
 }
 
 export type Ctx = {
@@ -197,6 +191,7 @@ export const ConfigEnvSchema = {
     },
     DB_LOCAL_PATH: {
       type: 'string',
+      default: '.',
     },
     DB_REMOTE_USER: { type: 'string', default: '' },
     DB_REMOTE_PASSWORD: { type: 'string', default: '' },
