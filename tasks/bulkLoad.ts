@@ -23,13 +23,7 @@ class BulkLoader {
     const config = loadConfig();
     const dbClient = await dbService.init({
       logger: console,
-      backend: config.DB_BACKEND,
-      dbName: config.DB_NAME,
-      localPath: config.DB_LOCAL_PATH,
-      serverUrl: config.DB_REMOTE_URL,
-      username: config.DB_REMOTE_USER,
-      password: config.DB_REMOTE_PASSWORD,
-      env: config.NODE_ENV,
+      config,
     });
 
     return new BulkLoader(dbService(dbClient));
@@ -75,6 +69,7 @@ class BulkLoader {
       })
       .toArray();
 
+    const parents = new Map<string | null, number>();
     for (let i = 0; i < numPages; i++) {
       const randomH2 = this.getRandomElement(h2sWithChap);
       const pageTitle = $(randomH2)
@@ -101,14 +96,33 @@ class BulkLoader {
 
       let parentId: string | null = null;
       let slug = 'home';
+      let position = 10000;
       if (this.existingPages.length > 0) {
         const randomIndex = Math.floor(
           Math.random() * this.existingPages.length
         );
-        parentId = this.existingPages[randomIndex]._id;
+
+        // Tries to create many roots
+        if (Math.random() > 0.5) {
+          parentId = null;
+        } else {
+          parentId = this.existingPages[randomIndex]._id;
+        }
+
+        parents.set(parentId, (parents.get(parentId) ?? 9999) + 1);
+        position = parents.get(parentId)!;
+
         slug = this.generateUniqueSlug(pageTitle);
+      } else {
+        // The very first page is a root
+        parents.set(parentId, position);
       }
 
+      if (parentId === null) {
+        console.log(`Creating root page with position ${position}`);
+      }
+
+      const now = new Date().toISOString();
       const pageId: string = dbService.generateIdFor('page');
       this.pages.push({
         type: 'page',
@@ -118,9 +132,9 @@ class BulkLoader {
         parentId,
         pageSlug: slug,
         pageSlugs: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        position: 10000,
+        createdAt: now,
+        updatedAt: now,
+        position,
         contentUpdated: true,
       });
 

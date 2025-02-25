@@ -32,6 +32,7 @@ import { POSITION_GAP_SIZE } from '~/constants';
 import { ErrorWithFeedback } from '~/lib/errors';
 import { Feedbacks } from '~/lib/feedbacks';
 import {
+  ensurePathExists,
   ensureValidLanguage,
   extractFileRefsFrom,
   getDefaultLanguage,
@@ -215,7 +216,6 @@ export const dbService = (client?: DbClient) => {
       return result.rows.map((row) => row.doc);
     },
 
-    // Find the appropriate position for inserting a page
     async findInsertPosition(
       parentId: string | null,
       targetIndex = Number.POSITIVE_INFINITY,
@@ -334,7 +334,57 @@ export const dbService = (client?: DbClient) => {
       return result.docs;
     },
 
-    async buildMenuTree(parentId: string | null): Promise<NavItem[]> {
+    async buildMenuTree(parentId: string | null = null): Promise<NavItem[]> {
+      // First, fetch all pages in a single query
+      const result = await this.db.find({
+        selector: {
+          type: 'page',
+          // We're not filtering by parentId here, we'll organize in memory
+        },
+        fields: ['_id', 'pageTitle', 'pageSlug', 'position', 'parentId'],
+        // No need to sort here, we'll sort in memory
+        limit: -1,
+      });
+
+      const pages = result.docs as PageModel[];
+
+      // Group pages by parentId
+      const pagesByParent = new Map<string | null, PageModel[]>();
+
+      pages.forEach((page) => {
+        const parentKey = page.parentId || null;
+        if (!pagesByParent.has(parentKey)) {
+          pagesByParent.set(parentKey, []);
+        }
+        // biome-ignore lint/style/noNonNullAssertion:
+        pagesByParent.get(parentKey)!.push(page);
+      });
+
+      // Sort each group by position
+      pagesByParent.forEach((group) => {
+        group.sort((a, b) => (a.position || 0) - (b.position || 0));
+      });
+
+      // Recursive function to build tree structure
+      const buildTree = (currentParentId: string | null): NavItem[] => {
+        const children = pagesByParent.get(currentParentId) || [];
+
+        return children.map((page) => ({
+          pageId: page._id,
+          title: page.pageTitle,
+          link: slugUrl(page.pageSlug),
+          position: page.position,
+          children: buildTree(page._id),
+        }));
+      };
+
+      // Build the tree starting from the requested parent
+      const tree = buildTree(parentId);
+
+      return tree;
+    },
+
+    async oldBuildMenuTree(parentId: string | null): Promise<NavItem[]> {
       const result = await this.db.find({
         selector: {
           type: 'page',
@@ -810,19 +860,17 @@ dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
       break;
 
     case config.DB_BACKEND === 'local':
-      {
-        PouchDB.plugin(PouchAdapterLevelDb)
-          .plugin(PouchFind)
-          .plugin(PouchReduce);
+      await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
 
-        // Note: bootstrap is taking care of creating the directory if it doesn't exist
-        db = new PouchDB<DocumentModel>(
-          path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
-          {
-            adapter: 'leveldb',
-          }
-        );
-      }
+      PouchDB.plugin(PouchAdapterLevelDb).plugin(PouchFind).plugin(PouchReduce);
+
+      // Note: bootstrap is taking care of creating the directory if it doesn't exist
+      db = new PouchDB<DocumentModel>(
+        path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
+        {
+          adapter: 'leveldb',
+        }
+      );
       break;
 
     default:

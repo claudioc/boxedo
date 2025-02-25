@@ -364,29 +364,7 @@ const router = async (app: FastifyInstance) => {
       if (cached) {
         forest = cached.data;
       } else {
-        let topLevels: PageModel[] = [];
-        try {
-          topLevels = await dbs.getTopLevelPages();
-        } catch {
-          /* ignore */
-        }
-
-        if (topLevels.length === 0) {
-          app.cache.reset(NAVIGATION_CACHE_KEY);
-          return '';
-        }
-
-        // We build a tree for each of the top-level pages
-        for (const topLevel of topLevels) {
-          forest.push({
-            pageId: topLevel._id,
-            title: topLevel.pageTitle,
-            link: slugUrl(topLevel.pageSlug),
-            position: topLevel.position,
-            children: await dbs.buildMenuTree(topLevel._id),
-          });
-        }
-
+        forest = await dbs.buildMenuTree(null);
         app.cache.set(NAVIGATION_CACHE_KEY, forest);
       }
 

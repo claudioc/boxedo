@@ -3,6 +3,7 @@ import type { ConfigEnv, PageModel, SearchResult } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
 import {
   compressTextForSearch,
+  ensurePathExists,
   highlightPhrase,
   prepareFTSQuery,
 } from '~/lib/helpers';
@@ -125,6 +126,7 @@ export class SearchService {
     }
 
     if (!SearchService.instance && dbs && config) {
+      await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
       SearchService.instance = new SearchService(dbs, config);
       await SearchService.instance.indexBuilt;
       return SearchService.instance;

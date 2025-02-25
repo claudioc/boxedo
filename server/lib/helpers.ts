@@ -1,5 +1,7 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import fs from 'node:fs';
+import { access, mkdir } from 'node:fs/promises';
 import {
   ConfigEnvSchema,
   DEFAULT_SUPPORTED_LANGUAGE,
@@ -221,4 +223,18 @@ export const highlightPhrase = (
 
   // Replace matches with marked version
   return title.replace(pattern, '<mark>$1</mark>');
+};
+
+export const ensurePathExists = async (path: string, description: string) => {
+  try {
+    await access(path, fs.constants.R_OK | fs.constants.W_OK);
+  } catch {
+    try {
+      await mkdir(path, { recursive: true });
+    } catch (error) {
+      throw new Error(
+        `Failed to create ${description} at ${path}: ${(error as Error).message}`
+      );
+    }
+  }
 };

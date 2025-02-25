@@ -10,8 +10,6 @@ import Fastify from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
 import type { PinoLoggerOptions } from 'fastify/types/logger';
 import osUtils from 'node-os-utils';
-import fs from 'node:fs';
-import { access, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import {
   ConfigEnvSchema,
@@ -28,6 +26,7 @@ import { dbService, type DbService } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
+import { ensurePathExists } from './helpers';
 import router from './router';
 import { syncUsers } from './syncUsers';
 
@@ -107,22 +106,7 @@ await emailService.initialize({
 
 app.decorate('emailService', emailService);
 
-// Ensure that the db local path exists (used at least for the search engine)
-try {
-  await access(app.config.DB_LOCAL_PATH, fs.constants.R_OK | fs.constants.W_OK);
-  app.log.info(
-    `Using existing database directory: ${app.config.DB_LOCAL_PATH}`
-  );
-} catch {
-  try {
-    await mkdir(app.config.DB_LOCAL_PATH, { recursive: true });
-    app.log.info(`Created database directory: ${app.config.DB_LOCAL_PATH}`);
-  } catch (error) {
-    throw new Error(
-      `Failed to create database directory at ${app.config.DB_LOCAL_PATH}: ${(error as Error).message}`
-    );
-  }
-}
+await ensurePathExists(app.config.DB_LOCAL_PATH, 'database directory');
 
 let dbs: DbService;
 try {
