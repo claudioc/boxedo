@@ -331,20 +331,21 @@ export const dbService = (client?: DbClient) => {
         return ok(await this.db.get<SessionModel>(sessionId));
       } catch (error) {
         if ((error as PouchDB.Core.Error).status !== 404) {
+          console.log('Error finding a session', error);
           return err(Feedbacks.E_UNKNOWN_ERROR);
         }
         return ok(null);
       }
     },
 
-    async deleteSession(sessionId: string): Promise<void> {
+    async deleteSession(sessionId: string): Promise<Result<void, Feedback>> {
       const session = (await this.getSessionById(sessionId)).match(
         (session) => session,
         () => null
       );
 
       if (!session) {
-        return;
+        return ok();
       }
 
       try {
@@ -352,9 +353,12 @@ export const dbService = (client?: DbClient) => {
         await this.db.remove(session._id, session._rev!);
       } catch (error) {
         if ((error as PouchDB.Core.Error).status !== 404) {
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+          console.log('Error deleting a session', error);
+          return err(Feedbacks.E_UNKNOWN_ERROR);
         }
       }
+
+      return ok();
     },
 
     async getTopLevelPages(): Promise<PageModel[]> {

@@ -242,12 +242,7 @@ const router = async (app: FastifyInstance) => {
     const dbs = app.dbService;
 
     if (sessionId) {
-      try {
-        await dbs.deleteSession(sessionId);
-      } catch (error) {
-        app.log.error('Error deleting session:', error);
-        // Continue with logout even if db operation fails
-      }
+      (await dbs.deleteSession(sessionId)).match(nop, nop);
     }
 
     rep.clearCookie(SESSION_COOKIE_NAME, {
