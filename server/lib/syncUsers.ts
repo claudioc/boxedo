@@ -5,6 +5,7 @@ import type { JSONSchema } from 'json-schema-to-ts';
 import { readFile } from 'node:fs/promises';
 import yaml from 'yaml';
 import { dbService } from '~/services/dbService';
+import { nop } from './helpers';
 
 const UsersYamlSchema = {
   type: 'object',
@@ -86,7 +87,12 @@ export async function syncUsers(
       data.users = [];
     }
 
-    const existingUsers = await dbs.getAllUsers();
+    const existingUsers = (await dbs.getAllUsers()).match(
+      (users) => users,
+      (feedback) => {
+        throw new Error(feedback.message);
+      }
+    );
     const existingEmails = new Set(existingUsers.map((u) => u.email));
     const yamlEmails = new Set(data.users.map((u) => u.email));
 
@@ -114,12 +120,16 @@ export async function syncUsers(
 
     for (const user of usersToAdd) {
       const userId = dbService.generateIdFor('user');
-      await dbs.insertUser({
-        type: 'user',
-        _id: userId,
-        email: user.email,
-        fullname: user.fullname,
-        createdAt: new Date().toISOString(),
+      (
+        await dbs.insertUser({
+          type: 'user',
+          _id: userId,
+          email: user.email,
+          fullname: user.fullname,
+          createdAt: new Date().toISOString(),
+        })
+      ).match(nop, (feedback) => {
+        throw new Error(feedback.message);
       });
       app.log.info(`Added user: ${user.email}`);
     }
@@ -127,16 +137,22 @@ export async function syncUsers(
     for (const user of usersToUpdate) {
       const existingUser = existingUsers.find((u) => u.email === user.email);
       if (existingUser) {
-        await dbs.updateUser({
-          ...existingUser,
-          fullname: user.fullname,
+        (
+          await dbs.updateUser({
+            ...existingUser,
+            fullname: user.fullname,
+          })
+        ).match(nop, (feedback) => {
+          throw new Error(feedback.message);
         });
         app.log.info(`Updated user: ${user.email}`);
       }
     }
 
     for (const user of usersToRemove) {
-      await dbs.deleteUser(user._id);
+      (await dbs.deleteUser(user._id)).match(nop, (feedback) => {
+        throw new Error(feedback.message);
+      });
       app.log.info(`Removed user: ${user.email}`);
     }
 

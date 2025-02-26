@@ -31,7 +31,6 @@ import type {
 } from '~/../types';
 import { DEFAULT_TEXT_SIZE } from '~/../types';
 import { POSITION_GAP_SIZE } from '~/constants';
-import { ErrorWithFeedback } from '~/lib/errors';
 import { Feedbacks } from '~/lib/feedbacks';
 import {
   ensurePathExists,
@@ -79,7 +78,7 @@ export type DbClient = PouchDB.Database<DocumentModel>;
 export type DbService = ReturnType<typeof dbService>;
 
 export const dbService = (client?: DbClient) => {
-  if (!client) throw new ErrorWithFeedback(Feedbacks.E_MISSING_DB);
+  if (!client) throw new Error(Feedbacks.E_MISSING_DB.message);
 
   return {
     db: client,
@@ -737,7 +736,10 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async createMagic(email: string, ttlMinutes: number): Promise<MagicModel> {
+    async createMagic(
+      email: string,
+      ttlMinutes: number
+    ): Promise<Result<MagicModel, Feedback>> {
       const now = new Date();
       const expiresAt = new Date(now.getTime() + ttlMinutes * 60000);
 
@@ -750,36 +752,49 @@ export const dbService = (client?: DbClient) => {
         used: false,
       };
 
-      await this.db.put(data);
-      return data;
-    },
-
-    async validateMagic(magicId: string): Promise<string | null> {
-      const result = (await this.db.find({
-        selector: {
-          type: 'magic',
-          _id: magicId,
-          used: false,
-          expiresAt: {
-            $gt: new Date().toISOString(),
-          },
-        },
-        limit: 1,
-      })) as PouchDB.Find.FindResponse<MagicModel>;
-
-      if (result.docs.length === 0) {
-        return null;
+      try {
+        await this.db.put(data);
+        return ok(data);
+      } catch (error) {
+        console.error('Error creating magic link:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
-
-      // Mark token as used
-      const magic = result.docs[0];
-      magic.used = true;
-      await this.db.put(magic);
-
-      return magic.email;
     },
 
-    async getUserByEmail(email: string): Promise<UserModel | null> {
+    async validateMagic(
+      magicId: string
+    ): Promise<Result<string | null, Feedback>> {
+      try {
+        const result = (await this.db.find({
+          selector: {
+            type: 'magic',
+            _id: magicId,
+            used: false,
+            expiresAt: {
+              $gt: new Date().toISOString(),
+            },
+          },
+          limit: 1,
+        })) as PouchDB.Find.FindResponse<MagicModel>;
+
+        if (result.docs.length === 0) {
+          return ok(null);
+        }
+
+        // Mark token as used
+        const magic = result.docs[0];
+        magic.used = true;
+        await this.db.put(magic);
+        return ok(magic.email);
+      } catch (error) {
+        console.error('Error validating magic link:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
+    },
+
+    async getUserByEmail(
+      email: string
+    ): Promise<Result<UserModel | null, Feedback>> {
       try {
         const result = (await this.db.find({
           selector: {
@@ -789,14 +804,14 @@ export const dbService = (client?: DbClient) => {
           limit: 1,
         })) as PouchDB.Find.FindResponse<UserModel>;
 
-        return result.docs[0] || null;
-      } catch (err) {
-        console.log(err);
-        return null;
+        return ok(result.docs[0] || null);
+      } catch (error) {
+        console.error('Error getting user by email:', error);
+        return ok(null);
       }
     },
 
-    async getAllUsers(): Promise<UserModel[]> {
+    async getAllUsers(): Promise<Result<UserModel[], Feedback>> {
       try {
         const result = (await this.db.find({
           selector: {
@@ -804,41 +819,45 @@ export const dbService = (client?: DbClient) => {
           },
         })) as PouchDB.Find.FindResponse<UserModel>;
 
-        return result.docs;
-      } catch (err) {
-        console.log(err);
-        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        return ok(result.docs);
+      } catch (error) {
+        console.error('Error getting all users:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
 
-    async insertUser(user: UserModel): Promise<void> {
+    async insertUser(user: UserModel): Promise<Result<void, Feedback>> {
       try {
         await this.db.put(user);
-      } catch (err) {
-        console.log(err);
-        throw new ErrorWithFeedback(Feedbacks.E_CREATING_USER);
+        return ok();
+      } catch (error) {
+        console.log('Error inserting a user', error);
+        return err(Feedbacks.E_CREATING_USER);
       }
     },
 
-    async updateUser(user: UserModel): Promise<void> {
+    async updateUser(user: UserModel): Promise<Result<void, Feedback>> {
       try {
         await this.db.put(user);
-      } catch (err) {
-        console.log(err);
-        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_USER);
+        return ok();
+      } catch (error) {
+        console.log('Error updating a user', error);
+        return err(Feedbacks.E_UPDATING_USER);
       }
     },
 
-    async deleteUser(userId: string): Promise<void> {
+    async deleteUser(userId: string): Promise<Result<void, Feedback>> {
       try {
         const user = await this.db.get(`user:${userId}`);
         await this.db.remove(user);
-      } catch (err) {
+        return ok();
+      } catch (error) {
         // If user doesn't exist (404) just ignore
-        if ((err as PouchDB.Core.Error).status !== 404) {
-          console.log(err);
-          throw new ErrorWithFeedback(Feedbacks.E_DELETING_USER);
+        if ((error as PouchDB.Core.Error).status !== 404) {
+          console.log('Error deleting a user', error);
+          return err(Feedbacks.E_DELETING_USER);
         }
+        return ok();
       }
     },
 

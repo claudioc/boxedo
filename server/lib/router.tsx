@@ -139,16 +139,20 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const { i18n, settings, config } = app;
 
-      const user = await dbs.getUserByEmail(email);
+      const user = (await dbs.getUserByEmail(email)).match((user) => user, nop);
       if (!user) {
         return rep.redirect(
           pathWithFeedback('/auth/login', Feedbacks.E_USER_NOT_FOUND)
         );
       }
 
-      const magicData = await dbs.createMagic(
-        email,
-        MAGIC_TOKEN_EXPIRATION_MINUTES
+      const magicData = (
+        await dbs.createMagic(email, MAGIC_TOKEN_EXPIRATION_MINUTES)
+      ).match(
+        (magicData) => magicData,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
       );
 
       const emailMessage = {
@@ -192,7 +196,12 @@ const router = async (app: FastifyInstance) => {
       const magicId = req.params.magicId;
       const { i18n } = app;
 
-      const email = await dbs.validateMagic(magicId);
+      const email = (await dbs.validateMagic(magicId)).match(
+        (email) => email,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       const sessionId = dbService.generateIdFor('session');
 
