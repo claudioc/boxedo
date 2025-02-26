@@ -34,7 +34,12 @@ export const createRequireAuth = (app: FastifyInstance) => {
       return rep.redirect('/auth/login');
     }
 
-    const user = await dbs.getUserByEmail(session.email);
+    const user = (await dbs.getUserByEmail(session.email)).match(
+      (user) => user,
+      (feedback) => {
+        throw new Error(feedback.message);
+      }
+    );
 
     if (!user) {
       rep.clearCookie(SESSION_COOKIE_NAME);
