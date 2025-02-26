@@ -394,7 +394,12 @@ const router = async (app: FastifyInstance) => {
       if (cached) {
         forest = cached.data;
       } else {
-        forest = await dbs.buildMenuTree(null);
+        forest = (await dbs.buildMenuTree(null)).match(
+          (forest) => forest,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
         app.cache.set(NAVIGATION_CACHE_KEY, forest);
       }
 

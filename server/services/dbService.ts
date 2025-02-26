@@ -379,83 +379,87 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async buildMenuTree(parentId: string | null = null): Promise<NavItem[]> {
-      // First, fetch all pages in a single query
-      const result = await this.db.find({
-        selector: {
-          type: 'page',
-          // We're not filtering by parentId here, we'll organize in memory
-        },
-        fields: ['_id', 'pageTitle', 'pageSlug', 'position', 'parentId'],
-        // No need to sort here, we'll sort in memory
-        limit: Number.MAX_SAFE_INTEGER,
-      });
+    async buildMenuTree(
+      parentId: string | null = null
+    ): Promise<Result<NavItem[], Feedback>> {
+      try {
+        const result = await this.db.find({
+          selector: {
+            type: 'page',
+            // We're not filtering by parentId here, we'll organize in memory
+          },
+          fields: ['_id', 'pageTitle', 'pageSlug', 'position', 'parentId'],
+          // No need to sort here, we'll sort in memory
+          limit: Number.MAX_SAFE_INTEGER,
+        });
 
-      const pages = result.docs as PageModel[];
+        const pages = result.docs as PageModel[];
 
-      // Group pages by parentId
-      const pagesByParent = new Map<string | null, PageModel[]>();
+        // Group pages by parentId
+        const pagesByParent = new Map<string | null, PageModel[]>();
 
-      pages.forEach((page) => {
-        const parentKey = page.parentId || null;
-        if (!pagesByParent.has(parentKey)) {
-          pagesByParent.set(parentKey, []);
-        }
-        // biome-ignore lint/style/noNonNullAssertion:
-        pagesByParent.get(parentKey)!.push(page);
-      });
+        pages.forEach((page) => {
+          const parentKey = page.parentId || null;
+          if (!pagesByParent.has(parentKey)) {
+            pagesByParent.set(parentKey, []);
+          }
+          // biome-ignore lint/style/noNonNullAssertion:
+          pagesByParent.get(parentKey)!.push(page);
+        });
 
-      // Sort each group by position
-      pagesByParent.forEach((group) => {
-        group.sort((a, b) => (a.position || 0) - (b.position || 0));
-      });
+        // Sort each group by position
+        pagesByParent.forEach((group) => {
+          group.sort((a, b) => (a.position || 0) - (b.position || 0));
+        });
 
-      // Recursive function to build tree structure
-      const buildTree = (currentParentId: string | null): NavItem[] => {
-        const children = pagesByParent.get(currentParentId) || [];
+        // Recursive function to build tree structure
+        const buildTree = (currentParentId: string | null): NavItem[] => {
+          const children = pagesByParent.get(currentParentId) || [];
 
-        return children.map((page) => ({
-          pageId: page._id,
-          title: page.pageTitle,
-          link: slugUrl(page.pageSlug),
-          position: page.position,
-          children: buildTree(page._id),
-        }));
-      };
-
-      // Build the tree starting from the requested parent
-      const tree = buildTree(parentId);
-
-      return tree;
-    },
-
-    async oldBuildMenuTree(parentId: string | null): Promise<NavItem[]> {
-      const result = await this.db.find({
-        selector: {
-          type: 'page',
-          parentId: parentId ?? null,
-          position: { $gte: 0 },
-        },
-        fields: ['_id', 'pageTitle', 'pageSlug', 'position'],
-        sort: [{ position: 'asc' }],
-      });
-
-      const menuTree = await Promise.all(
-        (result.docs as PageModel[]).map(async (page) => {
-          const menuItem: NavItem = {
+          return children.map((page) => ({
             pageId: page._id,
             title: page.pageTitle,
             link: slugUrl(page.pageSlug),
             position: page.position,
-            children: await this.buildMenuTree(page._id),
-          };
+            children: buildTree(page._id),
+          }));
+        };
 
-          return menuItem;
-        })
-      );
-
-      return menuTree;
+        // Build the tree starting from the requested parent
+        return ok(buildTree(parentId));
+      } catch (error) {
+        console.error('Error building menu tree:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
+
+    // async oldBuildMenuTree(parentId: string | null): Promise<NavItem[]> {
+    //   const result = await this.db.find({
+    //     selector: {
+    //       type: 'page',
+    //       parentId: parentId ?? null,
+    //       position: { $gte: 0 },
+    //     },
+    //     fields: ['_id', 'pageTitle', 'pageSlug', 'position'],
+    //     sort: [{ position: 'asc' }],
+    //   });
+
+    //   const menuTree = await Promise.all(
+    //     (result.docs as PageModel[]).map(async (page) => {
+    //       const menuItem: NavItem = {
+    //         pageId: page._id,
+    //         title: page.pageTitle,
+    //         link: slugUrl(page.pageSlug),
+    //         position: page.position,
+    //         children: await this.buildMenuTree(page._id),
+    //       };
+
+    //       return menuItem;
+    //     })
+    //   );
+
+    //   return menuTree;
+    // },
 
     async updatePageContent(page: PageModel, newPage: Partial<PageModel>) {
       const updatedPage: PageModel = {
