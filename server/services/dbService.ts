@@ -361,17 +361,22 @@ export const dbService = (client?: DbClient) => {
       return ok();
     },
 
-    async getTopLevelPages(): Promise<PageModel[]> {
-      const result = (await this.db.find({
-        selector: {
-          type: 'page',
-          parentId: null,
-          position: { $gte: 0 },
-        },
-        sort: [{ position: 'asc' }],
-      })) as PouchDB.Find.FindResponse<PageModel>;
+    async getTopLevelPages(): Promise<Result<PageModel[], Feedback>> {
+      try {
+        const result = (await this.db.find({
+          selector: {
+            type: 'page',
+            parentId: null,
+            position: { $gte: 0 },
+          },
+          sort: [{ position: 'asc' }],
+        })) as PouchDB.Find.FindResponse<PageModel>;
 
-      return result.docs;
+        return ok(result.docs);
+      } catch (error) {
+        console.error('Error getting top level pages:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
     async buildMenuTree(parentId: string | null = null): Promise<NavItem[]> {
