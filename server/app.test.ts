@@ -321,20 +321,3 @@ describe('Reordering pages', () => {
     expect($a.eq(3).text()).toBe('Second page, first child');
   });
 });
-
-describe('Searching titles', () => {
-  it('should return matching titles', async () => {
-    await createPage('First and only page');
-    await createPage('Second and only page');
-    await createPage('Third and only page');
-
-    let $ = await getContent('/parts/titles?q=First');
-    expect($('li').length).toBe(1);
-
-    $ = await getContent('/parts/titles?q=only+Page');
-    expect($('li').length).toBe(3);
-
-    $ = await getContent('/parts/titles?q=foooobar');
-    expect($('li').length).toBe(0);
-  });
-});

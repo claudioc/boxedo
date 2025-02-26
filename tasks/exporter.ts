@@ -145,7 +145,11 @@ ${JSON.stringify(metadata, null, 2)}
   private async createHtmlDocument(page: PageModel): Promise<string> {
     const frontmatter = this.createFrontmatter(page);
     const processedContent = await this.processPageContent(page.pageContent);
-    const settings = await this.dbs.getSettings();
+    const settingsResult = await this.dbs.getSettings();
+    const settings = settingsResult.match(
+      (settings) => settings,
+      () => ({})
+    );
 
     return `${frontmatter}
 <!DOCTYPE html>

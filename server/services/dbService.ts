@@ -1,3 +1,4 @@
+import { type Result, err, ok } from 'neverthrow';
 import PouchDB from 'pouchdb-core';
 
 import PouchHttp from 'pouchdb-adapter-http';
@@ -17,6 +18,7 @@ import type {
   ConfigEnv,
   DbServiceInitParams,
   DocumentModel,
+  Feedback,
   FileAttachmentModel,
   FileModel,
   MagicModel,
@@ -82,7 +84,9 @@ export const dbService = (client?: DbClient) => {
   return {
     db: client,
 
-    async getSettings(config?: ConfigEnv): Promise<SettingsModel> {
+    async getSettings(
+      config?: ConfigEnv
+    ): Promise<Result<SettingsModel, Feedback>> {
       try {
         const settings = await this.db.get<SettingsModel>('settings');
 
@@ -91,10 +95,15 @@ export const dbService = (client?: DbClient) => {
           settings.textSize = DEFAULT_TEXT_SIZE;
           await this.db.put(settings);
         }
+        // End future attributes
 
-        return settings;
-      } catch (err) {
-        if ((err as PouchDB.Core.Error)?.status === 404) {
+        if (settings && !config) {
+          return err(Feedbacks.E_EMPTY_TITLE);
+        }
+
+        return ok(settings);
+      } catch (error) {
+        if ((error as PouchDB.Core.Error)?.status === 404) {
           const newSettings: SettingsModel = {
             _id: 'settings',
             type: 'settings',
@@ -104,13 +113,15 @@ export const dbService = (client?: DbClient) => {
             siteLang: getDefaultLanguage(config),
             textSize: config ? config?.SETTINGS_TEXT_SIZE : DEFAULT_TEXT_SIZE,
           };
-          await this.db.put(newSettings);
-          // Refetch it to be sure we have the _rev
-          return await this.db.get<SettingsModel>('settings');
+
+          try {
+            await this.db.put(newSettings);
+            return ok(await this.db.get<SettingsModel>('settings'));
+          } catch {}
         }
 
-        console.error(err);
-        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        console.error(error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
 

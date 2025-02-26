@@ -128,7 +128,14 @@ if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
-const settings = await dbs.getSettings(app.config);
+const settingsResult = await dbs.getSettings(app.config);
+const settings = settingsResult.match(
+  (settings) => settings,
+  (feedback) => {
+    app.log.error(`Failed to get settings: ${feedback.message}`);
+    throw new Error(`Cannot load application settings: ${feedback.message}`);
+  }
+);
 
 if (app.config.AUTHENTICATION_TYPE !== 'none') {
   await syncUsers(app, dbs, {

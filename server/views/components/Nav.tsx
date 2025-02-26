@@ -18,7 +18,7 @@ export const Nav = ({ forest, currentPageId }: NavProps) => {
       <menu class={styles.nav} id="main-navigation">
         {forest.length ? <NavTree items={forest} /> : null}
       </menu>
-      <SortableEnabler />
+      {forest.length ? <SortableEnabler /> : null}
     </>
   );
 };

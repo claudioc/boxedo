@@ -19,7 +19,7 @@
     "requestFailed": "The request cannot be fullfilled",
     "unexpectedError": "An unexpected error occurred",
     "invalidParameters": "Request parameters are not valid",
-    "unhandledError": "Unhandled error",
+    "unhandledError": "Internal server error",
     "pageNotFound": "Page not found",
     "unauthorized": "Unauthorized"
   },

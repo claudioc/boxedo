@@ -290,7 +290,13 @@ const router = async (app: FastifyInstance) => {
       const { landingPageId, siteLang, siteTitle, textSize } = req.body;
       const dbs = app.dbService;
       const rs = redirectService(app, rep);
-      const settings = await dbs.getSettings();
+      const settingsResult = await dbs.getSettings();
+      const settings = settingsResult.match(
+        (settings) => settings,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (landingPageId) {
         if (settings.landingPageId !== landingPageId) {
