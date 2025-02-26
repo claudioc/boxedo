@@ -786,12 +786,9 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      try {
-        await dbs.updatePagePosition(page, position);
-      } catch (error) {
-        app.log.error(error);
-        return rep.status(500);
-      }
+      (await dbs.updatePagePosition(page, position)).mapErr((feedback) => {
+        throw new Error(feedback.message);
+      });
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 

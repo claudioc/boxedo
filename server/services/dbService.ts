@@ -509,15 +509,20 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async updatePagePosition(page: PageModel, position: number) {
+    async updatePagePosition(
+      page: PageModel,
+      position: number
+    ): Promise<Result<void, Feedback>> {
       try {
         await this.db.put({
           ...page,
           contentUpdated: false,
           position,
         });
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
+        return ok();
+      } catch (error) {
+        console.error('Error updating page position:', error);
+        return err(Feedbacks.E_UPDATING_PAGE);
       }
     },
 
