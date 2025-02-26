@@ -922,13 +922,12 @@ const router = async (app: FastifyInstance) => {
         uploadedAt: new Date().toISOString(),
       };
 
-      let fileRev: string;
-      try {
-        const { rev } = await dbs.insertFile(doc);
-        fileRev = rev;
-      } catch (err) {
-        return rs.bailWithError(500, err);
-      }
+      const fileRev = (await dbs.insertFile(doc)).match(
+        (doc) => doc.rev,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       const stream = Readable.from(processedBuffer);
 
@@ -940,11 +939,9 @@ const router = async (app: FastifyInstance) => {
         params: { rev: fileRev },
       };
 
-      try {
-        await dbs.insertFileAttachment(attachment);
-      } catch (err) {
-        return rs.bailWithError(500, err);
-      }
+      (await dbs.insertFileAttachment(attachment)).mapErr((feedback) => {
+        throw new Error(feedback.message);
+      });
 
       return {
         success: true,

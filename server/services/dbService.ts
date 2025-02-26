@@ -555,17 +555,20 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async insertFile(file: FileModel): Promise<PouchDB.Core.Response> {
+    async insertFile(
+      file: FileModel
+    ): Promise<Result<PouchDB.Core.Response, Feedback>> {
       try {
-        return await this.db.put(file);
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_CREATING_FILE);
+        return ok(await this.db.put(file));
+      } catch (error) {
+        console.log('Error inserting a file', error);
+        return err(Feedbacks.E_CREATING_FILE);
       }
     },
 
     async insertFileAttachment(
       attachment: FileAttachmentModel
-    ): Promise<PouchDB.Core.Response> {
+    ): Promise<Result<PouchDB.Core.Response, Feedback>> {
       try {
         // Get the current rev of the document
         const doc = await this.db.get(attachment.fileId);
@@ -578,15 +581,18 @@ export const dbService = (client?: DbClient) => {
                 attachment.attachment as NodeJS.ReadableStream
               );
 
-        return await this.db.putAttachment(
-          attachment.fileId,
-          attachment.attachmentName,
-          doc._rev,
-          buffer,
-          attachment.contentType
+        return ok(
+          await this.db.putAttachment(
+            attachment.fileId,
+            attachment.attachmentName,
+            doc._rev,
+            buffer,
+            attachment.contentType
+          )
         );
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_CREATING_ATTACHMENT);
+      } catch (error) {
+        console.log('Error inserting a file attachment', error);
+        return err(Feedbacks.E_CREATING_ATTACHMENT);
       }
     },
 
