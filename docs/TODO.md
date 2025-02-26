@@ -1,9 +1,8 @@
 Doing:
-  - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
-  - there are several db access in the dbservice not protected by try catch
   - remove the Unknown Errors
 
   MVP
+  - port SearchService to neverthrow
   - tables in the editor
   - formatDate needs to be aware of the current locale
   - probably remove the image-macro now that we have the floating menu
@@ -103,3 +102,5 @@ Done
 - the search is not case sensitive, the title and the body must be lowercased
 - rebuild index on create/delete/update and fix the things in LUNR.md
 - search: use cheerio to remove html from the content
+- when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
+- there are several db access in the dbservice not protected by try catch

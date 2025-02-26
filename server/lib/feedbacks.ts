@@ -62,7 +62,7 @@ export const Feedbacks: { [key in AnyCode]: Feedback } = {
   },
   S_PAGE_MOVED: {
     code: 4,
-    message: 'Page moved to a new parent',
+    message: 'Page moved',
   },
   S_SETTINGS_UPDATED: {
     code: 5,
