@@ -719,7 +719,12 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      const position = await dbs.findInsertPosition(parentId);
+      const position = (await dbs.findInsertPosition(parentId)).match(
+        (position) => position,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       try {
         await dbs.changePageParent(page, parentId, position);
@@ -762,10 +767,13 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const position = await dbs.findInsertPosition(
-        page.parentId ?? null,
-        targetIndex,
-        pageId
+      const position = (
+        await dbs.findInsertPosition(page.parentId ?? null, targetIndex, pageId)
+      ).match(
+        (position) => position,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
       );
 
       try {
@@ -1073,7 +1081,12 @@ const router = async (app: FastifyInstance) => {
         }
       );
       const now = new Date().toISOString();
-      const position = await dbs.findInsertPosition(parentId);
+      const position = (await dbs.findInsertPosition(parentId)).match(
+        (position) => position,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       let pageId: string;
 

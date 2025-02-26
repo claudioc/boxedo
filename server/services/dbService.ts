@@ -252,56 +252,50 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    // Helper to get siblings of a page sorted by position
-    async getSiblingPages(parentId: string) {
-      const result = await this.db.query('pages/by_parent_position', {
-        startkey: [parentId],
-        endkey: [parentId, {}],
-        include_docs: true,
-      });
-
-      return result.rows.map((row) => row.doc);
-    },
-
     async findInsertPosition(
       parentId: string | null,
       targetIndex = Number.POSITIVE_INFINITY,
       pageId?: string
-    ): Promise<number> {
-      const siblings = await this.db.query<PageModel>(
-        'pages/by_parent_position',
-        {
-          startkey: [parentId],
-          endkey: [parentId, {}],
-          include_docs: true,
+    ): Promise<Result<number, Feedback>> {
+      try {
+        const siblings = await this.db.query<PageModel>(
+          'pages/by_parent_position',
+          {
+            startkey: [parentId],
+            endkey: [parentId, {}],
+            include_docs: true,
+          }
+        );
+
+        // biome-ignore lint/style/noNonNullAssertion:
+        let pages = siblings.rows.map((row) => row.doc!);
+        if (pageId) {
+          pages = pages.filter((page) => page?._id !== pageId);
         }
-      );
 
-      // biome-ignore lint/style/noNonNullAssertion:
-      let pages = siblings.rows.map((row) => row.doc!);
-      if (pageId) {
-        pages = pages.filter((page) => page?._id !== pageId);
+        // No siblings - first page
+        if (pages.length === 0) {
+          return ok(POSITION_GAP_SIZE);
+        }
+
+        // Append at end
+        if (targetIndex >= pages.length) {
+          return ok(pages[pages.length - 1].position + POSITION_GAP_SIZE);
+        }
+
+        // Insert at beginning
+        if (targetIndex === 0) {
+          return ok(pages[0].position / 2);
+        }
+
+        // Insert between pages
+        const prevPosition = pages[targetIndex - 1].position;
+        const nextPosition = pages[targetIndex].position;
+        return ok((prevPosition + nextPosition) / 2);
+      } catch (error) {
+        console.error('Error finding insert position:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
-
-      // No siblings - first page
-      if (pages.length === 0) {
-        return POSITION_GAP_SIZE;
-      }
-
-      // Append at end
-      if (targetIndex >= pages.length) {
-        return pages[pages.length - 1].position + POSITION_GAP_SIZE;
-      }
-
-      // Insert at beginning
-      if (targetIndex === 0) {
-        return pages[0].position / 2;
-      }
-
-      // Insert between pages
-      const prevPosition = pages[targetIndex - 1].position;
-      const nextPosition = pages[targetIndex].position;
-      return (prevPosition + nextPosition) / 2;
     },
 
     async insertPage(page: PageModel) {
