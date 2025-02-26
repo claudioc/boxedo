@@ -526,7 +526,7 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async deletePage(page: PageModel): Promise<void> {
+    async deletePage(page: PageModel): Promise<Result<void, Feedback>> {
       try {
         // First delete the page
         await this.db.remove(page as Required<PageModel>);
@@ -547,8 +547,11 @@ export const dbService = (client?: DbClient) => {
             contentUpdated: false,
           });
         }
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_DELETING_PAGE);
+
+        return ok();
+      } catch (error) {
+        console.error('Error deleting page:', error);
+        return err(Feedbacks.E_DELETING_PAGE);
       }
     },
 

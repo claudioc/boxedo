@@ -823,11 +823,9 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      try {
-        await dbs.deletePage(page);
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
+      (await dbs.deletePage(page)).mapErr((feedback) => {
+        throw new Error(feedback.message);
+      });
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
