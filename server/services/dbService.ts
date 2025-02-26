@@ -461,24 +461,29 @@ export const dbService = (client?: DbClient) => {
     //   return menuTree;
     // },
 
-    async updatePageContent(page: PageModel, newPage: Partial<PageModel>) {
-      const updatedPage: PageModel = {
-        ...page,
-        ...newPage,
-        contentUpdated: true,
-        pageTitle: safeHtml(newPage.pageTitle ?? ''),
-        pageContent: safeHtml(newPage.pageContent ?? ''),
-        updatedAt: newPage.updatedAt ?? new Date().toISOString(),
-      };
-
-      if (page.pageSlug !== newPage.pageSlug) {
-        updatedPage.pageSlugs = [...page.pageSlugs, page.pageSlug];
-      }
-
+    async updatePageContent(
+      page: PageModel,
+      newPage: Partial<PageModel>
+    ): Promise<Result<void, Feedback>> {
       try {
+        const updatedPage: PageModel = {
+          ...page,
+          ...newPage,
+          contentUpdated: true,
+          pageTitle: safeHtml(newPage.pageTitle ?? ''),
+          pageContent: safeHtml(newPage.pageContent ?? ''),
+          updatedAt: newPage.updatedAt ?? new Date().toISOString(),
+        };
+
+        if (page.pageSlug !== newPage.pageSlug) {
+          updatedPage.pageSlugs = [...page.pageSlugs, page.pageSlug];
+        }
+
         await this.db.put(updatedPage);
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
+        return ok();
+      } catch (error) {
+        console.error('Error updating page content:', error);
+        return err(Feedbacks.E_UPDATING_PAGE);
       }
     },
 

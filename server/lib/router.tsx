@@ -569,16 +569,16 @@ const router = async (app: FastifyInstance) => {
       }
 
       const newSlug = await maybeNewSlug();
-      try {
+      (
         await dbs.updatePageContent(page, {
           pageTitle: req.body.pageTitle,
           pageContent: req.body.pageContent,
           pageSlug: newSlug,
           updatedAt: new Date().toISOString(),
-        });
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
+        })
+      ).mapErr((feedback) => {
+        throw new Error(feedback.message);
+      });
 
       const updatedPage = (await dbs.getPageById(pageId)).match(
         (page) => page,
