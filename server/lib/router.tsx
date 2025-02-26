@@ -65,7 +65,10 @@ const router = async (app: FastifyInstance) => {
       // 3. The landing page exists: we show the landing page
 
       // Do we have any page at all?
-      const pageCount = await dbs.countPages();
+      const pageCount = (await dbs.countPages()).match(
+        (count) => count,
+        (_) => 0
+      );
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {

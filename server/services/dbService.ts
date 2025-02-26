@@ -139,13 +139,13 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async countPages(): Promise<number> {
+    async countPages(): Promise<Result<number, Feedback>> {
       try {
         const result = await this.db.query('pages/count', { reduce: true });
-        return result.rows[0]?.value || 0;
+        return ok(result.rows[0]?.value || 0);
       } catch (error) {
         console.error('Error counting pages:', error);
-        return 0;
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
 

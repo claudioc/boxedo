@@ -1,10 +1,10 @@
 Doing:
+  - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
+  - there are several db access in the dbservice not protected by try catch
 
   MVP
   - tables in the editor
   - formatDate needs to be aware of the current locale
-  - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
-  - there are several db access in the dbservice not protected by try catch
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
   - the couchdb scripts and compose file must be even more parametric

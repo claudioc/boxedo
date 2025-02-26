@@ -152,7 +152,10 @@ export class SearchService {
   public async buildIndex(forced = false) {
     try {
       if (!forced) {
-        const nPage = await this.dbs.countPages();
+        const nPage = (await this.dbs.countPages()).match(
+          (count) => count,
+          (_) => 0
+        );
         const nIndexed = this.db
           .prepare('SELECT COUNT(*) as count FROM pages_fts')
           .get() as { count: number };
