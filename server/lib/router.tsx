@@ -1184,7 +1184,12 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      const history = await dbs.getPageHistory(page);
+      const history = await (await dbs.getPageHistory(page)).match(
+        (history) => history,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       rep.html(
         <PageHistory
@@ -1219,12 +1224,12 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
 
-      let historyItem: PageModel | undefined;
-      try {
-        historyItem = await dbs.getPageHistoryItem(page, version);
-      } catch {
-        return rs.slugWithFeedback(page.pageSlug, Feedbacks.E_INVALID_VERSION);
-      }
+      const historyItem = (await dbs.getPageHistoryItem(page, version)).match(
+        (historyItem) => historyItem,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       rep.html(
         <ReadPageVersion

@@ -681,46 +681,60 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async getPageHistory(page: PageModel): Promise<PageModel[]> {
-      const doc = await this.db.get(page._id, { revs_info: true });
+    async getPageHistory(
+      page: PageModel
+    ): Promise<Result<PageModel[], Feedback>> {
+      try {
+        const doc = await this.db.get(page._id, { revs_info: true });
 
-      if (!doc._revs_info) return [];
+        if (!doc._revs_info) {
+          return ok([]);
+        }
 
-      const history = (
-        await Promise.all(
-          (doc._revs_info as PouchDB.Core.RevisionInfo[]).map(async (rev) => {
-            if (rev.status !== 'available') return null;
-            if (rev.rev === doc._rev) return null;
-            const revisionDoc = (await this.db.get(page._id, {
-              rev: rev.rev,
-            })) as PageModel;
-            if (!revisionDoc.contentUpdated) return null;
-            return {
-              pageTitle: revisionDoc.pageTitle,
-              updatedAt: revisionDoc.updatedAt,
-              _rev: revisionDoc._rev,
-            };
-          })
-        )
-      ).filter((item): item is Required<PageModel> => item !== null);
+        const history = (
+          await Promise.all(
+            (doc._revs_info as PouchDB.Core.RevisionInfo[]).map(async (rev) => {
+              if (rev.status !== 'available') return null;
+              if (rev.rev === doc._rev) return null;
+              const revisionDoc = (await this.db.get(page._id, {
+                rev: rev.rev,
+              })) as PageModel;
+              if (!revisionDoc.contentUpdated) return null;
+              return {
+                pageTitle: revisionDoc.pageTitle,
+                updatedAt: revisionDoc.updatedAt,
+                _rev: revisionDoc._rev,
+              };
+            })
+          )
+        ).filter((item): item is Required<PageModel> => item !== null);
 
-      return history;
+        return ok(history);
+      } catch (error) {
+        console.error('Error getting page history:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
     async getPageHistoryItem(
       page: PageModel,
       version: string
-    ): Promise<PageModel> {
-      const revisionDoc = (await this.db.get(page._id, {
-        rev: version,
-      })) as PageModel;
+    ): Promise<Result<PageModel, Feedback>> {
+      try {
+        const revisionDoc = await this.db.get<PageModel>(page._id, {
+          rev: version,
+        });
 
-      return {
-        pageTitle: revisionDoc.pageTitle,
-        pageContent: revisionDoc.pageContent,
-        updatedAt: revisionDoc.updatedAt,
-        _rev: revisionDoc._rev,
-      } as PageModel;
+        return ok({
+          pageTitle: revisionDoc.pageTitle,
+          pageContent: revisionDoc.pageContent,
+          updatedAt: revisionDoc.updatedAt,
+          _rev: revisionDoc._rev,
+        } as PageModel);
+      } catch (error) {
+        console.error('Error getting page history item:', error);
+        return err(Feedbacks.E_INVALID_VERSION);
+      }
     },
 
     async createMagic(email: string, ttlMinutes: number): Promise<MagicModel> {
