@@ -298,16 +298,17 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async insertPage(page: PageModel) {
+    async insertPage(page: PageModel): Promise<Result<void, Feedback>> {
       page.pageContent = safeHtml(page.pageContent);
       page.pageTitle = safeHtml(page.pageTitle);
       page.contentUpdated = true;
 
       try {
         await this.db.put(page);
+        return ok();
       } catch (error) {
-        console.log(error);
-        throw new ErrorWithFeedback(Feedbacks.E_CREATING_PAGE);
+        console.log('Error inserting a page', error);
+        return err(Feedbacks.E_CREATING_PAGE);
       }
     },
 

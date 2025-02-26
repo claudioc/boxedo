@@ -1088,10 +1088,8 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      let pageId: string;
-
-      try {
-        pageId = dbService.generateIdFor('page');
+      const pageId = dbService.generateIdFor('page');
+      (
         await dbs.insertPage({
           type: 'page',
           _id: pageId,
@@ -1104,10 +1102,10 @@ const router = async (app: FastifyInstance) => {
           contentUpdated: true,
           updatedAt: now,
           createdAt: now,
-        });
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
+        })
+      ).match(nop, (feedback) => {
+        throw new Error(feedback.message);
+      });
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
