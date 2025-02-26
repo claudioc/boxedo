@@ -447,7 +447,12 @@ const router = async (app: FastifyInstance) => {
         );
       }
 
-      const oldPage = await dbs.lookupPageBySlug(slug);
+      const oldPage = (await dbs.lookupPageBySlug(slug)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (oldPage) {
         // Redirect to the current slug

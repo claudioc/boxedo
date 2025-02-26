@@ -191,18 +191,31 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async lookupPageBySlug(slug: string): Promise<PageModel | null> {
-      const result = await this.db.find({
-        selector: {
-          type: 'page',
-          pageSlugs: {
-            $elemMatch: { $eq: slug },
+    async lookupPageBySlug(
+      slug: string
+    ): Promise<Result<PageModel | null, Feedback>> {
+      try {
+        const result = await this.db.find({
+          selector: {
+            type: 'page',
+            pageSlugs: {
+              $elemMatch: { $eq: slug },
+            },
           },
-        },
-        limit: 1,
-      });
+          limit: 1,
+        });
 
-      return result.docs.length > 0 ? (result.docs[0] as PageModel) : null;
+        return ok(
+          result.docs.length > 0 ? (result.docs[0] as PageModel) : null
+        );
+      } catch (error) {
+        if ((error as PouchDB.Core.Error).status === 404) {
+          return ok(null);
+        }
+
+        console.error('Error looking up a page by slug:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
     async generateUniqueSlug(title: string): Promise<string> {
