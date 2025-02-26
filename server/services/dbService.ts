@@ -324,19 +324,25 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async getSessionById(sessionId: string): Promise<SessionModel | null> {
+    async getSessionById(
+      sessionId: string
+    ): Promise<Result<SessionModel | null, Feedback>> {
       try {
-        return await this.db.get<SessionModel>(sessionId);
-      } catch (err) {
-        if ((err as PouchDB.Core.Error).status !== 404) {
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        return ok(await this.db.get<SessionModel>(sessionId));
+      } catch (error) {
+        if ((error as PouchDB.Core.Error).status !== 404) {
+          return err(Feedbacks.E_UNKNOWN_ERROR);
         }
-        return null;
+        return ok(null);
       }
     },
 
     async deleteSession(sessionId: string): Promise<void> {
-      const session = await this.getSessionById(sessionId);
+      const session = (await this.getSessionById(sessionId)).match(
+        (session) => session,
+        () => null
+      );
+
       if (!session) {
         return;
       }

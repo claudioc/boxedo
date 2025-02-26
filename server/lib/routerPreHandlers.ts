@@ -22,7 +22,12 @@ export const createRequireAuth = (app: FastifyInstance) => {
       return rep.redirect('/auth/login');
     }
     const dbs = app.dbService;
-    const session = await dbs.getSessionById(sessionId);
+    const session = (await dbs.getSessionById(sessionId)).match(
+      (session) => session,
+      (feedback) => {
+        throw new Error(feedback.message);
+      }
+    );
 
     if (!session || new Date(session.expiresAt) < new Date()) {
       rep.clearCookie(SESSION_COOKIE_NAME);

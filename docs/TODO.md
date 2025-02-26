@@ -1,6 +1,7 @@
 Doing:
   - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
   - there are several db access in the dbservice not protected by try catch
+  - remove the Unknown Errors
 
   MVP
   - tables in the editor
