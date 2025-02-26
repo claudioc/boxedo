@@ -972,19 +972,24 @@ const router = async (app: FastifyInstance) => {
 
       const { fileId, filename } = req.params;
 
-      try {
-        const file = await dbs.getFileById(fileId);
-        if (!file) {
-          return rs.bailWithError(404, 'File not found');
+      const file = (await dbs.getFileById(fileId)).match(
+        (file) => file,
+        (feedback) => {
+          throw new Error(feedback.message);
         }
+      );
 
-        const stream = await dbs.getFileAttachment(fileId, filename);
-
-        rep.type(file.processedMimetype);
-        return stream;
-      } catch (err) {
-        return rs.bailWithError(500, err);
+      if (!file) {
+        return rs.bailWithError(404, 'File not found');
       }
+
+      const stream = await dbs.getFileAttachment(fileId, filename);
+      if (!stream) {
+        return rs.bailWithError(404, 'File stream not found');
+      }
+
+      rep.type(file.processedMimetype);
+      return stream;
     }
   );
 
@@ -1235,7 +1240,12 @@ const router = async (app: FastifyInstance) => {
   app.get('/admin/cleanup-orphaned-files', async () => {
     const dbs = app.dbService;
 
-    const deleted = await dbs.cleanupOrphanedFiles();
+    const deleted = (await dbs.cleanupOrphanedFiles()).match(
+      (deleted) => deleted,
+      (feedback) => {
+        throw new Error(feedback.message);
+      }
+    );
 
     return `${deleted} file removed.`;
   });

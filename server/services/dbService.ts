@@ -596,88 +596,88 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async cleanupOrphanedFiles() {
+    async cleanupOrphanedFiles(): Promise<Result<number, Feedback>> {
       /* Our main assumption here is that each file has only one attachment,
        * even though CouchDb allows multiple attachments per document.
        * This simplifies the logic and is sufficient for our use case; in a more
        * complex scenario we would have to consider which attachments are used.
        */
-      const usedFiles = new Set<string>();
-      const pagesResult = (await this.db.find({
-        selector: {
-          type: 'page',
-        },
-      })) as PouchDB.Find.FindResponse<PageModel>;
+      try {
+        const usedFiles = new Set<string>();
+        const pagesResult = (await this.db.find({
+          selector: {
+            type: 'page',
+          },
+        })) as PouchDB.Find.FindResponse<PageModel>;
 
-      // Extract file references from all pages
-      pagesResult.docs.forEach((doc) => {
-        extractFileRefsFrom(doc.pageContent ?? '').forEach((ref) =>
-          usedFiles.add(ref)
+        // Extract file references from all pages
+        pagesResult.docs.forEach((doc) => {
+          extractFileRefsFrom(doc.pageContent ?? '').forEach((ref) =>
+            usedFiles.add(ref)
+          );
+        });
+
+        const filesResult = (await this.db.find({
+          selector: {
+            type: 'file',
+          },
+        })) as PouchDB.Find.FindResponse<FileModel>;
+
+        // Find unused files
+        const unusedFiles = filesResult.docs.filter(
+          (file) => !usedFiles.has(file._id)
         );
-      });
 
-      const filesResult = (await this.db.find({
-        selector: {
-          type: 'file',
-        },
-      })) as PouchDB.Find.FindResponse<FileModel>;
-
-      // Find unused files
-      const unusedFiles = filesResult.docs.filter(
-        (file) => !usedFiles.has(file._id)
-      );
-
-      if (unusedFiles.length === 0) {
-        return 0;
-      }
-
-      const deleteOps: PouchDB.Core.PutDocument<FileModel>[] = unusedFiles.map(
-        (file) => ({
-          ...file,
-          _deleted: true,
-        })
-      );
-
-      // Delete in batches of 50
-      const BATCH_SIZE = 50;
-      for (let i = 0; i < deleteOps.length; i += BATCH_SIZE) {
-        const batch = deleteOps.slice(i, i + BATCH_SIZE);
-        try {
-          await this.db.bulkDocs(batch);
-        } catch (error) {
-          console.error(`Error deleting batch starting at index ${i}:`, error);
-          throw error;
+        if (unusedFiles.length === 0) {
+          return ok(0);
         }
-      }
 
-      return unusedFiles.length;
+        const deleteOps: PouchDB.Core.PutDocument<FileModel>[] =
+          unusedFiles.map((file) => ({
+            ...file,
+            _deleted: true,
+          }));
+
+        // Delete in batches of 50
+        const BATCH_SIZE = 50;
+        for (let i = 0; i < deleteOps.length; i += BATCH_SIZE) {
+          const batch = deleteOps.slice(i, i + BATCH_SIZE);
+          await this.db.bulkDocs(batch);
+        }
+
+        return ok(unusedFiles.length);
+      } catch (error) {
+        console.error('Error cleaning up orphaned files:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
-    async getFileById(fileId: string): Promise<FileModel | null> {
-      let file: FileModel | null = null;
+    async getFileById(
+      fileId: string
+    ): Promise<Result<FileModel | null, Feedback>> {
       try {
-        file = await this.db.get(fileId);
-      } catch (err) {
-        if ((err as PouchDB.Core.Error)?.status !== 404) {
-          console.log(err);
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        return ok(await this.db.get(fileId));
+      } catch (error) {
+        if ((error as PouchDB.Core.Error)?.status !== 404) {
+          console.error('Error getting a file by id:', err);
+          return err(Feedbacks.E_UNKNOWN_ERROR);
         }
+        return ok(null);
       }
-
-      return file;
     },
 
     async getFileAttachment(
       fileId: string,
       attachmentName: string
-    ): Promise<Blob | Buffer<ArrayBufferLike>> {
+    ): Promise<Result<Blob | Buffer<ArrayBufferLike> | null, Feedback>> {
       try {
-        return await this.db.getAttachment(fileId, attachmentName);
-      } catch (err: unknown) {
-        if ((err as PouchDB.Core.Error).status !== 404) {
-          throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        return ok(await this.db.getAttachment(fileId, attachmentName));
+      } catch (error) {
+        if ((error as PouchDB.Core.Error).status !== 404) {
+          console.error('Error getting a attachment by id:', error);
+          return err(Feedbacks.E_UNKNOWN_ERROR);
         }
-        throw err;
+        return ok(null);
       }
     },
 
