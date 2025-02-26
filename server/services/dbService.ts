@@ -125,14 +125,17 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async updateSettings(settings: SettingsModel) {
+    async updateSettings(
+      settings: SettingsModel
+    ): Promise<Result<void, Feedback>> {
       settings.siteLang = ensureValidLanguage(settings.siteLang);
 
       try {
         await this.db.put(settings);
-      } catch (err) {
-        console.log(err);
-        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_SETTINGS);
+        return ok();
+      } catch (error) {
+        console.error('Error updating settings:', error);
+        return err(Feedbacks.E_UPDATING_SETTINGS);
       }
     },
 

@@ -238,3 +238,5 @@ export const ensurePathExists = async (path: string, description: string) => {
     }
   }
 };
+
+export const nop = () => {};

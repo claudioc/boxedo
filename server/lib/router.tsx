@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { pathWithFeedback, slugUrl } from './helpers';
+import { nop, pathWithFeedback, slugUrl } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
 import { Readable } from 'node:stream';
 import sharp from 'sharp';
@@ -317,11 +317,10 @@ const router = async (app: FastifyInstance) => {
 
       app.settings = settings;
 
-      try {
-        await dbs.updateSettings(settings);
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
+      const result = await dbs.updateSettings(settings);
+      result.match(nop, (feedback) => {
+        throw new Error(feedback.message);
+      });
 
       return rs.homeWithFeedback(Feedbacks.S_SETTINGS_UPDATED);
     }
