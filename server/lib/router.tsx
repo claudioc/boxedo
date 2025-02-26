@@ -587,7 +587,7 @@ const router = async (app: FastifyInstance) => {
 
       // If the title is the same as the current page, we keep the slug
       // Otherwise, we generate a new one
-      async function maybeNewSlug() {
+      async function maybeNewSlug(): Promise<string> {
         if (!page) {
           return '/';
         }
@@ -596,7 +596,12 @@ const router = async (app: FastifyInstance) => {
           return page.pageSlug;
         }
 
-        return await dbs.generateUniqueSlug(pageTitle);
+        return (await dbs.generateUniqueSlug(pageTitle)).match(
+          (slug) => slug,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
       }
     }
   );
@@ -1061,7 +1066,12 @@ const router = async (app: FastifyInstance) => {
       }
 
       const parentId = parentPageId ?? null;
-      const slug = await dbs.generateUniqueSlug(pageTitle);
+      const slug = (await dbs.generateUniqueSlug(pageTitle)).match(
+        (slug) => slug,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
       const now = new Date().toISOString();
       const position = await dbs.findInsertPosition(parentId);
 

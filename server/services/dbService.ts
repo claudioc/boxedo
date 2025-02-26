@@ -218,33 +218,38 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async generateUniqueSlug(title: string): Promise<string> {
+    async generateUniqueSlug(title: string): Promise<Result<string, Feedback>> {
       let slug = slugify(title.trim(), { lower: true });
       let uniqueSlugFound = false;
       let counter = 1;
 
-      while (!uniqueSlugFound) {
-        const result = await this.db.find({
-          selector: {
-            type: 'page',
-            $or: [
-              { pageSlug: slug },
-              { pageSlugs: { $elemMatch: { $eq: slug } } },
-            ],
-          },
-          limit: 1,
-        });
+      try {
+        while (!uniqueSlugFound) {
+          const result = await this.db.find({
+            selector: {
+              type: 'page',
+              $or: [
+                { pageSlug: slug },
+                { pageSlugs: { $elemMatch: { $eq: slug } } },
+              ],
+            },
+            limit: 1,
+          });
 
-        const slugAlreadyInUse = result.docs.length > 0;
+          const slugAlreadyInUse = result.docs.length > 0;
 
-        if (slugAlreadyInUse) {
-          slug = `${slugify(title.trim(), { lower: true })}-${counter++}`;
-        } else {
-          uniqueSlugFound = true;
+          if (slugAlreadyInUse) {
+            slug = `${slugify(title.trim(), { lower: true })}-${counter++}`;
+          } else {
+            uniqueSlugFound = true;
+          }
         }
-      }
 
-      return slug;
+        return ok(slug);
+      } catch (error) {
+        console.error('Error generating unique slug:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
     // Helper to get siblings of a page sorted by position
