@@ -191,14 +191,18 @@ const router = async (app: FastifyInstance) => {
       const sessionId = dbService.generateIdFor('session');
 
       if (email) {
-        await dbs.createSession({
-          type: 'session',
-          _id: sessionId,
-          email,
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(
-            Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
-          ).toISOString(),
+        (
+          await dbs.createSession({
+            type: 'session',
+            _id: sessionId,
+            email,
+            createdAt: new Date().toISOString(),
+            expiresAt: new Date(
+              Date.now() + SEVEN_DAYS_IN_SECONDS * 1000
+            ).toISOString(),
+          })
+        ).match(nop, (feedback) => {
+          throw new Error(feedback.message);
         });
 
         rep.setCookie(SESSION_COOKIE_NAME, sessionId, {

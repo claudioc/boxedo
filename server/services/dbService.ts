@@ -312,12 +312,15 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async createSession(session: SessionModel) {
+    async createSession(
+      session: SessionModel
+    ): Promise<Result<void, Feedback>> {
       try {
         await this.db.put(session);
+        return ok();
       } catch (error) {
-        console.log(error);
-        throw new ErrorWithFeedback(Feedbacks.E_CREATING_SESSION);
+        console.log('Error creating a session', error);
+        return err(Feedbacks.E_CREATING_SESSION);
       }
     },
 
