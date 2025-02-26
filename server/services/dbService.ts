@@ -160,21 +160,35 @@ export const dbService = (client?: DbClient) => {
         if ((error as PouchDB.Core.Error).status === 404) {
           return ok(null);
         }
-        console.error('Error getting a page:', error);
+
+        console.error('Error getting a page by id:', error);
         return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
 
-    async getPageBySlug(slug: string): Promise<PageModel | null> {
-      const result = await this.db.find({
-        selector: {
-          type: 'page',
-          pageSlug: slug,
-        },
-        limit: 1,
-      });
+    async getPageBySlug(
+      slug: string
+    ): Promise<Result<PageModel | null, Feedback>> {
+      try {
+        const result = await this.db.find({
+          selector: {
+            type: 'page',
+            pageSlug: slug,
+          },
+          limit: 1,
+        });
 
-      return result.docs.length > 0 ? (result.docs[0] as PageModel) : null;
+        return ok(
+          result.docs.length > 0 ? (result.docs[0] as PageModel) : null
+        );
+      } catch (error) {
+        if ((error as PouchDB.Core.Error).status === 404) {
+          return ok(null);
+        }
+
+        console.error('Error getting a page by slug:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
+      }
     },
 
     async lookupPageBySlug(slug: string): Promise<PageModel | null> {

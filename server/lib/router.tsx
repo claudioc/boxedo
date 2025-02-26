@@ -425,7 +425,12 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const isHtmx = req.headers['hx-request'];
 
-      const page = await dbs.getPageBySlug(slug);
+      const page = (await dbs.getPageBySlug(slug)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (page) {
         // These are useful for testing purposes
