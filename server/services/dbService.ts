@@ -491,17 +491,21 @@ export const dbService = (client?: DbClient) => {
       page: PageModel,
       newParentId: string | null,
       position: number
-    ) {
-      const updatedPage: PageModel = {
-        ...page,
-        position,
-        contentUpdated: false,
-        parentId: newParentId,
-      };
+    ): Promise<Result<void, Feedback>> {
       try {
+        const updatedPage: PageModel = {
+          ...page,
+          position,
+          contentUpdated: false,
+          parentId: newParentId,
+        };
+
         await this.db.put(updatedPage);
-      } catch {
-        throw new ErrorWithFeedback(Feedbacks.E_UPDATING_PAGE);
+
+        return ok();
+      } catch (error) {
+        console.error('Error changing page parent:', error);
+        return err(Feedbacks.E_UPDATING_PAGE);
       }
     },
 

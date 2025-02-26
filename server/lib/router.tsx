@@ -736,11 +736,11 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      try {
-        await dbs.changePageParent(page, parentId, position);
-      } catch (error) {
-        return rs.homeWithError(error);
-      }
+      (await dbs.changePageParent(page, parentId, position)).mapErr(
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
