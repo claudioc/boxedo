@@ -149,17 +149,19 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async getPageById(pageId: string): Promise<PageModel | null> {
+    async getPageById(
+      pageId: string
+    ): Promise<Result<PageModel | null, Feedback>> {
       try {
         const doc = await this.db.get(pageId);
         // Only return if it's actually a page
-        return doc.type === 'page' ? doc : null;
-      } catch (err) {
-        if ((err as PouchDB.Core.Error).status === 404) {
-          return null;
+        return ok(doc.type === 'page' ? doc : null);
+      } catch (error) {
+        if ((error as PouchDB.Core.Error).status === 404) {
+          return ok(null);
         }
-
-        throw new ErrorWithFeedback(Feedbacks.E_UNKNOWN_ERROR);
+        console.error('Error getting a page:', error);
+        return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     },
 

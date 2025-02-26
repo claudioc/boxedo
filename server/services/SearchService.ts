@@ -232,7 +232,13 @@ export class SearchService {
       const searchResults: SearchResult[] = [];
 
       for (const row of rows) {
-        const page = await this.dbs.getPageById(row.id);
+        const page = (await this.dbs.getPageById(row.id)).match(
+          (page) => page,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
+
         if (!page) continue;
 
         searchResults.push({

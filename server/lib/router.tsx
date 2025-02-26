@@ -72,7 +72,12 @@ const router = async (app: FastifyInstance) => {
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {
-        landingPage = await dbs.getPageById(settings.landingPageId);
+        landingPage = (await dbs.getPageById(settings.landingPageId)).match(
+          (page) => page,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
       } else {
         if (pageCount > 0) {
           // Decision: if there is no landing page, we show the first page
@@ -263,7 +268,12 @@ const router = async (app: FastifyInstance) => {
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {
-        landingPage = await dbs.getPageById(settings.landingPageId);
+        landingPage = (await dbs.getPageById(settings.landingPageId)).match(
+          (page) => page,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
       }
 
       rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -304,7 +314,13 @@ const router = async (app: FastifyInstance) => {
       if (landingPageId) {
         if (settings.landingPageId !== landingPageId) {
           // Can't use a non-existing landing page
-          const page = await dbs.getPageById(landingPageId);
+          const page = (await dbs.getPageById(landingPageId)).match(
+            (page) => page,
+            (feedback) => {
+              throw new Error(feedback.message);
+            }
+          );
+
           if (!page) {
             return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
           }
@@ -460,7 +476,12 @@ const router = async (app: FastifyInstance) => {
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -504,7 +525,13 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_REV);
       }
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
@@ -533,7 +560,12 @@ const router = async (app: FastifyInstance) => {
         return rs.homeWithError(error);
       }
 
-      const updatedPage = await dbs.getPageById(pageId);
+      const updatedPage = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       // await delay(2000);
       if (updatedPage) {
@@ -572,7 +604,12 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -580,7 +617,12 @@ const router = async (app: FastifyInstance) => {
 
       let parent: PageModel | null = null;
       if (page.parentId) {
-        parent = await dbs.getPageById(page.parentId ?? '');
+        parent = (await dbs.getPageById(page.parentId ?? '')).match(
+          (page) => page,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
 
         if (!parent) {
           return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -633,7 +675,13 @@ const router = async (app: FastifyInstance) => {
       }
 
       // Can't move a non-existing page
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
@@ -645,7 +693,12 @@ const router = async (app: FastifyInstance) => {
 
       // Can't move a page to a non-existing parent
       if (parentId) {
-        const newParentPage = await dbs.getPageById(parentId);
+        const newParentPage = (await dbs.getPageById(parentId)).match(
+          (page) => page,
+          (feedback) => {
+            throw new Error(feedback.message);
+          }
+        );
         if (!newParentPage) {
           return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
         }
@@ -683,7 +736,13 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
@@ -723,7 +782,12 @@ const router = async (app: FastifyInstance) => {
       const rs = redirectService(app, rep);
       const dbs = app.dbService;
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
@@ -918,7 +982,13 @@ const router = async (app: FastifyInstance) => {
       let parentPage: PageModel | null = null;
       if (parentPageId) {
         try {
-          parentPage = await dbs.getPageById(parentPageId);
+          parentPage = (await dbs.getPageById(parentPageId)).match(
+            (page) => page,
+            (feedback) => {
+              throw new Error(feedback.message);
+            }
+          );
+
           if (!parentPage) {
             return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
           }
@@ -966,7 +1036,12 @@ const router = async (app: FastifyInstance) => {
       let parentPage: PageModel | null = null;
       if (parentPageId) {
         try {
-          parentPage = await dbs.getPageById(parentPageId);
+          parentPage = (await dbs.getPageById(parentPageId)).match(
+            (page) => page,
+            (feedback) => {
+              throw new Error(feedback.message);
+            }
+          );
           if (!parentPage) {
             return rs.homeWithFeedback(Feedbacks.E_MISSING_PARENT);
           }
@@ -1003,7 +1078,12 @@ const router = async (app: FastifyInstance) => {
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
       if (page) {
         // These are useful for testing purposes
@@ -1055,7 +1135,13 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
@@ -1085,7 +1171,12 @@ const router = async (app: FastifyInstance) => {
       const dbs = app.dbService;
       const rs = redirectService(app, rep);
 
-      const page = await dbs.getPageById(pageId);
+      const page = (await dbs.getPageById(pageId)).match(
+        (page) => page,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
       if (!page) {
         return rs.homeWithFeedback(Feedbacks.E_MISSING_PAGE);
       }
