@@ -60,6 +60,11 @@ export type ModelName =
 
 type DocumentType = 'settings' | 'file' | 'magic' | 'session' | 'user' | 'page';
 
+export type PageTitle = {
+  pageId: string;
+  pageTitle: string;
+};
+
 export interface BaseModel {
   _id: string;
   _rev?: string;

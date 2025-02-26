@@ -332,16 +332,17 @@ const router = async (app: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const dbs = app.dbService;
+      // const dbs = app.dbService;
       const { q } = req.query;
 
       if (q.length < 3 || q.length > 50) {
         return '';
       }
 
-      const results = await dbs.search(q);
+      // const results = await dbs.searchTitles(q);
+      const titles = await (await SearchService.getInstance()).searchByTitle(q);
 
-      rep.html(<TitlesList results={results} i18n={app.i18n} />);
+      rep.html(<TitlesList titles={titles} i18n={app.i18n} />);
     }
   );
 

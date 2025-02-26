@@ -60,7 +60,7 @@
     "movingPage": "Change a page's parent",
     "currentParentIs": "Current parent is \"%{title}\"",
     "newParentIs": "New parent is",
-    "searchNewParent": "Search for a new parent",
+    "searchNewParent": "Search for a new parent (wildcard* allowed)",
     "startTyping": "Start typing…",
     "noParent": "No parent (top level page)",
     "noResults": "No title matches your search",

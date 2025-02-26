@@ -60,7 +60,7 @@
     "movingPage": "Cambia collocazione della pagina",
     "currentParentIs": "Il genitore attuale è \"%{title}\"",
     "newParentIs": "Il nuovo genitore è",
-    "searchNewParent": "Cerca un nuovo genitore",
+    "searchNewParent": "Cerca un nuovo genitore (carattere jolly* consentito)",
     "startTyping": "Inizia a scrivere…",
     "noParent": "Nessun genitore (pagina di primo livello)",
     "noResults": "Nessun titolo corrisponde alla tua ricerca",

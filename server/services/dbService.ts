@@ -61,7 +61,6 @@ const safeHtml = (str: string) =>
     },
   });
 
-const safeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const isTestRun = process.env.NODE_ENV === 'test';
 
 const streamToBuffer = async (
@@ -306,21 +305,6 @@ export const dbService = (client?: DbClient) => {
       }
     },
 
-    async search(q: string): Promise<PageModel[]> {
-      const query = safeRegExp(q);
-
-      const result = await this.db.find({
-        selector: {
-          pageTitle: {
-            $regex: RegExp(query, 'i'),
-          },
-        },
-        limit: 25,
-      });
-
-      return result.docs as PageModel[];
-    },
-
     async getTopLevelPages(): Promise<PageModel[]> {
       const result = (await this.db.find({
         selector: {
@@ -343,7 +327,7 @@ export const dbService = (client?: DbClient) => {
         },
         fields: ['_id', 'pageTitle', 'pageSlug', 'position', 'parentId'],
         // No need to sort here, we'll sort in memory
-        limit: -1,
+        limit: Number.MAX_SAFE_INTEGER,
       });
 
       const pages = result.docs as PageModel[];
@@ -815,6 +799,7 @@ dbService._createViews = async (db: PouchDB.Database) => {
           }
         }`,
       },
+
       count: {
         map: `function (doc) {
           if (doc.type === 'page') {
@@ -829,7 +814,14 @@ dbService._createViews = async (db: PouchDB.Database) => {
   try {
     await db.put(designDoc);
   } catch (err) {
-    if ((err as PouchDB.Core.Error).status !== 409) {
+    if ((err as PouchDB.Core.Error).status === 409) {
+      const existing = await db.get('_design/pages');
+      const updatedDoc = {
+        ...designDoc,
+        _rev: existing._rev, // Add the _rev from the existing document
+      };
+      await db.put(updatedDoc);
+    } else {
       console.error('Error creating design doc:', err);
       throw err;
     }

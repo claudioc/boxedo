@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import type { ConfigEnv, PageModel, SearchResult } from '~/../types';
+import type { ConfigEnv, PageModel, PageTitle, SearchResult } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
 import {
   compressTextForSearch,
@@ -25,6 +25,7 @@ export class SearchService {
     update: Database.Statement;
     delete: Database.Statement;
     search: Database.Statement;
+    searchTitle: Database.Statement;
   };
   // biome-ignore lint/suspicious/noExplicitAny:
   private changeListener: PouchDB.Core.Changes<any> | null = null;
@@ -111,6 +112,15 @@ export class SearchService {
         WHERE pages_fts MATCH ?
         ORDER BY bm25(pages_fts, 10, 5)
         LIMIT 50
+      `),
+      searchTitle: this.db.prepare(`
+        SELECT
+          id,
+          title_full
+        FROM pages_fts
+        WHERE title MATCH ?
+        ORDER BY bm25(pages_fts, 10, 0)
+        LIMIT 25
       `),
     };
   }
@@ -233,6 +243,33 @@ export class SearchService {
       return searchResults;
     } catch (error) {
       console.error('Search error:', error);
+      return [];
+    }
+  }
+
+  public async searchByTitle(q: string): Promise<PageTitle[]> {
+    await this.indexBuilt;
+
+    const query = prepareFTSQuery(q);
+
+    if (query === '') {
+      return [];
+    }
+
+    try {
+      const rows = this.statements.searchTitle.all(query) as {
+        id: string;
+        title_full: string;
+      }[];
+
+      return rows
+        .filter((row) => row.title_full !== null)
+        .map((row) => ({
+          pageId: row.id,
+          pageTitle: row.title_full,
+        }));
+    } catch (error) {
+      console.error('Title search error:', error);
       return [];
     }
   }

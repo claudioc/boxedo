@@ -8,6 +8,7 @@ Doing:
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
   - the couchdb scripts and compose file must be even more parametric
+  - the movePage's page actions are in the wrong place
 
   NEXT
   - add a classification to the documents (like 'Internal only', 'Public'...)
