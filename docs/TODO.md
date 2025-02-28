@@ -104,3 +104,4 @@ Done
 - search: use cheerio to remove html from the content
 - when we catch an error, we should log what it is. The ErrorWithFeedback should augment the original error object
 - there are several db access in the dbservice not protected by try catch
+- maybe shift+alt+enter to save

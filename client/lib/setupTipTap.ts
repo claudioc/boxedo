@@ -97,21 +97,32 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     extensions,
     editorProps: {
       handleKeyDown: (_view, event) => {
-        // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
-        if (!(event.metaKey || event.ctrlKey) || event.key !== 'k') {
-          return false;
-        }
-
-        event.preventDefault();
-
-        // If there's no selection, return
-        if (editor.state.selection.empty) {
+        if (!(event.metaKey || event.ctrlKey)) {
           return;
         }
 
-        addLink();
+        if (event.key === 'k') {
+          event.preventDefault();
+          if (!editor.state.selection.empty) {
+            addLink();
+          }
+          return true;
+        }
 
-        return true;
+        // Check for Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux) for saving
+        if (event.key === 'Enter') {
+          event.preventDefault();
+
+          // Find the form and submit it
+          const form = document.querySelector(
+            'form[method="post"] button[type="submit"]'
+          );
+          if (form) {
+            (form as HTMLButtonElement).click();
+          }
+
+          return true;
+        }
       },
     },
   };

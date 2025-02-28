@@ -1,9 +1,9 @@
+import type { Context } from '../types';
+import { isUrl, removeQueryParam } from './lib/helpers';
 import { store, storeForm } from './lib/setupAlpine';
 import './lib/setupHtmx';
+import { destroySortable, enableSortable } from './lib/setupSortable';
 import type { TipTapEditor } from './lib/setupTipTap';
-import { removeQueryParam, isUrl } from './lib/helpers';
-import { enableSortable, destroySortable } from './lib/setupSortable';
-import type { Context } from '../types';
 
 class App {
   private editor: TipTapEditor | null = null;
@@ -95,10 +95,15 @@ class App {
     if (Object.values(error).some((v) => v)) {
       event.stopImmediatePropagation();
       event.preventDefault();
-      return;
+      setTimeout(() => {
+        storeForm.submitting = false;
+      }, 5);
+      return false;
     }
 
     window.onbeforeunload = null;
+
+    return true;
   }
 
   enableEditor() {
