@@ -18,6 +18,7 @@ import {
   RightIcon,
   SmallIcon,
   StrikeIcon,
+  TableIcon,
   UnderlineIcon,
 } from '../icons/editorIcons';
 
@@ -110,6 +111,9 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
         </button>
         <button type="button" data-command="hr">
           <HrIcon title={i18n.t('EditIcons.insertHr')} />
+        </button>
+        <button type="button" data-command="table">
+          <TableIcon title={i18n.t('EditIcons.insertTable')} />
         </button>
       </div>
 

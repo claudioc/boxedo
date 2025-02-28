@@ -67,3 +67,8 @@
   cursor:grab !important;
   border: 1px solid gray;
 }
+
+/* bulma override */
+.table tbody tr:first-child {
+  background-color: var(--bulma-table-row-hover-background-color);
+}

@@ -59,6 +59,7 @@ const safeHtml = (str: string) =>
         // Used by tiptap Image extension
         'data-alignment',
       ],
+      table: ['class'],
     },
   });
 

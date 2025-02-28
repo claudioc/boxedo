@@ -95,9 +95,7 @@ class App {
     if (Object.values(error).some((v) => v)) {
       event.stopImmediatePropagation();
       event.preventDefault();
-      setTimeout(() => {
-        storeForm.submitting = false;
-      }, 5);
+      this.resetForm();
       return false;
     }
 

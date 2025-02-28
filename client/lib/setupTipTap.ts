@@ -6,6 +6,10 @@ import FloatingMenu from '@tiptap/extension-floating-menu';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import TextAlign from '@tiptap/extension-text-align';
 import Typography from '@tiptap/extension-typography';
 import Underline from '@tiptap/extension-underline';
@@ -89,6 +93,16 @@ const getEditorOptions = (): Partial<EditorOptions> => {
         return '';
       },
     }),
+    Table.configure({
+      resizable: false,
+      cellMinWidth: 50,
+      HTMLAttributes: {
+        class: 'table is-bordered is-hoverable is-fullwidth',
+      },
+    }),
+    TableRow,
+    TableHeader,
+    TableCell,
   ];
 
   return {
@@ -271,6 +285,7 @@ type BubbleMenuCommands =
   | 'sizeSmall'
   | 'sizeMedium'
   | 'hr'
+  | 'table'
   | '';
 
 const addBubbleMenuHandlers = () => {
@@ -285,6 +300,9 @@ const addBubbleMenuHandlers = () => {
         .command ?? '') as BubbleMenuCommands;
       const chain = editor.chain().focus();
       switch (command) {
+        case 'table':
+          chain.insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+          break;
         case 'hr':
           chain.setHorizontalRule().run();
           break;
