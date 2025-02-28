@@ -96,10 +96,6 @@ export const dbService = (client?: DbClient) => {
         }
         // End future attributes
 
-        if (settings && !config) {
-          return err(Feedbacks.E_EMPTY_TITLE);
-        }
-
         return ok(settings);
       } catch (error) {
         if ((error as PouchDB.Core.Error)?.status === 404) {

@@ -100,7 +100,7 @@ export const Layout = ({
               <div class="block">
                 {/* The href and text is dynamically updated by our htmx extension */}
                 <a
-                  class="button is-outlined is-info"
+                  class="button is-outlined is-info is-small"
                   href={createButtonLink}
                   data-labelNested={i18n.t('Navigation.createNestedPage')}
                 >

@@ -45,7 +45,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
         <div class="level is-flex-direction-row is-justify-content-right">
           <button
             type="button"
-            class="button is-danger is-outlined"
+            class="button is-danger is-outlined is-small"
             id="delete-page-button"
             x-on:click="$refs.dialog.showModal()"
           >

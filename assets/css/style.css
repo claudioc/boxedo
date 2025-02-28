@@ -34,7 +34,7 @@
 .tiptap.ProseMirror {
   outline: 0;
   padding: 0.5rem;
-  background-color: #222;
+  /* background-color: #222; */
 }
 
 .tiptap-img {

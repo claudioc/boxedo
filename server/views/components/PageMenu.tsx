@@ -16,7 +16,7 @@ export const PageMenu = ({ ctx, page }: PageMenuProps) => {
     <div class="dropdown is-right is-hoverable">
       <div class="dropdown-trigger">
         <button
-          class="button is-text-mobile"
+          class="button is-text-mobile is-small"
           aria-haspopup="true"
           aria-controls="dropdown-menu"
           type="button"
