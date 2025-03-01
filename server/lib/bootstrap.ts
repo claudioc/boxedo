@@ -146,7 +146,11 @@ const repositories = await RepositoryFactory.create({
 app.decorate('repos', repositories);
 
 // Initializes the search service instance, starting indexing the documents
-await SearchService.create({ dbs, config: app.config, logger: app.log });
+await SearchService.create({
+  repos: repositories,
+  config: app.config,
+  logger: app.log,
+});
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);

@@ -1,7 +1,7 @@
 import { type Result, err, ok } from 'neverthrow';
 import PouchHttp from 'pouchdb-adapter-http';
 import PouchDB from 'pouchdb-core';
-import type { AnyLogger, ConfigEnv, DocumentModel } from '~/../types';
+import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
 // Remember to exclude this one from bundling in esbuild
 import PouchAdapterLevelDb from 'pouchdb-adapter-leveldb';
 import PouchAdapterMemory from 'pouchdb-adapter-memory';
@@ -16,8 +16,6 @@ interface DatabaseServiceOptions {
   config: ConfigEnv;
   logger: AnyLogger;
 }
-
-type Db = PouchDB.Database<DocumentModel>;
 
 export class DatabaseService {
   private static instance: DatabaseService;

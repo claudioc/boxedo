@@ -2,6 +2,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import fs from 'node:fs';
 import { access, mkdir } from 'node:fs/promises';
+import sanitizeHtml from 'sanitize-html';
 import {
   ConfigEnvSchema,
   DEFAULT_SUPPORTED_LANGUAGE,
@@ -240,3 +241,26 @@ export const ensurePathExists = async (path: string, description: string) => {
 };
 
 export const nop = () => {};
+
+// https://github.com/apostrophecms/sanitize-html
+export const safeHtml = (str: string) =>
+  sanitizeHtml(str, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+      a: ['href', 'rel', 'target'],
+      img: [
+        'src',
+        'srcset',
+        'alt',
+        'title',
+        'width',
+        'height',
+        'loading',
+        'class',
+        'style',
+        // Used by tiptap Image extension
+        'data-alignment',
+      ],
+      table: ['class'],
+    },
+  });

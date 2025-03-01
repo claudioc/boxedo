@@ -33,6 +33,8 @@ export const dbBackends = ['local', 'remote', 'memory'] as const;
 export type DbBackend = (typeof dbBackends)[number];
 export const DEFAULT_DB_BACKEND: DbBackend = 'local';
 
+export type Db = PouchDB.Database<DocumentModel>;
+
 export interface DbServiceInitParams {
   logger: FastifyBaseLogger;
   config: ConfigEnv;

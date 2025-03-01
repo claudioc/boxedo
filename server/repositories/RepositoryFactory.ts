@@ -1,4 +1,5 @@
-import type { AnyLogger, ConfigEnv, DocumentModel } from '~/../types';
+import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
+import { PageRepository } from './PageRepository';
 import { SettingsRepository } from './SettingsRepository';
 
 interface RepositoryFactoryOptions {
@@ -10,9 +11,10 @@ interface RepositoryFactoryOptions {
 export class RepositoryFactory {
   private static instance: RepositoryFactory;
   private settingsRepository: SettingsRepository;
+  private pageRepository: PageRepository;
 
   private constructor(
-    private db: PouchDB.Database<DocumentModel>,
+    private db: Db,
     private config: ConfigEnv,
     private logger: AnyLogger
   ) {
@@ -21,6 +23,7 @@ export class RepositoryFactory {
       this.config,
       this.logger
     );
+    this.pageRepository = new PageRepository(this.db, this.config, this.logger);
   }
 
   static create(options: RepositoryFactoryOptions): RepositoryFactory {
@@ -32,7 +35,15 @@ export class RepositoryFactory {
     return RepositoryFactory.instance;
   }
 
+  getDb(): Db {
+    return this.db;
+  }
+
   getSettingsRepository(): SettingsRepository {
     return this.settingsRepository;
+  }
+
+  getPageRepository(): PageRepository {
+    return this.pageRepository;
   }
 }

@@ -14,10 +14,10 @@ import {
   highlightPhrase,
   prepareFTSQuery,
 } from '~/lib/helpers';
-import type { DbService } from './dbService';
+import type { RepositoryFactory } from '~/repositories/RepositoryFactory';
 
 interface SearchServiceOptions {
-  dbs: DbService;
+  repos: RepositoryFactory;
   config: ConfigEnv;
   logger: AnyLogger;
 }
@@ -31,6 +31,7 @@ interface SearchRow {
 
 export class SearchService {
   private static instance: SearchService | null = null;
+  // This is the Sqlite3 database
   private db: Database.Database;
   private indexBuilt: Promise<void>;
   private resolveIndexBuilt!: () => void;
@@ -44,7 +45,7 @@ export class SearchService {
   private changeListener: PouchDB.Core.Changes<any> | null = null;
 
   private constructor(
-    private dbs: DbService,
+    private repos: RepositoryFactory,
     private config: ConfigEnv,
     private logger: AnyLogger
   ) {
@@ -88,12 +89,12 @@ export class SearchService {
   public static async create(
     options: SearchServiceOptions
   ): Promise<Result<SearchService, Error>> {
-    const { dbs, config, logger } = options;
+    const { repos, config, logger } = options;
 
     if (!SearchService.instance) {
       try {
         await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
-        SearchService.instance = new SearchService(dbs, config, logger);
+        SearchService.instance = new SearchService(repos, config, logger);
         await SearchService.instance.indexBuilt;
       } catch (error) {
         logger.error('Failed to initialize search service:', error);
@@ -114,7 +115,8 @@ export class SearchService {
   }
 
   private setupChangeListener() {
-    this.changeListener = this.dbs.db
+    this.changeListener = this.repos
+      .getDb()
       .changes({
         since: 'now',
         live: true,
@@ -174,7 +176,7 @@ export class SearchService {
   private async buildIndex(forced = false) {
     try {
       if (!forced) {
-        const nPage = (await this.dbs.countPages()).match(
+        const nPage = (await this.repos.getPageRepository().countPages()).match(
           (count) => count,
           (_) => 0
         );
@@ -192,7 +194,7 @@ export class SearchService {
       }
 
       const allDocs = (
-        await this.dbs.db.find({
+        await this.repos.getDb().find({
           selector: { type: 'page' },
           limit: MAX_INDEXABLE_DOCUMENTS,
         })
@@ -258,7 +260,9 @@ export class SearchService {
       const searchResults: SearchResult[] = [];
 
       for (const row of rows) {
-        const page = (await this.dbs.getPageById(row.id)).match(
+        const page = (
+          await this.repos.getPageRepository().getPageById(row.id)
+        ).match(
           (page) => page,
           (feedback) => {
             this.logger.error(

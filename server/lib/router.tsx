@@ -55,7 +55,7 @@ const router = async (app: FastifyInstance) => {
       preHandler: requireAuth,
     },
     async (req, rep) => {
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const isHtmx = req.headers['hx-request'];
       const { settings } = app;
 
@@ -65,14 +65,16 @@ const router = async (app: FastifyInstance) => {
       // 3. The landing page exists: we show the landing page
 
       // Do we have any page at all?
-      const pageCount = (await dbs.countPages()).match(
+      const pageCount = (await pageRepo.countPages()).match(
         (count) => count,
         (_) => 0
       );
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {
-        landingPage = (await dbs.getPageById(settings.landingPageId)).match(
+        landingPage = (
+          await pageRepo.getPageById(settings.landingPageId)
+        ).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -81,7 +83,7 @@ const router = async (app: FastifyInstance) => {
       } else {
         if (pageCount > 0) {
           // Decision: if there is no landing page, we show the first page
-          (await dbs.getTopLevelPages()).match(
+          (await pageRepo.getTopLevelPages()).match(
             (pages) => {
               landingPage = pages[0] || null;
             },
@@ -273,12 +275,14 @@ const router = async (app: FastifyInstance) => {
       preHandler: requireAuth,
     },
     async (req, rep) => {
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const { settings } = app;
 
       let landingPage: PageModel | null = null;
       if (settings.landingPageId) {
-        landingPage = (await dbs.getPageById(settings.landingPageId)).match(
+        landingPage = (
+          await pageRepo.getPageById(settings.landingPageId)
+        ).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -311,7 +315,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { landingPageId, siteLang, siteTitle, textSize } = req.body;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const settingRepo = app.repos.getSettingsRepository();
       const rs = redirectService(app, rep);
 
@@ -324,7 +328,7 @@ const router = async (app: FastifyInstance) => {
 
       if (landingPageId && settings.landingPageId !== landingPageId) {
         // Can't use a non-existing landing page
-        const page = (await dbs.getPageById(landingPageId)).match(
+        const page = (await pageRepo.getPageById(landingPageId)).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -397,7 +401,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
 
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
@@ -405,7 +409,7 @@ const router = async (app: FastifyInstance) => {
       if (cached) {
         forest = cached.data;
       } else {
-        forest = (await dbs.buildMenuTree(null)).match(
+        forest = (await pageRepo.buildMenuTree(null)).match(
           (forest) => forest,
           (feedback) => {
             throw new Error(feedback.message);
@@ -443,11 +447,11 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { slug } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const isHtmx = req.headers['hx-request'];
       const rs = redirectService(app, rep);
 
-      const page = (await dbs.getPageBySlug(slug)).match(
+      const page = (await pageRepo.getPageBySlug(slug)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -469,7 +473,7 @@ const router = async (app: FastifyInstance) => {
         );
       }
 
-      const oldPage = (await dbs.lookupPageBySlug(slug)).match(
+      const oldPage = (await pageRepo.lookupPageBySlug(slug)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -505,11 +509,11 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -543,7 +547,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { pageTitle, pageContent, rev } = req.body;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
       if (pageTitle.trim() === '') {
@@ -558,7 +562,7 @@ const router = async (app: FastifyInstance) => {
         return rs.home(Feedbacks.E_MISSING_REV);
       }
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -580,7 +584,7 @@ const router = async (app: FastifyInstance) => {
 
       const newSlug = await maybeNewSlug();
       (
-        await dbs.updatePageContent(page, {
+        await pageRepo.updatePageContent(page, {
           pageTitle: req.body.pageTitle,
           pageContent: req.body.pageContent,
           pageSlug: newSlug,
@@ -590,7 +594,7 @@ const router = async (app: FastifyInstance) => {
         throw new Error(feedback.message);
       });
 
-      const updatedPage = (await dbs.getPageById(pageId)).match(
+      const updatedPage = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -616,7 +620,7 @@ const router = async (app: FastifyInstance) => {
           return page.pageSlug;
         }
 
-        return (await dbs.generateUniqueSlug(pageTitle)).match(
+        return (await pageRepo.generateUniqueSlug(pageTitle)).match(
           (slug) => slug,
           (feedback) => {
             throw new Error(feedback.message);
@@ -636,10 +640,10 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -652,7 +656,7 @@ const router = async (app: FastifyInstance) => {
 
       let parent: PageModel | null = null;
       if (page.parentId) {
-        parent = (await dbs.getPageById(page.parentId ?? '')).match(
+        parent = (await pageRepo.getPageById(page.parentId ?? '')).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -690,7 +694,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { newParentId, moveToTop } = req.body;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
       let parentId = newParentId ?? null;
@@ -710,7 +714,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       // Can't move a non-existing page
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -728,7 +732,7 @@ const router = async (app: FastifyInstance) => {
 
       // Can't move a page to a non-existing parent
       if (parentId) {
-        const newParentPage = (await dbs.getPageById(parentId)).match(
+        const newParentPage = (await pageRepo.getPageById(parentId)).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -739,14 +743,14 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
-      const position = (await dbs.findInsertPosition(parentId)).match(
+      const position = (await pageRepo.findInsertPosition(parentId)).match(
         (position) => position,
         (feedback) => {
           throw new Error(feedback.message);
         }
       );
 
-      (await dbs.changePageParent(page, parentId, position)).mapErr(
+      (await pageRepo.changePageParent(page, parentId, position)).mapErr(
         (feedback) => {
           throw new Error(feedback.message);
         }
@@ -773,10 +777,10 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { targetIndex } = req.body;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -788,7 +792,11 @@ const router = async (app: FastifyInstance) => {
       }
 
       const position = (
-        await dbs.findInsertPosition(page.parentId ?? null, targetIndex, pageId)
+        await pageRepo.findInsertPosition(
+          page.parentId ?? null,
+          targetIndex,
+          pageId
+        )
       ).match(
         (position) => position,
         (feedback) => {
@@ -796,7 +804,7 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      (await dbs.updatePagePosition(page, position)).mapErr((feedback) => {
+      (await pageRepo.updatePagePosition(page, position)).mapErr((feedback) => {
         throw new Error(feedback.message);
       });
 
@@ -820,9 +828,9 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const rs = redirectService(app, rep);
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -833,7 +841,7 @@ const router = async (app: FastifyInstance) => {
         return rs.home(Feedbacks.E_MISSING_PAGE);
       }
 
-      (await dbs.deletePage(page)).mapErr((feedback) => {
+      (await pageRepo.deletePage(page)).mapErr((feedback) => {
         throw new Error(feedback.message);
       });
 
@@ -1006,13 +1014,13 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { parentPageId } = req.query;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
       let parentPage: PageModel | null = null;
       if (parentPageId) {
-        parentPage = (await dbs.getPageById(parentPageId)).match(
+        parentPage = (await pageRepo.getPageById(parentPageId)).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -1050,7 +1058,7 @@ const router = async (app: FastifyInstance) => {
       const { parentPageId } = req.query;
       const { pageTitle, pageContent } = req.body;
       const rs = redirectService(app, rep);
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
 
       if (pageTitle.trim() === '') {
         return rs.home(Feedbacks.E_EMPTY_TITLE);
@@ -1062,7 +1070,7 @@ const router = async (app: FastifyInstance) => {
 
       let parentPage: PageModel | null = null;
       if (parentPageId) {
-        parentPage = (await dbs.getPageById(parentPageId)).match(
+        parentPage = (await pageRepo.getPageById(parentPageId)).match(
           (page) => page,
           (feedback) => {
             throw new Error(feedback.message);
@@ -1074,14 +1082,14 @@ const router = async (app: FastifyInstance) => {
       }
 
       const parentId = parentPageId ?? null;
-      const slug = (await dbs.generateUniqueSlug(pageTitle)).match(
+      const slug = (await pageRepo.generateUniqueSlug(pageTitle)).match(
         (slug) => slug,
         (feedback) => {
           throw new Error(feedback.message);
         }
       );
       const now = new Date().toISOString();
-      const position = (await dbs.findInsertPosition(parentId)).match(
+      const position = (await pageRepo.findInsertPosition(parentId)).match(
         (position) => position,
         (feedback) => {
           throw new Error(feedback.message);
@@ -1090,7 +1098,7 @@ const router = async (app: FastifyInstance) => {
 
       const pageId = dbService.generateIdFor('page');
       (
-        await dbs.insertPage({
+        await pageRepo.insertPage({
           type: 'page',
           _id: pageId,
           parentId,
@@ -1109,7 +1117,7 @@ const router = async (app: FastifyInstance) => {
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -1173,10 +1181,10 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -1187,7 +1195,7 @@ const router = async (app: FastifyInstance) => {
         return rs.home(Feedbacks.E_MISSING_PAGE);
       }
 
-      const history = await (await dbs.getPageHistory(page)).match(
+      const history = await (await pageRepo.getPageHistory(page)).match(
         (history) => history,
         (feedback) => {
           throw new Error(feedback.message);
@@ -1214,10 +1222,10 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId, version } = req.params;
-      const dbs = app.dbService;
+      const pageRepo = app.repos.getPageRepository();
       const rs = redirectService(app, rep);
 
-      const page = (await dbs.getPageById(pageId)).match(
+      const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
         (feedback) => {
           throw new Error(feedback.message);
@@ -1228,7 +1236,9 @@ const router = async (app: FastifyInstance) => {
         return rs.home(Feedbacks.E_MISSING_PAGE);
       }
 
-      const historyItem = (await dbs.getPageHistoryItem(page, version)).match(
+      const historyItem = (
+        await pageRepo.getPageHistoryItem(page, version)
+      ).match(
         (historyItem) => historyItem,
         (feedback) => {
           throw new Error(feedback.message);
