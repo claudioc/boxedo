@@ -814,8 +814,8 @@ export const dbService = (client?: DbClient) => {
       }
 
       try {
-        await dbService._createIndexes(this.db);
-        await dbService._createViews(this.db);
+        // await dbService._createIndexes(this.db);
+        // await dbService._createViews(this.db);
       } catch {
         // Index might already exist, that's fine
       }
@@ -825,66 +825,6 @@ export const dbService = (client?: DbClient) => {
 
 // bulk-load uses the same logic
 dbService.generateIdFor = (model: ModelName) => `${model}:${createId()}`;
-
-dbService._createIndexes = async (db: PouchDB.Database) => {
-  await db.createIndex({
-    index: {
-      fields: ['type', 'parentId', 'createdAt'],
-    },
-  });
-
-  await db.createIndex({
-    index: {
-      fields: ['position'],
-    },
-  });
-
-  await db.createIndex({
-    index: {
-      fields: ['type', 'position', 'parentId'],
-    },
-  });
-};
-
-dbService._createViews = async (db: PouchDB.Database) => {
-  const designDoc = {
-    _id: '_design/pages',
-    views: {
-      by_parent_position: {
-        map: `function(doc) {
-          if (doc.type === 'page' && doc.position !== undefined) {
-            emit([doc.parentId || null, doc.position], null);
-          }
-        }`,
-      },
-
-      count: {
-        map: `function (doc) {
-          if (doc.type === 'page') {
-            emit(null, 1);
-          }
-        }`,
-        reduce: '_count',
-      },
-    },
-  };
-
-  try {
-    await db.put(designDoc);
-  } catch (err) {
-    if ((err as PouchDB.Core.Error).status === 409) {
-      const existing = await db.get('_design/pages');
-      const updatedDoc = {
-        ...designDoc,
-        _rev: existing._rev, // Add the _rev from the existing document
-      };
-      await db.put(updatedDoc);
-    } else {
-      console.error('Error creating design doc:', err);
-      throw err;
-    }
-  }
-};
 
 dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
   const { config } = params;
@@ -927,13 +867,6 @@ dbService.init = async (params: DbServiceInitParams): Promise<DbClient> => {
       throw new Error(
         'Database configuration inconsistent or unknown. Cannot continue.'
       );
-  }
-
-  try {
-    await dbService._createIndexes(db);
-    await dbService._createViews(db);
-  } catch {
-    // Index might already exist, that's fine
   }
 
   return db;

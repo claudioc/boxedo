@@ -17,9 +17,11 @@ interface DatabaseServiceOptions {
   logger: AnyLogger;
 }
 
+type Db = PouchDB.Database<DocumentModel>;
+
 export class DatabaseService {
   private static instance: DatabaseService;
-  private db!: PouchDB.Database<DocumentModel>;
+  private db!: Db;
 
   private constructor() {}
 
@@ -28,6 +30,7 @@ export class DatabaseService {
   ): Promise<Result<DatabaseService, Error>> {
     const { config, logger } = options;
     const dbName = config.DB_NAME;
+    let db: Db;
 
     if (DatabaseService.instance) {
       logger.error('The database service is already initialized');
@@ -41,20 +44,17 @@ export class DatabaseService {
         PouchDB.plugin(PouchFind)
           .plugin(PouchReduce)
           .plugin(PouchAdapterMemory);
-        DatabaseService.instance.db = new PouchDB<DocumentModel>(dbName);
+        db = new PouchDB<DocumentModel>(dbName);
         break;
 
       case config.DB_BACKEND === 'remote' && !!config.DB_REMOTE_URL:
         PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
-        DatabaseService.instance.db = new PouchDB(
-          `${config.DB_REMOTE_URL}/${dbName}`,
-          {
-            auth: {
-              username: config.DB_REMOTE_USER,
-              password: config.DB_REMOTE_PASSWORD,
-            },
-          }
-        );
+        db = new PouchDB(`${config.DB_REMOTE_URL}/${dbName}`, {
+          auth: {
+            username: config.DB_REMOTE_USER,
+            password: config.DB_REMOTE_PASSWORD,
+          },
+        });
         logger.info('Connected to remote database');
         break;
 
@@ -66,7 +66,7 @@ export class DatabaseService {
           .plugin(PouchReduce);
 
         // Note: bootstrap is taking care of creating the directory if it doesn't exist
-        DatabaseService.instance.db = new PouchDB<DocumentModel>(
+        db = new PouchDB<DocumentModel>(
           path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
           {
             adapter: 'leveldb',
@@ -84,6 +84,15 @@ export class DatabaseService {
         );
     }
 
+    try {
+      await DatabaseService.createIndexes(db, logger);
+      await DatabaseService.createViews(db, logger);
+    } catch {
+      // Index might already exist, that's fine
+    }
+
+    DatabaseService.instance.db = db;
+
     return ok(DatabaseService.instance);
   }
 
@@ -93,6 +102,70 @@ export class DatabaseService {
     }
 
     return ok(DatabaseService.instance);
+  }
+
+  private static async createIndexes(db: Db, logger: AnyLogger) {
+    try {
+      await db.createIndex({
+        index: {
+          fields: ['type', 'parentId', 'createdAt'],
+        },
+      });
+
+      await db.createIndex({
+        index: {
+          fields: ['position'],
+        },
+      });
+
+      await db.createIndex({
+        index: {
+          fields: ['type', 'position', 'parentId'],
+        },
+      });
+    } catch (error) {
+      logger.error('Error creating indexes', error);
+    }
+  }
+
+  private static async createViews(db: PouchDB.Database, logger: AnyLogger) {
+    const designDoc = {
+      _id: '_design/pages',
+      views: {
+        by_parent_position: {
+          map: `function(doc) {
+            if (doc.type === 'page' && doc.position !== undefined) {
+              emit([doc.parentId || null, doc.position], null);
+            }
+          }`,
+        },
+
+        count: {
+          map: `function (doc) {
+            if (doc.type === 'page') {
+              emit(null, 1);
+            }
+          }`,
+          reduce: '_count',
+        },
+      },
+    };
+
+    try {
+      await db.put(designDoc);
+    } catch (err) {
+      if ((err as PouchDB.Core.Error).status === 409) {
+        const existing = await db.get('_design/pages');
+        const updatedDoc = {
+          ...designDoc,
+          _rev: existing._rev, // Add the _rev from the existing document
+        };
+        await db.put(updatedDoc);
+      } else {
+        logger.error('Error creating design doc:', err);
+        throw err;
+      }
+    }
   }
 
   getDatabase(): PouchDB.Database<DocumentModel> {
