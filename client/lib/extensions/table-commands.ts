@@ -11,82 +11,76 @@ export interface TableCommand {
   command: (props: { editor: Editor }) => void;
 }
 
+interface TableCommandsProps {
+  items: TableCommand[];
+  command: (command: TableCommand) => void;
+}
+
 // List of table commands that will be shown in the slash menu
 export const tableCommands: TableCommand[] = [
   {
     title: 'Add row above',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().addRowBefore().run();
     },
   },
   {
     title: 'Add row below',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().addRowAfter().run();
     },
   },
   {
     title: 'Add column left',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().addColumnBefore().run();
     },
   },
   {
     title: 'Add column right',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().addColumnAfter().run();
     },
   },
   {
     title: 'Delete row',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().deleteRow().run();
     },
   },
   {
     title: 'Delete column',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().deleteColumn().run();
     },
   },
   {
     title: 'Delete table',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().deleteTable().run();
     },
   },
   {
     title: 'Merge cells',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().mergeCells().run();
     },
   },
   {
     title: 'Split cell',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().splitCell().run();
     },
   },
   {
     title: 'Toggle header row',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().toggleHeaderRow().run();
     },
   },
   {
     title: 'Toggle header column',
     command: ({ editor }) => {
-      // You'll implement this
       editor.chain().focus().toggleHeaderColumn().run();
     },
   },
@@ -127,15 +121,39 @@ export const renderTableCommandsSuggestion = () => {
   };
   let popup: TippyInstance;
 
+  const renderComponent = (props: TableCommandsProps) => {
+    component.refs.list.innerHTML = '';
+    component.items = props.items;
+
+    component.items.forEach((item: TableCommand, _: number) => {
+      const commandButton = document.createElement('button');
+      commandButton.classList.add('tablecommands-item');
+      commandButton.innerHTML = `
+        <div class="tablecommands-item-title">${item.title}</div>
+      `;
+
+      commandButton.addEventListener('click', () => {
+        popup.hide();
+        props.command(item);
+      });
+
+      component.refs.list.appendChild(commandButton);
+    });
+  };
+
   return {
     // biome-ignore lint/suspicious/noExplicitAny:
     onStart: (props: any) => {
+      if (!props.clientRect) {
+        return;
+      }
+
       component = {
         refs: {
           list: document.createElement('div'),
           wrapper: document.createElement('div'),
         },
-        items: [],
+        items: props.items,
       };
 
       component.refs.wrapper.classList.add('tablecommands-wrapper');
@@ -151,42 +169,16 @@ export const renderTableCommandsSuggestion = () => {
         trigger: 'manual',
         placement: 'bottom-start',
       })[0];
+
+      renderComponent(props);
     },
 
-    onUpdate(props: {
-      items: TableCommand[];
-      command: (command: TableCommand) => void;
-    }) {
-      console.log('update');
-      component.items = props.items;
-
-      // Clear the list
-      component.refs.list.innerHTML = '';
-
-      component.items.forEach((item: TableCommand, index: number) => {
-        const commandButton = document.createElement('button');
-        commandButton.classList.add('tablecommands-item');
-        commandButton.innerHTML = `
-          <div class="tablecommands-item-title">${item.title}</div>
-        `;
-
-        // Select the currently active item
-        if (index === props.items.indexOf(props.items[0])) {
-          commandButton.classList.add('is-selected');
-        }
-
-        commandButton.addEventListener('click', () => {
-          props.command(item);
-          popup.hide();
-        });
-
-        component.refs.list.appendChild(commandButton);
-      });
+    onUpdate(props: TableCommandsProps) {
+      renderComponent(props);
     },
 
     onKeyDown(props: { event: KeyboardEvent }) {
       const { event } = props;
-      // Escape closes the popup
       if (event.key === 'Escape') {
         popup.hide();
         return true;
@@ -194,7 +186,6 @@ export const renderTableCommandsSuggestion = () => {
 
       // Arrow navigation
       if (['ArrowUp', 'ArrowDown', 'Enter'].includes(event.key)) {
-        console.log('arrow');
         const items = component.refs.list.querySelectorAll(
           '.tablecommands-item'
         );
@@ -204,17 +195,23 @@ export const renderTableCommandsSuggestion = () => {
 
         if (event.key === 'ArrowUp') {
           const prevIndex = (currentIndex - 1 + items.length) % items.length;
-          if (items[currentIndex])
+          if (items[currentIndex]) {
             items[currentIndex].classList.remove('is-selected');
-          if (items[prevIndex]) items[prevIndex].classList.add('is-selected');
+          }
+          if (items[prevIndex]) {
+            items[prevIndex].classList.add('is-selected');
+          }
           return true;
         }
 
         if (event.key === 'ArrowDown') {
           const nextIndex = (currentIndex + 1) % items.length;
-          if (items[currentIndex])
+          if (items[currentIndex]) {
             items[currentIndex].classList.remove('is-selected');
-          if (items[nextIndex]) items[nextIndex].classList.add('is-selected');
+          }
+          if (items[nextIndex]) {
+            items[nextIndex].classList.add('is-selected');
+          }
           return true;
         }
 

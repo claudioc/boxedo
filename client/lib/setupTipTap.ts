@@ -33,17 +33,11 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     TableCommands.configure({
       suggestion: {
         startOfLine: true,
-        items: ({ query }: { query: string }) => {
-          if (query === '') {
-            return tableCommands;
-          }
-          // Filter commands based on the query
-          return tableCommands.filter((item: TableCommand) =>
+        items: ({ query }: { query: string }) =>
+          tableCommands.filter((item: TableCommand) =>
             item.title.toLowerCase().includes(query.toLowerCase())
-          );
-        },
+          ),
         render: renderTableCommandsSuggestion,
-        // Only show the commands when inside a table
         allow: ({ editor }) => {
           return (
             editor.isActive('table') ||
