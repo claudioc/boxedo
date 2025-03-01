@@ -1,6 +1,12 @@
 import Database from 'better-sqlite3';
 import { err, ok, type Result } from 'neverthrow';
-import type { ConfigEnv, PageModel, PageTitle, SearchResult } from '~/../types';
+import type {
+  AnyLogger,
+  ConfigEnv,
+  PageModel,
+  PageTitle,
+  SearchResult,
+} from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
 import {
   compressTextForSearch,
@@ -10,16 +16,17 @@ import {
 } from '~/lib/helpers';
 import type { DbService } from './dbService';
 
+interface SearchServiceOptions {
+  dbs: DbService;
+  config: ConfigEnv;
+  logger: AnyLogger;
+}
+
 interface SearchRow {
   id: string;
   title_highlighted: string | null; // SQLite might return null
   content_snippet: string | null; // SQLite might return null
   slug: string;
-}
-
-interface AnyLogger {
-  error: (msg: string, ...args: unknown[]) => void;
-  info: (msg: string, ...args: unknown[]) => void;
 }
 
 export class SearchService {
@@ -79,10 +86,10 @@ export class SearchService {
   }
 
   public static async create(
-    dbs: DbService,
-    config: ConfigEnv,
-    logger: AnyLogger
+    options: SearchServiceOptions
   ): Promise<Result<SearchService, Error>> {
+    const { dbs, config, logger } = options;
+
     if (!SearchService.instance) {
       try {
         await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');

@@ -312,8 +312,10 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { landingPageId, siteLang, siteTitle, textSize } = req.body;
       const dbs = app.dbService;
+      const settingRepo = app.repos.getSettingsRepository();
       const rs = redirectService(app, rep);
-      const settings = (await dbs.getSettings()).match(
+
+      const settings = (await settingRepo.getSettings()).match(
         (settings) => settings,
         (feedback) => {
           throw new Error(feedback.message);
@@ -343,7 +345,7 @@ const router = async (app: FastifyInstance) => {
 
       app.settings = settings;
 
-      (await dbs.updateSettings(settings)).match(nop, (feedback) => {
+      (await settingRepo.updateSettings(settings)).match(nop, (feedback) => {
         throw new Error(feedback.message);
       });
 

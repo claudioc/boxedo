@@ -15,7 +15,6 @@ import path from 'node:path';
 import sanitizeHtml from 'sanitize-html';
 import slugify from 'slugify';
 import type {
-  ConfigEnv,
   DbServiceInitParams,
   DocumentModel,
   Feedback,
@@ -26,19 +25,11 @@ import type {
   NavItem,
   PageModel,
   SessionModel,
-  SettingsModel,
   UserModel,
 } from '~/../types';
-import { DEFAULT_TEXT_SIZE } from '~/../types';
 import { POSITION_GAP_SIZE } from '~/constants';
 import { Feedbacks } from '~/lib/feedbacks';
-import {
-  ensurePathExists,
-  ensureValidLanguage,
-  extractFileRefsFrom,
-  getDefaultLanguage,
-  slugUrl,
-} from '~/lib/helpers';
+import { ensurePathExists, extractFileRefsFrom, slugUrl } from '~/lib/helpers';
 
 // https://github.com/apostrophecms/sanitize-html
 const safeHtml = (str: string) =>
@@ -83,57 +74,6 @@ export const dbService = (client?: DbClient) => {
 
   return {
     db: client,
-
-    async getSettings(
-      config?: ConfigEnv
-    ): Promise<Result<SettingsModel, Feedback>> {
-      try {
-        const settings = await this.db.get<SettingsModel>('settings');
-
-        // Adds the future attributes
-        if (!settings.textSize) {
-          settings.textSize = DEFAULT_TEXT_SIZE;
-          await this.db.put(settings);
-        }
-        // End future attributes
-
-        return ok(settings);
-      } catch (error) {
-        if ((error as PouchDB.Core.Error)?.status === 404) {
-          const newSettings: SettingsModel = {
-            _id: 'settings',
-            type: 'settings',
-            landingPageId: null,
-            siteTitle: config ? (config.SETTINGS_TITLE ?? '') : '',
-            siteDescription: config ? (config.SETTINGS_DESCRIPTION ?? '') : '',
-            siteLang: getDefaultLanguage(config),
-            textSize: config ? config?.SETTINGS_TEXT_SIZE : DEFAULT_TEXT_SIZE,
-          };
-
-          try {
-            await this.db.put(newSettings);
-            return ok(await this.db.get<SettingsModel>('settings'));
-          } catch {}
-        }
-
-        console.error(error);
-        return err(Feedbacks.E_UNKNOWN_ERROR);
-      }
-    },
-
-    async updateSettings(
-      settings: SettingsModel
-    ): Promise<Result<void, Feedback>> {
-      settings.siteLang = ensureValidLanguage(settings.siteLang);
-
-      try {
-        await this.db.put(settings);
-        return ok();
-      } catch (error) {
-        console.error('Error updating settings:', error);
-        return err(Feedbacks.E_UPDATING_SETTINGS);
-      }
-    },
 
     async countPages(): Promise<Result<number, Feedback>> {
       try {

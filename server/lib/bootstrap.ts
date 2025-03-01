@@ -22,6 +22,8 @@ import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
+import { RepositoryFactory } from '~/repositories/RepositoryFactory';
+import { DatabaseService } from '~/services/DatabaseService';
 import { dbService, type DbService } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
@@ -42,6 +44,7 @@ declare module 'fastify' {
     feedbackCode: number;
     cache: Cache;
     emailService: EmailService;
+    repos: RepositoryFactory;
   }
   interface FastifyRequest {
     user: UserModel | null;
@@ -118,18 +121,38 @@ try {
   );
   app.decorate('dbService', dbs);
 } catch {
-  throw new Error('Cannot establish a database connection.');
+  throw new Error('Cannot establish a database connection');
 }
 
+await DatabaseService.create({
+  config: app.config,
+  logger: app.log,
+});
+
+const db = DatabaseService.getInstance().match(
+  (service) => service.getDatabase(),
+  (err) => {
+    app.log.error(err);
+    throw new Error('Cannot access the database');
+  }
+);
+
+const repositories = await RepositoryFactory.create({
+  db,
+  config: app.config,
+  logger: app.log,
+});
+
+app.decorate('repos', repositories);
+
 // Initializes the search service instance, starting indexing the documents
-await SearchService.create(dbs, app.config, app.log);
+await SearchService.create({ dbs, config: app.config, logger: app.log });
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
-const settingsResult = await dbs.getSettings(app.config);
-const settings = settingsResult.match(
+const settings = (await app.repos.getSettingsRepository().getSettings()).match(
   (settings) => settings,
   (feedback) => {
     app.log.error(`Failed to get settings: ${feedback.message}`);

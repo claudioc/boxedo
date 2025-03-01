@@ -7,6 +7,11 @@ export type NodeEnv = (typeof nodeEnv)[number];
 export const authenticationTypes = ['none', 'magiclink'] as const;
 export type AuthenticationType = (typeof authenticationTypes)[number];
 
+export interface AnyLogger {
+  error: (msg: string, ...args: unknown[]) => void;
+  info: (msg: string, ...args: unknown[]) => void;
+}
+
 export const emailProviderNames = [
   'sendgrid',
   'mailgun',
