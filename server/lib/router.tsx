@@ -368,7 +368,17 @@ const router = async (app: FastifyInstance) => {
         return '';
       }
 
-      const titles = await (await SearchService.getInstance()).searchByTitle(q);
+      const service = (await SearchService.getInstance()).match(
+        (service) => service,
+        (error) => {
+          app.log.error(error);
+          return null;
+        }
+      );
+
+      const titles = service
+        ? (await service.searchByTitle(q)).unwrapOr([])
+        : [];
 
       rep.html(<TitlesList titles={titles} i18n={app.i18n} />);
     }
@@ -1131,11 +1141,21 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { q } = req.query;
 
+      const service = (await SearchService.getInstance()).match(
+        (service) => service,
+        (error) => {
+          app.log.error(error);
+          return null;
+        }
+      );
+
+      const results = service ? (await service.search(q)).unwrapOr([]) : [];
+
       rep.html(
         <SearchResults
           ctx={{ app, user: req.user }}
           query={q}
-          results={await (await SearchService.getInstance()).search(q)}
+          results={results}
         />
       );
     }

@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { err, ok, type Result } from 'neverthrow';
 import type { ConfigEnv, PageModel, PageTitle, SearchResult } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
 import {
@@ -71,6 +72,32 @@ export class SearchService {
     }
   }
 
+  public static async getInstance(
+    dbs?: DbService,
+    config?: ConfigEnv
+  ): Promise<Result<SearchService, Error>> {
+    if (!SearchService.instance && !dbs && !config) {
+      return err(
+        new Error(
+          'Cannot create an indexer instance without the database service and the config'
+        )
+      );
+    }
+
+    if (!SearchService.instance && dbs && config) {
+      await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
+      SearchService.instance = new SearchService(dbs, config);
+      await SearchService.instance.indexBuilt;
+      return ok(SearchService.instance);
+    }
+
+    if (!SearchService.instance) {
+      return err(new Error('Unexpected missed searchService instance'));
+    }
+
+    return ok(SearchService.instance);
+  }
+
   private setupChangeListener() {
     this.changeListener = this.dbs.db
       .changes({
@@ -82,10 +109,14 @@ export class SearchService {
         if (change?.doc?.type === 'page') {
           // We cannot really distinguish between inserts and updates
           // See also https://pouchdb.com/guides/changes.html
-          if (change.deleted) {
-            await this.removeDocument(change.id);
-          } else {
-            await this.updateDocument(change.doc);
+          try {
+            if (change.deleted) {
+              await this.removeDocument(change.id);
+            } else {
+              await this.updateDocument(change.doc);
+            }
+          } catch (error) {
+            console.error('Failed to update search index:', error);
           }
         }
       })
@@ -125,31 +156,7 @@ export class SearchService {
     };
   }
 
-  public static async getInstance(
-    dbs?: DbService,
-    config?: ConfigEnv
-  ): Promise<SearchService> {
-    if (!SearchService.instance && !dbs && !config) {
-      throw new Error(
-        'Cannot create an indexer instance without the database service and the config'
-      );
-    }
-
-    if (!SearchService.instance && dbs && config) {
-      await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
-      SearchService.instance = new SearchService(dbs, config);
-      await SearchService.instance.indexBuilt;
-      return SearchService.instance;
-    }
-
-    if (!SearchService.instance) {
-      throw new Error('Unexpected missed searchService instance');
-    }
-
-    return SearchService.instance;
-  }
-
-  public async buildIndex(forced = false) {
+  private async buildIndex(forced = false) {
     try {
       if (!forced) {
         const nPage = (await this.dbs.countPages()).match(
@@ -201,12 +208,12 @@ export class SearchService {
     }
   }
 
-  public async removeDocument(id: string): Promise<void> {
+  private async removeDocument(id: string): Promise<void> {
     await this.indexBuilt;
     this.statements.delete.run(id);
   }
 
-  public async updateDocument(doc: PageModel): Promise<void> {
+  private async updateDocument(doc: PageModel): Promise<void> {
     await this.indexBuilt;
     this.statements.update.run(
       doc._id,
@@ -217,13 +224,13 @@ export class SearchService {
     );
   }
 
-  public async search(q: string): Promise<SearchResult[]> {
+  public async search(q: string): Promise<Result<SearchResult[], []>> {
     await this.indexBuilt;
 
     const query = prepareFTSQuery(q);
 
     if (query === '') {
-      return [];
+      return ok([]);
     }
 
     try {
@@ -235,7 +242,11 @@ export class SearchService {
         const page = (await this.dbs.getPageById(row.id)).match(
           (page) => page,
           (feedback) => {
-            throw new Error(feedback.message);
+            console.error(
+              'Error getting a page while searching:',
+              feedback.message
+            );
+            return null;
           }
         );
 
@@ -249,20 +260,20 @@ export class SearchService {
         });
       }
 
-      return searchResults;
+      return ok(searchResults);
     } catch (error) {
       console.error('Search error:', error);
-      return [];
+      return ok([]);
     }
   }
 
-  public async searchByTitle(q: string): Promise<PageTitle[]> {
+  public async searchByTitle(q: string): Promise<Result<PageTitle[], []>> {
     await this.indexBuilt;
 
     const query = prepareFTSQuery(q);
 
     if (query === '') {
-      return [];
+      return ok([]);
     }
 
     try {
@@ -271,15 +282,17 @@ export class SearchService {
         title_full: string;
       }[];
 
-      return rows
-        .filter((row) => row.title_full !== null)
-        .map((row) => ({
-          pageId: row.id,
-          pageTitle: row.title_full,
-        }));
+      return ok(
+        rows
+          .filter((row) => row.title_full !== null)
+          .map((row) => ({
+            pageId: row.id,
+            pageTitle: row.title_full,
+          }))
+      );
     } catch (error) {
       console.error('Title search error:', error);
-      return [];
+      return ok([]);
     }
   }
 

@@ -1,9 +1,7 @@
 Doing:
   - remove the Unknown Errors
-  - subcommands for the table
 
   MVP
-  - port SearchService to neverthrow
   - formatDate needs to be aware of the current locale
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
@@ -106,3 +104,5 @@ Done
 - there are several db access in the dbservice not protected by try catch
 - maybe shift+alt+enter to save
 - tables in the editor
+- subcommands for the table
+- port SearchService to neverthrow
