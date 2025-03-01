@@ -17,6 +17,12 @@ import { generateHTML } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
 import { ImageAlign } from './extensions/image-align';
 import { ImageMacro } from './extensions/image-macro';
+import {
+  renderTableCommandsSuggestion,
+  type TableCommand,
+  TableCommands,
+  tableCommands,
+} from './extensions/table-commands';
 
 // The one and only Editor instance
 let editor: Editor;
@@ -24,6 +30,30 @@ let editor: Editor;
 // This function is called at the moment the editor is instantiated
 const getEditorOptions = (): Partial<EditorOptions> => {
   const extensions: Extensions = [
+    TableCommands.configure({
+      suggestion: {
+        startOfLine: true,
+        items: ({ query }: { query: string }) => {
+          if (query === '') {
+            return tableCommands;
+          }
+          // Filter commands based on the query
+          return tableCommands.filter((item: TableCommand) =>
+            item.title.toLowerCase().includes(query.toLowerCase())
+          );
+        },
+        render: renderTableCommandsSuggestion,
+        // Only show the commands when inside a table
+        allow: ({ editor }) => {
+          return (
+            editor.isActive('table') ||
+            editor.isActive('tableRow') ||
+            editor.isActive('tableCell') ||
+            editor.isActive('tableHeader')
+          );
+        },
+      },
+    }),
     BubbleMenu.configure({
       tippyOptions: {
         appendTo: 'parent',
@@ -32,7 +62,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
     }),
     FloatingMenu.configure({
       tippyOptions: {
-        // offset: [0, -100],
         placement: 'left',
       },
       shouldShow: ({ editor }) => {

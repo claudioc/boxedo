@@ -72,3 +72,48 @@
 .table tbody tr:first-child {
   background-color: var(--bulma-table-row-hover-background-color);
 }
+
+
+.tablecommands-wrapper {
+  width: 280px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  padding: 8px;
+  border: 1px solid #eee;
+}
+
+.tablecommands-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tablecommands-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.tablecommands-item:hover, .tablecommands-item.is-selected {
+  background-color: #f0f0f0;
+}
+
+.tablecommands-item-icon {
+  margin-right: 8px;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.tablecommands-item-title {
+  font-size: 14px;
+}

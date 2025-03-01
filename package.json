@@ -80,6 +80,7 @@
     "@tiptap/html": "^2.10.0",
     "@tiptap/pm": "^2.10.0",
     "@tiptap/starter-kit": "^2.10.0",
+    "@tiptap/suggestion": "^2.11.5",
     "@types/nodemailer": "^6.4.17",
     "@types/pouchdb-adapter-leveldb": "^6.1.6",
     "@types/pouchdb-core": "^7.0.15",
