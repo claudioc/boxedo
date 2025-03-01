@@ -17,6 +17,11 @@ interface SearchRow {
   slug: string;
 }
 
+interface AnyLogger {
+  error: (msg: string, ...args: unknown[]) => void;
+  info: (msg: string, ...args: unknown[]) => void;
+}
+
 export class SearchService {
   private static instance: SearchService | null = null;
   private db: Database.Database;
@@ -33,7 +38,8 @@ export class SearchService {
 
   private constructor(
     private dbs: DbService,
-    private config: ConfigEnv
+    private config: ConfigEnv,
+    private logger: AnyLogger
   ) {
     this.indexBuilt = new Promise((resolve) => {
       this.resolveIndexBuilt = resolve;
@@ -67,30 +73,32 @@ export class SearchService {
         this.setupChangeListener();
       }
     } catch (err) {
-      console.error('Failed to initialize SQLite database:', err);
+      logger.error('Failed to initialize SQLite database:', err);
       throw err;
     }
   }
 
-  public static async getInstance(
-    dbs?: DbService,
-    config?: ConfigEnv
+  public static async create(
+    dbs: DbService,
+    config: ConfigEnv,
+    logger: AnyLogger
   ): Promise<Result<SearchService, Error>> {
-    if (!SearchService.instance && !dbs && !config) {
-      return err(
-        new Error(
-          'Cannot create an indexer instance without the database service and the config'
-        )
-      );
+    if (!SearchService.instance) {
+      try {
+        await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
+        SearchService.instance = new SearchService(dbs, config, logger);
+        await SearchService.instance.indexBuilt;
+      } catch (error) {
+        logger.error('Failed to initialize search service:', error);
+        return err(error as Error);
+      }
     }
 
-    if (!SearchService.instance && dbs && config) {
-      await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
-      SearchService.instance = new SearchService(dbs, config);
-      await SearchService.instance.indexBuilt;
-      return ok(SearchService.instance);
-    }
+    return ok(SearchService.instance);
+  }
 
+  public static getInstance(): Result<SearchService, Error> {
+    // Building the instance is the responsibility of the caller (using .create)
     if (!SearchService.instance) {
       return err(new Error('Unexpected missed searchService instance'));
     }
@@ -116,12 +124,12 @@ export class SearchService {
               await this.updateDocument(change.doc);
             }
           } catch (error) {
-            console.error('Failed to update search index:', error);
+            this.logger.error('Failed to update search index:', error);
           }
         }
       })
       .on('error', (err) => {
-        console.error('Error in changes feed:', err);
+        this.logger.error('Error in changes feed:', err);
         // Maybe try to reconnect after a delay
         setTimeout(() => this.setupChangeListener(), 5000);
       });
@@ -168,7 +176,9 @@ export class SearchService {
           .get() as { count: number };
 
         if (nPage === nIndexed.count) {
-          console.log(`🔍 Search index is up to date with ${nPage} documents`);
+          this.logger.info(
+            `🔍 Search index is up to date with ${nPage} documents`
+          );
           this.resolveIndexBuilt();
           return;
         }
@@ -200,10 +210,12 @@ export class SearchService {
       // Run the transaction
       insertDocs(allDocs);
 
-      console.log(`🔍 SQLite FTS index built with ${allDocs.length} documents`);
+      this.logger.info(
+        `🔍 SQLite FTS index built with ${allDocs.length} documents`
+      );
       this.resolveIndexBuilt();
     } catch (err) {
-      console.error('Failed to build index:', err);
+      this.logger.error('Failed to build index:', err);
       throw err;
     }
   }
@@ -242,7 +254,7 @@ export class SearchService {
         const page = (await this.dbs.getPageById(row.id)).match(
           (page) => page,
           (feedback) => {
-            console.error(
+            this.logger.error(
               'Error getting a page while searching:',
               feedback.message
             );
@@ -262,7 +274,7 @@ export class SearchService {
 
       return ok(searchResults);
     } catch (error) {
-      console.error('Search error:', error);
+      this.logger.error('Search error:', error);
       return ok([]);
     }
   }
@@ -291,7 +303,7 @@ export class SearchService {
           }))
       );
     } catch (error) {
-      console.error('Title search error:', error);
+      this.logger.error('Title search error:', error);
       return ok([]);
     }
   }

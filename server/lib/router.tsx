@@ -368,7 +368,7 @@ const router = async (app: FastifyInstance) => {
         return '';
       }
 
-      const service = (await SearchService.getInstance()).match(
+      const service = SearchService.getInstance().match(
         (service) => service,
         (error) => {
           app.log.error(error);
@@ -1141,7 +1141,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { q } = req.query;
 
-      const service = (await SearchService.getInstance()).match(
+      const service = SearchService.getInstance().match(
         (service) => service,
         (error) => {
           app.log.error(error);

@@ -122,7 +122,7 @@ try {
 }
 
 // Initializes the search service instance, starting indexing the documents
-SearchService.getInstance(dbs, app.config);
+await SearchService.create(dbs, app.config, app.log);
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
