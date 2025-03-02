@@ -192,6 +192,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const rs = redirectService(app, rep);
       const dbs = app.dbService;
+      const sessionRepo = app.repos.getSessionRepository();
       const magicId = req.params.magicId;
       const { i18n } = app;
 
@@ -206,7 +207,7 @@ const router = async (app: FastifyInstance) => {
 
       if (email) {
         (
-          await dbs.createSession({
+          await sessionRepo.createSession({
             type: 'session',
             _id: sessionId,
             email,
@@ -253,10 +254,10 @@ const router = async (app: FastifyInstance) => {
 
   app.post('/auth/logout', async (req, rep) => {
     const sessionId = req.cookies.session;
-    const dbs = app.dbService;
+    const sessionRepo = app.repos.getSessionRepository();
 
     if (sessionId) {
-      (await dbs.deleteSession(sessionId)).match(nop, nop);
+      (await sessionRepo.deleteSession(sessionId)).match(nop, nop);
     }
 
     rep.clearCookie(SESSION_COOKIE_NAME, {

@@ -1,5 +1,6 @@
 import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
 import { PageRepository } from './PageRepository';
+import { SessionRepository } from './SessionRepository';
 import { SettingsRepository } from './SettingsRepository';
 
 interface RepositoryFactoryOptions {
@@ -12,6 +13,7 @@ export class RepositoryFactory {
   private static instance: RepositoryFactory;
   private settingsRepository: SettingsRepository;
   private pageRepository: PageRepository;
+  private sessionRepository: SessionRepository;
 
   private constructor(
     private db: Db,
@@ -24,6 +26,11 @@ export class RepositoryFactory {
       this.logger
     );
     this.pageRepository = new PageRepository(this.db, this.config, this.logger);
+    this.sessionRepository = new SessionRepository(
+      this.db,
+      this.config,
+      this.logger
+    );
   }
 
   static create(options: RepositoryFactoryOptions): RepositoryFactory {
@@ -45,5 +52,9 @@ export class RepositoryFactory {
 
   getPageRepository(): PageRepository {
     return this.pageRepository;
+  }
+
+  getSessionRepository(): SessionRepository {
+    return this.sessionRepository;
   }
 }
