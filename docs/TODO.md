@@ -1,14 +1,14 @@
 Doing:
   - remove the Unknown Errors
 
-  MVP
+MVP
   - formatDate needs to be aware of the current locale
   - probably remove the image-macro now that we have the floating menu
   - collection of actions for audit purposes (log)
   - the couchdb scripts and compose file must be even more parametric
   - the movePage's page actions are in the wrong place
 
-  NEXT
+NEXT
   - add a classification to the documents (like 'Internal only', 'Public'...)
   - editing the page doesn't take into account the settings.textSize
   - Consider rate limiting the magic link generation
@@ -18,7 +18,7 @@ Doing:
   - use couchdb for the cache (see /docs/CACHE.md)
   - it would be nice to be able to `npx joongle init`
 
-  LATER
+LATER
   - What about https://demo.umodoc.com/editor ?
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - allow to duplicate/copy a page (needs to specify parent?)
