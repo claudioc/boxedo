@@ -48,7 +48,7 @@
     "typescript": "^5.7.0",
     "typescript-plugin-css-modules": "^5.1.0",
     "vite-tsconfig-paths": "^5.1.0",
-    "vitest": "^2.1.9"
+    "vitest": "^3.0.7"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.1",
