@@ -4,6 +4,7 @@ import { MagicRepository } from './MagicRepository';
 import { PageRepository } from './PageRepository';
 import { SessionRepository } from './SessionRepository';
 import { SettingsRepository } from './SettingsRepository';
+import { UserRepository } from './UserRepository';
 
 interface RepositoryFactoryOptions {
   db: PouchDB.Database<DocumentModel>;
@@ -18,6 +19,7 @@ export class RepositoryFactory {
   private sessionRepository: SessionRepository;
   private fileRepository: FileRepository;
   private magicRepository: MagicRepository;
+  private userRepository: UserRepository;
 
   private constructor(
     private db: Db,
@@ -41,6 +43,7 @@ export class RepositoryFactory {
       this.config,
       this.logger
     );
+    this.userRepository = new UserRepository(this.db, this.config, this.logger);
   }
 
   static create(options: RepositoryFactoryOptions): RepositoryFactory {
@@ -74,5 +77,9 @@ export class RepositoryFactory {
 
   getMagicRepository(): MagicRepository {
     return this.magicRepository;
+  }
+
+  getUserRepository(): UserRepository {
+    return this.userRepository;
   }
 }

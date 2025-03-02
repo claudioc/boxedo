@@ -20,6 +20,7 @@ interface DatabaseServiceOptions {
 export class DatabaseService {
   private static instance: DatabaseService;
   private db!: Db;
+  private config!: ConfigEnv;
 
   private constructor() {}
 
@@ -90,6 +91,7 @@ export class DatabaseService {
     }
 
     DatabaseService.instance.db = db;
+    DatabaseService.instance.config = config;
 
     return ok(DatabaseService.instance);
   }
@@ -166,115 +168,31 @@ export class DatabaseService {
     }
   }
 
+  async nukeTests() {
+    // Note that tests also use a memory adapter and never a real one
+    if (this.config.NODE_ENV !== 'test') return;
+
+    const allDocs = await this.db.allDocs({ include_docs: true });
+    const deletions = allDocs.rows
+      .filter((row) => row.doc)
+      .map((row) => ({
+        ...row.doc,
+        _deleted: true,
+      }));
+
+    if (deletions.length > 0) {
+      await this.db.bulkDocs(deletions as DocumentModel[]);
+    }
+
+    try {
+      // await DatabaseService.createIndexes(this.db);
+      // await DatabaseService.createViews(this.db);
+    } catch {
+      // Index might already exist, that's fine
+    }
+  }
+
   getDatabase(): PouchDB.Database<DocumentModel> {
     return this.db;
   }
 }
-
-/*
-// Base Repository Interface
-interface Repository<T, ID> {
-  findById(id: ID): Promise<Result<T | null, Error>>;
-  save(entity: T): Promise<Result<T, Error>>;
-  // Common methods...
-}
-
-// PageRepository.ts
-export class PageRepository implements Repository<PageModel, string> {
-  constructor(private db: PouchDB.Database<DocumentModel>) {}
-
-  async findById(id: string): Promise<Result<PageModel | null, Error>> {
-    try {
-      const doc = await this.db.get(id);
-      return ok(doc.type === 'page' ? doc as PageModel : null);
-    } catch (err) {
-      if ((err as PouchDB.Core.Error).status === 404) {
-        return ok(null);
-      }
-      return err(new Error(`Failed to find page: ${err.message}`));
-    }
-  }
-
-  async findBySlug(slug: string): Promise<Result<PageModel | null, Error>> {
-    // Implementation...
-  }
-
-  async save(page: PageModel): Promise<Result<PageModel, Error>> {
-    // Implementation...
-  }
-
-  // More page-specific methods...
-}
-
-// SettingsRepository.ts
-export class SettingsRepository {
-  constructor(private db: PouchDB.Database<DocumentModel>) {}
-
-  async getSettings(): Promise<Result<SettingsModel, Error>> {
-    // Implementation...
-  }
-
-  async updateSettings(settings: SettingsModel): Promise<Result<SettingsModel, Error>> {
-    // Implementation...
-  }
-}
-
-// Similar repositories for User, File, etc.
-3. Factory for Creating Repositories
-typescript
-
-Copy
-// RepositoryFactory.ts
-export class RepositoryFactory {
-  private static instance: RepositoryFactory;
-  private pageRepository: PageRepository;
-  private settingsRepository: SettingsRepository;
-  // Other repositories...
-
-  private constructor(private db: PouchDB.Database<DocumentModel>) {
-    this.pageRepository = new PageRepository(db);
-    this.settingsRepository = new SettingsRepository(db);
-    // Initialize other repositories...
-  }
-
-  static initialize(db: PouchDB.Database<DocumentModel>): RepositoryFactory {
-    if (!RepositoryFactory.instance) {
-      RepositoryFactory.instance = new RepositoryFactory(db);
-    }
-    return RepositoryFactory.instance;
-  }
-
-  getPageRepository(): PageRepository {
-    return this.pageRepository;
-  }
-
-  getSettingsRepository(): SettingsRepository {
-    return this.settingsRepository;
-  }
-
-  // Getter methods for other repositories...
-}
-4. Usage in Application
-typescript
-
-Copy
-// Initialization
-const dbServiceResult = await DatabaseService.initialize(config);
-if (dbServiceResult.isErr()) {
-  // Handle error
-}
-
-const dbService = dbServiceResult.value;
-const repositories = RepositoryFactory.initialize(dbService.getDatabase());
-
-// Usage in routes
-app.get('/settings', async (req, rep) => {
-  const settingsRepo = repositories.getSettingsRepository();
-  const settingsResult = await settingsRepo.getSettings();
-
-  return settingsResult.match(
-    settings => rep.send(settings),
-    error => rep.code(500).send({ error: error.message })
-  );
-});
-*/

@@ -138,11 +138,14 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const rs = redirectService(app, rep);
       const { email } = req.body;
-      const dbs = app.dbService;
+      const userRepo = app.repos.getUserRepository();
       const magicRepo = app.repos.getMagicRepository();
       const { i18n, settings, config } = app;
 
-      const user = (await dbs.getUserByEmail(email)).match((user) => user, nop);
+      const user = (await userRepo.getUserByEmail(email)).match(
+        (user) => user,
+        nop
+      );
       if (!user) {
         return rs.path('/auth/login', Feedbacks.E_USER_NOT_FOUND, true);
       }
