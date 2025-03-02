@@ -1,3 +1,4 @@
+import { createId } from '@paralleldrive/cuid2';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import fs from 'node:fs';
@@ -8,6 +9,7 @@ import {
   DEFAULT_SUPPORTED_LANGUAGE,
   type ConfigEnv,
   type Feedback,
+  type ModelName,
   type PageModel,
   type UrlParts,
 } from '../../types';
@@ -264,3 +266,5 @@ export const safeHtml = (str: string) =>
       table: ['class'],
     },
   });
+
+export const generateIdFor = (model: ModelName) => `${model}:${createId()}`;

@@ -1,4 +1,6 @@
 import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
+import { FileRepository } from './FileRepository';
+import { MagicRepository } from './MagicRepository';
 import { PageRepository } from './PageRepository';
 import { SessionRepository } from './SessionRepository';
 import { SettingsRepository } from './SettingsRepository';
@@ -14,6 +16,8 @@ export class RepositoryFactory {
   private settingsRepository: SettingsRepository;
   private pageRepository: PageRepository;
   private sessionRepository: SessionRepository;
+  private fileRepository: FileRepository;
+  private magicRepository: MagicRepository;
 
   private constructor(
     private db: Db,
@@ -27,6 +31,12 @@ export class RepositoryFactory {
     );
     this.pageRepository = new PageRepository(this.db, this.config, this.logger);
     this.sessionRepository = new SessionRepository(
+      this.db,
+      this.config,
+      this.logger
+    );
+    this.fileRepository = new FileRepository(this.db, this.config, this.logger);
+    this.magicRepository = new MagicRepository(
       this.db,
       this.config,
       this.logger
@@ -56,5 +66,13 @@ export class RepositoryFactory {
 
   getSessionRepository(): SessionRepository {
     return this.sessionRepository;
+  }
+
+  getFileRepository(): FileRepository {
+    return this.fileRepository;
+  }
+
+  getMagicRepository(): MagicRepository {
+    return this.magicRepository;
   }
 }

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { nop } from './helpers';
+import { generateIdFor, nop } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
 import { Readable } from 'node:stream';
 import sharp from 'sharp';
@@ -19,7 +19,6 @@ import {
   SESSION_COOKIE_NAME,
   SEVEN_DAYS_IN_SECONDS,
 } from '~/constants';
-import { dbService } from '~/services/dbService';
 import { redirectService } from '~/services/redirectService';
 import { SearchService } from '~/services/SearchService';
 import { Nav } from '~/views/components/Nav';
@@ -140,6 +139,7 @@ const router = async (app: FastifyInstance) => {
       const rs = redirectService(app, rep);
       const { email } = req.body;
       const dbs = app.dbService;
+      const magicRepo = app.repos.getMagicRepository();
       const { i18n, settings, config } = app;
 
       const user = (await dbs.getUserByEmail(email)).match((user) => user, nop);
@@ -148,7 +148,7 @@ const router = async (app: FastifyInstance) => {
       }
 
       const magicData = (
-        await dbs.createMagic(email, MAGIC_TOKEN_EXPIRATION_MINUTES)
+        await magicRepo.createMagic(email, MAGIC_TOKEN_EXPIRATION_MINUTES)
       ).match(
         (magicData) => magicData,
         (feedback) => {
@@ -191,19 +191,19 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = app.dbService;
       const sessionRepo = app.repos.getSessionRepository();
+      const magicRepo = app.repos.getMagicRepository();
       const magicId = req.params.magicId;
       const { i18n } = app;
 
-      const email = (await dbs.validateMagic(magicId)).match(
+      const email = (await magicRepo.validateMagic(magicId)).match(
         (email) => email,
         (feedback) => {
           throw new Error(feedback.message);
         }
       );
 
-      const sessionId = dbService.generateIdFor('session');
+      const sessionId = generateIdFor('session');
 
       if (email) {
         (
@@ -866,7 +866,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = app.dbService;
+      const fileRepo = app.repos.getFileRepository();
 
       if (!req.isMultipart()) {
         return rs.bail(400, 'Invalid file type. Please upload an image.');
@@ -915,7 +915,7 @@ const router = async (app: FastifyInstance) => {
         finalMimeType = 'image/jpeg';
       }
 
-      const fileId = dbService.generateIdFor('file');
+      const fileId = generateIdFor('file');
 
       const doc: FileModel = {
         type: 'file',
@@ -932,7 +932,7 @@ const router = async (app: FastifyInstance) => {
         uploadedAt: new Date().toISOString(),
       };
 
-      const fileRev = (await dbs.insertFile(doc)).match(
+      const fileRev = (await fileRepo.insertFile(doc)).match(
         (doc) => doc.rev,
         (feedback) => {
           throw new Error(feedback.message);
@@ -949,7 +949,7 @@ const router = async (app: FastifyInstance) => {
         params: { rev: fileRev },
       };
 
-      (await dbs.insertFileAttachment(attachment)).mapErr((feedback) => {
+      (await fileRepo.insertFileAttachment(attachment)).mapErr((feedback) => {
         throw new Error(feedback.message);
       });
 
@@ -978,11 +978,11 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const dbs = app.dbService;
+      const fileRepo = app.repos.getFileRepository();
 
       const { fileId, filename } = req.params;
 
-      const file = (await dbs.getFileById(fileId)).match(
+      const file = (await fileRepo.getFileById(fileId)).match(
         (file) => file,
         (feedback) => {
           throw new Error(feedback.message);
@@ -993,7 +993,7 @@ const router = async (app: FastifyInstance) => {
         return rs.bail(404, 'File not found');
       }
 
-      const stream = await dbs.getFileAttachment(fileId, filename);
+      const stream = await fileRepo.getFileAttachment(fileId, filename);
       if (!stream) {
         return rs.bail(404, 'File stream not found');
       }
@@ -1097,7 +1097,7 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      const pageId = dbService.generateIdFor('page');
+      const pageId = generateIdFor('page');
       (
         await pageRepo.insertPage({
           type: 'page',
@@ -1258,9 +1258,9 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get('/admin/cleanup-orphaned-files', async () => {
-    const dbs = app.dbService;
+    const fileRepo = app.repos.getFileRepository();
 
-    const deleted = (await dbs.cleanupOrphanedFiles()).match(
+    const deleted = (await fileRepo.cleanupOrphanedFiles()).match(
       (deleted) => deleted,
       (feedback) => {
         throw new Error(feedback.message);

@@ -23,7 +23,7 @@ export class SessionRepository extends BaseRepository {
       await this.db.put(session);
       return ok();
     } catch (error) {
-      console.log('Error creating a session', error);
+      this.logger.error('Error creating a session', error);
       return err(Feedbacks.E_CREATING_SESSION);
     }
   }
@@ -35,7 +35,7 @@ export class SessionRepository extends BaseRepository {
       return ok(await this.db.get<SessionModel>(sessionId));
     } catch (error) {
       if ((error as PouchDB.Core.Error).status !== 404) {
-        console.log('Error finding a session', error);
+        this.logger.error('Error finding a session', error);
         return err(Feedbacks.E_UNKNOWN_ERROR);
       }
       return ok(null);
@@ -57,7 +57,7 @@ export class SessionRepository extends BaseRepository {
       await this.db.remove(session._id, session._rev!);
     } catch (error) {
       if ((error as PouchDB.Core.Error).status !== 404) {
-        console.log('Error deleting a session', error);
+        this.logger.error('Error deleting a session', error);
         return err(Feedbacks.E_UNKNOWN_ERROR);
       }
     }
