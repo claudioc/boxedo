@@ -24,7 +24,6 @@ import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import { RepositoryFactory } from '~/repositories/RepositoryFactory';
 import { DatabaseService } from '~/services/DatabaseService';
-import { dbService, type DbService } from '~/services/dbService';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
@@ -39,7 +38,6 @@ declare module 'fastify' {
     config: ConfigEnv;
     is: (env: NodeEnv) => boolean;
     settings: SettingsModel;
-    dbService: DbService;
     i18n: i18nExtended;
     feedbackCode: number;
     cache: Cache;
@@ -78,7 +76,6 @@ const app = Fastify({
   logger:
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
-
 if (process.env.NODE_ENV !== 'production') {
   // Do not log assets requests
   app.addHook('onRoute', (opts) => {
@@ -111,19 +108,6 @@ app.decorate('emailService', emailService);
 
 await ensurePathExists(app.config.DB_LOCAL_PATH, 'database directory');
 
-let dbs: DbService;
-try {
-  dbs = dbService(
-    await dbService.init({
-      logger: app.log,
-      config: app.config,
-    })
-  );
-  app.decorate('dbService', dbs);
-} catch {
-  throw new Error('Cannot establish a database connection');
-}
-
 await DatabaseService.create({
   config: app.config,
   logger: app.log,
@@ -146,11 +130,13 @@ const repositories = await RepositoryFactory.create({
 app.decorate('repos', repositories);
 
 // Initializes the search service instance, starting indexing the documents
-await SearchService.create({
-  repos: repositories,
-  config: app.config,
-  logger: app.log,
-});
+if (app.config.NODE_ENV !== 'test') {
+  await SearchService.create({
+    repos: repositories,
+    config: app.config,
+    logger: app.log,
+  });
+}
 
 if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
@@ -165,7 +151,9 @@ const settings = (await app.repos.getSettingsRepository().getSettings()).match(
 );
 
 if (app.config.AUTHENTICATION_TYPE !== 'none') {
-  await syncUsers(app, dbs, {
+  await syncUsers({
+    app,
+    repos: repositories,
     dryRun: app.config.NODE_ENV === 'test',
   });
 }

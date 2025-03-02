@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { SettingsModel } from '../types';
 import { POSITION_GAP_SIZE } from './constants';
 import bootstrap from './lib/bootstrap';
+import { DatabaseService } from './services/DatabaseService';
 
 let app: FastifyInstance;
 
@@ -14,7 +15,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await app.dbService.nukeTests();
+  await DatabaseService.nukeTests(app.repos.getDb());
 });
 
 afterAll(async () => {

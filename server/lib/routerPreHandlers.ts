@@ -8,7 +8,9 @@ import { SESSION_COOKIE_NAME } from '~/constants';
 
 export const createRequireAuth = (app: FastifyInstance) => {
   return async (req: FastifyRequest, rep: FastifyReply) => {
-    const { config } = app;
+    const { config, repos } = app;
+    const userRepo = repos.getUserRepository();
+    const sessionRepo = repos.getSessionRepository();
 
     req.user = null;
 
@@ -21,8 +23,8 @@ export const createRequireAuth = (app: FastifyInstance) => {
     if (!sessionId) {
       return rep.redirect('/auth/login');
     }
-    const dbs = app.dbService;
-    const session = (await dbs.getSessionById(sessionId)).match(
+
+    const session = (await sessionRepo.getSessionById(sessionId)).match(
       (session) => session,
       (feedback) => {
         throw new Error(feedback.message);
@@ -34,7 +36,7 @@ export const createRequireAuth = (app: FastifyInstance) => {
       return rep.redirect('/auth/login');
     }
 
-    const user = (await dbs.getUserByEmail(session.email)).match(
+    const user = (await userRepo.getUserByEmail(session.email)).match(
       (user) => user,
       (feedback) => {
         throw new Error(feedback.message);

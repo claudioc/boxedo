@@ -4,8 +4,8 @@ import type { FastifyInstance } from 'fastify';
 import type { JSONSchema } from 'json-schema-to-ts';
 import { readFile } from 'node:fs/promises';
 import yaml from 'yaml';
-import { dbService } from '~/services/dbService';
-import { nop } from './helpers';
+import type { RepositoryFactory } from '../repositories/RepositoryFactory';
+import { generateIdFor, nop } from './helpers';
 
 const UsersYamlSchema = {
   type: 'object',
@@ -39,6 +39,8 @@ addFormats(ajv);
 const validateYamlConfig = ajv.compile(UsersYamlSchema);
 
 interface SyncOptions {
+  app: FastifyInstance;
+  repos: RepositoryFactory;
   dryRun?: boolean;
 }
 
@@ -51,12 +53,9 @@ interface YamlConfig {
   users: YamlUser[];
 }
 
-export async function syncUsers(
-  app: FastifyInstance,
-  dbs: ReturnType<typeof dbService>,
-  options: SyncOptions = {}
-) {
-  const { dryRun = false } = options;
+export async function syncUsers(options: SyncOptions) {
+  const { app, repos, dryRun = false } = options;
+  const userRepo = repos.getUserRepository();
 
   try {
     const fileContent = await readFile('./users.yaml', 'utf8');
@@ -87,7 +86,7 @@ export async function syncUsers(
       data.users = [];
     }
 
-    const existingUsers = (await dbs.getAllUsers()).match(
+    const existingUsers = (await userRepo.getAllUsers()).match(
       (users) => users,
       (feedback) => {
         throw new Error(feedback.message);
@@ -119,9 +118,9 @@ export async function syncUsers(
     }
 
     for (const user of usersToAdd) {
-      const userId = dbService.generateIdFor('user');
+      const userId = generateIdFor('user');
       (
-        await dbs.insertUser({
+        await userRepo.insertUser({
           type: 'user',
           _id: userId,
           email: user.email,
@@ -138,7 +137,7 @@ export async function syncUsers(
       const existingUser = existingUsers.find((u) => u.email === user.email);
       if (existingUser) {
         (
-          await dbs.updateUser({
+          await userRepo.updateUser({
             ...existingUser,
             fullname: user.fullname,
           })
@@ -150,7 +149,7 @@ export async function syncUsers(
     }
 
     for (const user of usersToRemove) {
-      (await dbs.deleteUser(user._id)).match(nop, (feedback) => {
+      (await userRepo.deleteUser(user._id)).match(nop, (feedback) => {
         throw new Error(feedback.message);
       });
       app.log.info(`Removed user: ${user.email}`);

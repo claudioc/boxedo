@@ -20,7 +20,6 @@ interface DatabaseServiceOptions {
 export class DatabaseService {
   private static instance: DatabaseService;
   private db!: Db;
-  private config!: ConfigEnv;
 
   private constructor() {}
 
@@ -91,7 +90,6 @@ export class DatabaseService {
     }
 
     DatabaseService.instance.db = db;
-    DatabaseService.instance.config = config;
 
     return ok(DatabaseService.instance);
   }
@@ -104,7 +102,7 @@ export class DatabaseService {
     return ok(DatabaseService.instance);
   }
 
-  private static async createIndexes(db: Db, logger: AnyLogger) {
+  private static async createIndexes(db: Db, logger?: AnyLogger) {
     try {
       await db.createIndex({
         index: {
@@ -124,11 +122,11 @@ export class DatabaseService {
         },
       });
     } catch (error) {
-      logger.error('Error creating indexes', error);
+      logger?.error('Error creating indexes', error);
     }
   }
 
-  private static async createViews(db: PouchDB.Database, logger: AnyLogger) {
+  private static async createViews(db: PouchDB.Database, logger?: AnyLogger) {
     const designDoc = {
       _id: '_design/pages',
       views: {
@@ -162,17 +160,17 @@ export class DatabaseService {
         };
         await db.put(updatedDoc);
       } else {
-        logger.error('Error creating design doc:', err);
+        logger?.error('Error creating design doc:', err);
         throw err;
       }
     }
   }
 
-  async nukeTests() {
+  static async nukeTests(db: Db) {
     // Note that tests also use a memory adapter and never a real one
-    if (this.config.NODE_ENV !== 'test') return;
+    if (process.env.NODE_ENV !== 'test') return;
 
-    const allDocs = await this.db.allDocs({ include_docs: true });
+    const allDocs = await db.allDocs({ include_docs: true });
     const deletions = allDocs.rows
       .filter((row) => row.doc)
       .map((row) => ({
@@ -181,12 +179,12 @@ export class DatabaseService {
       }));
 
     if (deletions.length > 0) {
-      await this.db.bulkDocs(deletions as DocumentModel[]);
+      await db.bulkDocs(deletions as DocumentModel[]);
     }
 
     try {
-      // await DatabaseService.createIndexes(this.db);
-      // await DatabaseService.createViews(this.db);
+      await DatabaseService.createIndexes(db);
+      await DatabaseService.createViews(db);
     } catch {
       // Index might already exist, that's fine
     }
