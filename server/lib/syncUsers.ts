@@ -40,7 +40,7 @@ const validateYamlConfig = ajv.compile(UsersYamlSchema);
 
 interface SyncOptions {
   app: FastifyInstance;
-  repos: RepositoryFactory;
+  repoFactory: RepositoryFactory;
   dryRun?: boolean;
 }
 
@@ -54,8 +54,8 @@ interface YamlConfig {
 }
 
 export async function syncUsers(options: SyncOptions) {
-  const { app, repos, dryRun = false } = options;
-  const userRepo = repos.getUserRepository();
+  const { app, repoFactory, dryRun = false } = options;
+  const userRepo = repoFactory.getUserRepository();
 
   try {
     const fileContent = await readFile('./users.yaml', 'utf8');

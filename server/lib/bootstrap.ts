@@ -22,11 +22,11 @@ import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
-import { RepositoryFactory } from '~/repositories/RepositoryFactory';
-import { DatabaseService } from '~/services/DatabaseService';
+import type { RepositoryFactory } from '~/repositories/RepositoryFactory';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
 import { phrases, type SupportedLocales } from '../locales/phrases';
+import { AppContext } from './AppContext';
 import { ensurePathExists } from './helpers';
 import router from './router';
 import { syncUsers } from './syncUsers';
@@ -42,7 +42,8 @@ declare module 'fastify' {
     feedbackCode: number;
     cache: Cache;
     emailService: EmailService;
-    repos: RepositoryFactory;
+    repoFactory: RepositoryFactory;
+    context: AppContext;
   }
   interface FastifyRequest {
     user: UserModel | null;
@@ -76,8 +77,9 @@ const app = Fastify({
   logger:
     envToLogger[(process.env.NODE_ENV as NodeEnv) || 'development'] ?? true,
 });
+
 if (process.env.NODE_ENV !== 'production') {
-  // Do not log assets requests
+  // Do not log assets requests in development
   app.addHook('onRoute', (opts) => {
     if (opts.path.includes('/a/')) {
       opts.logLevel = 'silent';
@@ -108,31 +110,27 @@ app.decorate('emailService', emailService);
 
 await ensurePathExists(app.config.DB_LOCAL_PATH, 'database directory');
 
-await DatabaseService.create({
+const contextResult = await AppContext.create({
   config: app.config,
   logger: app.log,
 });
 
-const db = DatabaseService.getInstance().match(
-  (service) => service.getDatabase(),
-  (err) => {
-    app.log.error(err);
-    throw new Error('Cannot access the database');
-  }
-);
+if (contextResult.isErr()) {
+  app.log.error(
+    'Failed to initialize application context:',
+    contextResult.error
+  );
+  process.exit(1);
+}
 
-const repositories = await RepositoryFactory.create({
-  db,
-  config: app.config,
-  logger: app.log,
-});
+app.decorate('context', contextResult.value);
 
-app.decorate('repos', repositories);
+app.decorate('repoFactory', app.context.getRepositoryFactory());
 
 // Initializes the search service instance, starting indexing the documents
 if (app.config.NODE_ENV !== 'test') {
   await SearchService.create({
-    repos: repositories,
+    repoFactory: app.context.getRepositoryFactory(),
     config: app.config,
     logger: app.log,
   });
@@ -142,7 +140,9 @@ if (app.config.NODE_ENV !== 'test') {
   await app.register(csrfProtection);
 }
 
-const settings = (await app.repos.getSettingsRepository().getSettings()).match(
+const settings = (
+  await app.repoFactory.getSettingsRepository().getSettings()
+).match(
   (settings) => settings,
   (feedback) => {
     app.log.error(`Failed to get settings: ${feedback.message}`);
@@ -153,7 +153,7 @@ const settings = (await app.repos.getSettingsRepository().getSettings()).match(
 if (app.config.AUTHENTICATION_TYPE !== 'none') {
   await syncUsers({
     app,
-    repos: repositories,
+    repoFactory: app.context.getRepositoryFactory(),
     dryRun: app.config.NODE_ENV === 'test',
   });
 }

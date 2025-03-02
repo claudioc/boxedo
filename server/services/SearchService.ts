@@ -17,7 +17,7 @@ import {
 import type { RepositoryFactory } from '~/repositories/RepositoryFactory';
 
 interface SearchServiceOptions {
-  repos: RepositoryFactory;
+  repoFactory: RepositoryFactory;
   config: ConfigEnv;
   logger: AnyLogger;
 }
@@ -89,12 +89,12 @@ export class SearchService {
   public static async create(
     options: SearchServiceOptions
   ): Promise<Result<SearchService, Error>> {
-    const { repos, config, logger } = options;
+    const { repoFactory, config, logger } = options;
 
     if (!SearchService.instance) {
       try {
         await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
-        SearchService.instance = new SearchService(repos, config, logger);
+        SearchService.instance = new SearchService(repoFactory, config, logger);
         await SearchService.instance.indexBuilt;
       } catch (error) {
         logger.error('Failed to initialize search service:', error);

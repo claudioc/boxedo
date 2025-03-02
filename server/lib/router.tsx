@@ -54,7 +54,7 @@ const router = async (app: FastifyInstance) => {
       preHandler: requireAuth,
     },
     async (req, rep) => {
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const isHtmx = req.headers['hx-request'];
       const { settings } = app;
 
@@ -138,8 +138,8 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const rs = redirectService(app, rep);
       const { email } = req.body;
-      const userRepo = app.repos.getUserRepository();
-      const magicRepo = app.repos.getMagicRepository();
+      const userRepo = app.repoFactory.getUserRepository();
+      const magicRepo = app.repoFactory.getMagicRepository();
       const { i18n, settings, config } = app;
 
       const user = (await userRepo.getUserByEmail(email)).match(
@@ -194,8 +194,8 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const sessionRepo = app.repos.getSessionRepository();
-      const magicRepo = app.repos.getMagicRepository();
+      const sessionRepo = app.repoFactory.getSessionRepository();
+      const magicRepo = app.repoFactory.getMagicRepository();
       const magicId = req.params.magicId;
       const { i18n } = app;
 
@@ -257,7 +257,7 @@ const router = async (app: FastifyInstance) => {
 
   app.post('/auth/logout', async (req, rep) => {
     const sessionId = req.cookies.session;
-    const sessionRepo = app.repos.getSessionRepository();
+    const sessionRepo = app.repoFactory.getSessionRepository();
 
     if (sessionId) {
       (await sessionRepo.deleteSession(sessionId)).match(nop, nop);
@@ -279,7 +279,7 @@ const router = async (app: FastifyInstance) => {
       preHandler: requireAuth,
     },
     async (req, rep) => {
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const { settings } = app;
 
       let landingPage: PageModel | null = null;
@@ -319,8 +319,8 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { landingPageId, siteLang, siteTitle, textSize } = req.body;
-      const pageRepo = app.repos.getPageRepository();
-      const settingRepo = app.repos.getSettingsRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
+      const settingRepo = app.repoFactory.getSettingsRepository();
       const rs = redirectService(app, rep);
 
       const settings = (await settingRepo.getSettings()).match(
@@ -405,7 +405,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
 
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
@@ -451,7 +451,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { slug } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const isHtmx = req.headers['hx-request'];
       const rs = redirectService(app, rep);
 
@@ -513,7 +513,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
@@ -551,7 +551,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { pageTitle, pageContent, rev } = req.body;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       if (pageTitle.trim() === '') {
@@ -644,7 +644,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       const page = (await pageRepo.getPageById(pageId)).match(
@@ -698,7 +698,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { newParentId, moveToTop } = req.body;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       let parentId = newParentId ?? null;
@@ -781,7 +781,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const { targetIndex } = req.body;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       const page = (await pageRepo.getPageById(pageId)).match(
@@ -832,7 +832,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { pageId } = req.params;
       const rs = redirectService(app, rep);
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
 
       const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
@@ -869,7 +869,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const fileRepo = app.repos.getFileRepository();
+      const fileRepo = app.repoFactory.getFileRepository();
 
       if (!req.isMultipart()) {
         return rs.bail(400, 'Invalid file type. Please upload an image.');
@@ -981,7 +981,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
-      const fileRepo = app.repos.getFileRepository();
+      const fileRepo = app.repoFactory.getFileRepository();
 
       const { fileId, filename } = req.params;
 
@@ -1018,7 +1018,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { parentPageId } = req.query;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
       const token = rep.generateCsrf();
 
@@ -1062,7 +1062,7 @@ const router = async (app: FastifyInstance) => {
       const { parentPageId } = req.query;
       const { pageTitle, pageContent } = req.body;
       const rs = redirectService(app, rep);
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
 
       if (pageTitle.trim() === '') {
         return rs.home(Feedbacks.E_EMPTY_TITLE);
@@ -1185,7 +1185,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       const page = (await pageRepo.getPageById(pageId)).match(
@@ -1226,7 +1226,7 @@ const router = async (app: FastifyInstance) => {
     },
     async (req, rep) => {
       const { pageId, version } = req.params;
-      const pageRepo = app.repos.getPageRepository();
+      const pageRepo = app.repoFactory.getPageRepository();
       const rs = redirectService(app, rep);
 
       const page = (await pageRepo.getPageById(pageId)).match(
@@ -1261,7 +1261,7 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get('/admin/cleanup-orphaned-files', async () => {
-    const fileRepo = app.repos.getFileRepository();
+    const fileRepo = app.repoFactory.getFileRepository();
 
     const deleted = (await fileRepo.cleanupOrphanedFiles()).match(
       (deleted) => deleted,

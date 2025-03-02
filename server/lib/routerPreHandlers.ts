@@ -8,7 +8,7 @@ import { SESSION_COOKIE_NAME } from '~/constants';
 
 export const createRequireAuth = (app: FastifyInstance) => {
   return async (req: FastifyRequest, rep: FastifyReply) => {
-    const { config, repos } = app;
+    const { config, repoFactory: repos } = app;
     const userRepo = repos.getUserRepository();
     const sessionRepo = repos.getSessionRepository();
 

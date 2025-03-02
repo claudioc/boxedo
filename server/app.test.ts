@@ -15,7 +15,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await DatabaseService.nukeTests(app.repos.getDb());
+  await DatabaseService.nukeTests(app.repoFactory.getDb());
 });
 
 afterAll(async () => {

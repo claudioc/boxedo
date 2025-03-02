@@ -37,49 +37,54 @@ export class DatabaseService {
 
     DatabaseService.instance = new DatabaseService();
 
-    switch (true) {
-      case config.DB_BACKEND === 'memory' || config.NODE_ENV === 'test':
-        PouchDB.plugin(PouchFind)
-          .plugin(PouchReduce)
-          .plugin(PouchAdapterMemory);
-        db = new PouchDB<DocumentModel>(dbName);
-        break;
+    try {
+      switch (true) {
+        case config.DB_BACKEND === 'memory' || config.NODE_ENV === 'test':
+          PouchDB.plugin(PouchFind)
+            .plugin(PouchReduce)
+            .plugin(PouchAdapterMemory);
+          db = new PouchDB<DocumentModel>(dbName);
+          break;
 
-      case config.DB_BACKEND === 'remote' && !!config.DB_REMOTE_URL:
-        PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
-        db = new PouchDB(`${config.DB_REMOTE_URL}/${dbName}`, {
-          auth: {
-            username: config.DB_REMOTE_USER,
-            password: config.DB_REMOTE_PASSWORD,
-          },
-        });
-        logger.info('Connected to remote database');
-        break;
+        case config.DB_BACKEND === 'remote' && !!config.DB_REMOTE_URL:
+          PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
+          db = new PouchDB(`${config.DB_REMOTE_URL}/${dbName}`, {
+            auth: {
+              username: config.DB_REMOTE_USER,
+              password: config.DB_REMOTE_PASSWORD,
+            },
+          });
+          logger.info('Connected to remote database');
+          break;
 
-      case config.DB_BACKEND === 'local':
-        await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
+        case config.DB_BACKEND === 'local':
+          await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
 
-        PouchDB.plugin(PouchAdapterLevelDb)
-          .plugin(PouchFind)
-          .plugin(PouchReduce);
+          PouchDB.plugin(PouchAdapterLevelDb)
+            .plugin(PouchFind)
+            .plugin(PouchReduce);
 
-        // Note: bootstrap is taking care of creating the directory if it doesn't exist
-        db = new PouchDB<DocumentModel>(
-          path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
-          {
-            adapter: 'leveldb',
-          }
-        );
-        logger.info('Connected to local database');
-        break;
+          // Note: bootstrap is taking care of creating the directory if it doesn't exist
+          db = new PouchDB<DocumentModel>(
+            path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
+            {
+              adapter: 'leveldb',
+            }
+          );
+          logger.info('Connected to local database');
+          break;
 
-      default:
-        logger.error(
-          'Database configuration inconsistent or unknown. Cannot continue.'
-        );
-        throw new Error(
-          'Database configuration inconsistent or unknown. Cannot continue.'
-        );
+        default:
+          logger.error(
+            'Database configuration inconsistent or unknown. Cannot continue.'
+          );
+          throw new Error(
+            'Database configuration inconsistent or unknown. Cannot continue.'
+          );
+      }
+    } catch (error) {
+      logger.error('Error connecting to the database', error);
+      return err(new Error('Error connecting to the database'));
     }
 
     try {

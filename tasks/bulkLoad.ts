@@ -1,8 +1,8 @@
 import { load } from 'cheerio';
 import fs from 'fs';
 import slugify from 'slugify';
-import { loadConfig } from '../server/lib/helpers';
-import { DbService, dbService } from '../server/services/dbService';
+import { AppContext } from '../server/lib/AppContext';
+import { generateIdFor, loadConfig } from '../server/lib/helpers';
 import { PageModel } from '../types';
 
 type ExistingPage = {
@@ -11,22 +11,28 @@ type ExistingPage = {
 };
 
 class BulkLoader {
-  private dbs: DbService;
   private pages: PageModel[] = [];
   private existingPages: ExistingPage[] = [];
 
-  constructor(dbs: DbService) {
-    this.dbs = dbs;
-  }
+  constructor(private readonly context: AppContext) {}
 
   static async create(): Promise<BulkLoader> {
     const config = loadConfig();
-    const dbClient = await dbService.init({
-      logger: console,
-      config,
-    });
 
-    return new BulkLoader(dbService(dbClient));
+    const context = (
+      await AppContext.create({
+        config,
+        logger: console,
+      })
+    ).match(
+      (context) => context,
+      (error) => {
+        console.log(error);
+        process.exit(1);
+      }
+    );
+
+    return new BulkLoader(context);
   }
 
   getRandomElement<T>(arr: T[]): T {
@@ -123,7 +129,7 @@ class BulkLoader {
       }
 
       const now = new Date().toISOString();
-      const pageId: string = dbService.generateIdFor('page');
+      const pageId: string = generateIdFor('page');
       this.pages.push({
         type: 'page',
         _id: pageId,
@@ -141,9 +147,9 @@ class BulkLoader {
       this.existingPages.push({ _id: pageId, pageSlug: slug });
     }
 
-    await this.dbs.db.bulkDocs(this.pages);
-
-    await loader.dbs.db.close();
+    const db = this.context.getDatabaseService().getDatabase();
+    await db.bulkDocs(this.pages);
+    await db.close();
 
     return;
   }

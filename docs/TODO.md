@@ -10,17 +10,16 @@ Doing:
 
   NEXT
   - add a classification to the documents (like 'Internal only', 'Public'...)
-  - Consider using [minisearch](https://github.com/lucaong/minisearch)
   - editing the page doesn't take into account the settings.textSize
   - Consider rate limiting the magic link generation
-  - Fetch the preview for links?
   - use the can() API to enable/disable the buttons on the bubblemenu (https://tiptap.dev/docs/editor/api/editor#can)
   - immersive read / immersive edit
-  - What about https://demo.umodoc.com/editor ?
   - Syntax hightlight? https://tiptap.dev/docs/editor/extensions/nodes/code-block-lowlight
   - use couchdb for the cache (see /docs/CACHE.md)
+  - it would be nice to be able to `npx joongle init`
 
   LATER
+  - What about https://demo.umodoc.com/editor ?
   - consider putting deleted page in a Trash bin instead of deleting them (or "Archive")
   - allow to duplicate/copy a page (needs to specify parent?)
   - consider access implications to the history of docs
@@ -29,8 +28,6 @@ Doing:
   - do we need a "Revert to this version" for the history? (probably not)
   - uses CSRF for delete and move page? (probably not)
   - unit tests for the dbService would be good.
-  - There is also Lexical as an possible replacement for tiptap, if needed
-  - Do we still need the replaceReact plugin?
   - Add inline comments
   - move document metadata in their own document, instead of using the metadata flag
 
@@ -106,3 +103,7 @@ Done
 - tables in the editor
 - subcommands for the table
 - port SearchService to neverthrow
+- Consider using [minisearch](https://github.com/lucaong/minisearch)
+- Fetch the preview for links?
+- There is also Lexical as an possible replacement for tiptap, if needed
+- Do we still need the replaceReact plugin?
