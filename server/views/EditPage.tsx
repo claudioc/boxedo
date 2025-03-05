@@ -24,7 +24,12 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
       context="editing page"
     >
       <PageFormWrapper ctx={ctx}>
-        <form action="" method="post" class="block" x-on:submit="App.validate">
+        <form
+          action=""
+          method="post"
+          class="b-block"
+          x-on:submit="App.validate"
+        >
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
           <PageActions

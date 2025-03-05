@@ -27,7 +27,7 @@ export const SettingsPage = ({
       <div
         x-data={`{landingPageId: '${landingPage ? landingPage._id : ''}', newLandingPageTitle: '', error: {landingPageId: false}}`}
       >
-        <div x-show="error && error.landingPageId" class="block">
+        <div x-show="error && error.landingPageId" class="b-block">
           <Feedback ctx={ctx} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
@@ -45,7 +45,7 @@ export const SettingsPage = ({
           />
 
           <MainContent>
-            <div class="block">
+            <div class="b-block">
               <div class="field">
                 <label class="label" for="search">
                   {i18n.t('SettingsPage.siteTitle')}
@@ -65,7 +65,7 @@ export const SettingsPage = ({
             <input type="hidden" name="landingPageId" x-model="landingPageId" />
             <input type="hidden" name="_csrf" value={token} />
 
-            <div class="block">
+            <div class="b-block">
               <p>
                 {i18n.t('SettingsPage.currentLandingPageIs', {
                   title: landingPage
@@ -74,7 +74,7 @@ export const SettingsPage = ({
                 })}
               </p>
 
-              <div class="block" x-show="newLandingPageTitle">
+              <div class="b-block" x-show="newLandingPageTitle">
                 {i18n.t('SettingsPage.newLandingPageIs')} "
                 <span x-text="newLandingPageTitle" />"
               </div>
@@ -107,7 +107,7 @@ export const SettingsPage = ({
               x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
             />
 
-            <div class="block">
+            <div class="b-block">
               <div class="field">
                 <div class="label">{i18n.t('SettingsPage.textSize')}</div>
                 <div class="radios control">

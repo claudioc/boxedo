@@ -1,11 +1,11 @@
-@import '/a/vendor/bulma.min.css';
-@import url(app.css);
+/* This is the main CSS file, which includes the other parts
+  - daisyui.css.: loads tailwind and daisyui; it's compiled from by a npm script and monitored by hawk.ts
+  - app.css: compiled by esbuild out of the CSS modules
 
-:root {
-  .menu {
-    --bulma-menu-list-line-height: 1;
-  }
-}
+  They are both symlinks to /dist
+*/
+@import url(daisyui.css);
+@import url(app.css);
 
 /* Custom responsive modifier for Bulma button */
 @media screen and (max-width: 768px) {

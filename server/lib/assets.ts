@@ -6,7 +6,7 @@ import {
   CLIENT_BUNDLE_LOCATION,
 } from '~/constants';
 
-export const cssFile = `/${ASSETS_MOUNT_POINT}/css/style.css?_=${CACHE_BUSTER}`;
+export const cssFile = `/${ASSETS_MOUNT_POINT}/css/global.css?_=${CACHE_BUSTER}`;
 type Bundle = 'app' | 'editor';
 
 const bundleNames: Record<Bundle, string> = {

@@ -125,7 +125,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
       >
         <form method="dialog" x-on:submit="App.validate">
           <h3 class="title is-2">{i18n.t('ImageDialog.title')}</h3>
-          <div class="block">
+          <div class="b-block">
             <div class="field">
               <label class="label" for="uploadUrl">
                 {i18n.t('ImageDialog.enterUrl')}
@@ -144,7 +144,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
 
           <hr />
 
-          <div class="block">
+          <div class="b-block">
             <div class="field">
               <label class="label" for="uploadFile">
                 {i18n.t('ImageDialog.uploadFile')}

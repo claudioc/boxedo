@@ -51,18 +51,16 @@ export const Layout = ({
         )}
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
-        <main class="columns mt-0 ml-0" data-context={context}>
+        <main data-context={context}>
           {/* "main > div" is referenced in App.ts */}
-          <div class={[styles.mainLeft, 'column', 'is-narrow']}>
-            <header class={[styles.header, 'block']}>
-              <div class="block">
-                <div class="level is-flex-direction-row">
-                  <div class={[styles.title, 'is-size-5', 'level-left']}>
-                    <a href="/" class="has-text-warning">
-                      {settings.siteTitle}
-                    </a>
+          <div class={[styles.mainLeft]}>
+            <header class={[styles.header, 'b-block']}>
+              <div class="b-block">
+                <div class="level">
+                  <div class={[styles.title]}>
+                    <a href="/">{settings.siteTitle}</a>
                   </div>
-                  <div class="level-right is-flex-direction-row">
+                  <div class="level-right">
                     <menu class="level">
                       {user ? (
                         <form method="post" action="/auth/logout">
@@ -91,13 +89,13 @@ export const Layout = ({
                   </div>
                 </div>
               </div>
-              <div class="block">
+              <div class="b-block">
                 <Search ctx={ctx} />
               </div>
             </header>
 
             {withCreateButton && (
-              <div class="block">
+              <div class="b-block">
                 {/* The href and text is dynamically updated by our htmx extension */}
                 <a
                   class="button is-outlined is-info is-small"
@@ -111,7 +109,7 @@ export const Layout = ({
               </div>
             )}
             <aside
-              class={[styles.aside, 'block']}
+              class={[styles.aside, 'b-block']}
               hx-get={`/parts/nav/${page ? page._id : ''}`}
               hx-trigger="load once"
             >

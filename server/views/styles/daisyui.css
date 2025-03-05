@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Compatibility with Bulma */
+.b-block {
+  @apply mb-5;
+}

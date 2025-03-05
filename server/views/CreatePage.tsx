@@ -29,7 +29,7 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
         <form
           action=""
           method="post"
-          class="block"
+          class="b-block"
           name="createPage"
           x-on:submit="App.validate"
         >

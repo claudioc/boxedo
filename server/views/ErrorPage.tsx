@@ -22,12 +22,12 @@ export const ErrorPage = ({
         <OhNoIcon title={title} size={48} />
         {title}
       </h1>
-      <p class="block">{i18n.t('Error.requestFailed')}</p>
-      <p class="block">
+      <p class="b-block">{i18n.t('Error.requestFailed')}</p>
+      <p class="b-block">
         <code>{String(error)}</code>
       </p>
       {goHome ? (
-        <p class="block">
+        <p class="b-block">
           <a class="button" href="/">
             <ArrowLeftIcon title={'Back home'} />
             &nbsp;Home

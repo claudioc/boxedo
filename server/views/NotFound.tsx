@@ -16,8 +16,8 @@ export const NotFound = ({ ctx, title }: NotFoundProps) => {
         <OhNoIcon title={i18n.t('NotFound.title')} size={48} />
         {i18n.t('NotFound.title')}
       </h1>
-      <p class="block">{i18n.t('NotFound.message')}</p>
-      <p class="block">
+      <p class="b-block">{i18n.t('NotFound.message')}</p>
+      <p class="b-block">
         <a class="button" href="/">
           <ArrowLeftIcon title={'Back home'} />
           &nbsp;Home

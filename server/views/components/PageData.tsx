@@ -10,7 +10,7 @@ export const PageData = ({ page, debug }: DebugInfoProps) => {
     return (
       <details>
         <summary>Debug</summary>
-        <div class="block">
+        <div class="b-block">
           <input type="text" name="pageTitle" value={page?.pageTitle} />
         </div>
         <textarea name="pageContent">{page?.pageContent}</textarea>

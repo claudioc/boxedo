@@ -37,13 +37,13 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
             />
             <h1 class="title">{page.pageTitle}</h1>
 
-            <p class="block">
+            <p class="b-block">
               {i18n.t('MovePage.currentParentIs', {
                 title: parent ? parent.pageTitle : i18n.t('MovePage.noParent'),
               })}
             </p>
 
-            <p class="block" x-show="newParentId">
+            <p class="b-block" x-show="newParentId">
               {i18n.t('MovePage.newParentIs')} "
               <span x-text="newParentTitle" />"
             </p>
@@ -53,14 +53,14 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
             <input type="hidden" name="_csrf" value={token} />
           </form>
 
-          <div class="block">
+          <div class="b-block">
             <label class="checkbox">
               <input type="checkbox" x-model="moveToTop" />{' '}
               {i18n.t('MovePage.moveToTop')}
             </label>
           </div>
 
-          <div class="block" x-show="!moveToTop">
+          <div class="b-block" x-show="!moveToTop">
             <div class="field">
               <label class="label" for="search">
                 {i18n.t('MovePage.searchNewParent')}

@@ -27,7 +27,7 @@ export const Feedback = ({ ctx, feedback }: FeedbackProps) => {
     <div
       class={[
         styles.Feedback,
-        'block',
+        'b-block',
         'notification',
         'is-light',
         'px-4',

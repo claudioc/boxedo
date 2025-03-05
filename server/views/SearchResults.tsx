@@ -23,8 +23,8 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
         <ul>
           {results.map((result) => (
             <li class="content">
-              <div class="block">
-                <div class={[styles.item, 'block', 'is-size-5']}>
+              <div class="b-block">
+                <div class={[styles.item, 'b-block', 'is-size-5']}>
                   <DocumentIcon />
                   <a href={slugUrl(result.pageSlug)}>{result.title}</a>
                 </div>
