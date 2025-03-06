@@ -51,6 +51,10 @@ export const RouterSchemas = {
     filename: { type: 'string' },
   } as const),
 
+  NavQuery: buildSchema([], {
+    disabled: { type: 'boolean', default: false },
+  } as const),
+
   SearchQuery: buildSchema(['q'], {
     q: { type: 'string' },
   } as const),

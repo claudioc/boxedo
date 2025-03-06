@@ -395,17 +395,22 @@ const router = async (app: FastifyInstance) => {
   );
 
   /* Returns the navigation menu */
-  app.get<{ Params: FromSchema<typeof RS.PageParamsOptional> }>(
+  app.get<{
+    Params: FromSchema<typeof RS.PageParamsOptional>;
+    Querystring: FromSchema<typeof RS.NavQuery>;
+  }>(
     '/parts/nav/:pageId?',
     {
       preHandler: requireAuth,
       schema: {
         params: RS.PageParamsOptional,
+        querystring: RS.NavQuery,
       },
     },
     async (req, rep) => {
       const { pageId } = req.params;
       const pageRepo = app.repoFactory.getPageRepository();
+      const { disabled } = req.query;
 
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
@@ -430,6 +435,7 @@ const router = async (app: FastifyInstance) => {
       rep.html(
         <Nav
           forest={forest}
+          disabled={disabled}
           currentPageId={
             // Don't highlight the landing page in the menu
             pageId && app.settings.landingPageId !== pageId ? pageId : ''

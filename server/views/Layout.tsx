@@ -6,7 +6,6 @@ import { Head } from './components/Head';
 import { Search } from './components/Search';
 import { CogIcon } from './icons/CogIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
-import styles from './Layout.module.css';
 
 interface LayoutProps extends WithCtx {
   title: string;
@@ -51,88 +50,82 @@ export const Layout = ({
         )}
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
-        <main data-context={context}>
+        <main class="flex m-0" data-context={context}>
           {/* "main > div" is referenced in App.ts */}
-          <div class={[styles.mainLeft]}>
-            <header class={[styles.header, 'b-block']}>
-              <div class="b-block">
-                <div class="level">
-                  <div class={[styles.title]}>
-                    <a href="/">{settings.siteTitle}</a>
-                  </div>
-                  <div class="level-right">
-                    <menu class="level">
-                      {user ? (
+          <div class={['min-h-screen', 'bg-neutral', 'max-w-72']}>
+            <header>
+              <div class="navbar">
+                <div class={['uppercase', 'flex-1']}>
+                  <a href="/">{settings.siteTitle}</a>
+                </div>
+                <div class="flex-none">
+                  <ul class="menu menu-xs menu-horizontal">
+                    {user ? (
+                      <li>
                         <form method="post" action="/auth/logout">
                           <button
                             type="submit"
                             aria-label={i18n.t('Login.logout')}
-                            class="has-text-grey-lighter"
                             title={i18n.t('Login.logout')}
                           >
                             <LogoutIcon title={i18n.t('Login.logout')} />
                           </button>
                         </form>
-                      ) : (
-                        ''
-                      )}
-
+                      </li>
+                    ) : null}
+                    <li>
                       <a
                         href="/settings"
                         aria-label={i18n.t('Navigation.editSettings')}
-                        class="has-text-grey-lighter"
                         title={i18n.t('Navigation.editSettings')}
                       >
                         <CogIcon />
                       </a>
-                    </menu>
-                  </div>
+                    </li>
+                  </ul>
                 </div>
-              </div>
-              <div class="b-block">
-                <Search ctx={ctx} />
               </div>
             </header>
 
-            {withCreateButton && (
-              <div class="b-block">
-                {/* The href and text is dynamically updated by our htmx extension */}
-                <a
-                  class="button is-outlined is-info is-small"
-                  href={createButtonLink}
-                  data-labelNested={i18n.t('Navigation.createNestedPage')}
-                >
-                  {isLandingPage
-                    ? i18n.t('Navigation.createTopPage')
-                    : i18n.t('Navigation.createNestedPage')}
-                </a>
+            <div class="p-4">
+              <div class="mb-5">
+                <Search ctx={ctx} />
               </div>
-            )}
-            <aside
-              class={[styles.aside, 'b-block']}
-              hx-get={`/parts/nav/${page ? page._id : ''}`}
-              hx-trigger="load once"
-            >
-              <div class="skeleton-lines">
-                <div />
-                <div />
-                <div />
-                <div />
-                <div />
-              </div>
-            </aside>
+
+              {withCreateButton && (
+                <div class="mb-5">
+                  {/* The href and text is dynamically updated by our htmx extension */}
+                  <a
+                    class="j-btn"
+                    href={createButtonLink}
+                    data-labelNested={i18n.t('Navigation.createNestedPage')}
+                  >
+                    {isLandingPage
+                      ? i18n.t('Navigation.createTopPage')
+                      : i18n.t('Navigation.createNestedPage')}
+                  </a>
+                </div>
+              )}
+
+              <aside
+                class={['mb-5', 'text-base-content']}
+                hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
+                hx-trigger="load once"
+              >
+                <div class="flex w-52 flex-col gap-4">
+                  <div class="skeleton h-2 w-28" />
+                  <div class="skeleton h-2 w-full" />
+                  <div class="skeleton h-2 w-28" />
+                  <div class="skeleton h-2 w-full" />
+                </div>
+              </aside>
+            </div>
           </div>
 
-          <div class={[styles.mainRight, 'column', 'p-3', 'pr-5']}>
-            <button
+          <div class={['flex-1', 'p-3', 'pr-5']}>
+            {/* <button
               type="button"
               x-on:click="window.App.toggleNavbar()"
-              class={[
-                'navbar-burger',
-                'level',
-                'level-right',
-                'is-hidden-tablet',
-              ]}
               aria-label="menu"
               aria-expanded="false"
             >
@@ -140,7 +133,7 @@ export const Layout = ({
               <span aria-hidden="true" />
               <span aria-hidden="true" />
               <span aria-hidden="true" />
-            </button>
+            </button> */}
             <div
               x-show="$store.has.some()"
               x-init="setTimeout(() => $store.has.none(), 2000)"

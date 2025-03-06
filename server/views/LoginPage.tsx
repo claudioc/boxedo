@@ -17,36 +17,33 @@ export const LoginPage = ({ ctx, token }: LoginPageProps) => {
       ctx={ctx}
       title={i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}
     >
-      <div class="container">
+      <div class="prose prose-headings:mt-0 -mt-48">
         <Feedback ctx={ctx} feedback={feedback} />
 
-        <h1 class="title">
-          {i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}
-        </h1>
+        <h2>{i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}</h2>
 
         {feedback && !isFeedbackError(feedback) ? (
           <p>{i18n.t('Login.allGood')}</p>
         ) : (
           <form method="POST" action="/auth/login">
             <input type="hidden" name="_csrf" value={token} />
-            <div class="field">
-              <label class="label" for="email">
+
+            <div>
+              <label class="input">
                 {i18n.t('common.email')}
-              </label>
-              <div class="control">
                 <input
                   autofocus="true"
-                  class="input"
                   type="email"
+                  class="grow"
                   name="email"
-                  id="email"
                   placeholder={i18n.t('Login.enterEmail')}
                   required
                 />
-              </div>
-              <p class="help">{i18n.t('Login.helpEmail')}</p>
+              </label>
+
+              <p>{i18n.t('Login.helpEmail')}</p>
             </div>
-            <button class="button is-primary" type="submit">
+            <button class="btn btn-primary" type="submit">
               {i18n.t('Login.sendMagicLink')}
             </button>
           </form>

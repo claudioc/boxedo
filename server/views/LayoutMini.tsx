@@ -1,6 +1,6 @@
 import type { WithCtx } from '~/../types';
+import { getBundleFilename } from '~/lib/assets';
 import { Head } from './components/Head';
-import styles from './Layout.module.css';
 
 interface LayoutMiniProps extends WithCtx {
   title: string;
@@ -19,19 +19,20 @@ export const LayoutMini = ({ ctx, title, children }: LayoutMiniProps) => {
         ctx={ctx}
       />
       <body>
-        <main class="hero is-fullheight">
-          <header class={[styles.header]}>
-            <div class={[styles.title, 'is-size-5']}>
-              <a href="/" class="has-text-warning">
+        <script src={getBundleFilename('appMini')} />
+        <main class="min-h-screen flex flex-col">
+          <header class="p-4 prose">
+            <h1>
+              <a href="/" class="uppercase no-underline ">
                 {settings.siteTitle}
               </a>
-            </div>
+            </h1>
           </header>
 
-          <div class="hero-body">
-            <div class="container">
-              <div class="columns is-centered">
-                <div class="column is-5-tablet is-5-desktop is-5-widescreen">
+          <div class="flex-1 flex items-center justify-center">
+            <div class="container mx-auto px-4">
+              <div class="flex justify-center">
+                <div class="w-full md:w-5/12 lg:w-5/12 xl:w-5/12">
                   {children}
                 </div>
               </div>

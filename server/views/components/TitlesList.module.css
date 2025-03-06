@@ -1,3 +1,0 @@
-.item {
-  composes: documentTitleAsListItem from "../styles/common.module.css";
-}

@@ -1,7 +1,6 @@
 import type Polyglot from 'node-polyglot';
 import type { PageTitle } from '~/../types';
 import { DocumentIcon } from '../icons/DocumentIcon';
-import styles from './TitlesList.module.css';
 
 interface TitlesListProps {
   titles: PageTitle[];
@@ -16,7 +15,7 @@ export const TitlesList = ({ titles, i18n }: TitlesListProps) => {
         <ul>
           {titles.map((title) => (
             <li>
-              <div class={styles.item}>
+              <div>
                 <DocumentIcon />
                 <a
                   href={`#${title.pageId}`}
@@ -31,7 +30,7 @@ export const TitlesList = ({ titles, i18n }: TitlesListProps) => {
         </ul>
       )}
       {titles.length === 0 && (
-        <div class={styles.noResults}>
+        <div>
           <em>{i18n.t('MovePage.noResults')}</em>
         </div>
       )}

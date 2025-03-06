@@ -6,19 +6,15 @@ export const Search = ({ ctx }: WithCtx) => {
 
   return (
     <form action="/search" method="get">
-      <div class="field">
-        <div class="control has-icons-left">
-          <input
-            type="search"
-            class="input is-small"
-            name="q"
-            placeholder={`${i18n.t('Search.search')}…`}
-          />
-          <span class="icon is-small is-left">
-            <SearchIcon />
-          </span>
-        </div>
-      </div>
+      <label class="input">
+        <SearchIcon />
+        <input
+          type="search"
+          name="q"
+          class="grow input-sm"
+          placeholder={`${i18n.t('Search.search')}…`}
+        />
+      </label>
     </form>
   );
 };

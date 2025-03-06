@@ -116,13 +116,13 @@ const setupHtmx = () => {
       // by a change the Alpine store
 
       // Activate the current page in the nav
-      const [parent, activeClass] = (el.dataset.activate ?? '').split('/');
-      if (parent && activeClass) {
-        el.closest(parent)
+      const [navElement, activeClass] = (el.dataset.activate ?? '').split('/');
+      if (navElement && activeClass) {
+        el.closest(navElement)
           ?.querySelectorAll(`.${activeClass}`)
           .forEach((el) => el.classList.remove(activeClass));
 
-        el.classList.add(activeClass);
+        el.parentElement?.classList.add(activeClass);
       }
 
       // Update the main context

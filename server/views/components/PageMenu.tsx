@@ -1,5 +1,4 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { EllipsisIcon } from '../icons/EllipsisIcon';
 
 interface PageMenuProps extends WithCtx {
   page?: PageModel;
@@ -13,33 +12,35 @@ export const PageMenu = ({ ctx, page }: PageMenuProps) => {
   }
 
   return (
-    <div class="dropdown is-right is-hoverable">
-      <div class="dropdown-trigger">
-        <button
-          class="button is-text-mobile is-small"
-          aria-haspopup="true"
-          aria-controls="dropdown-menu"
-          type="button"
-        >
-          <span class="is-hidden-mobile">{i18n.t('PageMenu.actions')} …</span>
-          <span class="is-hidden-tablet">
-            <EllipsisIcon title={i18n.t('PageMenu.actions')} />
-          </span>
-        </button>
+    <div class="dropdown dropdown-hover dropdown-end">
+      {/* biome-ignore lint/a11y/useFocusableInteractive: */}
+      {/* biome-ignore lint/a11y/useSemanticElements: */}
+      <div tabindex="0" role="button" class="btn m-0" aria-haspopup="true">
+        <span>{i18n.t('PageMenu.actions')} …</span>
       </div>
-      <div class="dropdown-menu" id="dropdown-menu">
-        <div class="dropdown-content">
+      {/* <span>
+        <EllipsisIcon title={i18n.t('PageMenu.actions')} />
+      </span> */}
+      <ul
+        tabindex="0"
+        class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+      >
+        <li>
           <a href={`/pages/${page._id}/edit`} class="dropdown-item">
             {i18n.t('PageMenu.editThisPage')}
           </a>
+        </li>
+        <li>
           <a href={`/pages/${page._id}/move`} class="dropdown-item">
             {i18n.t('PageMenu.moveThisPage')}
           </a>
+        </li>
+        <li>
           <a href={`/pages/${page._id}/history`} class="dropdown-item">
             {i18n.t('PageMenu.pageHistory')}
           </a>
-        </div>
-      </div>
+        </li>
+      </ul>
     </div>
   );
 };

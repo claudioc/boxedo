@@ -7,11 +7,12 @@ import {
 } from '~/constants';
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/global.css?_=${CACHE_BUSTER}`;
-type Bundle = 'app' | 'editor';
+type Bundle = 'app' | 'editor' | 'appMini';
 
 const bundleNames: Record<Bundle, string> = {
   app: '',
   editor: '',
+  appMini: '',
 };
 
 export const getBundleFilename = (bundle: Bundle): string => {

@@ -1,21 +1,29 @@
 import type { Context, NavItem } from '~/../types';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
-import styles from './Nav.module.css';
 import { SortableEnabler } from './SortableEnabler';
 
 interface NavProps {
   forest: NavItem[];
   currentPageId: string;
+  // In certain cases we don't want people to use the navigation
+  // i.e. during page creation or editing
+  disabled: boolean;
 }
 
 let pageId = '';
 
-export const Nav = ({ forest, currentPageId }: NavProps) => {
+export const Nav = ({ forest, currentPageId, disabled }: NavProps) => {
   pageId = currentPageId;
 
   return (
     <>
-      <menu class={styles.nav} id="main-navigation">
+      <menu
+        class={[
+          'menu p-0 -ml-3',
+          disabled ? 'pointer-events-none opacity-50' : '',
+        ]}
+        id="main-navigation"
+      >
         {forest.length ? <NavTree items={forest} /> : null}
       </menu>
       {forest.length ? <SortableEnabler /> : null}
@@ -46,7 +54,7 @@ const NavItemComponent = ({ item }: NavItemProps) => {
   const context: Context = 'viewing page';
 
   return (
-    <div class={styles.item}>
+    <div class={['items-start', item.pageId === pageId ? 'j-active' : '']}>
       <DocumentIcon isSortableHandle />
       <a
         href={item.link}
@@ -54,11 +62,10 @@ const NavItemComponent = ({ item }: NavItemProps) => {
         hx-target="#main-page-body"
         hx-push-url={item.link}
         hx-ext="activate"
-        data-activate="aside/is-active"
+        data-activate=".menu/j-active"
         data-context={context}
         data-page-id={item.pageId}
         data-position={item.position}
-        class={item.pageId === pageId ? 'is-active' : ''}
         title={item.title}
       >
         {item.title}

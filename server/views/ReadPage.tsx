@@ -1,9 +1,9 @@
-import { Layout } from './Layout';
 import type { PageModel, TextSize, WithCtx } from '~/../types';
 import { formatDate, isSameTimestamp } from '~/lib/helpers';
-import { PageMenu } from './components/PageMenu';
-import { PageBody } from './components/PageBody';
 import { MainContent } from './components/MainContent';
+import { PageBody } from './components/PageBody';
+import { PageMenu } from './components/PageMenu';
+import { Layout } from './Layout';
 
 export interface ReadPageProps extends WithCtx {
   page?: PageModel;
@@ -25,13 +25,13 @@ const welcomePage: PageModelPartial = {
 const mapTextSize = (size: TextSize) => {
   switch (size) {
     case 'S':
-      return 'is-size-7';
+      return 'text-sm';
     case 'M':
-      return 'is-size-6';
+      return 'text-base';
     case 'L':
-      return 'is-size-5';
+      return 'text-lg';
     case 'XL':
-      return 'is-size-4';
+      return 'text-xl';
   }
 };
 
@@ -73,10 +73,12 @@ export const ReadPage = ({
       data-page-id={page?._id}
     >
       {showPage && (
-        <div class="level level-right has-text-grey is-size-7 page-actions is-flex-direction-row">
-          {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
-          {!isSameTimestamp(page.updatedAt, page.createdAt) &&
-            ` (${formatDate(page.updatedAt)})`}
+        <div class="text-sm flex justify-end items-center gap-2 mb-5 ">
+          <div class="opacity-50">
+            {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
+            {!isSameTimestamp(page.updatedAt, page.createdAt) &&
+              ` (${formatDate(page.updatedAt)})`}
+          </div>
           <PageMenu ctx={ctx} page={page} />
         </div>
       )}

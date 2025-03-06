@@ -4,7 +4,6 @@ import {
   getFeedbackKeyByCode,
   isFeedbackError,
 } from '~/lib/feedbacks';
-import styles from './Feedback.module.css';
 
 interface FeedbackProps extends WithCtx {
   feedback?: FeedbackType;
@@ -25,19 +24,20 @@ export const Feedback = ({ ctx, feedback }: FeedbackProps) => {
    */
   return (
     <div
-      class={[
-        styles.Feedback,
-        'b-block',
-        'notification',
-        'is-light',
-        'px-4',
-        'py-3',
-        isFeedbackError(feedback) ? 'is-danger' : 'is-success',
-      ]}
-      role={isFeedbackError(feedback) ? 'alert' : 'status'}
+      x-data="{ isOpen: true }"
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 w-1/2 max-w-lg z-50"
     >
-      <button type="button" class="delete" x-on:click="$store.has.none()" />
-      {i18n.t(getFeedbackKeyByCode(feedback.code))}
+      <div
+        x-show="isOpen"
+        x-on:click="isOpen=false"
+        class={[
+          'alert',
+          isFeedbackError(feedback) ? 'alert-error' : 'alert-success',
+        ]}
+        role={isFeedbackError(feedback) ? 'alert' : 'status'}
+      >
+        {i18n.t(getFeedbackKeyByCode(feedback.code))}
+      </div>
     </div>
   );
 };

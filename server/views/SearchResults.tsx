@@ -1,7 +1,6 @@
 import type { SearchResult, WithCtx } from '~/../types';
 import { slugUrl } from '~/lib/helpers';
 import { Layout } from './Layout';
-import styles from './SearchResults.module.css';
 import { DocumentIcon } from './icons/DocumentIcon';
 
 interface SearchResultsProps extends WithCtx {
@@ -23,8 +22,8 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
         <ul>
           {results.map((result) => (
             <li class="content">
-              <div class="b-block">
-                <div class={[styles.item, 'b-block', 'is-size-5']}>
+              <div class="mb-5">
+                <div class="mb-5">
                   <DocumentIcon />
                   <a href={slugUrl(result.pageSlug)}>{result.title}</a>
                 </div>

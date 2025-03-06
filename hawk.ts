@@ -188,6 +188,7 @@ const setupFileWatchers: TaskFn = async (_) => {
             'lint-server',
             'clean-server',
             'build-server',
+            'build-daisyui',
             'start-api-server',
             'notify-server-update',
           ]);
@@ -328,7 +329,11 @@ const lint: TaskFn = async (_, target = 'client') => {
 
 const buildClient: TaskFn = async (_) => {
   await esbuild.build({
-    entryPoints: ['./client/app.ts', './client/editor.ts'],
+    entryPoints: [
+      './client/app.ts',
+      './client/editor.ts',
+      './client/appMini.ts',
+    ],
     bundle: true,
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',

@@ -1,22 +1,3 @@
-.mainLeft {
-  background-color: #1e2a3b;
-  min-height: 100vh;
-  width: 280px !important;
-
-  .aside {
-    white-space: nowrap;
-  }
-
-  .aside * {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-:global(#main-page-body) {
-  height: 100%;
-}
-
 @media screen and (max-width: 768px) {
   .mainLeft {
     position: fixed;
@@ -30,17 +11,5 @@
     &:global(.isOpen) {
       inset-inline-start: 0;
     }
-  }
-}
-
-.header {
-  text-transform: uppercase;
-  .title {
-    white-space: nowrap;
-  }
-  a {
-    text-overflow: ellipsis;
-    max-width: 225px;
-    overflow: hidden;
   }
 }

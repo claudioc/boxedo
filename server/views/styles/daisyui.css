@@ -1,7 +1,34 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  /* biome-ignore lint/correctness/noUnknownProperty: */
+  themes: dracula --default;
+}
+
+.j-btn {
+  @apply btn btn-outline btn-primary btn-sm;
+}
+
+/* We need to use j-active because apparently Daisy has issues with menu-active class */
+.j-active {
+  @apply bg-base-content/10 cursor-pointer outline-hidden;
+  box-shadow: 0 1px oklch(0% 0 0 / 0.01) inset, 0 -1px oklch(100% 0 0 / 0.01)
+    inset;
+}
 
 /* Compatibility with Bulma */
 .b-block {
   @apply mb-5;
+}
+
+.b-level {
+  @apply flex items-center justify-between;
+}
+
+.b-level-left {
+  @apply flex items-center mr-auto;
+}
+
+.b-level-right {
+  @apply flex items-center ml-auto;
 }
