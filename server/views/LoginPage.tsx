@@ -1,6 +1,7 @@
 import type { WithCtx } from '~/../types';
 import { getFeedbackByCode, isFeedbackError } from '~/lib/feedbacks';
 import { Feedback } from './components/Feedback';
+import { EmailIcon } from './icons/EmailIcon';
 import { LayoutMini } from './LayoutMini';
 
 interface LoginPageProps extends WithCtx {
@@ -23,7 +24,10 @@ export const LoginPage = ({ ctx, token }: LoginPageProps) => {
         <h2>{i18n.t('Login.loginTo', { siteTitle: settings.siteTitle })}</h2>
 
         {feedback && !isFeedbackError(feedback) ? (
-          <p>{i18n.t('Login.allGood')}</p>
+          <p class="flex gap-2">
+            <EmailIcon title={i18n.t('Login.allGood')} />
+            {i18n.t('Login.allGood')}
+          </p>
         ) : (
           <form method="POST" action="/auth/login">
             <input type="hidden" name="_csrf" value={token} />
