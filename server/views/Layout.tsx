@@ -5,6 +5,7 @@ import { Feedback } from './components/Feedback';
 import { Head } from './components/Head';
 import { Search } from './components/Search';
 import { CogIcon } from './icons/CogIcon';
+import { HamburgerIcon } from './icons/HamburgerIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
 
 interface LayoutProps extends WithCtx {
@@ -50,12 +51,32 @@ export const Layout = ({
         )}
 
         {/* We use the context to identify what we are doing, like 'editing page' for example; useful for CSS or JS targeting */}
-        <main class="flex m-0" data-context={context}>
-          {/* "main > div" is referenced in App.ts */}
-          <div class={['min-h-screen', 'bg-neutral', 'max-w-72']}>
-            <header>
+        <main data-context={context} class="drawer lg:drawer-open">
+          <input id="layout-drawer" type="checkbox" class="drawer-toggle" />
+          <div class="drawer-content flex flex-col p-4">
+            <div class="flex justify-end">
+              <label
+                for="layout-drawer"
+                aria-label="open sidebar"
+                class="btn btn-square btn-ghost lg:hidden"
+              >
+                <HamburgerIcon title="Open sidebar" />
+              </label>
+            </div>
+            <div
+              x-show="$store.has.some()"
+              x-init="setTimeout(() => $store.has.none(), 3000)"
+            >
+              <Feedback ctx={ctx} feedback={getFeedbackByCode(feedbackCode)} />
+            </div>
+            {/* #main-page-body is used as a hx-target */}
+            <div id="main-page-body">{children}</div>
+          </div>
+
+          <div class="drawer-side min-h-screen bg-neutral max-w-72">
+            <div>
               <div class="navbar">
-                <div class={['uppercase', 'flex-1']}>
+                <div class="uppercase flex-1">
                   <a href="/">{settings.siteTitle}</a>
                 </div>
                 <div class="flex-none">
@@ -85,63 +106,47 @@ export const Layout = ({
                   </ul>
                 </div>
               </div>
-            </header>
 
-            <div class="p-4">
-              <div class="mb-5">
-                <Search ctx={ctx} />
-              </div>
+              <div class="p-4">
+                <label
+                  for="layout-drawer"
+                  aria-label="close sidebar"
+                  class="drawer-overlay"
+                />
 
-              {withCreateButton && (
                 <div class="mb-5">
-                  {/* The href and text is dynamically updated by our htmx extension */}
-                  <a
-                    class="j-btn"
-                    href={createButtonLink}
-                    data-labelNested={i18n.t('Navigation.createNestedPage')}
-                  >
-                    {isLandingPage
-                      ? i18n.t('Navigation.createTopPage')
-                      : i18n.t('Navigation.createNestedPage')}
-                  </a>
+                  <Search ctx={ctx} />
                 </div>
-              )}
 
-              <aside
-                class={['mb-5', 'text-base-content']}
-                hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
-                hx-trigger="load once"
-              >
-                <div class="flex w-52 flex-col gap-4">
-                  <div class="skeleton h-2 w-28" />
-                  <div class="skeleton h-2 w-full" />
-                  <div class="skeleton h-2 w-28" />
-                  <div class="skeleton h-2 w-full" />
-                </div>
-              </aside>
-            </div>
-          </div>
+                {withCreateButton && (
+                  <div class="mb-5">
+                    {/* The href and text is dynamically updated by our htmx extension */}
+                    <a
+                      class="j-btn"
+                      href={createButtonLink}
+                      data-labelNested={i18n.t('Navigation.createNestedPage')}
+                    >
+                      {isLandingPage
+                        ? i18n.t('Navigation.createTopPage')
+                        : i18n.t('Navigation.createNestedPage')}
+                    </a>
+                  </div>
+                )}
 
-          <div class={['flex-1', 'p-3', 'pr-5']}>
-            {/* <button
-              type="button"
-              x-on:click="window.App.toggleNavbar()"
-              aria-label="menu"
-              aria-expanded="false"
-            >
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-              <span aria-hidden="true" />
-            </button> */}
-            <div
-              x-show="$store.has.some()"
-              x-init="setTimeout(() => $store.has.none(), 2000)"
-            >
-              <Feedback ctx={ctx} feedback={getFeedbackByCode(feedbackCode)} />
+                <aside
+                  class={['mb-5', 'text-base-content']}
+                  hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
+                  hx-trigger="load once"
+                >
+                  <div class="flex w-52 flex-col gap-4">
+                    <div class="skeleton h-2 w-28" />
+                    <div class="skeleton h-2 w-full" />
+                    <div class="skeleton h-2 w-28" />
+                    <div class="skeleton h-2 w-full" />
+                  </div>
+                </aside>
+              </div>
             </div>
-            {/* #main-page-body is used as a hx-target */}
-            <div id="main-page-body">{children}</div>
           </div>
         </main>
       </body>

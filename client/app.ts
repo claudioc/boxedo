@@ -118,11 +118,6 @@ class App {
     destroySortable();
   }
 
-  toggleNavbar() {
-    const nav = document.querySelector('main > div');
-    nav?.classList.toggle('isOpen');
-  }
-
   resetForm() {
     setTimeout(() => {
       storeForm.submitting = false;

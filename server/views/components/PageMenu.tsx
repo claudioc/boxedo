@@ -1,4 +1,5 @@
 import type { PageModel, WithCtx } from '~/../types';
+import { EllipsisIcon } from '../icons/EllipsisIcon';
 
 interface PageMenuProps extends WithCtx {
   page?: PageModel;
@@ -13,17 +14,19 @@ export const PageMenu = ({ ctx, page }: PageMenuProps) => {
 
   return (
     <div class="dropdown dropdown-hover dropdown-end">
-      {/* biome-ignore lint/a11y/useFocusableInteractive: */}
-      {/* biome-ignore lint/a11y/useSemanticElements: */}
-      <div tabindex="0" role="button" class="btn m-0" aria-haspopup="true">
-        <span>{i18n.t('PageMenu.actions')} …</span>
+      <div
+        tabindex="0"
+        class="btn-ghost sm:btn sm:btn-solid"
+        aria-haspopup="true"
+      >
+        <span class="hidden md:block">{i18n.t('PageMenu.actions')} …</span>
+        <span class="block md:hidden">
+          <EllipsisIcon title={i18n.t('PageMenu.actions')} />
+        </span>
       </div>
-      {/* <span>
-        <EllipsisIcon title={i18n.t('PageMenu.actions')} />
-      </span> */}
       <ul
         tabindex="0"
-        class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+        class="dropdown-content menu bg-base-300 rounded-field z-1 w-52 p-2"
       >
         <li>
           <a href={`/pages/${page._id}/edit`} class="dropdown-item">
