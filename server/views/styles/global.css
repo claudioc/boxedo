@@ -1,0 +1,178 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  /* biome-ignore lint/correctness/noUnknownProperty: */
+  themes: dracula --default;
+}
+
+.j-btn {
+  @apply btn btn-outline btn-primary btn-sm;
+}
+
+/* We need to use j-active because apparently Daisy has issues with menu-active class */
+.j-active {
+  @apply bg-base-content/10 cursor-pointer outline-hidden;
+  box-shadow: 0 1px oklch(0% 0 0 / 0.01) inset, 0 -1px oklch(100% 0 0 / 0.01)
+    inset;
+}
+
+@media screen and (min-width: 769px) and (max-width: 1215px) {
+  .MainContent {
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+}
+
+@media screen and (min-width: 1216px) {
+  .MainContent {
+    margin-left: 15vw;
+    margin-right: 15vw;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .MainContent {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.bubbleMenu {
+  background-color: white;
+  color: #222;
+  border-radius: 3px;
+  display: flex;
+  padding: 0.2rem;
+  width: fit-content;
+  > div {
+    display: flex;
+    gap: .3rem;
+  }
+  button {
+    line-height: 1;
+    padding: .2rem;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: rgb(228, 228, 228);
+    }
+  }
+
+  .separator {
+    border-right: 1px solid rgb(228, 228, 228);
+  }
+}
+
+.floatingMenu {
+  background-color: white;
+  color: #222;
+  border-radius: 3px;
+  display: flex;
+  padding: 0.2rem;
+  width: fit-content;
+  gap: .3rem;
+  button {
+    line-height: 1;
+    padding: .2rem;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: rgb(228, 228, 228);
+    }
+  }
+
+  .separator {
+    border-right: 1px solid rgb(228, 228, 228);
+  }
+}
+
+/* Placeholder (on every new line) */
+.tiptap .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #595b5e;
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap.ProseMirror {
+  outline: 0;
+  padding: 0.5rem;
+  /* background-color: #222; */
+}
+
+.tiptap-img {
+  display: block;
+
+  &.tiptap-left {
+    margin: 0 0 var(--bulma-content-block-margin-bottom) 0;
+  }
+
+  &.tiptap-center {
+    margin: 0 auto var(--bulma-content-block-margin-bottom) auto;
+  }
+
+  &.tiptap-right {
+    margin: 0 0 var(--bulma-content-block-margin-bottom) auto;
+  }
+}
+
+#editor-data {
+  display: none;
+}
+
+.sortable-handle {
+  cursor: grab;
+}
+
+.sortable-ghost {
+  background: transparent !important;
+  opacity: 0.5;
+  cursor: grab !important;
+  border: 1px solid gray;
+}
+
+.tablecommands-wrapper {
+  width: 280px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  padding: 8px;
+  border: 1px solid #eee;
+}
+
+.tablecommands-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tablecommands-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.tablecommands-item:hover,
+.tablecommands-item.is-selected {
+  background-color: #f0f0f0;
+}
+
+.tablecommands-item-icon {
+  margin-right: 8px;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.tablecommands-item-title {
+  font-size: 14px;
+}

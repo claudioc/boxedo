@@ -24,12 +24,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
       context="editing page"
     >
       <PageFormWrapper ctx={ctx}>
-        <form
-          action=""
-          method="post"
-          class="b-block"
-          x-on:submit="App.validate"
-        >
+        <form action="" method="post" class="mb-5" x-on:submit="App.validate">
           <input type="hidden" name="_csrf" value={token} />
           <input type="hidden" name="rev" value={page._rev} />
           <PageActions
@@ -39,7 +34,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
             title={i18n.t('EditPage.title')}
           />
           <MainContent>
-            <div id="editor-placeholder" class="block content">
+            <div id="editor-placeholder" class="prose">
               <h1>{page.pageTitle}</h1>
               {page.pageContent}
             </div>
@@ -47,10 +42,10 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
           <PageData page={page} debug={ctx.app.is('development')} />
         </form>
 
-        <div class="level is-flex-direction-row is-justify-content-right">
+        <div class="flex justify-end">
           <button
             type="button"
-            class="button is-danger is-outlined is-small"
+            class="btn btn-warning"
             id="delete-page-button"
             x-on:click="$refs.dialog.showModal()"
           >
@@ -58,15 +53,16 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
           </button>
         </div>
 
-        <dialog x-ref="dialog" class="card m-auto">
-          <form method="dialog">
-            <h2 class="title is-2">{i18n.t('EditPage.deletePageConfirm')}</h2>
+        {/* Delete page confirmation dialog */}
+        <dialog x-ref="dialog" class="modal">
+          <div class="modal-box prose">
+            <h3>{i18n.t('EditPage.deletePageConfirm')}</h3>
             <p>{i18n.t('EditPage.deletePageWarning')}</p>
-            <div class="level">
-              <menu class="level-item level-right">
+            <form method="dialog">
+              <menu class="flex justify-end gap-3">
                 <button
                   type="button"
-                  class="button is-primary is-outlined"
+                  class="btn btn-primary"
                   value="default"
                   x-on:click="window.onbeforeunload=null; $refs.deleteForm.submit()"
                 >
@@ -74,15 +70,15 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
                 </button>
                 <button
                   type="button"
-                  class="button is-danger is-outlined"
+                  class="btn"
                   value="cancel"
                   x-on:click="$refs.dialog.close()"
                 >
                   {i18n.t('EditPage.deletePageCancelButton')}
                 </button>
               </menu>
-            </div>
-          </form>
+            </form>
+          </div>
         </dialog>
 
         <form

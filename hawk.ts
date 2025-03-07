@@ -188,24 +188,17 @@ const setupFileWatchers: TaskFn = async (_) => {
             'lint-server',
             'clean-server',
             'build-server',
-            'build-daisyui',
+            'build-css',
             'start-api-server',
             'notify-server-update',
           ]);
         }
 
-        if (event.filename?.match(/\.(module\.css)$/)) {
-          console.log(`[Hawk] Server CSS change: ${event.filename}`);
+        if (event.filename?.match(/(global\.css)$/)) {
+          console.log(`[Hawk] Server global css change: ${event.filename}`);
           // The server is rebuilt but the js code is not changing
           // so we don't need to restart the server
-          taskManager.run(['build-server', 'notify-server-update']);
-        }
-
-        if (event.filename?.match(/(daisyui\.css)$/)) {
-          console.log(`[Hawk] Server DaisyUI css change: ${event.filename}`);
-          // The server is rebuilt but the js code is not changing
-          // so we don't need to restart the server
-          taskManager.run(['build-daisyui', 'notify-server-update']);
+          taskManager.run(['build-css', 'notify-server-update']);
         }
 
         if (event.filename?.match(/\.(json)$/)) {
@@ -214,7 +207,7 @@ const setupFileWatchers: TaskFn = async (_) => {
           taskManager.run([
             'clean-server',
             'build-server',
-            'build-daisyui',
+            'build-css',
             'start-api-server',
             'notify-server-update',
           ]);
@@ -259,9 +252,9 @@ const setupFileWatchers: TaskFn = async (_) => {
   return true;
 };
 
-const buildDaisyUi: TaskFn = async (_) => {
+const buildCss: TaskFn = async (_) => {
   try {
-    console.log('[Hawk] Building DaisyUI CSS…');
+    console.log('[Hawk] Building global CSS…');
 
     return new Promise<boolean>((resolve) => {
       const process = spawn(
@@ -269,9 +262,9 @@ const buildDaisyUi: TaskFn = async (_) => {
         [
           '@tailwindcss/cli',
           '-i',
-          './server/views/styles/daisyui.css',
+          './server/views/styles/global.css',
           '-o',
-          './dist/server/daisyui.css',
+          './dist/server/global.css',
         ],
         {
           stdio: 'inherit',
@@ -279,7 +272,7 @@ const buildDaisyUi: TaskFn = async (_) => {
       );
 
       process.on('error', (err) => {
-        console.error('[Hawk] Error building DaisyUI:', err);
+        console.error('[Hawk] Error building global.css:', err);
         resolve(false);
       });
 
@@ -287,13 +280,13 @@ const buildDaisyUi: TaskFn = async (_) => {
         if (code === 0) {
           resolve(true);
         } else {
-          console.error(`[Hawk] DaisyUI build failed with code ${code}`);
+          console.error(`[Hawk] global.css build failed with code ${code}`);
           resolve(false);
         }
       });
     });
   } catch (error) {
-    console.error('[Hawk] Error in buildDaisyUi task:', error);
+    console.error('[Hawk] Error in buildCss task:', error);
     return false;
   }
 };
@@ -560,7 +553,7 @@ taskManager.registerTask('start-api-server', startApiServer);
 taskManager.registerTask('ready', ready);
 taskManager.registerTask('notify-client-update', notifyUpdates, 'client');
 taskManager.registerTask('notify-server-update', notifyUpdates, 'server');
-taskManager.registerTask('build-daisyui', buildDaisyUi, 'server');
+taskManager.registerTask('build-css', buildCss, 'server');
 
 if (process.env.NODE_ENV === 'production') {
   taskManager.run(
@@ -569,7 +562,7 @@ if (process.env.NODE_ENV === 'production') {
       'clean-server',
       'build-client',
       'build-server',
-      'build-daisyui',
+      'build-css',
     ],
     true
   );
@@ -585,7 +578,7 @@ if (process.env.NODE_ENV === 'production') {
       'type-check-server',
       'lint-server',
       'build-server',
-      'build-daisyui',
+      'build-css',
       'start-sse-server',
       'setup-file-watchers',
       'start-api-server',

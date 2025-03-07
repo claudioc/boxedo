@@ -195,6 +195,7 @@
 
   "common": {
     "OK": "OK",
+    "or": "or",
     "cancel": "Cancel",
     "email": "Email"
   }

@@ -22,8 +22,6 @@ import {
   UnderlineIcon,
 } from '../icons/editorIcons';
 
-import styles from './EditorEnabler.module.css';
-
 interface EditorEnablerProps extends WithCtx {}
 
 export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
@@ -32,7 +30,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
   return (
     <>
       {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
-      <div class={[styles.bubbleMenu, 'bubbleMenu']}>
+      <div class={'bubbleMenu'}>
         <div x-show="!$store.editorState.isImage()">
           <button type="button" data-command="bold">
             <BoldIcon title={i18n.t('EditIcons.boldSelection')} />
@@ -46,18 +44,18 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
           <button type="button" data-command="underline">
             <UnderlineIcon title={i18n.t('EditIcons.underlineSelection')} />
           </button>
-          <div aria-hidden="true" class={styles.separator} />
+          <div aria-hidden="true" class="separator" />
           <button type="button" data-command="highlight">
             <HighlightIcon title={i18n.t('EditIcons.highlightSelection')} />
           </button>
-          <div aria-hidden="true" class={styles.separator} />
+          <div aria-hidden="true" class="separator" />
           <button type="button" data-command="code">
             <CodeIcon title={i18n.t('EditIcons.code')} />
           </button>
           <button type="button" data-command="codeblock">
             <CodeBlockIcon title={i18n.t('EditIcons.codeBlock')} />
           </button>
-          <div aria-hidden="true" class={styles.separator} />
+          <div aria-hidden="true" class="separator" />
           <button type="button" data-command="h2">
             <H2Icon title={i18n.t('EditIcons.toggleH2Level')} />
           </button>
@@ -67,11 +65,11 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
           <button type="button" data-command="p">
             <ParagraphIcon title={i18n.t('EditIcons.paragraph')} />
           </button>
-          <div aria-hidden="true" class={styles.separator} />
+          <div aria-hidden="true" class="separator" />
           <button type="button" data-command="link">
             <LinkIcon title={i18n.t('EditIcons.toggleLink')} />
           </button>
-          <div aria-hidden="true" class={styles.separator} />
+          <div aria-hidden="true" class="separator" />
         </div>
         <div>
           <button type="button" data-command="alignLeft">
@@ -84,7 +82,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
             <RightIcon title={i18n.t('EditIcons.alignRight')} />
           </button>
           <div x-show="$store.editorState.isImage()">
-            <div aria-hidden="true" class={styles.separator} />
+            <div aria-hidden="true" class="separator" />
             <button type="button" data-command="sizeAuto">
               <AutoIcon title={i18n.t('EditIcons.sizeAuto')} />
             </button>
@@ -99,7 +97,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
       </div>
 
       {/* We need both global and local class. The global class is used to setup the menu for tiptap */}
-      <div class={[styles.floatingMenu, 'floatingMenu']}>
+      <div class={'floatingMenu'}>
         <button type="button" data-command="h2">
           <H2Icon title={i18n.t('EditIcons.toggleH2Level')} />
         </button>
@@ -121,50 +119,48 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
         id="uploadDialog"
         data-context="uploading file"
         x-ref="uploadDialog"
-        class="card m-auto"
+        class="modal open"
       >
-        <form method="dialog" x-on:submit="App.validate">
+        <div class="modal-box prose">
           <h3 class="title is-2">{i18n.t('ImageDialog.title')}</h3>
-          <div class="b-block">
-            <div class="field">
-              <label class="label" for="uploadUrl">
+
+          <form method="dialog" x-on:submit="App.validate">
+            <fieldset class="fieldset mb-5 w-full">
+              <legend class="fieldset-legend">
                 {i18n.t('ImageDialog.enterUrl')}
-              </label>
-              <div class="control">
-                <input
-                  name="uploadUrl"
-                  id="uploadUrl"
-                  class="input"
-                  type="text"
-                />
+              </legend>
+              <input
+                name="uploadUrl"
+                id="uploadUrl"
+                class="input w-full"
+                type="text"
+              />
+              <div class="fieldset-label">
+                {i18n.t('ImageDialog.enterUrlHelp')}
               </div>
-              <p class="help">{i18n.t('ImageDialog.enterUrlHelp')}</p>
-            </div>
-          </div>
+            </fieldset>
 
-          <hr />
+            <div class="divider uppercase">{i18n.t('common.or')}</div>
 
-          <div class="b-block">
-            <div class="field">
-              <label class="label" for="uploadFile">
+            <fieldset class="fieldset mb-5 w-full">
+              <legend class="fieldset-legend">
                 {i18n.t('ImageDialog.uploadFile')}
-              </label>
-              <div class="control">
-                <input
-                  name="uploadFile"
-                  id="uploadFile"
-                  class="input"
-                  type="file"
-                />
+              </legend>
+              <input
+                name="uploadFile"
+                id="uploadFile"
+                class="file-input w-full"
+                type="file"
+              />
+              <div class="fieldset-label">
+                {i18n.t('ImageDialog.uploadFileHelp')}
               </div>
-              <p class="help">{i18n.t('ImageDialog.uploadFileHelp')}</p>
-            </div>
-          </div>
-          <div class="level is-flex-direction-row">
-            <menu class="level-item level-right">
+            </fieldset>
+
+            <menu class="flex justify-end gap-3">
               <button
                 type="submit"
-                class="button is-primary is-outlined"
+                class="btn btn-primary"
                 value="default"
                 x-bind:disabled="$store.form.submitting"
                 x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
@@ -173,7 +169,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
               </button>
               <button
                 type="button"
-                class="button is-danger is-outlined"
+                class="btn"
                 value="cancel"
                 x-bind:disabled="$store.form.submitting"
                 x-on:click="$refs.uploadDialog.close()"
@@ -181,8 +177,8 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
                 {i18n.t('common.cancel')}
               </button>
             </menu>
-          </div>
-        </form>
+          </form>
+        </div>
       </dialog>
 
       <script defer>App.enableEditor();</script>
