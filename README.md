@@ -22,7 +22,7 @@ Some feature highlights:
 
 - **Hierarchical documentation organization** - pages are in a parent/child relationship to each others, with multiple roots. Single pages or even group of pages can be moved freely around
 - **Page history tracking** - using CouchDB's native support for revisions, it's always possible to see what changed over time in any document (but we don't offer "diff" representation at the moment)
-- **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile
+- **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile. The CSS framework [supports theming](https://daisyui.com/docs/themes/) out-of-the-box.
 - **Advanced WYSIWYG editor** - Joongle's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
 - **Multi-database backend** - at his core Joongle uses a document model database and the flavour I chose is CouchDB. Joongle uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Joongle! With PouchDB, you can run Joongle with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
 - **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Sqlite FTS5](https://www.sqlite.org/fts5.html)
@@ -58,11 +58,9 @@ users:
     fullname: Erika Musteramann
 ```
 
-This file is read only at bootstrap time, so if you change it, remember to restart the server and take a look at its logs for any validation error.
+This file is read only at bootstrap time, so if you change it, remember to restart the server and take a look at its logs for any validation error. The server will always sync the user database in PouchDb with the user file, so keep in mind that if you remove all the users in users.yaml you are also going to remove all the users in the database.
 
-The server will always sync the user database in couchdb with the user file, so keep in mind that if you remove all the users in users.yaml you are also going to remove all the users in the database.
-
-The users are NOT removed if you remove the file (maybe for security reasons), but if you then need to add a new one, you have to create a users.yaml which exactly mirrors the list of users in couchdb - otherwise the ones which don't match (by email) will be removed.
+The users are NOT removed if you remove the file (maybe for security reasons), but if you then need to add a new one, you have to create a `users.yaml` which exactly mirrors the list of users in PouchDb - otherwise the ones which don't match (by email) will be removed.
 
 ### No caching layer
 
@@ -79,10 +77,10 @@ These factors led me to architect Joongle as a server-side rendered application.
 
 For client-side interactivity, including AJAX calls and progressive enhancement, I chose HTMX and Alpine.js instead of writing extensive custom JavaScript. These libraries provide much of the reactivity we've come to expect in modern frontend development, while maintaining a lightweight footprint. While this aspect of Joongle's codebase currently represents its greatest opportunity for improvement and will likely undergo significant refactoring after the MVP release, it effectively serves the current needs of the project.
 
-### Why CouchDB and not XXX?
-CouchDB was chosen to explore document-oriented, schema-less database architecture. Its built-in features like document revisions and history tracking make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
+### Why PouchDb and not XXX?
+PouchDb was initially chosen to explore document-oriented, schema-less database architecture. Its built-in features like document revisions and history tracking make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
 
-CouchDB scales very well in case in the future we would like to see Joongle exposed on website using many users and documents.
+PouchDb (CouchDB) scales very well in case in the future we would like to see Joongle exposed on website using many users and documents.
 
 Images are also saved directly in the database since CouchDB has also a nice support for binary content, like compression, digest, and streaming.
 
@@ -113,10 +111,9 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 - [Sqlite FTS5](https://www.sqlite.org/fts5.html)
 - Server-side JSX rendering with [Kitajs/html](https://github.com/kitajs/html)
 - [Alpine.js](https://alpinejs.dev/) and [HTMX](https://htmx.org/)
-- CSS Modules
 - [esbuild](https://esbuild.github.io/)
 - [biome](https://biome.sh/)
-- [Bulma CSS](https://bulma.io)
+- [DaisyUI](https://daisyui.com/) - based on Tailwind
 - [Sortablejs](https://github.com/SortableJS/Sortable)
 - [Heroicons](https://heroicons.com/)
 - TypeScript
@@ -128,7 +125,7 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 
 ### Prerequisites
 - nodejs 20+
-- docker (optional - only if you want to use the real Couchdb interface and not Pouchdb with a local db)
+- docker (actually optional - only if you want to use the real Couchdb interface and not Pouchdb with a local db)
 - macOS or linux (my personal deployment uses Ubuntu 24.04). Windows is totally untested.
 
 ### Setup

@@ -990,7 +990,6 @@ const router = async (app: FastifyInstance) => {
       const fileRepo = app.repoFactory.getFileRepository();
 
       const { fileId, filename } = req.params;
-
       const file = (await fileRepo.getFileById(fileId)).match(
         (file) => file,
         (feedback) => {
@@ -1002,7 +1001,13 @@ const router = async (app: FastifyInstance) => {
         return rs.bail(404, 'File not found');
       }
 
-      const stream = await fileRepo.getFileAttachment(fileId, filename);
+      const stream = (await fileRepo.getFileAttachment(fileId, filename)).match(
+        (stream) => stream,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
       if (!stream) {
         return rs.bail(404, 'File stream not found');
       }

@@ -122,15 +122,18 @@
   display: block;
 
   &.tiptap-left {
-    margin: 0 0 var(--bulma-content-block-margin-bottom) 0;
+    margin-left: 0;
+    margin-right: auto;
   }
 
   &.tiptap-center {
-    margin: 0 auto var(--bulma-content-block-margin-bottom) auto;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &.tiptap-right {
-    margin: 0 0 var(--bulma-content-block-margin-bottom) auto;
+    margin-left: auto;
+    margin-right: 0;
   }
 }
 
