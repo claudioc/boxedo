@@ -120,11 +120,15 @@ const getEditorOptions = (): Partial<EditorOptions> => {
       resizable: false,
       cellMinWidth: 50,
       HTMLAttributes: {
-        class: 'table is-bordered is-hoverable is-fullwidth',
+        class: 'table w-full table-pin-rows not-prose rounded-field',
       },
     }),
     TableRow,
-    TableHeader,
+    TableHeader.configure({
+      HTMLAttributes: {
+        class: 'bg-neutral opacity-70',
+      },
+    }),
     TableCell,
   ];
 
@@ -149,7 +153,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
         // Check for Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux) for saving
         if (event.key === 'Enter') {
           event.preventDefault();
-
           // Find the form and submit it
           const form = document.querySelector(
             'form[method="post"] button[type="submit"]'
@@ -157,7 +160,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
           if (form) {
             (form as HTMLButtonElement).click();
           }
-
           return true;
         }
       },

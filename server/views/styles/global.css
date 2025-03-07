@@ -16,6 +16,23 @@
     inset;
 }
 
+.j-table-cmd-wrapper {
+  @apply bg-base-content rounded-field;
+}
+
+.j-table-cmd-list {
+  @apply menu p-2;
+}
+
+.j-table-cmd-item {
+  @apply text-info-content rounded-field;
+}
+
+.j-table-cmd-item:hover,
+.j-table-cmd-item-active {
+  @apply bg-neutral text-white opacity-50;
+}
+
 @media screen and (min-width: 769px) and (max-width: 1215px) {
   .MainContent {
     margin-left: 10%;
@@ -130,49 +147,4 @@
   opacity: 0.5;
   cursor: grab !important;
   border: 1px solid gray;
-}
-
-.tablecommands-wrapper {
-  width: 280px;
-  max-height: 300px;
-  overflow-y: auto;
-  background: white;
-  border-radius: 6px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
-  padding: 8px;
-  border: 1px solid #eee;
-}
-
-.tablecommands-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tablecommands-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  transition: background-color 0.2s ease;
-}
-
-.tablecommands-item:hover,
-.tablecommands-item.is-selected {
-  background-color: #f0f0f0;
-}
-
-.tablecommands-item-icon {
-  margin-right: 8px;
-  width: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.tablecommands-item-title {
-  font-size: 14px;
 }

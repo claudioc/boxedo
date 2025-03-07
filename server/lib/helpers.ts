@@ -265,6 +265,10 @@ export const safeHtml = (str: string) =>
         'data-alignment',
       ],
       table: ['class'],
+      tbody: ['class'],
+      th: ['class'],
+      tr: ['class'],
+      td: ['class'],
     },
   });
 

@@ -126,18 +126,18 @@ export const renderTableCommandsSuggestion = () => {
     component.items = props.items;
 
     component.items.forEach((item: TableCommand, _: number) => {
-      const commandButton = document.createElement('button');
-      commandButton.classList.add('tablecommands-item');
-      commandButton.innerHTML = `
-        <div class="tablecommands-item-title">${item.title}</div>
-      `;
-
-      commandButton.addEventListener('click', () => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.tabIndex = 0;
+      li.classList.add('j-table-cmd-item');
+      btn.innerHTML = item.title;
+      btn.addEventListener('click', () => {
         popup.hide();
         props.command(item);
       });
-
-      component.refs.list.appendChild(commandButton);
+      li.appendChild(btn);
+      component.refs.list.appendChild(li);
     });
   };
 
@@ -150,14 +150,14 @@ export const renderTableCommandsSuggestion = () => {
 
       component = {
         refs: {
-          list: document.createElement('div'),
+          list: document.createElement('ul'),
           wrapper: document.createElement('div'),
         },
         items: props.items,
       };
 
-      component.refs.wrapper.classList.add('tablecommands-wrapper');
-      component.refs.list.classList.add('tablecommands-list');
+      component.refs.wrapper.classList.add('j-table-cmd-wrapper');
+      component.refs.list.classList.add('j-table-cmd-list');
       component.refs.wrapper.appendChild(component.refs.list);
 
       popup = tippy('body', {
@@ -184,42 +184,47 @@ export const renderTableCommandsSuggestion = () => {
         return true;
       }
 
-      // Arrow navigation
       if (['ArrowUp', 'ArrowDown', 'Enter'].includes(event.key)) {
-        const items = component.refs.list.querySelectorAll(
-          '.tablecommands-item'
-        );
+        const items = component.refs.list.querySelectorAll('.j-table-cmd-item');
         const currentIndex = Array.from(items).findIndex((item) =>
-          item.classList.contains('is-selected')
+          item.classList.contains('j-table-cmd-item-active')
         );
 
         if (event.key === 'ArrowUp') {
           const prevIndex = (currentIndex - 1 + items.length) % items.length;
           if (items[currentIndex]) {
-            items[currentIndex].classList.remove('is-selected');
+            items[currentIndex].classList.remove('j-table-cmd-item-active');
           }
+
           if (items[prevIndex]) {
-            items[prevIndex].classList.add('is-selected');
+            items[prevIndex].classList.add('j-table-cmd-item-active');
           }
+
           return true;
         }
 
         if (event.key === 'ArrowDown') {
           const nextIndex = (currentIndex + 1) % items.length;
+
           if (items[currentIndex]) {
-            items[currentIndex].classList.remove('is-selected');
+            items[currentIndex].classList.remove('j-table-cmd-item-active');
           }
+
           if (items[nextIndex]) {
-            items[nextIndex].classList.add('is-selected');
+            items[nextIndex].classList.add('j-table-cmd-item-active');
           }
+
           return true;
         }
 
         if (event.key === 'Enter') {
           const selectedItem = items[currentIndex] as HTMLElement;
           if (selectedItem) {
-            selectedItem.click();
-            return true;
+            const btn = selectedItem.querySelector('button');
+            if (btn) {
+              btn.click();
+              return true;
+            }
           }
         }
       }

@@ -1,5 +1,5 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { formatDate, isSameTimestamp, mapTextSize } from '~/lib/helpers';
+import { formatDate, isSameTimestamp } from '~/lib/helpers';
 import { MainContent } from './components/MainContent';
 import { PageBody } from './components/PageBody';
 import { PageMenu } from './components/PageMenu';
@@ -31,8 +31,6 @@ export const ReadPage = ({
 }: ReadPageProps) => {
   const { i18n } = ctx.app;
 
-  const textSizeClass = mapTextSize(ctx.app.settings.textSize);
-
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
   const showPage = page && !isWelcome;
@@ -55,7 +53,6 @@ export const ReadPage = ({
         isWelcome && 'is-welcome',
         showPage && 'is-page',
         isLandingPage && 'is-landing',
-        textSizeClass,
       ]}
       data-page-id={page?._id}
     >
@@ -70,7 +67,11 @@ export const ReadPage = ({
         </div>
       )}
       <MainContent>
-        <PageBody title={actualPage.pageTitle} body={actualPage.pageContent} />
+        <PageBody
+          ctx={ctx}
+          title={actualPage.pageTitle}
+          body={actualPage.pageContent}
+        />
       </MainContent>
     </div>
   );

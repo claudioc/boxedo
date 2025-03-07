@@ -119,7 +119,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
         id="uploadDialog"
         data-context="uploading file"
         x-ref="uploadDialog"
-        class="modal open"
+        class="modal"
       >
         <div class="modal-box prose">
           <h3 class="title is-2">{i18n.t('ImageDialog.title')}</h3>

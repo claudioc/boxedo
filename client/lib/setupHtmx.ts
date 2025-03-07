@@ -43,20 +43,20 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
 
         // The document currently highlighted in the navigation
         const active = document.querySelector(
-          '.Layout_aside .is-active'
+          '#main-navigation .j-active'
         ) as HTMLElement;
 
         const pageId = page.dataset?.pageId;
         if (active && active.dataset.pageId !== pageId) {
-          active.classList.remove('is-active');
+          active.classList.remove('j-active');
         }
 
         const nextActive = document.querySelector(
-          `.Layout_aside [data-page-id="${pageId}"]`
+          `#main-navigation [data-page-id="${pageId}"]`
         );
 
         if (nextActive) {
-          nextActive.classList.add('is-active');
+          nextActive.closest('div')?.classList.add('j-active');
         }
 
         updateCreateButton(pageId);

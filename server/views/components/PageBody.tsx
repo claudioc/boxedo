@@ -1,11 +1,18 @@
-interface PageBodyProps {
+import type { WithCtx } from '~/../types';
+import { mapTextSize } from '~/lib/helpers';
+
+interface PageBodyProps extends WithCtx {
   title: string;
   body: string;
 }
 
-export const PageBody = ({ title, body }: PageBodyProps) => (
-  <div class="prose">
-    <h1 class="title">{title}</h1>
-    <div class="content">{`${body || ''}`}</div>
-  </div>
-);
+export const PageBody = ({ ctx, title, body }: PageBodyProps) => {
+  const textSizeClass = mapTextSize(ctx.app.settings.textSize);
+
+  return (
+    <div class="prose">
+      <h1>{title}</h1>
+      <div class={textSizeClass}>{`${body || ''}`}</div>
+    </div>
+  );
+};
