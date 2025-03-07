@@ -5,5 +5,5 @@ interface MainContentProps {
 }
 
 export const MainContent = ({ children }: MainContentProps) => (
-  <div class={[styles.mainContent, 'prose']}>{children}</div>
+  <div class={styles.mainContent}>{children}</div>
 );

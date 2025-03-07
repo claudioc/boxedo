@@ -78,7 +78,7 @@ export const SettingsPage = ({
               <span x-text="newLandingPageTitle" />"
             </div>
 
-            <fieldset class="fieldset mb-5">
+            <fieldset class="fieldset">
               <legend>{i18n.t('SettingsPage.setLandingPage')}</legend>
               <label class="input  w-full">
                 <SearchIcon />
@@ -97,7 +97,8 @@ export const SettingsPage = ({
 
             <div
               class="mb-5 results"
-              x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
+              x-ref="results"
+              x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle; $refs.results.innerHTML = ''"
             />
 
             <fieldset class="fieldset mb-5">
