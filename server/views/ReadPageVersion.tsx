@@ -21,32 +21,28 @@ export const ReadPageVersion = ({
   return (
     <Layout ctx={ctx} title={item.pageTitle} page={page}>
       <div>
-        <div class="message is-info" x-ref="message">
-          <div class="message-header">
-            <p>
+        {/* biome-ignore lint/a11y/useSemanticElements: */}
+        <div
+          role="alert"
+          class="card bg-info text-info-content mb-5 opacity-60"
+        >
+          <div class="card-body">
+            <div class="card-title">
               {i18n.t('ReadPageVersion.oldVersion', {
                 version: version.split('-')[0],
               })}
-            </p>
-            <button
-              class="delete"
-              aria-label="delete"
-              x-on:click="$refs.message.hidden = true"
-              type="button"
-            />
-          </div>
-          <div class="message-body">
+            </div>
             <p>
               {i18n.t('ReadPageVersion.oldVersionInfo', {
                 date: <strong>{formatDate(item.updatedAt)}</strong>,
                 newDate: <strong>{formatDate(page.updatedAt)}</strong>,
                 link: (
-                  <a class="is-link" href={slugUrl(page.pageSlug)}>
+                  <a class="link" href={slugUrl(page.pageSlug)}>
                     {i18n.t('ReadPageVersion.thisLink')}
                   </a>
                 ),
                 historyLink: (
-                  <a href={`../${page._id}`}>
+                  <a class="link" href="../history">
                     {i18n.t('ReadPageVersion.listOfVersions')}
                   </a>
                 ),
