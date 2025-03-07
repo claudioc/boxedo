@@ -64,13 +64,11 @@ export const SettingsPage = ({
             <input type="hidden" name="_csrf" value={token} />
 
             <div class="mb-5">
-              <p>
-                {i18n.t('SettingsPage.currentLandingPageIs', {
-                  title: landingPage
-                    ? landingPage.pageTitle
-                    : i18n.t('SettingsPage.notSet'),
-                })}
-              </p>
+              {i18n.t('SettingsPage.currentLandingPageIs', {
+                title: landingPage
+                  ? landingPage.pageTitle
+                  : i18n.t('SettingsPage.notSet'),
+              })}
             </div>
 
             <div class="mb-5" x-show="newLandingPageTitle">
@@ -80,7 +78,7 @@ export const SettingsPage = ({
 
             <fieldset class="fieldset">
               <legend>{i18n.t('SettingsPage.setLandingPage')}</legend>
-              <label class="input  w-full">
+              <label class="input w-full">
                 <SearchIcon />
                 <input
                   autocomplete="off"

@@ -59,7 +59,7 @@
   "MovePage": {
     "movingPage": "Change a page's parent",
     "currentParentIs": "Current parent is \"%{title}\"",
-    "newParentIs": "New parent is",
+    "newParentIs": "New parent will be",
     "searchNewParent": "Search for a new parent (wildcard* allowed)",
     "startTyping": "Start typing…",
     "noParent": "No parent (top level page)",
@@ -128,7 +128,7 @@
   "SettingsPage": {
     "title": "Edit settings",
     "notSet": "(Not set yet)",
-    "setLandingPage": "Set landing page to:",
+    "setLandingPage": "Set landing page to (wildcard* allowed):",
     "setLanguage": "Set the language of the user interface to:",
     "currentLandingPageIs": "Current landing page is \"%{title}\"",
     "newLandingPageIs": "New landing page is",

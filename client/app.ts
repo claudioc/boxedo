@@ -95,7 +95,7 @@ class App {
     if (Object.values(error).some((v) => v)) {
       event.stopImmediatePropagation();
       event.preventDefault();
-      this.resetForm();
+      window.App.resetForm();
       return false;
     }
 
