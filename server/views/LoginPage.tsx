@@ -42,10 +42,12 @@ export const LoginPage = ({ ctx, token }: LoginPageProps) => {
                   name="email"
                   placeholder={i18n.t('Login.enterEmail')}
                   required
+                  aria-describedby="email-alt"
                 />
               </label>
-
-              <p>{i18n.t('Login.helpEmail')}</p>
+              <p id="email-alt" class="text-sm text-gray-400">
+                {i18n.t('Login.helpEmail')}
+              </p>
             </div>
             <button class="btn btn-primary" type="submit">
               {i18n.t('Login.sendMagicLink')}

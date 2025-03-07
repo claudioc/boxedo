@@ -11,6 +11,7 @@ import {
   type Feedback,
   type ModelName,
   type PageModel,
+  type TextSize,
   type UrlParts,
 } from '../../types';
 import { supportedLocales, type SupportedLocales } from '../locales/phrases';
@@ -268,3 +269,16 @@ export const safeHtml = (str: string) =>
   });
 
 export const generateIdFor = (model: ModelName) => `${model}:${createId()}`;
+
+export const mapTextSize = (size: TextSize) => {
+  switch (size) {
+    case 'S':
+      return 'text-sm';
+    case 'M':
+      return 'text-base';
+    case 'L':
+      return 'text-lg';
+    case 'XL':
+      return 'text-xl';
+  }
+};

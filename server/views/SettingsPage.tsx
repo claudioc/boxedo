@@ -1,4 +1,5 @@
 import type { PageModel, SettingsModel, TextSize, WithCtx } from '~/../types';
+import { mapTextSize } from '~/lib/helpers';
 import { phraseDefinitions } from '~/locales/phrases';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { Feedback, Feedbacks } from './components/Feedback';
@@ -27,7 +28,7 @@ export const SettingsPage = ({
       <div
         x-data={`{landingPageId: '${landingPage ? landingPage._id : ''}', newLandingPageTitle: '', error: {landingPageId: false}}`}
       >
-        <div x-show="error && error.landingPageId" class="b-block">
+        <div x-show="error && error.landingPageId" class="mb-5">
           <Feedback ctx={ctx} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
         </div>
 
@@ -45,27 +46,24 @@ export const SettingsPage = ({
           />
 
           <MainContent>
-            <div class="b-block">
-              <div class="field">
-                <label class="label" for="search">
-                  {i18n.t('SettingsPage.siteTitle')}
-                </label>
-                <div class="control">
-                  <input
-                    name="siteTitle"
-                    class="input"
-                    type="text"
-                    value={settings.siteTitle}
-                  />
-                </div>
-                <p class="help">{i18n.t('SettingsPage.siteTitleHelp')}</p>
+            <fieldset class="fieldset mb-5">
+              <legend>{i18n.t('SettingsPage.siteTitle')}</legend>
+              <input
+                name="siteTitle"
+                class="input w-full"
+                type="text"
+                value={settings.siteTitle}
+                aria-describedby="sitetitle-alt"
+              />
+              <div class="fieldset-label" id="sitetitle-alt">
+                {i18n.t('SettingsPage.siteTitleHelp')}
               </div>
-            </div>
+            </fieldset>
 
             <input type="hidden" name="landingPageId" x-model="landingPageId" />
             <input type="hidden" name="_csrf" value={token} />
 
-            <div class="b-block">
+            <div class="mb-5">
               <p>
                 {i18n.t('SettingsPage.currentLandingPageIs', {
                   title: landingPage
@@ -73,111 +71,113 @@ export const SettingsPage = ({
                     : i18n.t('SettingsPage.notSet'),
                 })}
               </p>
-
-              <div class="b-block" x-show="newLandingPageTitle">
-                {i18n.t('SettingsPage.newLandingPageIs')} "
-                <span x-text="newLandingPageTitle" />"
-              </div>
-
-              <div class="field">
-                <label class="label" for="search">
-                  {i18n.t('SettingsPage.setLandingPage')}
-                </label>
-                <div class="control has-icons-left">
-                  <input
-                    class="input"
-                    autocomplete="off"
-                    type="text"
-                    id="search"
-                    name="q"
-                    placeholder={i18n.t('SettingsPage.startTyping')}
-                    hx-get="/parts/titles"
-                    hx-trigger="keyup changed delay:200ms"
-                    hx-target="next div.results"
-                  />
-                  <span class="icon is-small is-left">
-                    <SearchIcon />
-                  </span>
-                </div>
-              </div>
             </div>
 
+            <div class="mb-5" x-show="newLandingPageTitle">
+              {i18n.t('SettingsPage.newLandingPageIs')} "
+              <span x-text="newLandingPageTitle" />"
+            </div>
+
+            <fieldset class="fieldset mb-5">
+              <legend>{i18n.t('SettingsPage.setLandingPage')}</legend>
+              <label class="input  w-full">
+                <SearchIcon />
+                <input
+                  autocomplete="off"
+                  type="search"
+                  id="search"
+                  name="q"
+                  placeholder={i18n.t('SettingsPage.startTyping')}
+                  hx-get="/parts/titles"
+                  hx-trigger="keyup changed delay:200ms"
+                  hx-target="next div.results"
+                />
+              </label>
+            </fieldset>
+
             <div
-              class="block results"
+              class="mb-5 results"
               x-on:click="landingPageId = $event.target.dataset.pageId; newLandingPageTitle = $event.target.dataset.pageTitle"
             />
 
-            <div class="b-block">
-              <div class="field">
-                <div class="label">{i18n.t('SettingsPage.textSize')}</div>
-                <div class="radios control">
-                  <label class="radio">
-                    <input
-                      type="radio"
-                      name="textSize"
-                      class="mr-1"
-                      value={'S' satisfies TextSize}
-                      checked={settings.textSize === 'S'}
-                    />
-                    {i18n.t('SettingsPage.small')}
-                  </label>
-                  <label class="radio">
-                    <input
-                      type="radio"
-                      name="textSize"
-                      class="mr-1"
-                      value={'M' satisfies TextSize}
-                      checked={settings.textSize === 'M'}
-                    />
-                    {i18n.t('SettingsPage.medium')}
-                  </label>
-                  <label class="radio">
-                    <input
-                      type="radio"
-                      name="textSize"
-                      class="mr-1"
-                      value={'L' satisfies TextSize}
-                      checked={settings.textSize === 'L'}
-                    />
-                    {i18n.t('SettingsPage.large')}
-                  </label>
-                  <label class="radio">
-                    <input
-                      type="radio"
-                      name="textSize"
-                      class="mr-1"
-                      value={'XL' satisfies TextSize}
-                      checked={settings.textSize === 'XL'}
-                    />
-                    {i18n.t('SettingsPage.extraLarge')}
-                  </label>
-                </div>
-                <p class="help">{i18n.t('SettingsPage.textSizeHelp')}</p>
-              </div>
-            </div>
+            <fieldset class="fieldset mb-5">
+              <legend class="fieldset-legend">
+                {i18n.t('SettingsPage.textSize')}
+              </legend>
 
-            <div class="field">
-              <label class="label" for="search">
-                {i18n.t('SettingsPage.setLanguage')}
-              </label>
-              <div class="control has-icons-left">
-                <span class="select">
-                  <select name="siteLang">
-                    {phraseDefinitions.map((def) => (
-                      <option
-                        selected={siteLang === def.language}
-                        value={def.language}
-                      >
-                        {def.name}
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <span class="icon is-small is-left">
-                  <LanguageIcon />
-                </span>
+              <div class="flex flex-row gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="textSize"
+                    class="radio"
+                    value={'S' satisfies TextSize}
+                    checked={settings.textSize === 'S'}
+                  />
+                  <span class={mapTextSize('S')}>
+                    {i18n.t('SettingsPage.small')}
+                  </span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="textSize"
+                    class="radio"
+                    value={'M' satisfies TextSize}
+                    checked={settings.textSize === 'M'}
+                  />
+                  <span class={mapTextSize('M')}>
+                    {i18n.t('SettingsPage.medium')}
+                  </span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="textSize"
+                    class="radio"
+                    value={'L' satisfies TextSize}
+                    checked={settings.textSize === 'L'}
+                  />
+                  <span class={mapTextSize('L')}>
+                    {i18n.t('SettingsPage.large')}
+                  </span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="textSize"
+                    class="radio"
+                    value={'XL' satisfies TextSize}
+                    checked={settings.textSize === 'XL'}
+                  />
+                  <span class={mapTextSize('XL')}>
+                    {i18n.t('SettingsPage.extraLarge')}
+                  </span>
+                </label>
               </div>
-            </div>
+              <div class="fieldset-label">
+                {i18n.t('SettingsPage.textSizeHelp')}
+              </div>
+            </fieldset>
+
+            <fieldset class="fieldset mb-5">
+              <legend class="fieldset-legend">
+                <LanguageIcon /> {i18n.t('SettingsPage.setLanguage')}
+              </legend>
+              <select name="siteLang" class="select">
+                {phraseDefinitions.map((def) => (
+                  <option
+                    selected={siteLang === def.language}
+                    value={def.language}
+                  >
+                    {def.name}
+                  </option>
+                ))}
+              </select>
+            </fieldset>
           </MainContent>
         </form>
       </div>

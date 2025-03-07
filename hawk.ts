@@ -214,6 +214,7 @@ const setupFileWatchers: TaskFn = async (_) => {
           taskManager.run([
             'clean-server',
             'build-server',
+            'build-daisyui',
             'start-api-server',
             'notify-server-update',
           ]);

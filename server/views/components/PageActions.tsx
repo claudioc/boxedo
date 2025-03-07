@@ -22,20 +22,20 @@ export const PageActions = ({
   const { i18n } = ctx.app;
 
   return (
-    <div class="level is-flex-direction-row">
-      <div class=" level-left is-size-5">{title}</div>
-      <menu class="level-right m-0 is-flex-direction-row">
+    <div class="text-sm flex justify-between items-center mb-5">
+      <h2 class="text-2xl">{title}</h2>
+      <menu class="flex gap-3">
         {actions.includes('save') && (
           <button
-            class="button is-text-mobile is-primary is-outlined is-small"
+            class="btn btn-primary"
             type="submit"
             x-bind:disabled="$store.form.submitting"
             x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
           >
-            <span class="is-hidden-mobile">
+            <span class="hidden md:block">
               {i18n.t('PageActions.saveAndClose')}
             </span>
-            <span class="is-hidden-tablet">
+            <span class="block md:hidden">
               <SaveIcon title={i18n.t('PageActions.saveAndClose')} />
             </span>
           </button>
@@ -43,12 +43,12 @@ export const PageActions = ({
         {actions.includes('cancel') && (
           <a
             href={cancelUrl}
-            class="button is-text-mobile is-danger is-outlined is-small"
+            class="btn"
             x-bind:disabled="$store.form.submitting"
             x-on:click="window.onbeforeunload=null"
           >
-            <span class="is-hidden-mobile">{i18n.t('PageActions.cancel')}</span>
-            <span class="is-hidden-tablet">
+            <span class="hidden md:block">{i18n.t('PageActions.cancel')}</span>
+            <span class="block md:hidden">
               <CancelIcon title={i18n.t('PageActions.cancel')} />
             </span>
           </a>

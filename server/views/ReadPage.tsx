@@ -1,5 +1,5 @@
-import type { PageModel, TextSize, WithCtx } from '~/../types';
-import { formatDate, isSameTimestamp } from '~/lib/helpers';
+import type { PageModel, WithCtx } from '~/../types';
+import { formatDate, isSameTimestamp, mapTextSize } from '~/lib/helpers';
 import { MainContent } from './components/MainContent';
 import { PageBody } from './components/PageBody';
 import { PageMenu } from './components/PageMenu';
@@ -20,19 +20,6 @@ type PageModelPartial = Pick<PageModel, 'pageTitle' | 'pageContent'>;
 const welcomePage: PageModelPartial = {
   pageTitle: '', // Handled by translations
   pageContent: '', // Handled by translations
-};
-
-const mapTextSize = (size: TextSize) => {
-  switch (size) {
-    case 'S':
-      return 'text-sm';
-    case 'M':
-      return 'text-base';
-    case 'L':
-      return 'text-lg';
-    case 'XL':
-      return 'text-xl';
-  }
 };
 
 export const ReadPage = ({
