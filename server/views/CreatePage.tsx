@@ -29,7 +29,7 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
         <form
           action=""
           method="post"
-          class="b-block"
+          class="mb-5"
           name="createPage"
           x-on:submit="App.validate"
         >
@@ -43,7 +43,7 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
           />
 
           <MainContent>
-            <div id="editor-placeholder" class="block content" />
+            <div id="editor-placeholder" class="prose" />
           </MainContent>
 
           <PageData debug={ctx.app.is('development')} />

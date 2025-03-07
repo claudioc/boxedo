@@ -18,24 +18,26 @@ export const ErrorPage = ({
   const { i18n } = ctx.app;
   return (
     <LayoutMini ctx={ctx} title={title}>
-      <h1 class={['title', 'level', 'is-justify-content-start']}>
-        <OhNoIcon title={title} size={48} />
-        {title}
-      </h1>
-      <p class="b-block">{i18n.t('Error.requestFailed')}</p>
-      <p class="b-block">
-        <code>{String(error)}</code>
-      </p>
-      {goHome ? (
-        <p class="b-block">
-          <a class="button" href="/">
-            <ArrowLeftIcon title={'Back home'} />
-            &nbsp;Home
-          </a>
+      <div class="prose">
+        <h2 class="flex gap-2 items-center">
+          <OhNoIcon title={title} size={36} />
+          {title}
+        </h2>
+        <p>{i18n.t('Error.requestFailed')}</p>
+        <p>
+          <code>{String(error)}</code>
         </p>
-      ) : (
-        ''
-      )}
+        {goHome ? (
+          <p>
+            <a class="btn no-underline" href="/">
+              <ArrowLeftIcon title={i18n.t('common.homePage')} />
+              &nbsp;{i18n.t('common.homePage')}
+            </a>
+          </p>
+        ) : (
+          ''
+        )}
+      </div>
     </LayoutMini>
   );
 };

@@ -23,7 +23,7 @@ export const LayoutMini = ({ ctx, title, children }: LayoutMiniProps) => {
         <main class="min-h-screen flex flex-col">
           <header class="p-4 prose">
             <h1>
-              <a href="/" class="uppercase no-underline ">
+              <a href="/" class="uppercase no-underline">
                 {settings.siteTitle}
               </a>
             </h1>

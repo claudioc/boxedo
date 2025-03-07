@@ -12,17 +12,19 @@ export const NotFound = ({ ctx, title }: NotFoundProps) => {
 
   return (
     <LayoutMini ctx={ctx} title={title}>
-      <h1 class={['title', 'level', 'is-justify-content-start']}>
-        <OhNoIcon title={i18n.t('NotFound.title')} size={48} />
-        {i18n.t('NotFound.title')}
-      </h1>
-      <p class="b-block">{i18n.t('NotFound.message')}</p>
-      <p class="b-block">
-        <a class="button" href="/">
-          <ArrowLeftIcon title={'Back home'} />
-          &nbsp;Home
-        </a>
-      </p>
+      <div class="prose">
+        <h2 class="flex gap-2 items-center">
+          <OhNoIcon title={i18n.t('NotFound.title')} size={36} />
+          {i18n.t('NotFound.title')}
+        </h2>
+        <p>{i18n.t('NotFound.message')}</p>
+        <p>
+          <a class="btn no-underline" href="/">
+            <ArrowLeftIcon title={i18n.t('common.homePage')} />
+            &nbsp;{i18n.t('common.homePage')}
+          </a>
+        </p>
+      </div>
     </LayoutMini>
   );
 };

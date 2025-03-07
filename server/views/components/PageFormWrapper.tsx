@@ -1,5 +1,5 @@
+import type { WithCtx } from '~/../types';
 import { ValidationErrors } from '~/views/components/ValidationErrors';
-import type { WithCtx } from '../../../types';
 
 interface PageFormWrapperProps extends WithCtx {
   children: string | JSX.Element[] | JSX.Element;

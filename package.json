@@ -91,7 +91,6 @@
     "alpinejs": "^3.14.0",
     "better-sqlite3": "^11.8.1",
     "bindings": "^1.5.0",
-    "bulma": "^1.0.2",
     "cheerio": "^1.0.0",
     "fastify": "^5.2.0",
     "fastify-favicon": "^5.0.0",

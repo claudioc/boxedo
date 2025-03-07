@@ -26,7 +26,7 @@ export const PageData = ({ page, debug }: DebugInfoProps) => {
   }
 
   return (
-    <div class="is-hidden">
+    <div class="hidden">
       <input type="text" name="pageTitle" value={page?.pageTitle} />
       <textarea name="pageContent">{page?.pageContent}</textarea>
     </div>
