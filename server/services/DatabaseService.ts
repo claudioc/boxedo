@@ -58,20 +58,28 @@ export class DatabaseService {
           break;
 
         case config.DB_BACKEND === 'local':
-          await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
-
-          PouchDB.plugin(PouchAdapterLevelDb)
-            .plugin(PouchFind)
-            .plugin(PouchReduce);
-
-          // Note: bootstrap is taking care of creating the directory if it doesn't exist
-          db = new PouchDB<DocumentModel>(
-            path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
-            {
-              adapter: 'leveldb',
+          {
+            const pathResult = await ensurePathExists(
+              config.DB_LOCAL_PATH,
+              'database directory'
+            );
+            if (pathResult.isErr()) {
+              throw pathResult.error;
             }
-          );
-          logger.info('Connected to local database');
+
+            PouchDB.plugin(PouchAdapterLevelDb)
+              .plugin(PouchFind)
+              .plugin(PouchReduce);
+
+            // Note: bootstrap is taking care of creating the directory if it doesn't exist
+            db = new PouchDB<DocumentModel>(
+              path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
+              {
+                adapter: 'leveldb',
+              }
+            );
+            logger.info('Connected to local database');
+          }
           break;
 
         default:

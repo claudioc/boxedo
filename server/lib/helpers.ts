@@ -1,6 +1,7 @@
 import { createId } from '@paralleldrive/cuid2';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import { err, ok, type Result } from 'neverthrow';
 import fs from 'node:fs';
 import { access, mkdir } from 'node:fs/promises';
 import sanitizeHtml from 'sanitize-html';
@@ -10,7 +11,6 @@ import {
   type ConfigEnv,
   type Feedback,
   type ModelName,
-  type PageModel,
   type TextSize,
   type UrlParts,
 } from '../../types';
@@ -42,9 +42,6 @@ export const formatDate = (date: string, def = '') => {
 export const isSameTimestamp = (date1: string, date2: string) => {
   return Math.abs(new Date(date1).getTime() - new Date(date2).getTime()) < 10;
 };
-
-export const isTopLevelPage = (page: PageModel) =>
-  typeof page.parentId !== 'string';
 
 export const extractFileRefsFrom = (content: string) => {
   // Match URLs like /uploads/file:123/image.jpg - require both file: prefix and a following filename
@@ -229,18 +226,25 @@ export const highlightPhrase = (
   return title.replace(pattern, '<mark>$1</mark>');
 };
 
-export const ensurePathExists = async (path: string, description: string) => {
+export const ensurePathExists = async (
+  path: string,
+  description: string
+): Promise<Result<void, Error>> => {
   try {
     await access(path, fs.constants.R_OK | fs.constants.W_OK);
   } catch {
     try {
       await mkdir(path, { recursive: true });
     } catch (error) {
-      throw new Error(
-        `Failed to create ${description} at ${path}: ${(error as Error).message}`
+      return err(
+        new Error(
+          `Failed to create ${description} at ${path}: ${(error as Error).message}`
+        )
       );
     }
   }
+
+  return ok();
 };
 
 export const nop = () => {};

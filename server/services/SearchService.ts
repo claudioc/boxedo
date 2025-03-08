@@ -93,7 +93,13 @@ export class SearchService {
 
     if (!SearchService.instance) {
       try {
-        await ensurePathExists(config.DB_LOCAL_PATH, 'database directory');
+        const pathResult = await ensurePathExists(
+          config.DB_LOCAL_PATH,
+          'database directory'
+        );
+        if (pathResult.isErr()) {
+          throw pathResult.error;
+        }
         SearchService.instance = new SearchService(repoFactory, config, logger);
         await SearchService.instance.indexBuilt;
       } catch (error) {

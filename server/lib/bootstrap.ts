@@ -108,7 +108,14 @@ await emailService.initialize({
 
 app.decorate('emailService', emailService);
 
-await ensurePathExists(app.config.DB_LOCAL_PATH, 'database directory');
+const pathResult = await ensurePathExists(
+  app.config.DB_LOCAL_PATH,
+  'database directory'
+);
+if (pathResult.isErr()) {
+  app.log.error(pathResult.error.message);
+  process.exit(1);
+}
 
 const contextResult = await AppContext.create({
   config: app.config,

@@ -7,7 +7,6 @@ import {
   getDefaultLanguage,
   highlightPhrase,
   isSameTimestamp,
-  isTopLevelPage,
   parseBaseUrl,
   pathWithFeedback,
   prepareFTSQuery,
@@ -78,20 +77,6 @@ describe('isSameTimestamp', () => {
     const date1 = '2024-02-01T15:30:00.000Z';
     const date2 = '2024-02-01T15:30:00.011Z';
     expect(isSameTimestamp(date1, date2)).toBe(false);
-  });
-});
-
-describe('isTopLevelPage', () => {
-  it('returns true for pages without parentId', () => {
-    // biome-ignore lint/suspicious/noExplicitAny:
-    const page = { parentId: null } as any;
-    expect(isTopLevelPage(page)).toBe(true);
-  });
-
-  it('returns false for pages with parentId', () => {
-    // biome-ignore lint/suspicious/noExplicitAny:
-    const page = { parentId: 'page:123' } as any;
-    expect(isTopLevelPage(page)).toBe(false);
   });
 });
 
