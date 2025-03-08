@@ -69,8 +69,7 @@ export const Layout = ({
             >
               <Feedback ctx={ctx} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
-            {/* #main-page-body is used as a hx-target */}
-            <div id="main-page-body">{children}</div>
+            <div data-ref="main-page-body">{children}</div>
           </div>
 
           {/* Keep class customization of the drawer-side to a minimum to avoid issues */}

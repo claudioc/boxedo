@@ -22,7 +22,6 @@ export const Nav = ({ forest, currentPageId, disabled }: NavProps) => {
           'menu p-0 -ml-3',
           disabled ? 'pointer-events-none opacity-50' : '',
         ]}
-        id="main-navigation"
       >
         {forest.length ? <NavTree items={forest} /> : null}
       </menu>
@@ -36,7 +35,7 @@ interface NavTreeProps {
 }
 
 const NavTree = ({ items }: NavTreeProps) => (
-  <ul>
+  <ul data-ref="main-navigation-tree">
     {items.map((item: NavItem) => (
       <li>
         <NavItemComponent item={item} />
@@ -51,21 +50,20 @@ interface NavItemProps {
 }
 
 const NavItemComponent = ({ item }: NavItemProps) => (
-  <div class={['items-start', item.pageId === pageId ? 'j-active' : '']}>
+  <a
+    href={item.link}
+    hx-get={item.link}
+    hx-target="[data-ref='main-page-body']"
+    hx-push-url={item.link}
+    hx-ext="activate"
+    data-activate=".menu/j-active"
+    data-context="viewing page"
+    data-page-id={item.pageId}
+    data-position={item.position}
+    title={item.title}
+    class={['items-start', item.pageId === pageId ? 'j-active' : '']}
+  >
     <DocumentIcon isSortableHandle />
-    <a
-      href={item.link}
-      hx-get={item.link}
-      hx-target="#main-page-body"
-      hx-push-url={item.link}
-      hx-ext="activate"
-      data-activate=".menu/j-active"
-      data-context="viewing page"
-      data-page-id={item.pageId}
-      data-position={item.position}
-      title={item.title}
-    >
-      {item.title}
-    </a>
-  </div>
+    {item.title}
+  </a>
 );

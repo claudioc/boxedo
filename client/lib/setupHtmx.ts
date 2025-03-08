@@ -35,7 +35,7 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
       setTimeout(() => {
         // The document currently displayed
         const page = document.querySelector(
-          '#main-page-body [data-page-id]'
+          '[data-ref="main-page-body"] [data-page-id]'
         ) as HTMLElement;
         if (!page) {
           return;
@@ -43,7 +43,7 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
 
         // The document currently highlighted in the navigation
         const active = document.querySelector(
-          '#main-navigation .j-active'
+          '[data-ref="main-navigation-tree"] .j-active'
         ) as HTMLElement;
 
         const pageId = page.dataset?.pageId;
@@ -52,11 +52,11 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
         }
 
         const nextActive = document.querySelector(
-          `#main-navigation [data-page-id="${pageId}"]`
+          `[data-ref="main-navigation-tree"] [data-page-id="${pageId}"]`
         );
 
         if (nextActive) {
-          nextActive.closest('div')?.classList.add('j-active');
+          nextActive.classList.add('j-active');
         }
 
         updateCreateButton(pageId);
@@ -122,7 +122,7 @@ const setupHtmx = () => {
           ?.querySelectorAll(`.${activeClass}`)
           .forEach((el) => el.classList.remove(activeClass));
 
-        el.parentElement?.classList.add(activeClass);
+        el.classList.add(activeClass);
       }
 
       // Update the main context
