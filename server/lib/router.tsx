@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { generateIdFor, nop } from './helpers';
+import { generateIdFor, isHomePage, nop } from './helpers';
 // import { setTimeout as delay } from 'node:timers/promises';
 import { Readable } from 'node:stream';
 import sharp from 'sharp';
@@ -411,9 +411,12 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const pageRepo = app.repoFactory.getPageRepository();
       const { disabled } = req.query;
-
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
+
+      console.log('Rendering for', req.headers['hx-current-url']);
+
+      // hx-current-url
 
       if (cached) {
         forest = cached.data;
@@ -438,7 +441,9 @@ const router = async (app: FastifyInstance) => {
           disabled={disabled}
           currentPageId={
             // Don't highlight the landing page in the menu
-            pageId && app.settings.landingPageId !== pageId ? pageId : ''
+            isHomePage((req.headers['hx-current-url'] ?? '') as string)
+              ? ''
+              : (pageId ?? '')
           }
         />
       );

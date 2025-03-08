@@ -9,7 +9,7 @@ const updateCreateButton = (pageId = '') => {
   }
 
   const createButton = document.querySelector(
-    '.button[href*="/pages/create"]'
+    '[data-ref="create-page-button"]'
   ) as HTMLElement;
 
   if (createButton) {

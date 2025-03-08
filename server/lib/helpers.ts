@@ -286,3 +286,15 @@ export const mapTextSize = (size: TextSize) => {
       return 'text-xl';
   }
 };
+
+export const isHomePage = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+    const path = parsedUrl.pathname;
+    // Check if path is either '/' or empty
+    return path === '/' || path === '';
+  } catch {
+    // If URL parsing fails, return false
+    return false;
+  }
+};

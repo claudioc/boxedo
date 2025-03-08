@@ -73,8 +73,15 @@ export const Layout = ({
             <div id="main-page-body">{children}</div>
           </div>
 
-          <div class="drawer-side min-h-screen bg-neutral max-w-72">
-            <div>
+          {/* Keep class customization of the drawer-side to a minimum to avoid issues */}
+          <div class="drawer-side z-99">
+            <label
+              for="layout-drawer"
+              aria-label="close sidebar"
+              class="drawer-overlay"
+            />
+
+            <div class=" min-w-60 max-w-72 bg-neutral min-h-screen">
               <div class="navbar">
                 <div class="uppercase flex-1">
                   <a href="/">{settings.siteTitle}</a>
@@ -108,21 +115,16 @@ export const Layout = ({
               </div>
 
               <div class="p-4">
-                <label
-                  for="layout-drawer"
-                  aria-label="close sidebar"
-                  class="drawer-overlay"
-                />
-
                 <div class="mb-5">
                   <Search ctx={ctx} />
                 </div>
 
                 {withCreateButton && (
                   <div class="mb-5">
-                    {/* The href and text is dynamically updated by our htmx extension */}
+                    {/* This must be an anchor and The href and text is dynamically updated by our htmx extension */}
                     <a
                       class="j-btn"
+                      data-ref="create-page-button"
                       href={createButtonLink}
                       data-labelNested={i18n.t('Navigation.createNestedPage')}
                     >
@@ -133,8 +135,9 @@ export const Layout = ({
                   </div>
                 )}
 
+                {/* Need to impose a fixed width to avoid the sidebar from flickering */}
                 <aside
-                  class={['mb-5', 'text-base-content']}
+                  class="mb-5 text-base-content w-60"
                   hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
                   hx-trigger="load once"
                 >

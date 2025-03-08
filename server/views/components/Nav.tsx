@@ -1,4 +1,4 @@
-import type { Context, NavItem } from '~/../types';
+import type { NavItem } from '~/../types';
 import { DocumentIcon } from '~/views/icons/DocumentIcon';
 import { SortableEnabler } from './SortableEnabler';
 
@@ -50,26 +50,22 @@ interface NavItemProps {
   item: NavItem;
 }
 
-const NavItemComponent = ({ item }: NavItemProps) => {
-  const context: Context = 'viewing page';
-
-  return (
-    <div class={['items-start', item.pageId === pageId ? 'j-active' : '']}>
-      <DocumentIcon isSortableHandle />
-      <a
-        href={item.link}
-        hx-get={item.link}
-        hx-target="#main-page-body"
-        hx-push-url={item.link}
-        hx-ext="activate"
-        data-activate=".menu/j-active"
-        data-context={context}
-        data-page-id={item.pageId}
-        data-position={item.position}
-        title={item.title}
-      >
-        {item.title}
-      </a>
-    </div>
-  );
-};
+const NavItemComponent = ({ item }: NavItemProps) => (
+  <div class={['items-start', item.pageId === pageId ? 'j-active' : '']}>
+    <DocumentIcon isSortableHandle />
+    <a
+      href={item.link}
+      hx-get={item.link}
+      hx-target="#main-page-body"
+      hx-push-url={item.link}
+      hx-ext="activate"
+      data-activate=".menu/j-active"
+      data-context="viewing page"
+      data-page-id={item.pageId}
+      data-position={item.position}
+      title={item.title}
+    >
+      {item.title}
+    </a>
+  </div>
+);
