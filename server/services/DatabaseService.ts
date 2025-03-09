@@ -64,7 +64,7 @@ export class DatabaseService {
               'database directory'
             );
             if (pathResult.isErr()) {
-              throw pathResult.error;
+              return err(pathResult.error);
             }
 
             PouchDB.plugin(PouchAdapterLevelDb)
@@ -86,8 +86,10 @@ export class DatabaseService {
           logger.error(
             'Database configuration inconsistent or unknown. Cannot continue.'
           );
-          throw new Error(
-            'Database configuration inconsistent or unknown. Cannot continue.'
+          return err(
+            new Error(
+              'Database configuration inconsistent or unknown. Cannot continue.'
+            )
           );
       }
     } catch (error) {

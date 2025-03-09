@@ -168,9 +168,6 @@ describe('parseBaseUrl', () => {
   it('returns undefined for empty input', () => {
     expect(parseBaseUrl('')).toBeNull();
     expect(parseBaseUrl(undefined)).toBeNull();
-  });
-
-  it('throws error for invalid URL', () => {
     expect(parseBaseUrl('not-a-url')).toBeNull();
     expect(parseBaseUrl('http://')).toBeNull();
   });

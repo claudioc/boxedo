@@ -98,7 +98,7 @@ export class SearchService {
           'database directory'
         );
         if (pathResult.isErr()) {
-          throw pathResult.error;
+          return err(pathResult.error);
         }
         SearchService.instance = new SearchService(repoFactory, config, logger);
         await SearchService.instance.indexBuilt;
