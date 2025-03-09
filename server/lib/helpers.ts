@@ -61,9 +61,7 @@ export const extractFileRefsFrom = (content: string) => {
   return fileRefs;
 };
 
-export const parseBaseUrl = (
-  baseUrl: string | undefined
-): UrlParts | undefined => {
+export const parseBaseUrl = (baseUrl: string | undefined): UrlParts | null => {
   const trimmed = baseUrl ? baseUrl.trim() : '';
 
   try {
@@ -79,9 +77,11 @@ export const parseBaseUrl = (
     } as UrlParts;
   } catch {
     if (trimmed !== '') {
-      throw new Error(`Invalid base URL: ${baseUrl}`);
+      return null;
     }
   }
+
+  return null;
 };
 
 const parsePort = (input: string | undefined): number | undefined => {

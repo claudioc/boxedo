@@ -152,8 +152,8 @@ const settings = (
 ).match(
   (settings) => settings,
   (feedback) => {
-    app.log.error(`Failed to get settings: ${feedback.message}`);
-    throw new Error(`Cannot load application settings: ${feedback.message}`);
+    app.log.error(`Failed to load application settings: ${feedback.message}`);
+    process.exit(1);
   }
 );
 

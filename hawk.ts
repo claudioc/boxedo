@@ -22,9 +22,9 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 const sseClients: SseClient[] = [];
 
 const { LIVERELOAD_URL, BASE_INTERNAL_URL } = process.env;
-const liveReloadBaseUrl: UrlParts | undefined = parseBaseUrl(LIVERELOAD_URL);
-const hasLiveReload = liveReloadBaseUrl !== undefined;
-const apiServerBaseUrl: UrlParts | undefined = parseBaseUrl(BASE_INTERNAL_URL);
+const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(LIVERELOAD_URL);
+const hasLiveReload = liveReloadBaseUrl !== null;
+const apiServerBaseUrl: UrlParts | null = parseBaseUrl(BASE_INTERNAL_URL);
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
