@@ -28,6 +28,7 @@ export const DEFAULT_TEXT_SIZE: TextSize = 'M';
 
 export const DEFAULT_SUPPORTED_LOCALE: SupportedLocales = 'en';
 
+// Map application locales to full BCP 47 language tags if needed
 export const languageLocaleMap: Record<SupportedLocales, string> = {
   en: 'en-GB',
   it: 'it-IT',

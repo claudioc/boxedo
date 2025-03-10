@@ -38,13 +38,11 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
  */
 export const formatDate = (
   date: string,
-  locale: SupportedLocales = 'en',
+  locale: SupportedLocales = DEFAULT_SUPPORTED_LOCALE,
   def = ''
 ) => {
   if (!date) return def;
 
-  // Map application locales to full BCP 47 language tags if needed
-  // Use the mapped locale or fall back to the original locale code
   const formattingLocale = languageLocaleMap[locale] || locale;
 
   return new Intl.DateTimeFormat(formattingLocale, {
