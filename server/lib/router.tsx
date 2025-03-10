@@ -414,10 +414,6 @@ const router = async (app: FastifyInstance) => {
       let forest: NavItem[] = [];
       const cached = app.cache.get<NavItem[]>(NAVIGATION_CACHE_KEY);
 
-      console.log('Rendering for', req.headers['hx-current-url']);
-
-      // hx-current-url
-
       if (cached) {
         forest = cached.data;
       } else {

@@ -4,6 +4,7 @@
     "incremental": false,
     "removeComments": true,
     "noEmit": true,
+    "resolveJsonModule": true,
 
     "strict": true,
     "noImplicitAny": true,

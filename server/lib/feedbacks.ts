@@ -47,7 +47,7 @@ type AnyCode = ErrorCodes | SuccessCodes;
 
 // Keep this as an object instead of a Map to have a really strict and tight typing
 // The messages are translated but also we keep them here in plain text for the server logs
-export const Feedbacks: { [key in AnyCode]: Feedback } = {
+export const Feedbacks: Record<AnyCode, Feedback> = {
   S_PAGE_CREATED: {
     code: 1,
     message: 'Page created',

@@ -7,7 +7,8 @@ import { access, mkdir } from 'node:fs/promises';
 import sanitizeHtml from 'sanitize-html';
 import {
   ConfigEnvSchema,
-  DEFAULT_SUPPORTED_LANGUAGE,
+  DEFAULT_SUPPORTED_LOCALE,
+  languageLocaleMap,
   type ConfigEnv,
   type Feedback,
   type ModelName,
@@ -28,11 +29,25 @@ export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   return `${path}?f=${feedback.code}`;
 };
 
-export const formatDate = (date: string, def = '') => {
+/**
+ * Formats a date string according to the application's language setting
+ * @param date ISO date string to format
+ * @param locale Application language setting
+ * @param def Default value to return if date is empty
+ * @returns Formatted date string
+ */
+export const formatDate = (
+  date: string,
+  locale: SupportedLocales = 'en',
+  def = ''
+) => {
   if (!date) return def;
 
-  // FIXME this needs to be rethought according to the locale configuration
-  return new Intl.DateTimeFormat('en-UK', {
+  // Map application locales to full BCP 47 language tags if needed
+  // Use the mapped locale or fall back to the original locale code
+  const formattingLocale = languageLocaleMap[locale] || locale;
+
+  return new Intl.DateTimeFormat(formattingLocale, {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(date));
@@ -91,15 +106,15 @@ const parsePort = (input: string | undefined): number | undefined => {
 };
 
 export const ensureValidLanguage = (candidate: string) =>
-  (supportedLocales.includes(candidate)
+  (supportedLocales.includes(candidate as SupportedLocales)
     ? candidate
-    : DEFAULT_SUPPORTED_LANGUAGE) as SupportedLocales;
+    : DEFAULT_SUPPORTED_LOCALE) as SupportedLocales;
 
 export const getDefaultLanguage = (
   config: ConfigEnv | undefined
 ): SupportedLocales => {
   if (!config) {
-    return DEFAULT_SUPPORTED_LANGUAGE;
+    return DEFAULT_SUPPORTED_LOCALE;
   }
 
   const candidate = config.SETTINGS_LANGUAGE;

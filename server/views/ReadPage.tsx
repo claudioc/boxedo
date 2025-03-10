@@ -29,7 +29,7 @@ export const ReadPage = ({
   isWelcome = false,
   isLandingPage = false,
 }: ReadPageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, settings } = ctx.app;
 
   // We may receive an undefined page if we want to show the welcome page
   // or we still don't have a landing page
@@ -59,9 +59,10 @@ export const ReadPage = ({
       {showPage && (
         <div class="text-sm flex justify-between items-center gap-2 mb-5 ">
           <div class="opacity-25">
-            {i18n.t('ReadPage.createdOn')} {formatDate(page.createdAt)}
+            {i18n.t('ReadPage.createdOn')}{' '}
+            {formatDate(page.createdAt, settings.siteLang)}
             {!isSameTimestamp(page.updatedAt, page.createdAt) &&
-              ` (${formatDate(page.updatedAt)})`}
+              ` (${formatDate(page.updatedAt, settings.siteLang)})`}
           </div>
           <PageMenu ctx={ctx} page={page} />
         </div>

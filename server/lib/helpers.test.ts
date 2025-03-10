@@ -54,7 +54,7 @@ describe('pathWithFeedback', () => {
 describe('formatDate', () => {
   it('returns default value for empty date', () => {
     expect(formatDate('')).toBe('');
-    expect(formatDate('', 'N/A')).toBe('N/A');
+    expect(formatDate('', 'en', 'N/A')).toBe('N/A');
   });
 
   it('formats date correctly', () => {

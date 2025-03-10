@@ -1,5 +1,6 @@
 import type { JSONSchema } from 'json-schema-to-ts';
-import { supportedLanguages, textSizes, type ModelName } from '~/../types';
+import { textSizes, type ModelName } from '~/../types';
+import { supportedLocales } from '~/locales/phrases';
 
 export const IdFormat = (prefix: ModelName) =>
   ({
@@ -90,7 +91,7 @@ export const RouterSchemas = {
     landingPageId: {
       anyOf: [PageIdFormat, { type: 'null' }],
     },
-    siteLang: { type: 'string', enum: supportedLanguages },
+    siteLang: { type: 'string', enum: supportedLocales },
     siteTitle: { type: 'string' },
     siteDescription: { type: 'string' },
     textSize: { type: 'string', enum: textSizes },

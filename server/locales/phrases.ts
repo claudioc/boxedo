@@ -1,8 +1,11 @@
 import en from './en.json';
 import it from './it.json';
 
+export const supportedLocales = ['en', 'it'] as const;
+export type SupportedLocales = (typeof supportedLocales)[number];
+
 interface PhraseDefinition {
-  language: string;
+  language: SupportedLocales;
   name: string;
   phrases: Record<string, Record<string, string>>;
 }
@@ -24,6 +27,3 @@ export const phraseDefinitions: PhraseDefinition[] = [
 export const phrases = Object.fromEntries(
   phraseDefinitions.map(({ language, phrases }) => [language, phrases])
 ) as { [K in SupportedLocales]: Record<string, Record<string, string>> };
-
-export const supportedLocales = phraseDefinitions.map((p) => p.language);
-export type SupportedLocales = (typeof supportedLocales)[number];

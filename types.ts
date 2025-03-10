@@ -1,5 +1,6 @@
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 import type { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import type { SupportedLocales } from './server/locales/phrases';
 
 export const nodeEnv = ['development', 'production', 'test'] as const;
 export type NodeEnv = (typeof nodeEnv)[number];
@@ -25,9 +26,12 @@ export const textSizes = ['S', 'M', 'L', 'XL'] as const;
 export type TextSize = (typeof textSizes)[number];
 export const DEFAULT_TEXT_SIZE: TextSize = 'M';
 
-export const supportedLanguages = ['en', 'it'] as const;
-export type SupportedLanguage = (typeof supportedLanguages)[number];
-export const DEFAULT_SUPPORTED_LANGUAGE: SupportedLanguage = 'en';
+export const DEFAULT_SUPPORTED_LOCALE: SupportedLocales = 'en';
+
+export const languageLocaleMap: Record<SupportedLocales, string> = {
+  en: 'en-GB',
+  it: 'it-IT',
+};
 
 export const dbBackends = ['local', 'remote', 'memory'] as const;
 export type DbBackend = (typeof dbBackends)[number];
@@ -83,7 +87,7 @@ export interface SettingsModel extends BaseModel {
   landingPageId: string | null;
   siteTitle: string;
   siteDescription: string;
-  siteLang: string;
+  siteLang: SupportedLocales;
   textSize: TextSize;
 }
 
@@ -210,7 +214,7 @@ export const ConfigEnvSchema = {
     LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
     SETTINGS_LANGUAGE: {
       type: 'string',
-      default: DEFAULT_SUPPORTED_LANGUAGE satisfies SupportedLanguage,
+      default: DEFAULT_SUPPORTED_LOCALE satisfies SupportedLocales,
     },
     SETTINGS_DESCRIPTION: {
       type: 'string',
