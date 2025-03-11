@@ -63,6 +63,7 @@ export const ReadPage = ({
             {formatDate(page.createdAt, settings.siteLang)}
             {!isSameTimestamp(page.updatedAt, page.createdAt) &&
               ` (${formatDate(page.updatedAt, settings.siteLang)})`}
+            &nbsp; ({page.author})
           </div>
           <PageMenu ctx={ctx} page={page} />
         </div>

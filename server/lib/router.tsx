@@ -11,6 +11,7 @@ import type {
   PageModel,
 } from '~/../types';
 import {
+  ANONYMOUS_AUTHOR_ID,
   JPEG_QUALITY,
   MAGIC_TOKEN_EXPIRATION_MINUTES,
   MAX_IMAGE_DIMENSION,
@@ -1126,6 +1127,7 @@ const router = async (app: FastifyInstance) => {
           contentUpdated: true,
           updatedAt: now,
           createdAt: now,
+          author: req.user?.email ?? ANONYMOUS_AUTHOR_ID,
         })
       ).match(nop, (feedback) => {
         throw new Error(feedback.message);

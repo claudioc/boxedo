@@ -1,9 +1,9 @@
 import type Polyglot from 'node-polyglot';
-import type { PageTitle } from '~/../types';
+import type { SearchTitlesResult } from '~/../types';
 import { DocumentIcon } from '../icons/DocumentIcon';
 
 interface TitlesListProps {
-  titles: PageTitle[];
+  titles: SearchTitlesResult[];
   // We receive the i18n object because we can't use the useApp hook here
   i18n: Polyglot;
 }

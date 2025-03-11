@@ -7,6 +7,14 @@ import yaml from 'yaml';
 import type { RepositoryFactory } from '../repositories/RepositoryFactory';
 import { generateIdFor, nop } from './helpers';
 
+/* Example
+users:
+  - claudio.cicali@gmail.com
+    fullname: Claudio Cicali
+  - some.else@somewhere.com
+    fullname: Erika Musteramann
+*/
+
 const UsersYamlSchema = {
   type: 'object',
   required: ['users'],

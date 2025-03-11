@@ -25,6 +25,7 @@ export class SettingsRepository extends BaseRepository {
       const settings = await this.db.get<SettingsModel>('settings');
 
       // Adds the future attributes
+      // FIXME: follow the same pattern we use for the pages
       if (!settings.textSize) {
         settings.textSize = DEFAULT_TEXT_SIZE;
         await this.db.put(settings);
@@ -68,7 +69,7 @@ export class SettingsRepository extends BaseRepository {
       await this.db.put(settings);
       return ok();
     } catch (error) {
-      console.error('Error updating settings:', error);
+      this.logger.error('Error updating settings:', error);
       return err(Feedbacks.E_UPDATING_SETTINGS);
     }
   }

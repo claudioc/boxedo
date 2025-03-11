@@ -14,3 +14,4 @@ export const SEARCH_SNIPPET_LENGTH = 150;
 // The search index is loaded in memory, so you may run out of memory.
 // TODO: maybe move this to the .env? But does it make sense to have it configurable though?
 export const MAX_INDEXABLE_DOCUMENTS = 1_000_000;
+export const ANONYMOUS_AUTHOR_ID = 'Joongle';

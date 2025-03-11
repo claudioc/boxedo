@@ -72,11 +72,6 @@ export type ModelName =
 
 type DocumentType = 'settings' | 'file' | 'magic' | 'session' | 'user' | 'page';
 
-export type PageTitle = {
-  pageId: string;
-  pageTitle: string;
-};
-
 export interface BaseModel {
   _id: string;
   _rev?: string;
@@ -139,6 +134,7 @@ export interface UserModel extends BaseModel {
   createdAt: string;
 }
 
+// Double check the DEFAULT_PAGE_VALUES in the Page repository
 export interface PageModel extends BaseModel {
   type: 'page';
   parentId?: string | null;
@@ -148,6 +144,7 @@ export interface PageModel extends BaseModel {
   pageContent: string;
   position: number;
   contentUpdated: boolean;
+  author: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -312,3 +309,8 @@ export interface SearchResult {
   title: string;
   snippets: string;
 }
+
+export type SearchTitlesResult = {
+  pageId: string;
+  pageTitle: string;
+};

@@ -8,10 +8,30 @@ import type {
   NavItem,
   PageModel,
 } from '~/../types';
-import { POSITION_GAP_SIZE } from '~/constants';
+import { ANONYMOUS_AUTHOR_ID, POSITION_GAP_SIZE } from '~/constants';
 import { Feedbacks } from '~/lib/feedbacks';
 import { safeHtml, slugUrl } from '~/lib/helpers';
 import { BaseRepository } from './BaseRepository';
+
+// This values are only added on READ (not on WRITE)
+// just to be sure that the pages are always consistent
+// with the changes of the schema over time
+const DEFAULT_PAGE_VALUES: Partial<PageModel> = {
+  parentId: null,
+  pageTitle: '',
+  pageSlug: '',
+  pageSlugs: [],
+  pageContent: '',
+  position: POSITION_GAP_SIZE,
+  contentUpdated: false,
+  // Added on 11 March 2025
+  author: ANONYMOUS_AUTHOR_ID,
+} as const;
+
+const ensurePageDefaults = (page: PageModel): PageModel => ({
+  ...DEFAULT_PAGE_VALUES,
+  ...page,
+});
 
 export class PageRepository extends BaseRepository {
   constructor(
@@ -38,7 +58,7 @@ export class PageRepository extends BaseRepository {
     try {
       const doc = await this.db.get(pageId);
       // Only return if it's actually a page
-      return ok(doc.type === 'page' ? doc : null);
+      return ok(doc.type === 'page' ? ensurePageDefaults(doc) : null);
     } catch (error) {
       if ((error as PouchDB.Core.Error).status === 404) {
         return ok(null);
@@ -61,7 +81,11 @@ export class PageRepository extends BaseRepository {
         limit: 1,
       });
 
-      return ok(result.docs.length > 0 ? (result.docs[0] as PageModel) : null);
+      return ok(
+        result.docs.length > 0
+          ? ensurePageDefaults(result.docs[0] as PageModel)
+          : null
+      );
     } catch (error) {
       if ((error as PouchDB.Core.Error).status === 404) {
         return ok(null);
@@ -86,7 +110,11 @@ export class PageRepository extends BaseRepository {
         limit: 1,
       });
 
-      return ok(result.docs.length > 0 ? (result.docs[0] as PageModel) : null);
+      return ok(
+        result.docs.length > 0
+          ? ensurePageDefaults(result.docs[0] as PageModel)
+          : null
+      );
     } catch (error) {
       if ((error as PouchDB.Core.Error).status === 404) {
         return ok(null);
@@ -186,7 +214,7 @@ export class PageRepository extends BaseRepository {
       await this.db.put(page);
       return ok();
     } catch (error) {
-      console.log('Error inserting a page', error);
+      this.logger.error('Error inserting a page', error);
       return err(Feedbacks.E_CREATING_PAGE);
     }
   }
@@ -202,7 +230,7 @@ export class PageRepository extends BaseRepository {
         sort: [{ position: 'asc' }],
       })) as PouchDB.Find.FindResponse<PageModel>;
 
-      return ok(result.docs);
+      return ok(result.docs.map((doc) => ensurePageDefaults(doc)));
     } catch (error) {
       this.logger.error('Error getting top level pages:', error);
       return err(Feedbacks.E_UNKNOWN_ERROR);
@@ -223,7 +251,9 @@ export class PageRepository extends BaseRepository {
         limit: Number.MAX_SAFE_INTEGER,
       });
 
-      const pages = result.docs as PageModel[];
+      const pages = result.docs.map((doc) =>
+        ensurePageDefaults(doc as PageModel)
+      );
 
       // Group pages by parentId
       const pagesByParent = new Map<string | null, PageModel[]>();
@@ -372,9 +402,11 @@ export class PageRepository extends BaseRepository {
           (doc._revs_info as PouchDB.Core.RevisionInfo[]).map(async (rev) => {
             if (rev.status !== 'available') return null;
             if (rev.rev === doc._rev) return null;
-            const revisionDoc = (await this.db.get(page._id, {
-              rev: rev.rev,
-            })) as PageModel;
+            const revisionDoc = ensurePageDefaults(
+              await this.db.get(page._id, {
+                rev: rev.rev,
+              })
+            );
             if (!revisionDoc.contentUpdated) return null;
             return {
               pageTitle: revisionDoc.pageTitle,
@@ -401,12 +433,14 @@ export class PageRepository extends BaseRepository {
         rev: version,
       });
 
-      return ok({
-        pageTitle: revisionDoc.pageTitle,
-        pageContent: revisionDoc.pageContent,
-        updatedAt: revisionDoc.updatedAt,
-        _rev: revisionDoc._rev,
-      } as PageModel);
+      return ok(
+        ensurePageDefaults({
+          pageTitle: revisionDoc.pageTitle,
+          pageContent: revisionDoc.pageContent,
+          updatedAt: revisionDoc.updatedAt,
+          _rev: revisionDoc._rev,
+        } as PageModel)
+      );
     } catch (error) {
       this.logger.error('Error getting page history item:', error);
       return err(Feedbacks.E_INVALID_VERSION);

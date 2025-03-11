@@ -4,8 +4,8 @@ import type {
   AnyLogger,
   ConfigEnv,
   PageModel,
-  PageTitle,
   SearchResult,
+  SearchTitlesResult,
 } from '~/../types';
 import { MAX_INDEXABLE_DOCUMENTS } from '~/constants';
 import {
@@ -296,7 +296,9 @@ export class SearchService {
     }
   }
 
-  public async searchByTitle(q: string): Promise<Result<PageTitle[], []>> {
+  public async searchByTitle(
+    q: string
+  ): Promise<Result<SearchTitlesResult[], []>> {
     await this.indexBuilt;
 
     const query = prepareFTSQuery(q);
