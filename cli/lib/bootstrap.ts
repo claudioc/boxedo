@@ -1,0 +1,126 @@
+import createDebug from 'debug';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Argv as Yargs } from 'yargs';
+import yargs from 'yargs';
+
+const debug = createDebug('joongle-cli:bootstrap');
+
+// Ensure if any promises aren't handled correctly then they get logged
+process.on('unhandledRejection', (reason, promise) => {
+  console.warn('A promise was rejected but did not have a .catch() handler:');
+  // @ts-ignore
+  console.warn(reason?.stack || reason || promise);
+  throw reason;
+});
+
+export const bootstrap = {
+  /**
+   * Discovers any commands inside of the commands folder
+   */
+  discoverCommands(
+    commands: Record<string, string>,
+    dir: string
+  ): Record<string, string> {
+    const commandsDir = path.join(dir, 'commands');
+
+    // No commands here if commands dir doesn't exist
+    if (!fs.existsSync(commandsDir)) {
+      return commands;
+    }
+
+    // Read the directory and find the commands
+    fs.readdirSync(commandsDir)
+      .filter(
+        (command) =>
+          path.extname(command) === '.ts' ||
+          fs.existsSync(path.join(commandsDir, command, `${command}.ts`))
+      )
+      .forEach((command) => {
+        const basename = path.basename(command, '.ts');
+        const commandName = basename;
+        commands[commandName] = path.resolve(commandsDir, basename);
+      });
+
+    return commands;
+  },
+
+  /**
+   * Configure a single command
+   */
+  async loadCommand(
+    commandName: string,
+    commandPath: string,
+    argParser: Yargs
+  ): Promise<void> {
+    const module = await import(commandPath);
+    const CommandClass = module.default || module;
+    CommandClass.configure(commandName, argParser);
+  },
+
+  /**
+   * Kicks off the Joongle CLI.
+   */
+  async run() {
+    const argv = process.argv.slice(2);
+    debug('Starting bootstrap process');
+
+    let argParser = yargs();
+    argParser.usage(`
+Usage: joongle <command> [options]
+
+This is Joongle CLI.`);
+
+    const commands = bootstrap.discoverCommands({}, './cli');
+
+    debug(`Discovered commands: ${Object.keys(commands).join(', ')}`);
+
+    // Get the first argument so we can not load all the commands at once
+    const firstArg = argv.shift();
+
+    // Special-case `help` because we only want to configure all the commands
+    // for this one case
+    if (firstArg === 'help' || firstArg === '--help') {
+      debug('running help command, requiring and configuring every command');
+      for (const [commandName, commandPath] of Object.entries(commands)) {
+        await bootstrap.loadCommand(commandName, commandPath, argParser);
+      }
+      argv.unshift('help');
+    } else if (commands[firstArg!]) {
+      const commandName = firstArg!;
+      const commandPath = commands[firstArg!];
+      await bootstrap.loadCommand(commandName, commandPath, argParser);
+      argv.unshift(commandName!);
+    } else {
+      // Command not found :( Error and exit
+      console.error(
+        `Unrecognized command: '${firstArg}'. Run \`joongle help\` for usage.`
+      );
+      process.exit(1);
+    }
+
+    argParser
+      .wrap(Math.min(150, argParser.terminalWidth()))
+      .epilogue('For more information, see our docs.')
+      .group('help', 'Global Options:')
+      .option('d', {
+        alias: 'dir',
+        describe: 'Folder to run command in',
+        group: 'Global Options:',
+      })
+      .option('D', {
+        alias: 'development',
+        describe: 'Run in development mode',
+        type: 'boolean',
+        group: 'Global Options:',
+      })
+      .option('V', {
+        alias: 'verbose',
+        describe: 'Enable verbose output',
+        type: 'boolean',
+        group: 'Global Options:',
+      })
+      .version(false)
+      .parse(argv);
+  },
+};

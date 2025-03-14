@@ -40,6 +40,7 @@
     "@types/sanitize-filename": "^1.1.28",
     "@types/sanitize-html": "^2.11.0",
     "@types/sortablejs": "^1.15.8",
+    "@types/yargs": "^17.0.33",
     "cloc": "^2.2.0-cloc",
     "daisyui": "^5.0.0",
     "dotenv": "^16.4.5",
@@ -92,6 +93,7 @@
     "better-sqlite3": "^11.8.1",
     "bindings": "^1.5.0",
     "cheerio": "^1.0.0",
+    "debug": "^4.4.0",
     "fastify": "^5.2.0",
     "fastify-favicon": "^5.0.0",
     "fastify-plugin": "^5.0.1",
@@ -114,6 +116,7 @@
     "sortablejs": "^1.15.6",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "tailwindcss": "^4.0.9"
+    "tailwindcss": "^4.0.9",
+    "yargs": "^17.7.2"
   }
 }
