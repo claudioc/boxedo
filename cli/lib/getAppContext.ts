@@ -1,12 +1,15 @@
 import { AppContext } from '~/lib/AppContext';
 import { loadConfig } from '~/lib/helpers';
+import { AnyLogger } from '../../types';
 
-export const getAppContext = async (): Promise<AppContext | null> => {
+export const getAppContext = async (
+  logger: AnyLogger = console
+): Promise<AppContext | null> => {
   const config = loadConfig();
 
   const contextResult = await AppContext.create({
     config,
-    logger: console,
+    logger,
   });
 
   if (contextResult.isErr()) {

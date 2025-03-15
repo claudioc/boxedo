@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import type { Argv as Yargs, Options as YargsOptions } from 'yargs';
+import { Ui } from './Ui';
 
 const debug = createDebug('joongle-cli:bootstrap');
 
@@ -27,8 +28,11 @@ export abstract class Command {
    */
   public static flags: { [flagName: string]: YargsOptions } = {};
 
+  public ui!: Ui;
+
   public static async _run(argv: any): Promise<void> {
     const command: Command = new (<any>this)();
+    command.ui = new Ui();
     debug(`invoking '${this.commandName}' command`);
     try {
       await command.run(argv);
