@@ -142,6 +142,7 @@ class BulkLoader {
         updatedAt: now,
         position,
         contentUpdated: true,
+        author: 'Bulk loader',
       });
 
       this.existingPages.push({ _id: pageId, pageSlug: slug });
