@@ -1,10 +1,9 @@
-import { generateIdFor } from '~/lib/helpers';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default class AddUserCommand extends Command {
+export default class DelUserCommand extends Command {
   async run() {
     const spinner = this.ui.spinner('Initializing…');
     this.context = await getAppContext(this.ui.createConsole(spinner));
@@ -13,18 +12,17 @@ export default class AddUserCommand extends Command {
       return;
     }
 
-    while (await this.addUser());
+    while (await this.delUser());
   }
 
-  async addUser() {
+  async delUser() {
     const repo = await this.context!.getRepositoryFactory().getUserRepository();
 
     const answers = {
-      email: await this.ui.prompt('User email address', {
+      email: await this.ui.prompt('User email address to delete', {
         required: true,
         validate: (val) => emailRegex.test(val),
       }),
-      name: await this.ui.prompt('User full name'),
     };
 
     // Check if the user already exists
@@ -34,8 +32,8 @@ export default class AddUserCommand extends Command {
       return false;
     }
 
-    if (maybeUser.value) {
-      this.ui.console.error('This user email is already present');
+    if (!maybeUser.value) {
+      this.ui.console.error('This user email is not present');
       return true;
     }
 
@@ -43,23 +41,17 @@ export default class AddUserCommand extends Command {
       return false;
     }
 
-    const result = await repo.insertUser({
-      _id: generateIdFor('user'),
-      type: 'user',
-      email: answers.email,
-      fullname: answers.name,
-      createdAt: new Date().toISOString(),
-    });
+    const result = await repo.deleteUser(maybeUser.value._id);
 
     if (result.isErr()) {
       this.ui.console.error(result.error.message);
       return false;
     }
 
-    this.ui.console.info('User added');
+    this.ui.console.info('User deleted');
 
-    return await this.ui.confirm('Add another one?');
+    return await this.ui.confirm('Delete another one?');
   }
 }
 
-AddUserCommand.description = 'Add a user to the Joongle database';
+DelUserCommand.description = 'Delete a user from Joongle database';

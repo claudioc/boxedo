@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import type { Argv as Yargs, Options as YargsOptions } from 'yargs';
+import { AppContext } from '~/lib/AppContext';
 import { Ui } from './Ui';
 
 const debug = createDebug('joongle-cli:bootstrap');
@@ -29,6 +30,8 @@ export abstract class Command {
   public static flags: { [flagName: string]: YargsOptions } = {};
 
   public ui!: Ui;
+
+  protected context: AppContext | null = null;
 
   public static async _run(argv: any): Promise<void> {
     const command: Command = new (<any>this)();

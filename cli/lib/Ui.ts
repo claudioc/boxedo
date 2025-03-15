@@ -1,7 +1,10 @@
 import { confirm, input } from '@inquirer/prompts';
 import yoctoSpinner, { Spinner } from 'yocto-spinner';
+import { AnyLogger } from '../../types';
 
 export class Ui {
+  private _console!: AnyLogger;
+
   public spinner(text: string) {
     return yoctoSpinner({ text }).start();
   }
@@ -11,23 +14,33 @@ export class Ui {
     options: { required: boolean; validate?: (val: string) => boolean } = {
       required: true,
     }
-  ) {
-    const answer = await input({
-      message,
-      required: options.required,
-      validate: options.validate,
-    });
-    return answer;
+  ): Promise<string> {
+    try {
+      const answer = await input({
+        message,
+        required: options.required,
+        validate: options.validate,
+      });
+      return answer;
+    } catch (error) {
+      this.checkCtrlC(error);
+      process.exit(1);
+    }
   }
 
-  public async confirm(message: string) {
-    return await confirm({ message, default: false });
+  public async confirm(message: string): Promise<boolean> {
+    try {
+      return await confirm({ message, default: false });
+    } catch (error) {
+      this.checkCtrlC(error);
+      process.exit(1);
+    }
   }
 
   /**
    * A console-like which is spinner aware (stops and restart it) and adds a newline
    */
-  public console(spinner: Spinner) {
+  public createConsole(spinner: Spinner): AnyLogger {
     const createConsoleMethod = (method: 'log' | 'info' | 'error' | 'warn') => {
       return (...args: any[]) => {
         const wasSpinning = spinner.isSpinning;
@@ -50,11 +63,23 @@ export class Ui {
       };
     };
 
-    return {
-      log: createConsoleMethod('log'),
+    this._console = {
       info: createConsoleMethod('info'),
       error: createConsoleMethod('error'),
       warn: createConsoleMethod('warn'),
     };
+
+    return this._console;
+  }
+
+  get console() {
+    return this._console ?? console;
+  }
+
+  private checkCtrlC(error: any): void {
+    if (error instanceof Error && error.name === 'ExitPromptError') {
+      console.log('👋 until next time!');
+      process.exit(0);
+    }
   }
 }

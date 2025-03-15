@@ -74,7 +74,11 @@ export class UserRepository extends BaseRepository {
 
   async deleteUser(userId: string): Promise<Result<void, Feedback>> {
     try {
-      const user = await this.db.get(`user:${userId}`);
+      let id = userId;
+      if (!id.startsWith('user:')) {
+        id = `user:${userId}`;
+      }
+      const user = await this.db.get(id);
       await this.db.remove(user);
       return ok();
     } catch (error) {

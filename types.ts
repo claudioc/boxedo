@@ -11,6 +11,7 @@ export type AuthenticationType = (typeof authenticationTypes)[number];
 export interface AnyLogger {
   error: (msg: string, ...args: unknown[]) => void;
   info: (msg: string, ...args: unknown[]) => void;
+  warn: (msg: string, ...args: unknown[]) => void;
 }
 
 export const emailProviderNames = [
