@@ -1,26 +1,17 @@
-import { AppContext } from '~/lib/AppContext';
-import { loadConfig } from '~/lib/helpers';
 import { Command } from '../lib/Command';
+import { getAppContext } from '../lib/getAppContext';
 
 export default class ListUsersCommand extends Command {
   async run() {
-    const config = loadConfig();
-
-    const contextResult = await AppContext.create({
-      config,
-      logger: console,
-    });
-
-    if (contextResult.isErr()) {
-      console.error(contextResult.error.message);
+    const context = await getAppContext();
+    if (!context) {
       return;
     }
 
-    const context = contextResult.value;
-
-    const userRepo = context.getRepositoryFactory().getUserRepository();
-
-    const result = await userRepo.getAllUsers();
+    const result = await context
+      .getRepositoryFactory()
+      .getUserRepository()
+      .getAllUsers();
 
     if (result.isErr()) {
       console.error(result.error.message);
