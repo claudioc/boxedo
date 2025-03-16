@@ -19,10 +19,13 @@
     "server:test": "vitest",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
     "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts",
-    "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS ."
+    "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS .",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@fastify/one-line-logger": "^2.0.1",
     "@tailwindcss/typography": "^0.5.16",
     "@types/alpinejs": "^3.13.6",
@@ -43,6 +46,7 @@
     "dotenv": "^16.4.5",
     "esbuild": "0.25.0",
     "esbuild-plugin-inline-worker": "^0.1.1",
+    "husky": "^9.1.7",
     "json-schema-to-ts": "^3.1.0",
     "node-os-utils": "^1.3.7",
     "tsx": "^4.19.2",
