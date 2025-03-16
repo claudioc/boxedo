@@ -18,7 +18,6 @@
     "db:reset": "./tasks/dbReset.sh",
     "db:export": "tsx --no-deprecation --env-file=.env --tsconfig ./server/tsconfig.json ./tasks/exporter.ts",
     "server:test": "vitest",
-    "bulk-load": "tsx --no-deprecation --tsconfig ./server/tsconfig.json --env-file=.env tasks/bulkLoad.ts",
     "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
     "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts",
     "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS .",

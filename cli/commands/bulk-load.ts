@@ -1,9 +1,61 @@
 import { load } from 'cheerio';
 import fs from 'fs';
 import slugify from 'slugify';
-import { AppContext } from '../server/lib/AppContext';
-import { generateIdFor, loadConfig } from '../server/lib/helpers';
-import { PageModel } from '../types';
+import { AppContext } from '~/lib/AppContext';
+import { generateIdFor } from '~/lib/helpers';
+import { PageModel } from '../../types';
+import { Command } from '../lib/Command';
+import { getAppContext } from '../lib/getAppContext';
+
+export default class BulkLoadCommand extends Command {
+  async run() {
+    const spinner = this.ui.spinner('Initializing…');
+
+    this.context = await getAppContext(this.ui.createConsole(spinner));
+    if (!this.context) {
+      return;
+    }
+
+    const repo = await this.context.getRepositoryFactory().getPageRepository();
+
+    spinner.stop();
+
+    const pageCount = await repo.countPages();
+    if (pageCount.isErr()) {
+      this.ui.console.error(pageCount.error.message);
+      return;
+    }
+
+    if (
+      pageCount.value > 0 &&
+      !(await this.ui.confirm(
+        `There already ${pageCount.value} pages in the database. Continue anyway?`
+      ))
+    ) {
+      return;
+    }
+
+    const answers = {
+      howMany: await this.ui.prompt(
+        'How many docs you want to bulk load (max 1000)?',
+        {
+          required: true,
+          validate: (val) =>
+            /\d+/.test(val) && Number(val) > 0 && Number(val) <= 1000,
+        }
+      ),
+    };
+
+    spinner.start('Generating…');
+    const bulkLoader = new BulkLoader(this.context);
+
+    await bulkLoader.generatePages(Number(answers.howMany));
+    spinner.stop('Success!');
+  }
+}
+
+BulkLoadCommand.description =
+  'Loads several documents out of a demo data for testing purposes';
 
 type ExistingPage = {
   _id: string;
@@ -15,25 +67,6 @@ class BulkLoader {
   private existingPages: ExistingPage[] = [];
 
   constructor(private readonly context: AppContext) {}
-
-  static async create(): Promise<BulkLoader> {
-    const config = loadConfig();
-
-    const context = (
-      await AppContext.create({
-        config,
-        logger: console,
-      })
-    ).match(
-      (context) => context,
-      (error) => {
-        console.log(error);
-        process.exit(1);
-      }
-    );
-
-    return new BulkLoader(context);
-  }
 
   getRandomElement<T>(arr: T[]): T {
     const index = Math.floor(Math.random() * arr.length);
@@ -124,10 +157,6 @@ class BulkLoader {
         parents.set(parentId, position);
       }
 
-      if (parentId === null) {
-        console.log(`Creating root page with position ${position}`);
-      }
-
       const now = new Date().toISOString();
       const pageId: string = generateIdFor('page');
       this.pages.push({
@@ -155,24 +184,3 @@ class BulkLoader {
     return;
   }
 }
-
-const args = process.argv.slice(2);
-let howMany = 100; // Default value
-
-if (args.length > 0) {
-  const parsedCount = parseInt(args[0], 10);
-
-  // Validate that the parameter is a number
-  if (isNaN(parsedCount)) {
-    console.error('Error: Parameter must be a number');
-    console.log('Usage: node bulkLoad.js [count]');
-    process.exit(1);
-  }
-
-  howMany = parsedCount;
-}
-
-const loader = await BulkLoader.create();
-await loader.generatePages(howMany);
-
-console.log(`Pages generated successfully ${howMany}`);
