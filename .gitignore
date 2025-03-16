@@ -4,6 +4,6 @@ tmp
 .env
 .vscode
 .DS_Store
-exportedPages
+exported-pages
 users.yaml
 database
