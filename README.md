@@ -31,6 +31,7 @@ Some feature highlights:
 - **Developer-friendly** - Designed for easy hacking from the ground-up
 - **Image upload support** - images are also transparently saved in CouchDB. A support script exists to remove unused images
 - **Magic link authentication** - You can optionally use an authentication layer, but you don't have to maintain any credentials (see below for more details)
+- **Powerful CLI** to manage the database, add accounts, export and more
 
 Joongle is **Free Software**, currently using a MIT license. All its components are also all using a Free Software license.
 
@@ -49,18 +50,7 @@ A "magic link" is a link that is sent to a user via email. Following that link, 
 
 Configuring the magic link authentication takes a moment, though:
 - first, you can only use one of the supported email providers: sendgrid, mailgun or plain smtp. Sendgrid and Mailgun provide a fair amount of free emails that you can send with their services, but you have to "white list" all the emails you want to use beforehand (to avoid abusing their services). If you have a better option, please talk to me and I will add it as a supported provider.
-- second, you have to create a file called "users.yaml" in the root of the project where you are going to list your users. The format is trivial:
-```yaml
-users:
-  - claudio.cicali@gmail.com
-    fullname: Claudio Cicali
-  - some.else@somewhere.com
-    fullname: Erika Musteramann
-```
-
-This file is read only at bootstrap time, so if you change it, remember to restart the server and take a look at its logs for any validation error. The server will always sync the user database in PouchDb with the user file, so keep in mind that if you remove all the users in users.yaml you are also going to remove all the users in the database.
-
-The users are NOT removed if you remove the file (maybe for security reasons), but if you then need to add a new one, you have to create a `users.yaml` which exactly mirrors the list of users in PouchDb - otherwise the ones which don't match (by email) will be removed.
+- second, you have to manage your users via the CLI (./cli/joongle), using the commands `list-users`, `add-user` and `del-user`. Note that only a simple, formal validation is performed by the CLI (no email is sent at the moment of the user creation)
 
 ### No caching layer
 
