@@ -29,7 +29,6 @@ import { phrases, type SupportedLocales } from '../locales/phrases';
 import { AppContext } from './AppContext';
 import { ensurePathExists } from './helpers';
 import router from './router';
-import { syncUsers } from './syncUsers';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -156,14 +155,6 @@ const settings = (
     process.exit(1);
   }
 );
-
-if (app.config.AUTHENTICATION_TYPE !== 'none') {
-  await syncUsers({
-    app,
-    repoFactory: app.context.getRepositoryFactory(),
-    dryRun: app.config.NODE_ENV === 'test',
-  });
-}
 
 await app.register(fastifyI18n, {
   defaultLocale: settings.siteLang as SupportedLocales,
