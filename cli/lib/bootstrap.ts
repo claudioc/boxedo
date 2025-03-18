@@ -103,20 +103,9 @@ This is Joongle CLI.`);
       .wrap(Math.min(150, argParser.terminalWidth()))
       .epilogue('For more information, see our docs.')
       .group('help', 'Global Options:')
-      .option('d', {
-        alias: 'dir',
-        describe: 'Folder to run command in',
-        group: 'Global Options:',
-      })
-      .option('D', {
-        alias: 'development',
-        describe: 'Run in development mode',
-        type: 'boolean',
-        group: 'Global Options:',
-      })
-      .option('V', {
-        alias: 'verbose',
-        describe: 'Enable verbose output',
+      .option('n', {
+        alias: 'dry-run',
+        describe: "Execute the command but don't apply any change",
         type: 'boolean',
         group: 'Global Options:',
       })

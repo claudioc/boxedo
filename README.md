@@ -128,6 +128,14 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 
 For docker specific instructions, there is also a Docker.md in the docs/ directory where I have written some notes related to my own installation (in Ubuntu 24.04).
 
+### The CLI
+
+Joongle provides its users and developers with a powerful CLI to perform all sort of tasks, from managing users, export pages, check translation and even releasing the project to Github (although this last one task is supposed to only be used by the core developers!).
+
+To run the CLI, just use the `./cli/joongle help` command first from the root of the project. A list of the available commands will show. Please note that we will use npx as soon as [#32](https://github.com/claudioc/joongle/issues/32) is closed.
+
+To run the CLI in [debug](https://www.npmjs.com/package/debug) mode, use `DEBUG=joongle-cli:* ./cli/joongle help`.
+
 ---
 
 ## Security and other stuff

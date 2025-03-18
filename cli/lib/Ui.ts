@@ -40,10 +40,10 @@ export class Ui {
   /**
    * A console-like which is spinner aware (stops and restart it) and adds a newline
    */
-  public createConsole(spinner: Spinner): AnyLogger {
+  public createConsole(spinner?: Spinner): AnyLogger {
     const createConsoleMethod = (method: 'log' | 'info' | 'error' | 'warn') => {
       return (...args: any[]) => {
-        const wasSpinning = spinner.isSpinning;
+        const wasSpinning = spinner && spinner.isSpinning;
         if (wasSpinning) {
           spinner.stop();
         }
