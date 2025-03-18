@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2025-03-18
+
+### Features
+
+- adds the release command
+
 ## [0.1.1] - 2025-03-18
 
 ### Other Changes
