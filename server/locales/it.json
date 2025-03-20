@@ -21,6 +21,7 @@
     "S_PAGE_DELETED": "Pagina eliminata",
     "S_PAGE_MOVED": "Pagina spostata in una nuova posizione",
     "S_SETTINGS_UPDATED": "Impostazioni aggiornate",
+    "S_PREFERENCES_UPDATED": "Preferenze aggiornate",
     "S_MAGIC_LINK_SENT": "Magic link spedito",
     "S_LOGIN_SUCCESS": "Login effettuato con successo, ben tornato!",
     "E_INDEX_ALREADY_EXISTS": "Indice già esistente",
@@ -130,12 +131,16 @@
     "title": "Modifica impostazioni",
     "notSet": "(Non ancora impostato)",
     "setLandingPage": "Imposta pagina iniziale a:",
-    "setLanguage": "Imposta lingua dell'interfaccia utente a:",
     "currentLandingPageIs": "La pagina iniziale attuale è \"%{title}\"",
     "newLandingPageIs": "La nuova pagina iniziale è",
     "startTyping": "Inizia a scrivere…",
     "siteTitle": "Breve titolo per la testata",
-    "siteTitleHelp": "Verrà visualizzato solo in alto a sinistra nell'applicazione",
+    "siteTitleHelp": "Verrà visualizzato solo in alto a sinistra nell'applicazione"
+  },
+
+  "PreferencesPage": {
+    "title": "Modifica preferences",
+    "setLanguage": "Imposta lingua dell'interfaccia utente a:",
     "textSize": "Dimensione del testo delle pagine",
     "textSizeHelp": "Si applica solo alla dimensione del testo dei contenuti, non all'interfaccia utente",
     "small": "Piccola",
