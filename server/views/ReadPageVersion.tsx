@@ -16,7 +16,7 @@ export const ReadPageVersion = ({
   item,
   version,
 }: ReadPageVersionProps) => {
-  const { i18n, settings } = ctx.app;
+  const { i18n } = ctx.app;
 
   return (
     <Layout ctx={ctx} title={item.pageTitle} page={page}>
@@ -36,12 +36,12 @@ export const ReadPageVersion = ({
               {i18n.t('ReadPageVersion.oldVersionInfo', {
                 date: (
                   <strong>
-                    {formatDate(item.updatedAt, settings.siteLang)}
+                    {formatDate(item.updatedAt, ctx.prefs.siteLang)}
                   </strong>
                 ),
                 newDate: (
                   <strong>
-                    {formatDate(page.updatedAt, settings.siteLang)}
+                    {formatDate(page.updatedAt, ctx.prefs.siteLang)}
                   </strong>
                 ),
                 link: (

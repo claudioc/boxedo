@@ -87,13 +87,16 @@ export const RouterSchemas = {
     targetIndex: { type: 'integer', minimum: 0 },
   } as const),
 
-  SettingsPageBody: buildSchema(['siteLang', 'siteTitle'], {
+  SettingsPageBody: buildSchema(['siteTitle'], {
     landingPageId: {
       anyOf: [PageIdFormat, { type: 'null' }],
     },
-    siteLang: { type: 'string', enum: supportedLocales },
     siteTitle: { type: 'string' },
     siteDescription: { type: 'string' },
+  } as const),
+
+  PreferencesPageBody: buildSchema(['siteLang'], {
+    siteLang: { type: 'string', enum: supportedLocales },
     textSize: { type: 'string', enum: textSizes },
   } as const),
 };

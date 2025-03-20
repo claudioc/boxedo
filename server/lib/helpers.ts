@@ -289,7 +289,8 @@ export const safeHtml = (str: string) =>
     },
   });
 
-export const generateIdFor = (model: ModelName) => `${model}:${createId()}`;
+export const generateIdFor = (model: ModelName, id?: string) =>
+  `${model}:${id ? id : createId()}`;
 
 export const mapTextSize = (size: TextSize) => {
   switch (size) {

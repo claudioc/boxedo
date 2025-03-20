@@ -15,6 +15,7 @@ import {
   ConfigEnvSchema,
   type ConfigEnv,
   type NodeEnv,
+  type PreferencesModel,
   type SettingsModel,
   type UserModel,
 } from '~/../types';
@@ -25,9 +26,9 @@ import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import type { RepositoryFactory } from '~/repositories/RepositoryFactory';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
-import { phrases, type SupportedLocales } from '../locales/phrases';
+import { phrases } from '../locales/phrases';
 import { AppContext } from './AppContext';
-import { ensurePathExists } from './helpers';
+import { ensurePathExists, getDefaultLanguage } from './helpers';
 import router from './router';
 
 declare module 'fastify' {
@@ -46,6 +47,7 @@ declare module 'fastify' {
   }
   interface FastifyRequest {
     user: UserModel | null;
+    preferences: PreferencesModel;
   }
 }
 
@@ -156,11 +158,12 @@ const settings = (
   }
 );
 
+const siteLang = getDefaultLanguage(app.config);
 await app.register(fastifyI18n, {
-  defaultLocale: settings.siteLang as SupportedLocales,
+  defaultLocale: siteLang,
   phrases,
 });
-app.i18n.switchTo(settings.siteLang as SupportedLocales);
+app.i18n.switchTo(siteLang);
 
 app.decorate('settings', settings);
 app.decorate('is', (env: NodeEnv) => env === app.config.NODE_ENV);

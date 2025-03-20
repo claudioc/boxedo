@@ -49,6 +49,7 @@ export interface DbServiceInitParams {
 export type Ctx = {
   app: FastifyInstance;
   user?: UserModel | null;
+  prefs: PreferencesModel;
 };
 
 export type Context =
@@ -62,8 +63,11 @@ export interface WithCtx {
   ctx: Ctx;
 }
 
-export type PluralName<T extends string> = T extends 'settings' ? T : `${T}s`;
+export type PluralName<T extends string> = T extends 'settings' | 'preferences'
+  ? T
+  : `${T}s`;
 export type ModelName =
+  | 'preferences'
   | 'settings'
   | 'page'
   | 'file'
@@ -71,7 +75,14 @@ export type ModelName =
   | 'session'
   | 'user';
 
-type DocumentType = 'settings' | 'file' | 'magic' | 'session' | 'user' | 'page';
+type DocumentType =
+  | 'settings'
+  | 'preferences'
+  | 'file'
+  | 'magic'
+  | 'session'
+  | 'user'
+  | 'page';
 
 export interface BaseModel {
   _id: string;
@@ -84,6 +95,10 @@ export interface SettingsModel extends BaseModel {
   landingPageId: string | null;
   siteTitle: string;
   siteDescription: string;
+}
+
+export interface PreferencesModel extends BaseModel {
+  type: 'preferences';
   siteLang: SupportedLocales;
   textSize: TextSize;
 }
@@ -151,6 +166,7 @@ export interface PageModel extends BaseModel {
 }
 
 export type DocumentModel =
+  | PreferencesModel
   | SettingsModel
   | FileModel
   | MagicModel

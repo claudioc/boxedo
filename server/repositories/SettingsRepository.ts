@@ -1,14 +1,12 @@
 import { err, ok, type Result } from 'neverthrow';
-import {
-  DEFAULT_TEXT_SIZE,
-  type AnyLogger,
-  type ConfigEnv,
-  type DocumentModel,
-  type Feedback,
-  type SettingsModel,
+import type {
+  AnyLogger,
+  ConfigEnv,
+  DocumentModel,
+  Feedback,
+  SettingsModel,
 } from '~/../types';
 import { Feedbacks } from '~/lib/feedbacks';
-import { ensureValidLanguage, getDefaultLanguage } from '~/lib/helpers';
 import { BaseRepository } from './BaseRepository';
 
 export class SettingsRepository extends BaseRepository {
@@ -23,15 +21,6 @@ export class SettingsRepository extends BaseRepository {
   async getSettings(): Promise<Result<SettingsModel, Feedback>> {
     try {
       const settings = await this.db.get<SettingsModel>('settings');
-
-      // Adds the future attributes
-      // FIXME: follow the same pattern we use for the pages
-      if (!settings.textSize) {
-        settings.textSize = DEFAULT_TEXT_SIZE;
-        await this.db.put(settings);
-      }
-      // End future attributes
-
       return ok(settings);
     } catch (error) {
       if ((error as PouchDB.Core.Error)?.status === 404) {
@@ -43,10 +32,6 @@ export class SettingsRepository extends BaseRepository {
           siteDescription: this.config
             ? (this.config.SETTINGS_DESCRIPTION ?? '')
             : '',
-          siteLang: getDefaultLanguage(this.config),
-          textSize: this.config
-            ? this.config?.SETTINGS_TEXT_SIZE
-            : DEFAULT_TEXT_SIZE,
         };
 
         try {
@@ -63,8 +48,8 @@ export class SettingsRepository extends BaseRepository {
   async updateSettings(
     settings: SettingsModel
   ): Promise<Result<void, Feedback>> {
-    settings.siteLang = ensureValidLanguage(settings.siteLang);
-
+    settings.type = 'settings';
+    settings._id = 'settings';
     try {
       await this.db.put(settings);
       return ok();

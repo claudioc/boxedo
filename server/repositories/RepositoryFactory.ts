@@ -2,6 +2,7 @@ import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
 import { FileRepository } from './FileRepository';
 import { MagicRepository } from './MagicRepository';
 import { PageRepository } from './PageRepository';
+import { PreferencesRepository } from './PreferencesRepository';
 import { SessionRepository } from './SessionRepository';
 import { SettingsRepository } from './SettingsRepository';
 import { UserRepository } from './UserRepository';
@@ -20,6 +21,7 @@ export class RepositoryFactory {
   private fileRepository: FileRepository;
   private magicRepository: MagicRepository;
   private userRepository: UserRepository;
+  private preferencesRepository: PreferencesRepository;
 
   private constructor(
     private db: Db,
@@ -44,6 +46,11 @@ export class RepositoryFactory {
       this.logger
     );
     this.userRepository = new UserRepository(this.db, this.config, this.logger);
+    this.preferencesRepository = new PreferencesRepository(
+      this.db,
+      this.config,
+      this.logger
+    );
   }
 
   static create(options: RepositoryFactoryOptions): RepositoryFactory {
@@ -81,5 +88,9 @@ export class RepositoryFactory {
 
   getUserRepository(): UserRepository {
     return this.userRepository;
+  }
+
+  getPreferencesRepository(): PreferencesRepository {
+    return this.preferencesRepository;
   }
 }

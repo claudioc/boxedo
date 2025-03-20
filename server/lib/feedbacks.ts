@@ -32,7 +32,8 @@ type ErrorCodes =
   | 'E_CREATING_SESSION'
   | 'E_CREATING_USER'
   | 'E_UPDATING_USER'
-  | 'E_DELETING_USER';
+  | 'E_DELETING_USER'
+  | 'E_UPDATING_PREFERENCES';
 
 type SuccessCodes =
   | 'S_PAGE_CREATED'
@@ -41,7 +42,8 @@ type SuccessCodes =
   | 'S_PAGE_MOVED'
   | 'S_SETTINGS_UPDATED'
   | 'S_MAGIC_LINK_SENT'
-  | 'S_LOGIN_SUCCESS';
+  | 'S_LOGIN_SUCCESS'
+  | 'S_PREFERENCES_UPDATED';
 
 type AnyCode = ErrorCodes | SuccessCodes;
 
@@ -75,6 +77,10 @@ export const Feedbacks: Record<AnyCode, Feedback> = {
   S_LOGIN_SUCCESS: {
     code: 7,
     message: 'Login successful',
+  },
+  S_PREFERENCES_UPDATED: {
+    code: 8,
+    message: 'Preferences updated',
   },
   E_INDEX_ALREADY_EXISTS: {
     code: 100,
@@ -204,6 +210,10 @@ export const Feedbacks: Record<AnyCode, Feedback> = {
   E_DELETING_USER: {
     code: 133,
     message: 'Error deleting user',
+  },
+  E_UPDATING_PREFERENCES: {
+    code: 134,
+    message: 'Error updating user preferences',
   },
 } as const;
 

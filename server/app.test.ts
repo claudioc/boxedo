@@ -110,10 +110,8 @@ describe('Settings', () => {
       _id: 'settings',
       type: 'settings',
       landingPageId: pageId,
-      siteLang: 'en',
       siteTitle: 'Joongle',
       siteDescription: '',
-      textSize: 'M',
     };
 
     await postUrl('/settings', settings as unknown as Record<string, string>);

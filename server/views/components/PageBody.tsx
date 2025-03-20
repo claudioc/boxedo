@@ -7,7 +7,7 @@ interface PageBodyProps extends WithCtx {
 }
 
 export const PageBody = ({ ctx, title, body }: PageBodyProps) => {
-  const textSizeClass = mapTextSize(ctx.app.settings.textSize);
+  const textSizeClass = mapTextSize(ctx.prefs.textSize);
 
   return (
     <div class="prose">

@@ -31,6 +31,7 @@ import { LoginPage } from '~/views/LoginPage';
 import { MovePage } from '~/views/MovePage';
 import { NotFound } from '~/views/NotFound';
 import { PageHistory } from '~/views/PageHistory';
+import { PreferencesPage } from '~/views/PreferencesPage';
 import { ReadPage } from '~/views/ReadPage';
 import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
@@ -94,26 +95,23 @@ const router = async (app: FastifyInstance) => {
         }
       }
 
+      const ctx = { app, prefs: req.preferences, user: req.user };
+
       rep.html(
         <>
           {landingPage && (
             <ReadPage
-              ctx={{ app, user: req.user }}
+              ctx={ctx}
               isFull={!isHtmx}
               page={landingPage}
               isLandingPage
             />
           )}
           {!landingPage && pageCount === 0 && (
-            <ReadPage
-              ctx={{ app, user: req.user }}
-              isFull={!isHtmx}
-              isWelcome
-              isLandingPage
-            />
+            <ReadPage ctx={ctx} isFull={!isHtmx} isWelcome isLandingPage />
           )}
           {!landingPage && pageCount > 0 && (
-            <ReadPage ctx={{ app, user: req.user }} isFull={!isHtmx} />
+            <ReadPage ctx={ctx} isFull={!isHtmx} />
           )}
         </>
       );
@@ -122,7 +120,10 @@ const router = async (app: FastifyInstance) => {
 
   app.get('/auth/login', async (req, rep) => {
     rep.html(
-      <LoginPage ctx={{ app, user: req.user }} token={rep.generateCsrf()} />
+      <LoginPage
+        ctx={{ app, prefs: req.preferences, user: req.user }}
+        token={rep.generateCsrf()}
+      />
     );
   });
 
@@ -247,7 +248,7 @@ const router = async (app: FastifyInstance) => {
         .code(401)
         .html(
           <ErrorPage
-            ctx={{ app, user: req.user }}
+            ctx={{ app, prefs: req.preferences, user: req.user }}
             title={i18n.t('Error.unauthorized')}
             error={error}
             goHome={false}
@@ -299,7 +300,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <SettingsPage
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           settings={settings}
           landingPage={landingPage}
           token={rep.generateCsrf()}
@@ -319,7 +320,7 @@ const router = async (app: FastifyInstance) => {
       },
     },
     async (req, rep) => {
-      const { landingPageId, siteLang, siteTitle, textSize } = req.body;
+      const { landingPageId, siteTitle } = req.body;
       const pageRepo = app.repoFactory.getPageRepository();
       const settingRepo = app.repoFactory.getSettingsRepository();
       const rs = redirectService(app, rep);
@@ -346,11 +347,7 @@ const router = async (app: FastifyInstance) => {
         settings.landingPageId = landingPageId;
       }
 
-      settings.siteLang = siteLang;
       settings.siteTitle = siteTitle;
-      settings.textSize = textSize;
-
-      app.i18n.switchTo(siteLang);
 
       app.settings = settings;
 
@@ -359,6 +356,68 @@ const router = async (app: FastifyInstance) => {
       });
 
       return rs.home(Feedbacks.S_SETTINGS_UPDATED);
+    }
+  );
+
+  app.get(
+    '/preferences',
+    {
+      preHandler: requireAuth,
+    },
+    async (req, rep) => {
+      const { preferences } = req;
+
+      rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+      rep.html(
+        <PreferencesPage
+          preferences={preferences}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
+          token={rep.generateCsrf()}
+        />
+      );
+    }
+  );
+
+  app.post<{
+    Body: FromSchema<typeof RS.PreferencesPageBody>;
+  }>(
+    '/preferences',
+    {
+      preHandler: [requireAuth, requireCsrf],
+      schema: {
+        body: RS.PreferencesPageBody,
+      },
+    },
+    async (req, rep) => {
+      const { siteLang, textSize } = req.body;
+      const { user } = req;
+      const preferencesRepo = app.repoFactory.getPreferencesRepository();
+      const rs = redirectService(app, rep);
+      const userId = user ? user._id : ANONYMOUS_AUTHOR_ID;
+
+      const preferences = (
+        await preferencesRepo.getPreferencesByUserId(userId)
+      ).match(
+        (preferences) => preferences,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
+      preferences.siteLang = siteLang;
+      preferences.textSize = textSize;
+
+      app.i18n.switchTo(siteLang);
+
+      (await preferencesRepo.updatePreferences(userId, preferences)).match(
+        nop,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+
+      return rs.home(Feedbacks.S_PREFERENCES_UPDATED);
     }
   );
 
@@ -478,7 +537,7 @@ const router = async (app: FastifyInstance) => {
 
         return rep.html(
           <ReadPage
-            ctx={{ app, user: req.user }}
+            ctx={{ app, prefs: req.preferences, user: req.user }}
             isFull={!isHtmx}
             page={page}
           />
@@ -504,7 +563,7 @@ const router = async (app: FastifyInstance) => {
         .code(404)
         .html(
           <NotFound
-            ctx={{ app, user: req.user }}
+            ctx={{ app, prefs: req.preferences, user: req.user }}
             title={app.i18n.t('Error.pageNotFound')}
           />
         );
@@ -539,7 +598,11 @@ const router = async (app: FastifyInstance) => {
       rep.header('Cache-Control', 'no-cache, no-store, must-revalidate');
 
       rep.html(
-        <EditPage ctx={{ app, user: req.user }} page={page} token={token} />
+        <EditPage
+          ctx={{ app, prefs: req.preferences, user: req.user }}
+          page={page}
+          token={token}
+        />
       );
     }
   );
@@ -682,7 +745,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <MovePage
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           page={page}
           parent={parent}
           token={rep.generateCsrf()}
@@ -1051,7 +1114,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <CreatePage
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           parentPage={parentPage}
           token={token}
         />
@@ -1181,7 +1244,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <SearchResults
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           query={q}
           results={results}
         />
@@ -1222,7 +1285,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <PageHistory
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           page={page}
           history={history}
         />
@@ -1265,7 +1328,7 @@ const router = async (app: FastifyInstance) => {
 
       rep.html(
         <ReadPageVersion
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           page={page}
           item={historyItem}
           version={version}
@@ -1355,7 +1418,7 @@ const router = async (app: FastifyInstance) => {
       .code(404)
       .html(
         <NotFound
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           title={app.i18n.t('Error.pageNotFound')}
         />
       );
@@ -1379,7 +1442,7 @@ const router = async (app: FastifyInstance) => {
       rep.code(400);
       rep.html(
         <ErrorPage
-          ctx={{ app, user: req.user }}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
           title={app.i18n.t('Error.invalidParameters')}
           error={err}
         />
@@ -1390,7 +1453,7 @@ const router = async (app: FastifyInstance) => {
     rep.code(500);
     rep.html(
       <ErrorPage
-        ctx={{ app, user: req.user }}
+        ctx={{ app, prefs: req.preferences, user: req.user }}
         title={app.i18n.t('Error.unhandledError')}
         error={err}
       />

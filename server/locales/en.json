@@ -30,6 +30,7 @@
     "S_PAGE_DELETED": "Page deleted",
     "S_PAGE_MOVED": "Page moved to a new parent",
     "S_SETTINGS_UPDATED": "Settings updated",
+    "S_PREFERENCES_UPDATED": "Preferences updated",
     "S_MAGIC_LINK_SENT": "Magic link sent",
     "S_LOGIN_SUCCESS": "Login successful, welcome back!",
     "E_INDEX_ALREADY_EXISTS": "Index already exists",
@@ -71,7 +72,8 @@
     "createTopPage": "Create top level page",
     "createNestedPage": "Add nested page",
     "noRootPage": "Create your first page",
-    "editSettings": "Edit settings"
+    "editSettings": "Site settings",
+    "editPreferences": "User preferences"
   },
 
   "NotFound": {
@@ -129,12 +131,16 @@
     "title": "Edit settings",
     "notSet": "(Not set yet)",
     "setLandingPage": "Set landing page to (wildcard* allowed):",
-    "setLanguage": "Set the language of the user interface to:",
     "currentLandingPageIs": "Current landing page is \"%{title}\"",
     "newLandingPageIs": "New landing page is",
     "startTyping": "Start typing…",
     "siteTitle": "Short header title",
-    "siteTitleHelp": "This will appear at the very top left corner of the application",
+    "siteTitleHelp": "This will appear at the very top left corner of the application"
+  },
+
+  "PreferencesPage": {
+    "title": "Edit preferences",
+    "setLanguage": "Set the language of the user interface to:",
     "textSize": "Text size of the pages",
     "textSizeHelp": "Applies only to the main content, not the UI",
     "small": "Small",

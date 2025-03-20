@@ -8,7 +8,7 @@ interface PageHistoryProps extends WithCtx {
 }
 
 export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
-  const { i18n, settings } = ctx.app;
+  const { i18n } = ctx.app;
   const len = history.length;
 
   return (
@@ -36,7 +36,7 @@ export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
             {history.map((item) => (
               <tr>
                 <td>{item._rev?.split('-')[0]}</td>
-                <td>{formatDate(item.updatedAt, settings.siteLang, 'N/A')}</td>
+                <td>{formatDate(item.updatedAt, ctx.prefs.siteLang, 'N/A')}</td>
                 <td>{item.pageTitle}</td>
                 <td>
                   <a

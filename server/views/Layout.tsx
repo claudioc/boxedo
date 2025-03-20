@@ -4,7 +4,6 @@ import { getFeedbackByCode } from '~/lib/feedbacks';
 import { Feedback } from './components/Feedback';
 import { Head } from './components/Head';
 import { Search } from './components/Search';
-import { CogIcon } from './icons/CogIcon';
 import { HamburgerIcon } from './icons/HamburgerIcon';
 import { LogoutIcon } from './icons/LogoutIcon';
 
@@ -100,15 +99,6 @@ export const Layout = ({
                         </form>
                       </li>
                     ) : null}
-                    <li>
-                      <a
-                        href="/settings"
-                        aria-label={i18n.t('Navigation.editSettings')}
-                        title={i18n.t('Navigation.editSettings')}
-                      >
-                        <CogIcon />
-                      </a>
-                    </li>
                   </ul>
                 </div>
               </div>

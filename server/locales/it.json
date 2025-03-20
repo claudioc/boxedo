@@ -71,7 +71,8 @@
     "createTopPage": "Crea una pagina primo livello",
     "createNestedPage": "Aggiungi pagina annidata",
     "noRootPage": "Crea la tua prima pagina",
-    "editSettings": "Modifica impostazioni"
+    "editSettings": "Impostazioni sito",
+    "editPreferences": "Preferenze utente"
   },
 
   "NotFound": {

@@ -56,7 +56,7 @@ export class PageRepository extends BaseRepository {
     pageId: string
   ): Promise<Result<PageModel | null, Feedback>> {
     try {
-      const doc = await this.db.get(pageId);
+      const doc = await this.db.get<PageModel>(pageId);
       // Only return if it's actually a page
       return ok(doc.type === 'page' ? ensurePageDefaults(doc) : null);
     } catch (error) {

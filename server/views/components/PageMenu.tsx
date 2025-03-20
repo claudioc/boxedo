@@ -43,6 +43,15 @@ export const PageMenu = ({ ctx, page }: PageMenuProps) => {
             {i18n.t('PageMenu.pageHistory')}
           </a>
         </li>
+        <li class="disabled">
+          <span class="divider" />
+        </li>
+        <li>
+          <a href="/settings">{i18n.t('Navigation.editSettings')}</a>
+        </li>
+        <li>
+          <a href="/preferences">{i18n.t('Navigation.editPreferences')}</a>
+        </li>
       </ul>
     </div>
   );

@@ -4,17 +4,27 @@ import type {
   FastifyRequest,
   HookHandlerDoneFunction,
 } from 'fastify';
-import { SESSION_COOKIE_NAME } from '~/constants';
+import { ANONYMOUS_AUTHOR_ID, SESSION_COOKIE_NAME } from '~/constants';
 
 export const createRequireAuth = (app: FastifyInstance) => {
   return async (req: FastifyRequest, rep: FastifyReply) => {
     const { config, repoFactory: repos } = app;
     const userRepo = repos.getUserRepository();
     const sessionRepo = repos.getSessionRepository();
+    const preferencesRepo = repos.getPreferencesRepository();
 
     req.user = null;
 
     if (app.is('test') || config.AUTHENTICATION_TYPE === 'none') {
+      const prefs = (
+        await preferencesRepo.getPreferencesByUserId(ANONYMOUS_AUTHOR_ID)
+      ).match(
+        (prefs) => prefs,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
+      req.preferences = prefs;
       return;
     }
 
@@ -48,7 +58,16 @@ export const createRequireAuth = (app: FastifyInstance) => {
       return rep.redirect('/auth/login');
     }
 
-    // Add user to request for use in routes
+    const prefs = (
+      await preferencesRepo.getPreferencesByUserId(user._id)
+    ).match(
+      (prefs) => prefs,
+      (feedback) => {
+        throw new Error(feedback.message);
+      }
+    );
+
+    req.preferences = prefs;
     req.user = user;
   };
 };
