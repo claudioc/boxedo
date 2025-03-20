@@ -174,7 +174,8 @@
     "sizeAuto": "Size auto",
     "sizeSmall": "Size small",
     "sizeMedium": "Size medium",
-    "insertHr": "Insert horizontal rule"
+    "insertHr": "Insert horizontal rule",
+    "insertTable": "Insert table"
   },
 
   "ImageDialog": {

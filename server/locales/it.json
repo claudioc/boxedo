@@ -174,7 +174,8 @@
     "sizeAuto": "Dimensione auto",
     "sizeSmall": "Dimensione piccola",
     "sizeMedium": "Dimensione grande",
-    "insertHr": "Inserisci riga orizzontale"
+    "insertHr": "Inserisci riga orizzontale",
+    "insertTable": "Inserisci tabella"
   },
 
   "ImageDialog": {
