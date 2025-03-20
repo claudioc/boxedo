@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0] - 2025-03-20
+
+### Features
+
+- adds user preferences
+
+### Bug Fixes
+
+- update italian translations
+
+### Other Changes
+
+- adds the i18n-check command
+
 ## [0.2.0] - 2025-03-18
 
 ### Features
