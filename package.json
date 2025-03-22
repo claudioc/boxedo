@@ -16,9 +16,7 @@
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
     "db:reset": "./tasks/dbReset.sh",
-    "server:test": "vitest",
-    "check-trans": "tsx --env-file=.env tasks/checkTrans.ts",
-    "check-trans-keys": "tsx --env-file=.env tasks/checkTransKeys.ts",
+    "test": "vitest",
     "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS .",
     "prepare": "husky"
   },
