@@ -1,4 +1,3 @@
-import * as glob from 'glob';
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -19,15 +18,6 @@ interface CommitCategories {
   other: string[];
 }
 
-/**
- * Interface representing package.json structure
- */
-interface PackageJson {
-  version: string;
-  workspaces?: string[] | { packages: string[] };
-  [key: string]: unknown;
-}
-
 export default class ReleaseCommand extends Command {
   async run() {
     this.ui.createConsole();
@@ -39,7 +29,7 @@ export default class ReleaseCommand extends Command {
         return;
       }
 
-      if (!(await this.ui.confirm(`Release commited. Push?`))) {
+      if (!(await this.ui.confirm(`Release committed. Push?`))) {
         return;
       }
 
@@ -116,7 +106,7 @@ export default class ReleaseCommand extends Command {
         (commit) => commit.includes('BREAKING CHANGE') || commit.includes('!:')
       );
 
-      const nextVersion = this.updateVersion(
+      const nextVersion = this.getNextVersion(
         currentVersion,
         hasFeat,
         hasBreaking
@@ -138,7 +128,7 @@ export default class ReleaseCommand extends Command {
       );
 
       if (answer) {
-        this.updateVersionInWorkspace(nextVersion);
+        this.updatePackageJsonVersion(nextVersion);
         this.ui.console.info(`Updated package.json version to ${nextVersion}`);
 
         this.updateChangelog(categorizedCommits, nextVersion);
@@ -146,11 +136,14 @@ export default class ReleaseCommand extends Command {
 
         try {
           if (!this.isDryRun) {
-            execSync('git add package.json CHANGELOG.md');
+            execSync('npm ci'); // This will update the version in package-lock.json
+            execSync('git add package.json package-lock.json CHANGELOG.md');
             execSync(`git commit -m "chore(release): ${nextVersion}"`);
             execSync(`git tag v${nextVersion}`);
           } else {
-            this.ui.console.info('git add package.json CHANGELOG.md');
+            this.ui.console.info(
+              'git add package.json package-lock.json CHANGELOG.md'
+            );
             this.ui.console.info(
               `git commit -m "chore(release): ${nextVersion}"`
             );
@@ -205,7 +198,7 @@ export default class ReleaseCommand extends Command {
   /**
    * Update the version based on the commits
    */
-  updateVersion(
+  getNextVersion(
     version: string,
     hasFeat: boolean,
     hasBreaking: boolean
@@ -385,45 +378,14 @@ export default class ReleaseCommand extends Command {
   /**
    * Update the version in a package.json file
    */
-  updatePackageJsonVersion(packagePath: string, newVersion: string): void {
-    const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  updatePackageJsonVersion(newVersion: string): void {
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     packageJson.version = newVersion;
     if (!this.isDryRun) {
       fs.writeFileSync(
-        packagePath,
+        'package.json',
         JSON.stringify(packageJson, null, 2) + '\n'
       );
-    }
-  }
-
-  /**
-   * Update versions in all package.json files in a monorepo
-   */
-  updateVersionInWorkspace(newVersion: string): void {
-    const rootPackageJson: PackageJson = JSON.parse(
-      fs.readFileSync('package.json', 'utf8')
-    );
-
-    // Update root package.json
-    this.updatePackageJsonVersion('package.json', newVersion);
-
-    // Check if this is a monorepo by looking for workspaces
-    if (rootPackageJson.workspaces) {
-      const workspaces = Array.isArray(rootPackageJson.workspaces)
-        ? rootPackageJson.workspaces
-        : (rootPackageJson.workspaces as { packages: string[] }).packages || [];
-
-      // Update each workspace package.json
-      for (const pattern of workspaces) {
-        const dirs = glob.sync(pattern);
-        for (const dir of dirs) {
-          const packageJsonPath = path.join(dir, 'package.json');
-          if (fs.existsSync(packageJsonPath)) {
-            this.updatePackageJsonVersion(packageJsonPath, newVersion);
-            this.ui.console.info(`Updated version in ${packageJsonPath}`);
-          }
-        }
-      }
     }
   }
 
