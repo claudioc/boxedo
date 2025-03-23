@@ -2,6 +2,7 @@ services:
   couchdb:
     container_name: couchdb-joongle
     image: couchdb:latest
+    # Changing the volume name has impact on the CLI commands
     volumes:
       - couchdb_data:/opt/couchdb/data
       - ./scripts/couchdb/local.ini:/opt/couchdb/etc/local.ini

@@ -135,7 +135,7 @@ If you prefer to use the "remote" option for a database (that is, CouchDb), then
 2. Launch the development server with `npm run dev`
 3. Access at http://localhost:3000
 
-For a final production environment, I use myself `pm2` to start and monitor the server. You can check the `pm2-start.sh` script in the /task directory for inspiration.
+For a final production environment, I use myself `pm2` to start and monitor the server. You can check the `pm2-start.sh` script in the root directory for inspiration.
 
 For docker specific instructions, there is also a Docker.md in the docs/ directory where I have written some notes related to my own installation (in Ubuntu 24.04).
 

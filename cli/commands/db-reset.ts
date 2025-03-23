@@ -1,7 +1,9 @@
 import {
+  DOCKER_IMAGE_NAME,
   dockerComposeDown,
   dockerComposeUp,
   isDockerAvailable,
+  isDockerImageRunning,
   waitForService,
 } from 'lib/tools';
 import { execSync } from 'node:child_process';
@@ -125,6 +127,14 @@ This command only makes sense if you are using a CouchDb database running in a l
 If your CouchDb database is not running in a Docker container, you have to reset it manually.
 
 Please double check the project's README.md and https://docs.docker.com/get-docker/
+`);
+      return false;
+    }
+
+    if (!isDockerImageRunning(DOCKER_IMAGE_NAME)) {
+      this.ui.console.error(`
+❌ The CouchDB container is not running.
+Please make sure the CouchDB container is running before trying to reset the database.
 `);
       return false;
     }

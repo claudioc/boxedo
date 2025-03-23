@@ -6,3 +6,4 @@ tmp
 .DS_Store
 exported-pages
 database
+couchdb-backup*
