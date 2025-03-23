@@ -89,7 +89,6 @@
     "@types/pouchdb-core": "^7.0.15",
     "alpinejs": "^3.14.0",
     "better-sqlite3": "^11.8.1",
-    "bindings": "^1.5.0",
     "cheerio": "^1.0.0",
     "debug": "^4.4.0",
     "fastify": "^5.2.0",
