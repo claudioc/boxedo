@@ -68,13 +68,15 @@ These factors led me to architect Joongle as a server-side rendered application.
 For client-side interactivity, including AJAX calls and progressive enhancement, I chose HTMX and Alpine.js instead of writing extensive custom JavaScript. These libraries provide much of the reactivity we've come to expect in modern frontend development, while maintaining a lightweight footprint. While this aspect of Joongle's codebase currently represents its greatest opportunity for improvement and will likely undergo significant refactoring after the MVP release, it effectively serves the current needs of the project.
 
 ### Why PouchDb and not XXX?
-PouchDb was initially chosen to explore document-oriented, schema-less database architecture. Its built-in features like document revisions and history tracking make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
+PouchDb was chosen because of its built-in features, like document revisions and history tracking, make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
 
 PouchDb (CouchDB) scales very well in case in the future we would like to see Joongle exposed on website using many users and documents.
 
 Images are also saved directly in the database since CouchDB has also a nice support for binary content, like compression, digest, and streaming.
 
 Couchdb also offers, out-of-the-box, and administrative web interface (called Fauxston) at `http://localhost:5984/_utils`. That's _very_ handy indeed. Note that this is only supported if you use Couchdb and not another PouchDB driver (like LevelDB).
+
+PouchDb also offers a memory-only adapter which is great for testing.
 
 The database operations are relatively well decoupled so a version with maybe less features but an easier installation could be present in the future. A completely db-less approach - using just the file system for storing data - could also be an option; in that hypothesis, we could use a "front matter" approach for storing metadata (this very approach is already used when we want to export all the html files).
 
@@ -115,16 +117,25 @@ One of the aim of Joongle is to offer a great user experience, and part of it is
 
 ### Prerequisites
 - nodejs 20+
-- docker (actually optional - only if you want to use the real Couchdb interface and not Pouchdb with a local db)
+- docker (optional)
 - macOS or linux (my personal deployment uses Ubuntu 24.04). Windows is totally untested.
 
 ### Setup
 1. Clone the repository
 2. Copy environment config: `cp dot.env .env` and edit the values if you feel like
 3. Run `npm install`
-4. Optional: start the database with `npm run db:start` (this is only needed if you use couchdb as the backend for Pouchdb)
-5. Launch development server: `npm run dev`
-6. Access at http://localhost:3000
+
+### The database server
+If you decide to use a "local" database (that is, LevelDb), there is nothing else you have to do after you have configured it in the `.env` file. Just keep in mind that in that case, the "database" is not a server but it will just be a bunch of files.
+
+If you prefer to use the "remote" option for a database (that is, CouchDb), then you need to have a running CouchDb server, somewhere. This repository provides you with a docker-compose file and some CLI commands to allow for a quick start with that database configuration. In a production environment, the final configuration is of course up to you, whether you want to use the docker image, a standalone server colocated with the Joongle server, or another machine altogether for it.
+
+### Running Joongle
+1. if you are using docker, start its demon and then use our CLI command 'db-up' to start the database server
+2. Launch the development server with `npm run dev`
+3. Access at http://localhost:3000
+
+For a final production environment, I use myself `pm2` to start and monitor the server. You can check the `pm2-start.sh` script in the /task directory for inspiration.
 
 For docker specific instructions, there is also a Docker.md in the docs/ directory where I have written some notes related to my own installation (in Ubuntu 24.04).
 

@@ -29,12 +29,9 @@ interface PackageJson {
 }
 
 export default class ReleaseCommand extends Command {
-  private isDryRun: boolean = false;
-
-  async run(argv: any) {
+  async run() {
     this.ui.createConsole();
 
-    this.isDryRun = !!argv.dryRun;
     try {
       const nextVersion = await this.createRelease();
 

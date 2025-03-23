@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 
+if [ ! -f .env ]; then
+    echo "Error: .env file not found" >&2
+    echo "Before using the CLI you have to configure your application with a .env file"
+    exit 1
+fi
+
 ./node_modules/.bin/tsx --no-deprecation --tsconfig ./cli/tsconfig.json --env-file=.env ./cli/joongle.ts "$@"

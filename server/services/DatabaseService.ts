@@ -54,6 +54,8 @@ export class DatabaseService {
               password: config.DB_REMOTE_PASSWORD,
             },
           });
+          // Try an open operation to check if the connection is working
+          await db.info();
           logger.info('Connected to remote database');
           break;
 
@@ -78,6 +80,8 @@ export class DatabaseService {
                 adapter: 'leveldb',
               }
             );
+            // Try an open operation to check if the connection is working
+            await db.info();
             logger.info('Connected to local database');
           }
           break;

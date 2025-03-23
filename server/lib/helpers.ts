@@ -122,23 +122,38 @@ export const getDefaultLanguage = (
 
 // This helper is for the tasks that need to validate and load the config
 // but don't have access to Fastify (which does it automatically via a plugin)
-export const loadConfig = (): ConfigEnv => {
+export const loadConfig = (source = process.env): ConfigEnv => {
   const ajv = new Ajv({
     useDefaults: true,
     removeAdditional: true, // or 'all' or 'failing'
   });
+
   addFormats(ajv);
 
   const validate = ajv.compile(ConfigEnvSchema);
-  const config = process.env;
+  const input = { ...source };
 
-  if (!validate(config)) {
+  if (!validate(input)) {
     throw new Error(
       `Config validation failed: ${JSON.stringify(validate.errors)}`
     );
   }
 
-  return config as unknown as ConfigEnv;
+  // Extract only the properties defined in the schema
+  const config: Partial<ConfigEnv> = {};
+  const properties = ConfigEnvSchema.properties;
+
+  for (const key in properties) {
+    const typedKey = key as keyof ConfigEnv;
+    if (typedKey in input) {
+      if (input[typedKey] !== undefined) {
+        // biome-ignore lint:
+        config[typedKey] = input[typedKey] as any;
+      }
+    }
+  }
+
+  return config as ConfigEnv;
 };
 
 export const compressTextForSearch = (

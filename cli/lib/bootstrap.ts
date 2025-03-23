@@ -100,6 +100,7 @@ This is Joongle CLI.`);
     }
 
     argParser
+      .scriptName('joongle')
       .wrap(Math.min(150, argParser.terminalWidth()))
       .epilogue('For more information, see our docs.')
       .group('help', 'Global Options:')

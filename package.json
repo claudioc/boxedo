@@ -13,9 +13,6 @@
     "dev": "NODE_ENV=development tsx --no-deprecation --tsconfig ./tsconfig.base.json --env-file=.env hawk.ts",
     "build": "NODE_ENV=production tsx --env-file=.env hawk.ts",
     "start": "NODE_ENV=production node --env-file=.env ./dist/server/app.js",
-    "db:start": "docker compose up -d",
-    "db:stop": "docker compose down",
-    "db:reset": "./tasks/dbReset.sh",
     "test": "vitest",
     "cloc": "cloc --exclude-dir=node_modules,dist,assets,data,docs,scripts,tmp --include-lang=TypeScript,JavaScript,HTML,CSS .",
     "prepare": "husky"

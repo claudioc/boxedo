@@ -33,9 +33,13 @@ export abstract class Command {
 
   protected context: AppContext | null = null;
 
+  protected isDryRun = false;
+
   public static async _run(argv: any): Promise<void> {
     const command: Command = new (<any>this)();
     command.ui = new Ui();
+    command.isDryRun = !!argv.dryRun;
+
     debug(`invoking '${this.commandName}' command`);
     try {
       await command.run(argv);
