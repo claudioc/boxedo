@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0] - 2025-03-23
+
+### Features
+
+- adds the backup and restore commands
+- adds the db-related CLI commands
+
+### Bug Fixes
+
+- remove mentions of old cmds in package.json
+- updates package-lock
+
+### Other Changes
+
+- fix the release script
+- renames user commands
+
 ## [0.3.0] - 2025-03-20
 
 ### Features
