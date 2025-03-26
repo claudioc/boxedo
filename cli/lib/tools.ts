@@ -58,3 +58,7 @@ export const generateBackupFilename = (prefix: string, ext: string): string => {
 
   return `${prefix}-${timestamp}.${ext}`;
 };
+
+export const capitalize = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};

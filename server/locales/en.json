@@ -21,7 +21,8 @@
     "invalidParameters": "Request parameters are not valid",
     "unhandledError": "Internal server error",
     "pageNotFound": "Page not found",
-    "unauthorized": "Unauthorized"
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
   },
 
   "Feedbacks": {

@@ -1,4 +1,6 @@
+import { capitalize } from 'lib/tools';
 import { generateIdFor } from '~/lib/helpers';
+import { UserRole, userRoles } from '../../types';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 
@@ -25,6 +27,16 @@ export default class UserAddCommand extends Command {
         validate: (val) => emailRegex.test(val),
       }),
       name: await this.ui.prompt('User full name'),
+      role: await this.ui.select<UserRole>(
+        'User role',
+        userRoles.map((role) => {
+          return {
+            value: role,
+            name: capitalize(role),
+          };
+        }),
+        'author'
+      ),
     };
 
     // Check if the user already exists
@@ -48,6 +60,7 @@ export default class UserAddCommand extends Command {
       type: 'user',
       email: answers.email,
       fullname: answers.name,
+      role: answers.role,
       createdAt: new Date().toISOString(),
     });
 

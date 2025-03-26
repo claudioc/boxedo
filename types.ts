@@ -147,6 +147,7 @@ export interface UserModel extends BaseModel {
   type: 'user';
   email: string;
   fullname: string;
+  role: UserRole;
   createdAt: string;
 }
 
@@ -331,3 +332,70 @@ export type SearchTitlesResult = {
   pageId: string;
   pageTitle: string;
 };
+
+export const userRoles = ['admin', 'author', 'reader', 'inactive'] as const;
+export type UserRole = (typeof userRoles)[number];
+export const userRolesAsSelectOptions = [
+  { value: 'admin', name: 'Admin' },
+  { value: 'author', name: 'Author' },
+  { value: 'reader', name: 'Reader' },
+  { value: 'inactive', name: 'Inactive' },
+];
+
+export const capabilities = [
+  'impossible', // Nobody has this capability (for testing purposes)
+  'login', // Can log in
+  'settings:edit', // Can edit site settings
+  'settings:view', // Can view site settings
+  'pages:create', // Can create pages
+  'pages:edit', // Can edit pages
+  'pages:delete', // Can delete pages
+  'pages:move', // Can move pages
+  'pages:view', // Can view pages
+  'pages:view_history', // Can view page history
+  'users:manage', // Can manage users
+  'uploads:create', // Can upload files
+  'pref:edit', // Can edit preferences
+] as const;
+export type Capability = (typeof capabilities)[number];
+
+// Map of roles to their capabilities
+export const roleCapabilities: Record<UserRole, Capability[]> = {
+  admin: [
+    'login',
+    'settings:edit',
+    'settings:view',
+    'pages:create',
+    'pages:edit',
+    'pages:delete',
+    'pages:move',
+    'pages:view',
+    'pages:view_history',
+    'users:manage',
+    'uploads:create',
+  ],
+  author: [
+    'login',
+    'settings:view',
+    'pages:create',
+    'pages:edit',
+    'pages:delete',
+    'pages:move',
+    'pages:view',
+    'pages:view_history',
+    'uploads:create',
+  ],
+  reader: ['login', 'pages:view', 'pages:view_history'],
+  inactive: [
+    // No capabilities - deactivated user
+  ],
+};
+
+// Extend UserModel to include role
+export interface UserModel extends BaseModel {
+  type: 'user';
+  email: string;
+  fullname: string;
+  role: UserRole;
+  createdAt: string;
+}

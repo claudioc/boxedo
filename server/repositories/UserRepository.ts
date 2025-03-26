@@ -9,6 +9,16 @@ import type {
 import { Feedbacks } from '~/lib/feedbacks';
 import { BaseRepository } from './BaseRepository';
 
+const DEFAULT_USER_VALUES: Partial<UserModel> = {
+  // Added on 25 March 2025
+  role: 'reader',
+} as const;
+
+const ensureUserDefaults = (user: UserModel): UserModel => ({
+  ...DEFAULT_USER_VALUES,
+  ...user,
+});
+
 export class UserRepository extends BaseRepository {
   constructor(
     protected db: PouchDB.Database<DocumentModel>,
@@ -29,8 +39,11 @@ export class UserRepository extends BaseRepository {
         },
         limit: 1,
       })) as PouchDB.Find.FindResponse<UserModel>;
-
-      return ok(result.docs[0] || null);
+      let user = null;
+      if (result.docs.length > 0) {
+        user = ensureUserDefaults(result.docs[0]);
+      }
+      return ok(user);
     } catch (error) {
       this.logger.error('Error getting user by email:', error);
       return ok(null);

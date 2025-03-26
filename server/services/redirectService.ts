@@ -3,7 +3,7 @@ import type { Feedback } from '~/../types';
 import { ErrorWithFeedback } from '~/lib/errors';
 import { pathWithFeedback, slugUrl } from '~/lib/helpers';
 
-export function redirectService(app: FastifyInstance, rep: FastifyReply) {
+export const redirectService = (app: FastifyInstance, rep: FastifyReply) => {
   return {
     bail(code: number, message: unknown) {
       app.log.error(message);
@@ -33,12 +33,15 @@ export function redirectService(app: FastifyInstance, rep: FastifyReply) {
         .redirect(finalPath, 303);
     },
 
-    home(feedback: Feedback) {
-      this.path('/', feedback, true);
+    home(feedback?: Feedback) {
+      if (!feedback) {
+        return rep.redirect('/', 303);
+      }
+      return this.path('/', feedback, true);
     },
 
     slug(slug: string, feedback: Feedback) {
       this.path(slugUrl(slug), feedback, true);
     },
   };
-}
+};

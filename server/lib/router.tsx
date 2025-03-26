@@ -1,7 +1,5 @@
 import type { FastifyInstance } from 'fastify';
 import type { FromSchema } from 'json-schema-to-ts';
-import { generateIdFor, isHomePage, nop } from './helpers';
-// import { setTimeout as delay } from 'node:timers/promises';
 import { Readable } from 'node:stream';
 import sharp from 'sharp';
 import type {
@@ -37,7 +35,12 @@ import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
 import { SettingsPage } from '~/views/SettingsPage';
 import { Feedbacks } from './feedbacks';
-import { createRequireAuth, createRequireCsrf } from './routerPreHandlers';
+import { generateIdFor, isHomePage, nop } from './helpers';
+import {
+  createRequireAuth,
+  createRequireCapability,
+  createRequireCsrf,
+} from './routerPreHandlers';
 import { RouterSchemas as RS } from './routerSchemas';
 
 /**
@@ -48,12 +51,13 @@ import { RouterSchemas as RS } from './routerSchemas';
 const router = async (app: FastifyInstance) => {
   const requireAuth = createRequireAuth(app);
   const requireCsrf = createRequireCsrf(app);
+  const requireCapa = createRequireCapability(app);
 
   // The home page, folks
   app.get(
     '/',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
     },
     async (req, rep) => {
       const pageRepo = app.repoFactory.getPageRepository();
@@ -119,6 +123,25 @@ const router = async (app: FastifyInstance) => {
   );
 
   app.get('/auth/login', async (req, rep) => {
+    const rs = redirectService(app, rep);
+
+    if (app.config.AUTHENTICATION_TYPE === 'none') {
+      // Redirecting to the home page may lead to an infinite loop
+      rep
+        .code(404)
+        .html(
+          <NotFound
+            ctx={{ app, prefs: req.preferences, user: req.user }}
+            title={app.i18n.t('Error.pageNotFound')}
+          />
+        );
+      return;
+    }
+
+    if (req.user) {
+      return rs.home();
+    }
+
     rep.html(
       <LoginPage
         ctx={{ app, prefs: req.preferences, user: req.user }}
@@ -150,6 +173,15 @@ const router = async (app: FastifyInstance) => {
       );
       if (!user) {
         return rs.path('/auth/login', Feedbacks.E_USER_NOT_FOUND, true);
+      }
+
+      if (user.role === 'inactive') {
+        throw new Error(
+          "You don't have the rights to access this resource (user inactive)",
+          {
+            cause: 403,
+          }
+        );
       }
 
       const magicData = (
@@ -278,7 +310,7 @@ const router = async (app: FastifyInstance) => {
   app.get(
     '/settings',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('settings:view')],
     },
     async (req, rep) => {
       const pageRepo = app.repoFactory.getPageRepository();
@@ -314,7 +346,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/settings',
     {
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('settings:edit')],
       schema: {
         body: RS.SettingsPageBody,
       },
@@ -362,7 +394,7 @@ const router = async (app: FastifyInstance) => {
   app.get(
     '/preferences',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pref:edit')],
     },
     async (req, rep) => {
       const { preferences } = req;
@@ -384,7 +416,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/preferences',
     {
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('pref:edit')],
       schema: {
         body: RS.PreferencesPageBody,
       },
@@ -426,7 +458,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/parts/titles',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
       schema: {
         querystring: RS.SearchQuery,
       },
@@ -461,7 +493,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/parts/nav/:pageId?',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
       schema: {
         params: RS.PageParamsOptional,
         querystring: RS.NavQuery,
@@ -511,7 +543,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/view/:slug',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
       schema: {
         params: RS.PageSlugParams,
       },
@@ -573,7 +605,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/edit',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:edit')],
       schema: {
         params: RS.PageParams,
       },
@@ -617,7 +649,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         params: RS.PageParams,
       },
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('pages:edit')],
     },
     async (req, rep) => {
       const { pageId } = req.params;
@@ -676,7 +708,6 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      // await delay(2000);
       if (updatedPage) {
         app.cache.reset(NAVIGATION_CACHE_KEY);
         return rs.slug(newSlug, Feedbacks.S_PAGE_UPDATED);
@@ -708,7 +739,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/move',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:move')],
       schema: {
         params: RS.PageParams,
       },
@@ -760,7 +791,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/move',
     {
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('pages:move')],
       schema: {
         body: RS.MovePageBody,
         params: RS.PageParams,
@@ -843,7 +874,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/reorder',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:move')],
       schema: {
         body: RS.ReorderPageBody,
         params: RS.PageParams,
@@ -894,7 +925,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/:pageId/delete',
     {
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('pages:delete')],
       schema: {
         params: RS.PageParams,
       },
@@ -936,7 +967,7 @@ const router = async (app: FastifyInstance) => {
   app.post(
     '/uploads',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('uploads:create')],
     },
     async (req, rep) => {
       const rs = redirectService(app, rep);
@@ -1045,7 +1076,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/uploads/:fileId/:filename',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
       schema: {
         params: RS.UploadParams,
       },
@@ -1087,7 +1118,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/pages/create',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:create')],
       schema: {
         querystring: RS.CreatePageQuery,
       },
@@ -1132,7 +1163,7 @@ const router = async (app: FastifyInstance) => {
         body: RS.PageBody,
         querystring: RS.CreatePageQuery,
       },
-      preHandler: [requireAuth, requireCsrf],
+      preHandler: [requireAuth, requireCsrf, requireCapa('pages:create')],
     },
     async (req, rep) => {
       const { parentPageId } = req.query;
@@ -1223,7 +1254,7 @@ const router = async (app: FastifyInstance) => {
   }>(
     '/search',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view')],
       schema: {
         querystring: RS.SearchQuery,
       },
@@ -1255,7 +1286,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageParams> }>(
     '/pages/:pageId/history',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view_history')],
       schema: {
         params: RS.PageParams,
       },
@@ -1296,7 +1327,7 @@ const router = async (app: FastifyInstance) => {
   app.get<{ Params: FromSchema<typeof RS.PageWithVersionParams> }>(
     '/pages/:pageId/history/:version',
     {
-      preHandler: requireAuth,
+      preHandler: [requireAuth, requireCapa('pages:view_history')],
       schema: {
         params: RS.PageWithVersionParams,
       },
@@ -1337,81 +1368,24 @@ const router = async (app: FastifyInstance) => {
     }
   );
 
-  app.get('/admin/cleanup-orphaned-files', async () => {
-    const fileRepo = app.repoFactory.getFileRepository();
+  app.get(
+    '/admin/cleanup-orphaned-files',
+    {
+      preHandler: [requireAuth, requireCapa('pages:edit')],
+    },
+    async () => {
+      const fileRepo = app.repoFactory.getFileRepository();
 
-    const deleted = (await fileRepo.cleanupOrphanedFiles()).match(
-      (deleted) => deleted,
-      (feedback) => {
-        throw new Error(feedback.message);
-      }
-    );
+      const deleted = (await fileRepo.cleanupOrphanedFiles()).match(
+        (deleted) => deleted,
+        (feedback) => {
+          throw new Error(feedback.message);
+        }
+      );
 
-    return `${deleted} file removed.`;
-  });
-
-  // app.get('/admin/text-index', async () => {
-  //   try {
-  //     app.dbClient.db
-  //       ?.collection('pages')
-  //       .createIndex(
-  //         { pageTitle: 'text', pageContent: 'text' },
-  //         { weights: { pageTitle: 10, pageContent: 1 }, name: 'PagesTextIndex' }
-  //       );
-  //   } catch (err) {
-  //     return err;
-  //   }
-  //   return 'Text index generated';
-  // });
-
-  // app.get('/admin/schema/add-position', async () => {
-  //   const dbs = dbService(app.dbClient);
-  //   const pageDb = dbs.getPageDb();
-
-  //   // Get all pages without a position field
-  //   const result = await pageDb.find({
-  //     selector: {
-  //       position: { $exists: false }, // Find docs missing position
-  //     },
-  //   });
-
-  //   const pagesByParent = new Map<string, PageModel[]>();
-  //   result.docs.forEach((doc) => {
-  //     const pages = pagesByParent.get(doc.parentId ?? 'null') || [];
-  //     pages.push(doc);
-  //     pagesByParent.set(doc.parentId ?? 'null', pages);
-  //   });
-
-  //   // Update each group of siblings
-  //   const updates: PageModel[] = [];
-  //   for (const [_, siblings] of pagesByParent) {
-  //     siblings.forEach((doc, index) => {
-  //       updates.push({
-  //         ...doc,
-  //         position: (index + 1) * POSITION_GAP_SIZE,
-  //       });
-  //     });
-  //   }
-
-  //   // Bulk update if there are any documents to migrate
-  //   if (updates.length > 0) {
-  //     await pageDb.bulk({ docs: updates });
-  //     app.log.info(`Migrated ${updates.length} documents`);
-  //   } else {
-  //     app.log.info('No pages migrated');
-  //   }
-
-  //   try {
-  //     await pageDb.createIndex({
-  //       index: {
-  //         fields: ['parentId', 'position'],
-  //       },
-  //       name: 'pages-by-parent-position',
-  //     });
-  //   } catch {}
-
-  //   return 'All done';
-  // });
+      return `${deleted} file removed.`;
+    }
+  );
 
   app.setNotFoundHandler(async (req, rep) => {
     await rep
@@ -1444,6 +1418,18 @@ const router = async (app: FastifyInstance) => {
         <ErrorPage
           ctx={{ app, prefs: req.preferences, user: req.user }}
           title={app.i18n.t('Error.invalidParameters')}
+          error={err}
+        />
+      );
+      return;
+    }
+
+    if (err.cause === 403) {
+      rep.code(403);
+      rep.html(
+        <ErrorPage
+          ctx={{ app, prefs: req.preferences, user: req.user }}
+          title={app.i18n.t('Error.forbidden')}
           error={err}
         />
       );

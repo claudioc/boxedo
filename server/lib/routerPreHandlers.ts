@@ -4,7 +4,9 @@ import type {
   FastifyRequest,
   HookHandlerDoneFunction,
 } from 'fastify';
+import type { Capability } from '~/../types';
 import { ANONYMOUS_AUTHOR_ID, SESSION_COOKIE_NAME } from '~/constants';
+import { AuthorizationService } from '~/services/AuthorizationService';
 
 export const createRequireAuth = (app: FastifyInstance) => {
   return async (req: FastifyRequest, rep: FastifyReply) => {
@@ -84,5 +86,25 @@ export const createRequireCsrf = (app: FastifyInstance) => {
     }
 
     return app.csrfProtection.call(app, req, rep, done);
+  };
+};
+
+export const createRequireCapability = (_app: FastifyInstance) => {
+  const authService = AuthorizationService.getInstance();
+
+  return (capability: Capability) => {
+    return (
+      req: FastifyRequest,
+      _rep: FastifyReply,
+      done: HookHandlerDoneFunction
+    ) => {
+      if (!authService.hasCapability(req.user, capability)) {
+        throw new Error("You don't have the rights to access this resource", {
+          cause: 403,
+        });
+      }
+
+      done();
+    };
   };
 };

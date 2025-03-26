@@ -1,4 +1,4 @@
-import { confirm, input } from '@inquirer/prompts';
+import { confirm, input, select } from '@inquirer/prompts';
 import yoctoSpinner, { Spinner } from 'yocto-spinner';
 import { AnyLogger } from '../../types';
 
@@ -7,6 +7,24 @@ export class Ui {
 
   public spinner(text: string) {
     return yoctoSpinner({ text }).start();
+  }
+
+  public async select<T>(
+    message: string,
+    choices: { name: string; value: T }[],
+    def: T
+  ): Promise<T> {
+    try {
+      const answer = await select({
+        message,
+        choices,
+        default: def,
+      });
+      return answer;
+    } catch (error) {
+      this.checkCtrlC(error);
+      process.exit(1);
+    }
   }
 
   public async prompt(
