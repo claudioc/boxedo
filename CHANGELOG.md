@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0] - 2025-03-26
+
+### Features
+
+- adds authorization checks to routes
+
+### Other Changes
+
+- adds auth checks on the page menus
+- removes bindings references
+- removes sqlite references
+
 ## [0.4.0] - 2025-03-23
 
 ### Features
