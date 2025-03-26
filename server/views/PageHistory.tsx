@@ -14,14 +14,14 @@ export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
   return (
     <Layout ctx={ctx} title="Page history" page={page}>
       <div class="prose">
-        <h2>
+        <h2 class="mb-5">
           <span class="text-gray-400">{i18n.t('PageHistory.historyOf')}:</span>
           &nbsp;
           {page.pageTitle}
         </h2>
       </div>
       {len === 0 ? (
-        <p>{i18n.t('PageHistory.noChanges')}</p>
+        <p class="mb-5">{i18n.t('PageHistory.noChanges')}</p>
       ) : (
         <table class="table table-zebra table-pin-rows">
           <thead>

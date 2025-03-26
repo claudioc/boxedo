@@ -12,6 +12,8 @@ interface PageActionsProps extends WithCtx {
 
 /**
  * The menu that shows up at the top of any form page (edit / create)
+ *
+ * We are not checking for capabilities here, as the page is not accessible to unauthorized users.
  */
 export const PageActions = ({
   ctx,

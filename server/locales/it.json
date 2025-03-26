@@ -146,7 +146,8 @@
     "small": "Piccola",
     "medium": "Media",
     "large": "Grande",
-    "extraLarge": "Molto grande"
+    "extraLarge": "Molto grande",
+    "welcome": "Sei %{name} &lt;%{email}&gt; (%{role})"
   },
 
   "WelcomePage": {

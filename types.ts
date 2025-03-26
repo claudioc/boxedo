@@ -48,7 +48,7 @@ export interface DbServiceInitParams {
 
 export type Ctx = {
   app: FastifyInstance;
-  user?: UserModel | null;
+  user: UserModel | null;
   prefs: PreferencesModel;
 };
 
@@ -271,7 +271,7 @@ export const ConfigEnvSchema = {
       EMAIL_PROVIDER: {
         type: 'string',
         not: {
-          enum: ['', 'dummy'],
+          enum: [''],
         },
       },
     },
@@ -373,6 +373,7 @@ export const roleCapabilities: Record<UserRole, Capability[]> = {
     'pages:view_history',
     'users:manage',
     'uploads:create',
+    'pref:edit',
   ],
   author: [
     'login',
@@ -384,8 +385,9 @@ export const roleCapabilities: Record<UserRole, Capability[]> = {
     'pages:view',
     'pages:view_history',
     'uploads:create',
+    'pref:edit',
   ],
-  reader: ['login', 'pages:view', 'pages:view_history'],
+  reader: ['login', 'pages:view', 'pages:view_history', 'pref:edit'],
   inactive: [
     // No capabilities - deactivated user
   ],

@@ -1,6 +1,7 @@
 import type { Context, PageModel, WithCtx } from '~/../types';
 import { getBundleFilename } from '~/lib/assets';
 import { getFeedbackByCode } from '~/lib/feedbacks';
+import { AuthorizationService } from '~/services/AuthorizationService';
 import { Feedback } from './components/Feedback';
 import { Head } from './components/Head';
 import { Search } from './components/Search';
@@ -29,6 +30,7 @@ export const Layout = ({
 }: LayoutProps) => {
   const { feedbackCode, i18n, settings } = ctx.app;
   const user = ctx.user;
+  const authService = AuthorizationService.getInstance();
 
   const onKeypress = {
     '@keyup.escape': '$store.has.none()',
@@ -108,21 +110,22 @@ export const Layout = ({
                   <Search ctx={ctx} />
                 </div>
 
-                {withCreateButton && (
-                  <div class="mb-5">
-                    {/* This must be an anchor and The href and text is dynamically updated by our htmx extension */}
-                    <a
-                      class="j-btn"
-                      data-ref="create-page-button"
-                      href={createButtonLink}
-                      data-labelNested={i18n.t('Navigation.createNestedPage')}
-                    >
-                      {isLandingPage
-                        ? i18n.t('Navigation.createTopPage')
-                        : i18n.t('Navigation.createNestedPage')}
-                    </a>
-                  </div>
-                )}
+                {withCreateButton &&
+                  authService.hasCapability(ctx.user, 'pages:create') && (
+                    <div class="mb-5">
+                      {/* This must be an anchor and The href and text is dynamically updated by our htmx extension */}
+                      <a
+                        class="j-btn"
+                        data-ref="create-page-button"
+                        href={createButtonLink}
+                        data-labelNested={i18n.t('Navigation.createNestedPage')}
+                      >
+                        {isLandingPage
+                          ? i18n.t('Navigation.createTopPage')
+                          : i18n.t('Navigation.createNestedPage')}
+                      </a>
+                    </div>
+                  )}
 
                 {/* Need to impose a fixed width to avoid the sidebar from flickering */}
                 <aside
