@@ -18,6 +18,8 @@ interface CommitCategories {
   other: string[];
 }
 
+type VersionType = 'major' | 'minor' | 'patch';
+
 export default class ReleaseCommand extends Command {
   async run() {
     this.ui.createConsole();
@@ -29,37 +31,13 @@ export default class ReleaseCommand extends Command {
         return;
       }
 
-      if (!(await this.ui.confirm(`Release committed. Push?`))) {
-        return;
-      }
-
-      try {
-        if (!this.isDryRun) {
-          execSync('git push');
-          execSync('git push --tags');
-        } else {
-          this.ui.console.info('git push');
-          this.ui.console.info('git push --tags');
-        }
-      } catch (error) {
-        this.ui.console.error(
-          'An error occurred while pushing to remote. Please do it manually.',
-          error
-        );
-        return;
-      }
-
       if (!this.isGitHubCliAvailable()) {
-        this.ui.console.info(
-          'GitHub CLI (gh) is not installed or not available in PATH.'
-        );
-        this.ui.console.info(
-          'To create GitHub releases, please install the GitHub CLI:'
-        );
-        this.ui.console.info('  https://cli.github.com/');
-        this.ui.console.info(
-          '\nYou can still release manually from the github web interface.'
-        );
+        this.ui.console.info(`
+GitHub CLI (gh) is not installed or not available in PATH.
+To create GitHub releases, please install the GitHub CLI:
+    https://cli.github.com/
+You can still release manually from the github web interface.
+`);
         return;
       }
 
@@ -106,53 +84,57 @@ export default class ReleaseCommand extends Command {
         (commit) => commit.includes('BREAKING CHANGE') || commit.includes('!:')
       );
 
-      const nextVersion = this.getNextVersion(
-        currentVersion,
-        hasFeat,
-        hasBreaking
-      );
-
       this.ui.console.info('Commit summary:');
       if (categorizedCommits.features.length > 0) {
         this.ui.console.info(`Features: ${categorizedCommits.features.length}`);
       }
+
       if (categorizedCommits.fixes.length > 0) {
         this.ui.console.info(`Fixes: ${categorizedCommits.fixes.length}`);
       }
+
       if (categorizedCommits.docs.length > 0) {
         this.ui.console.info(`Docs: ${categorizedCommits.docs.length}`);
       }
 
+      const nextVersion: VersionType = hasBreaking
+        ? 'major'
+        : hasFeat
+          ? 'minor'
+          : 'patch';
+
       const answer = await this.ui.confirm(
-        `About to release version ${nextVersion}. Continue?`
+        `About to release a new ${nextVersion} version. Continue?`
       );
 
+      if (this.isDryRun) {
+        this.ui.console.info('Dry run enabled. No changes will be made.');
+        return null;
+      }
+
       if (answer) {
-        this.updatePackageJsonVersion(nextVersion);
-        this.ui.console.info(`Updated package.json version to ${nextVersion}`);
+        execSync(`npm version ${nextVersion} --no-git-tag-version`);
+        const currentVersion = this.getCurrentVersion();
+
+        this.ui.console.info(
+          `Updated package.json version to ${currentVersion}`
+        );
 
         this.updateChangelog(categorizedCommits, nextVersion);
         this.ui.console.info('Updated CHANGELOG.md');
 
         try {
-          if (!this.isDryRun) {
-            execSync('npm ci'); // This will update the version in package-lock.json
-            execSync('git add package.json package-lock.json CHANGELOG.md');
-            execSync(`git commit -m "chore(release): ${nextVersion}"`);
-            execSync(`git tag v${nextVersion}`);
-          } else {
-            this.ui.console.info(
-              'git add package.json package-lock.json CHANGELOG.md'
-            );
-            this.ui.console.info(
-              `git commit -m "chore(release): ${nextVersion}"`
-            );
-            this.ui.console.info(`git tag v${nextVersion}`);
-          }
+          execSync('git add package.json package-lock.json CHANGELOG.md');
+          execSync(`git commit -m "chore(release): ${currentVersion}"`);
+          execSync(`git tag v${currentVersion}`);
+          execSync(`git push`);
+          execSync('git push --tags');
 
-          this.ui.console.info(`Successfully created release ${nextVersion}`);
+          this.ui.console.info(
+            `Successfully committed, tagged, and pushed version ${currentVersion}!`
+          );
 
-          return nextVersion;
+          return currentVersion;
         } catch (error) {
           if (error instanceof Error) {
             this.ui.console.error('Failed to commit changes:', error.message);
@@ -196,30 +178,10 @@ export default class ReleaseCommand extends Command {
   }
 
   /**
-   * Update the version based on the commits
-   */
-  getNextVersion(
-    version: string,
-    hasFeat: boolean,
-    hasBreaking: boolean
-  ): string {
-    const [major, minor, patch] = version.split('.').map(Number);
-
-    if (hasBreaking) {
-      return `${major + 1}.0.0`;
-    } else if (hasFeat) {
-      return `${major}.${minor + 1}.0`;
-    } else {
-      return `${major}.${minor}.${patch + 1}`;
-    }
-  }
-
-  /**
    * Get the current version from the root package.json
    */
   getCurrentVersion(): string {
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    return packageJson.version;
+    return JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
   }
 
   /**
@@ -376,20 +338,6 @@ export default class ReleaseCommand extends Command {
   }
 
   /**
-   * Update the version in a package.json file
-   */
-  updatePackageJsonVersion(newVersion: string): void {
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    packageJson.version = newVersion;
-    if (!this.isDryRun) {
-      fs.writeFileSync(
-        'package.json',
-        JSON.stringify(packageJson, null, 2) + '\n'
-      );
-    }
-  }
-
-  /**
    * Check if the GitHub CLI is installed and available
    */
   isGitHubCliAvailable(): boolean {
@@ -406,7 +354,7 @@ export default class ReleaseCommand extends Command {
     changelogContent: string
   ): Promise<void> {
     try {
-      this.ui.console.info('Creating GitHub release...');
+      this.ui.console.info('Creating GitHub release…');
 
       // Extract the changelog section for just this version to use as release notes
       const releaseNotesRegex = new RegExp(
@@ -416,24 +364,28 @@ export default class ReleaseCommand extends Command {
       const match = changelogContent.match(releaseNotesRegex);
       const releaseNotes = match ? match[0].trim() : `Release ${version}`;
 
-      // Create a temporary file with the release notes
       const tempFile = path.join(os.tmpdir(), `release-notes-${version}.md`);
       fs.writeFileSync(tempFile, releaseNotes);
 
-      // Use the gh CLI to create the release
       execSync(
         `gh release create --draft v${version} --title "Release v${version}" --notes-file "${tempFile}"`
       );
 
-      // Clean up the temporary file
       fs.unlinkSync(tempFile);
 
-      console.log(`GitHub DRAFT release v${version} created successfully!`);
+      this.ui.console.info(
+        `GitHub DRAFT release v${version} created successfully!`
+      );
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Failed to create GitHub release:', error.message);
+        this.ui.console.error(
+          'Failed to create GitHub release:',
+          error.message
+        );
       } else {
-        console.error('Failed to create GitHub release with unknown error');
+        this.ui.console.error(
+          'Failed to create GitHub release with unknown error'
+        );
       }
     }
   }
