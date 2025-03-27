@@ -1,5 +1,13 @@
 # Changelog
 
+## [patch] - 2025-03-27
+
+### Other Changes
+
+- better release command
+- removes vite.config.ts
+- closes #6
+
 ## [0.5.0] - 2025-03-26
 
 ### Features
