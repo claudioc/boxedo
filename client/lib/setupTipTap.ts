@@ -16,7 +16,6 @@ import Underline from '@tiptap/extension-underline';
 import { generateHTML } from '@tiptap/html';
 import StarterKit from '@tiptap/starter-kit';
 import { ImageAlign } from './extensions/image-align';
-import { ImageMacro } from './extensions/image-macro';
 import {
   renderTableCommandsSuggestion,
   type TableCommand,
@@ -93,7 +92,6 @@ const getEditorOptions = (): Partial<EditorOptions> => {
       types: ['paragraph'],
     }),
     ImageAlign,
-    ImageMacro,
     Document.extend({
       content: 'heading block*',
     }),
