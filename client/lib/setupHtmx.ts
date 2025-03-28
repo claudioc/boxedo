@@ -1,7 +1,11 @@
 const htmx = window.htmx;
 let controller: AbortController;
-// FIXME bad idea but we need to know if an error occurred since htmx doesn't persist this information
+// FIXME bad idea but we need to know if an error occurred since htmx
+// doesn't persist this information
 let htmxAjaxFailed = false;
+// FIXME we need this from the headers to update the global page title
+// but the 'validate' extension doesn't have access to the headers
+let lastPageTitle = '';
 
 const updateCreateButton = (pageId = '') => {
   if (!pageId) {
@@ -69,13 +73,14 @@ const navigationHandlers = (_event: PageTransitionEvent) => {
   document.body.addEventListener(
     'htmx:afterRequest',
     (event) => {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny:
       const detail = (event as any).detail;
       if (!detail || !detail.xhr) {
         return;
       }
 
       htmxAjaxFailed = true;
+      lastPageTitle = detail.xhr.getResponseHeader('x-page-title') ?? '';
 
       if (detail.xhr.status === 404) {
         alert('Page not found');
@@ -139,6 +144,19 @@ const setupHtmx = () => {
 
       // Rebind sortable to the closest UL
       window.App.enableSortable(el.closest('ul'));
+
+      const titleEl = document.querySelector(
+        'title[data-site-title]'
+      ) as HTMLTitleElement;
+
+      if (titleEl) {
+        // Update the page title
+        window.App.setPageTitle(
+          titleEl.dataset.siteTitle ?? '',
+          lastPageTitle,
+          titleEl.dataset.titlePattern ?? ''
+        );
+      }
     },
   });
 

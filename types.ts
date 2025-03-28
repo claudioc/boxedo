@@ -257,6 +257,10 @@ export const ConfigEnvSchema = {
     EMAIL_HOST: { type: 'string' },
     EMAIL_PORT: { type: 'integer' },
     EMAIL_FROM_EMAIL: { type: 'string' },
+    TITLE_PATTERN: {
+      type: 'string',
+      default: '{siteTitle} - {pageTitle}',
+    },
   },
   if: {
     properties: {

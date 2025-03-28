@@ -1,5 +1,5 @@
 import type { Context } from '../types';
-import { isUrl, removeQueryParam } from './lib/helpers';
+import { compilePageTitle, isUrl, removeQueryParam } from './lib/helpers';
 import { store, storeForm } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import { destroySortable, enableSortable } from './lib/setupSortable';
@@ -122,6 +122,10 @@ class App {
     setTimeout(() => {
       storeForm.submitting = false;
     }, 5);
+  }
+
+  setPageTitle(siteTitle: string, pageTitle: string, titlePattern: string) {
+    document.title = compilePageTitle(siteTitle, pageTitle, titlePattern);
   }
 
   livereload() {

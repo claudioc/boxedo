@@ -331,3 +331,11 @@ export const isHomePage = (url: string) => {
     return false;
   }
 };
+
+// This same function is duplicated in the client code's helpers.ts
+export const compilePageTitle = (
+  siteTitle: string,
+  title: string,
+  pattern: string
+): string =>
+  pattern.replace('{siteTitle}', siteTitle).replace('{pageTitle}', title);

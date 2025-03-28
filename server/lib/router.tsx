@@ -565,6 +565,7 @@ const router = async (app: FastifyInstance) => {
         // These are useful for testing purposes
         rep.header('x-page-id', page._id);
         rep.header('x-parent-id', page.parentId ?? '');
+        rep.header('x-page-title', page.pageTitle);
         rep.header('x-rev', page._rev);
 
         return rep.html(
