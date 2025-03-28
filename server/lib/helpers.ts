@@ -115,7 +115,7 @@ export const getDefaultLanguage = (
     return DEFAULT_SUPPORTED_LOCALE;
   }
 
-  const candidate = config.SETTINGS_LANGUAGE;
+  const candidate = config.JNGL_SETTINGS_LANGUAGE;
 
   return ensureValidLanguage(candidate);
 };

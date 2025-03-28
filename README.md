@@ -26,12 +26,12 @@ Some feature highlights:
 - **Advanced WYSIWYG editor** - Joongle's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
 - **Multi-database backend** - at his core Joongle uses a document model database and the flavour I chose is CouchDB. Joongle uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Joongle! With PouchDB, you can run Joongle with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
 - **Search capabilities** - a fulltext search capability is integrated in Joongle by using [Sqlite FTS5](https://www.sqlite.org/fts5.html)
-- **Support tools** - the repository comes with tools for backing up, restoring and exporting the db. Additionally, other tools are present to provide a nice development experience, like translations keys managers and pm2 helpers
 - **Internationalization (i18n)** - only English is supported at the moment (also in terms of search stemming), but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
 - **Developer-friendly** - Designed for easy hacking from the ground-up
 - **Image upload support** - images are also transparently saved in CouchDB. A support script exists to remove unused images
 - **Magic link authentication** - You can optionally use an authentication layer, but you don't have to maintain any credentials (see below for more details)
-- **Powerful CLI** to manage the database, add accounts, export and more
+- **Powerful CLI** - to manage the database, add accounts, export and more
+- **User roles** - users can be added to one of the pre-defined set of roles with different capabilities, to complete administration to inactive
 
 Joongle is **Free Software**, currently using a MIT license. All its components are also all using a Free Software license.
 
@@ -50,7 +50,20 @@ A "magic link" is a link that is sent to a user via email. Following that link, 
 
 Configuring the magic link authentication takes a moment, though:
 - first, you can only use one of the supported email providers: sendgrid, mailgun or plain smtp. Sendgrid and Mailgun provide a fair amount of free emails that you can send with their services, but you have to "white list" all the emails you want to use beforehand (to avoid abusing their services). If you have a better option, please talk to me and I will add it as a supported provider.
-- second, you have to manage your users via the CLI (./cli/joongle), using the commands `list-users`, `add-user` and `del-user`. Note that only a simple, formal validation is performed by the CLI (no email is sent at the moment of the user creation)
+- second, you have to manage your users via the CLI (./cli/joongle), using the commands `user-list`, `user-add`, `user-role` and `user-del`. Note that only a simple, formal validation is performed by the CLI (no email is sent at the moment of the user creation)
+
+Something that is already planned for future releases includes:
+- OAuth2 support with a (small) selection of providers
+- maybe SAML for more corporate usages
+- ability to provision users with an API instead of a CLI
+
+### User roles
+
+When authentication is in place, Joongle supports assigning a role to each user. The current roles are:
+- **admin**: can do anything that the application can offer
+- **author**: can write documents but cannot change any website's setting
+- **reader**: can only read documents
+- **inactive**: cannot even login
 
 ### No caching layer
 

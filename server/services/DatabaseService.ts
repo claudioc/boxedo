@@ -27,7 +27,7 @@ export class DatabaseService {
     options: DatabaseServiceOptions
   ): Promise<Result<DatabaseService, Error>> {
     const { config, logger } = options;
-    const dbName = config.DB_NAME;
+    const dbName = config.JNGL_DB_NAME;
     let db: Db;
 
     if (DatabaseService.instance) {
@@ -39,19 +39,19 @@ export class DatabaseService {
 
     try {
       switch (true) {
-        case config.DB_BACKEND === 'memory' || config.NODE_ENV === 'test':
+        case config.JNGL_DB_BACKEND === 'memory' || config.NODE_ENV === 'test':
           PouchDB.plugin(PouchFind)
             .plugin(PouchReduce)
             .plugin(PouchAdapterMemory);
           db = new PouchDB<DocumentModel>(dbName);
           break;
 
-        case config.DB_BACKEND === 'remote' && !!config.DB_REMOTE_URL:
+        case config.JNGL_DB_BACKEND === 'remote' && !!config.JNGL_DB_REMOTE_URL:
           PouchDB.plugin(PouchHttp).plugin(PouchFind).plugin(PouchReduce);
-          db = new PouchDB(`${config.DB_REMOTE_URL}/${dbName}`, {
+          db = new PouchDB(`${config.JNGL_DB_REMOTE_URL}/${dbName}`, {
             auth: {
-              username: config.DB_REMOTE_USER,
-              password: config.DB_REMOTE_PASSWORD,
+              username: config.JNGL_DB_REMOTE_USER,
+              password: config.JNGL_DB_REMOTE_PASSWORD,
             },
           });
           // Try an open operation to check if the connection is working
@@ -59,10 +59,10 @@ export class DatabaseService {
           logger.info('Connected to remote database');
           break;
 
-        case config.DB_BACKEND === 'local':
+        case config.JNGL_DB_BACKEND === 'local':
           {
             const pathResult = await ensurePathExists(
-              config.DB_LOCAL_PATH,
+              config.JNGL_DB_LOCAL_PATH,
               'database directory'
             );
             if (pathResult.isErr()) {
@@ -75,7 +75,7 @@ export class DatabaseService {
 
             // Note: bootstrap is taking care of creating the directory if it doesn't exist
             db = new PouchDB<DocumentModel>(
-              path.join(config.DB_LOCAL_PATH, `${dbName}.db`),
+              path.join(config.JNGL_DB_LOCAL_PATH, `${dbName}.db`),
               {
                 adapter: 'leveldb',
               }

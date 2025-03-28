@@ -101,16 +101,16 @@ await app.register(fastifyEnv, { schema: ConfigEnvSchema });
 const emailService = EmailService.getInstance();
 
 await emailService.initialize({
-  type: app.config.EMAIL_PROVIDER ?? '',
-  apiKey: app.config.EMAIL_API_KEY ?? '',
-  domain: app.config.EMAIL_DOMAIN ?? '',
+  type: app.config.JNGL_EMAIL_PROVIDER ?? '',
+  apiKey: app.config.JNGL_EMAIL_API_KEY ?? '',
+  domain: app.config.JNGL_EMAIL_DOMAIN ?? '',
   host: app.config.EMAIL_HOST ?? '',
 });
 
 app.decorate('emailService', emailService);
 
 const pathResult = await ensurePathExists(
-  app.config.DB_LOCAL_PATH,
+  app.config.JNGL_DB_LOCAL_PATH,
   'database directory'
 );
 if (pathResult.isErr()) {

@@ -24,9 +24,9 @@ export const Head = ({
       the title pattern to build the full title from the js client  */}
       <title
         data-site-title={settings.siteTitle}
-        data-title-pattern={config.TITLE_PATTERN}
+        data-title-pattern={config.JNGL_TITLE_PATTERN}
       >
-        {compilePageTitle(settings.siteTitle, title, config.TITLE_PATTERN)}
+        {compilePageTitle(settings.siteTitle, title, config.JNGL_TITLE_PATTERN)}
       </title>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="description" content="Joongle is the ultimate CMS" />

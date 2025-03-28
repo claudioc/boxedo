@@ -5,9 +5,9 @@ import { dockerComposeDown, isDockerAvailable } from '../lib/tools';
 export default class DbDownCommand extends Command {
   async run() {
     const config = loadConfig();
-    if (config.DB_BACKEND !== 'remote') {
+    if (config.JNGL_DB_BACKEND !== 'remote') {
       this.ui.console.info(
-        `"${config.DB_BACKEND}" database does not need to be stopped.`
+        `"${config.JNGL_DB_BACKEND}" database does not need to be stopped.`
       );
       return;
     }
@@ -18,7 +18,7 @@ export default class DbDownCommand extends Command {
 This command only makes sense if you are using a CouchDb database running in a local Docker container.
 
 If your CouchDb database is not running in a Docker container, you have to stop it manually.
-If you are not using a CouchDb database (DB_BACKEND is 'local'), then you don't need to start or stop the database.
+If you are not using a CouchDb database (JNGL_DB_BACKEND is 'local'), then you don't need to start or stop the database.
 
 Please double check the project's README.md and https://docs.docker.com/get-docker/
 `);
@@ -26,8 +26,8 @@ Please double check the project's README.md and https://docs.docker.com/get-dock
     }
 
     const spinner = this.ui.spinner('Stopping the remote database…');
-    this.ui.console.info(`\nRemote database URL: ${config.DB_REMOTE_URL}`);
-    this.ui.console.info(`Remote database name: ${config.DB_NAME}`);
+    this.ui.console.info(`\nRemote database URL: ${config.JNGL_DB_REMOTE_URL}`);
+    this.ui.console.info(`Remote database name: ${config.JNGL_DB_NAME}`);
 
     try {
       dockerComposeDown();

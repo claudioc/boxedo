@@ -129,11 +129,11 @@ class App {
   }
 
   livereload() {
-    if (!LIVERELOAD_URL) {
+    if (!JNGL_LIVERELOAD_URL) {
       return;
     }
 
-    new EventSource(LIVERELOAD_URL).addEventListener('message', () =>
+    new EventSource(JNGL_LIVERELOAD_URL).addEventListener('message', () =>
       location.reload()
     );
   }

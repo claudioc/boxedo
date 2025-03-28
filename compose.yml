@@ -9,7 +9,7 @@ services:
     ports:
       - '5984:5984'
     environment:
-      - COUCHDB_USER=${DB_REMOTE_USER}
-      - COUCHDB_PASSWORD=${DB_REMOTE_PASSWORD}
+      - COUCHDB_USER=${JNGL_DB_REMOTE_USER}
+      - COUCHDB_PASSWORD=${JNGL_DB_REMOTE_PASSWORD}
 volumes:
   couchdb_data:

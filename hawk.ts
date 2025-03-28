@@ -21,10 +21,10 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
 
-const { LIVERELOAD_URL, BASE_INTERNAL_URL } = process.env;
-const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(LIVERELOAD_URL);
+const { JNGL_LIVERELOAD_URL, JNGL_BASE_INTERNAL_URL } = process.env;
+const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(JNGL_LIVERELOAD_URL);
 const hasLiveReload = liveReloadBaseUrl !== null;
-const apiServerBaseUrl: UrlParts | null = parseBaseUrl(BASE_INTERNAL_URL);
+const apiServerBaseUrl: UrlParts | null = parseBaseUrl(JNGL_BASE_INTERNAL_URL);
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
@@ -332,8 +332,8 @@ const buildClient: TaskFn = async (_) => {
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',
     define: {
-      LIVERELOAD_URL: JSON.stringify(
-        LIVERELOAD_URL ? `${LIVERELOAD_URL}/updates` : ''
+      JNGL_LIVERELOAD_URL: JSON.stringify(
+        JNGL_LIVERELOAD_URL ? `${JNGL_LIVERELOAD_URL}/updates` : ''
       ),
     },
     platform: 'browser',
@@ -418,7 +418,7 @@ const startSseServer: TaskFn = async () => {
   });
 
   sseServer.listen(liveReloadBaseUrl.port, liveReloadBaseUrl.hostname, () => {
-    console.log(`[Hawk] SSE server started on ${LIVERELOAD_URL}`);
+    console.log(`[Hawk] SSE server started on ${JNGL_LIVERELOAD_URL}`);
   });
 
   return true;

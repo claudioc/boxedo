@@ -209,7 +209,7 @@ describe('getDefaultLanguage', () => {
     expect(result).toBe('en');
   });
 
-  it('should return "en" when config has no SETTINGS_LANGUAGE', () => {
+  it('should return "en" when config has no JNGL_SETTINGS_LANGUAGE', () => {
     const config = {} as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
@@ -217,7 +217,7 @@ describe('getDefaultLanguage', () => {
 
   it('should return the configured language when it is supported', () => {
     const config = {
-      SETTINGS_LANGUAGE: 'it',
+      JNGL_SETTINGS_LANGUAGE: 'it',
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('it');
@@ -225,15 +225,15 @@ describe('getDefaultLanguage', () => {
 
   it('should return "en" when configured language is not supported', () => {
     const config = {
-      SETTINGS_LANGUAGE: 'bazooka', // assuming 'fr' is not in supportedLocales
+      JNGL_SETTINGS_LANGUAGE: 'bazooka', // assuming 'fr' is not in supportedLocales
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
   });
 
-  it('should return "en" when SETTINGS_LANGUAGE is empty string', () => {
+  it('should return "en" when JNGL_SETTINGS_LANGUAGE is empty string', () => {
     const config = {
-      SETTINGS_LANGUAGE: '',
+      JNGL_SETTINGS_LANGUAGE: '',
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
@@ -532,14 +532,14 @@ describe('highlightPhrase', () => {
 describe('loadConfig', () => {
   it('should load and validate a passed config', () => {
     const source = {
-      AUTHENTICATION_TYPE: 'none',
-      DB_BACKEND: 'remote',
+      JNGL_AUTHENTICATION_TYPE: 'none',
+      JNGL_DB_BACKEND: 'remote',
       UNKNOWN_KEY: 'value',
     };
     const config = loadConfig(source);
-    expect(config.AUTHENTICATION_TYPE).toBe('none');
-    expect(config.DB_BACKEND).toBe('remote');
-    expect(config.EMAIL_PROVIDER).toBe('dummy');
+    expect(config.JNGL_AUTHENTICATION_TYPE).toBe('none');
+    expect(config.JNGL_DB_BACKEND).toBe('remote');
+    expect(config.JNGL_EMAIL_PROVIDER).toBe('dummy');
     // @ts-ignore
     expect(config.UNKNOWN_KEY).toBe(undefined);
   });

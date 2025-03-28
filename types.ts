@@ -37,7 +37,7 @@ export const languageLocaleMap: Record<SupportedLocales, string> = {
 
 export const dbBackends = ['local', 'remote', 'memory'] as const;
 export type DbBackend = (typeof dbBackends)[number];
-export const DEFAULT_DB_BACKEND: DbBackend = 'local';
+export const DEFAULT_JNGL_DB_BACKEND: DbBackend = 'local';
 
 export type Db = PouchDB.Database<DocumentModel>;
 
@@ -201,70 +201,76 @@ export const ConfigEnvSchema = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    BASE_EXTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
-    BASE_INTERNAL_URL: { type: 'string', default: 'http://localhost:3000' },
+    JNGL_BASE_EXTERNAL_URL: {
+      type: 'string',
+      default: 'http://localhost:3000',
+    },
+    JNGL_BASE_INTERNAL_URL: {
+      type: 'string',
+      default: 'http://localhost:3000',
+    },
     NODE_ENV: {
       type: 'string',
       default: 'development' satisfies NodeEnv,
       enum: nodeEnv,
     },
-    DB_BACKEND: {
+    JNGL_DB_BACKEND: {
       type: 'string',
       enum: dbBackends,
-      default: DEFAULT_DB_BACKEND satisfies DbBackend,
+      default: DEFAULT_JNGL_DB_BACKEND satisfies DbBackend,
     },
-    DB_NAME: {
+    JNGL_DB_NAME: {
       type: 'string',
       default: 'joongle',
     },
-    DB_REMOTE_URL: {
+    JNGL_DB_REMOTE_URL: {
       type: 'string',
       default: 'http://localhost:5984',
     },
-    DB_LOCAL_PATH: {
+    JNGL_DB_LOCAL_PATH: {
       type: 'string',
       default: '.',
     },
-    DB_REMOTE_USER: { type: 'string', default: '' },
-    DB_REMOTE_PASSWORD: { type: 'string', default: '' },
-    LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
-    SETTINGS_LANGUAGE: {
+    JNGL_DB_REMOTE_USER: { type: 'string', default: '' },
+    JNGL_DB_REMOTE_PASSWORD: { type: 'string', default: '' },
+    JNGL_LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
+    JNGL_SETTINGS_LANGUAGE: {
       type: 'string',
       default: DEFAULT_SUPPORTED_LOCALE satisfies SupportedLocales,
     },
-    SETTINGS_DESCRIPTION: {
+    JNGL_SETTINGS_DESCRIPTION: {
       type: 'string',
       default: 'Content management made easy',
     },
-    SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+    JNGL_SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
     SETTINGS_TEXT_SIZE: {
       type: 'string',
       enum: textSizes,
       default: DEFAULT_TEXT_SIZE satisfies TextSize,
     },
-    AUTHENTICATION_TYPE: {
+    JNGL_AUTHENTICATION_TYPE: {
       type: 'string',
       enum: authenticationTypes,
       default: 'none' satisfies AuthenticationType,
     },
-    EMAIL_PROVIDER: {
+    JNGL_EMAIL_PROVIDER: {
       type: 'string',
       enum: emailProviderNames,
       default: 'dummy' satisfies EmailProviderName,
     },
-    EMAIL_API_KEY: { type: 'string' },
-    EMAIL_DOMAIN: { type: 'string' },
+    JNGL_EMAIL_API_KEY: { type: 'string' },
+    JNGL_EMAIL_DOMAIN: { type: 'string' },
     EMAIL_HOST: { type: 'string' },
     EMAIL_PORT: { type: 'integer' },
     EMAIL_FROM_EMAIL: { type: 'string' },
-    TITLE_PATTERN: {
+    JNGL_TITLE_PATTERN: {
       type: 'string',
       default: '{siteTitle} - {pageTitle}',
     },
   },
   if: {
     properties: {
-      AUTHENTICATION_TYPE: {
+      JNGL_AUTHENTICATION_TYPE: {
         not: { const: 'none' },
       },
     },
@@ -272,14 +278,14 @@ export const ConfigEnvSchema = {
   // biome-ignore lint/suspicious/noThenProperty:
   then: {
     properties: {
-      EMAIL_PROVIDER: {
+      JNGL_EMAIL_PROVIDER: {
         type: 'string',
         not: {
           enum: [''],
         },
       },
     },
-    required: ['EMAIL_PROVIDER'],
+    required: ['JNGL_EMAIL_PROVIDER'],
   },
 } as const satisfies JSONSchema;
 

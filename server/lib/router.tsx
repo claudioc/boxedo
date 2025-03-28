@@ -125,7 +125,7 @@ const router = async (app: FastifyInstance) => {
   app.get('/auth/login', async (req, rep) => {
     const rs = redirectService(app, rep);
 
-    if (app.config.AUTHENTICATION_TYPE === 'none') {
+    if (app.config.JNGL_AUTHENTICATION_TYPE === 'none') {
       // Redirecting to the home page may lead to an infinite loop
       rep
         .code(404)
@@ -203,12 +203,14 @@ const router = async (app: FastifyInstance) => {
           siteTitle: settings.siteTitle,
         }),
         text: i18n.t('Login.emailMagicLinkText', {
-          magicLink: `${config.BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`,
+          magicLink: `${config.JNGL_BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`,
         }),
       };
 
       if (app.is('development')) {
-        app.log.info(`${config.BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`);
+        app.log.info(
+          `${config.JNGL_BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`
+        );
       }
 
       app.emailService.sendEmail(emailMessage);
