@@ -94,7 +94,8 @@
     "lastUpdatedLabel": "Last updated",
     "titleLabel": "Title",
     "actionsLabel": "Actions",
-    "viewLabel": "View"
+    "viewLabel": "View",
+    "updatedByLabel": "Updated / Authored by"
   },
 
   "PageMenu": {
@@ -109,8 +110,8 @@
   },
 
   "ReadPageVersion": {
-    "oldVersion": "This is an older version (%{version}) of this page",
-    "oldVersionInfo": "This version was last saved on %{date} while the newest version is from %{newDate}. You can view the current version following %{link}, or you can go back to the %{historyLink}",
+    "oldVersion": "You are viewing an old version (number %{version}, from %{date} by %{updatedBy}) ",
+    "oldVersionInfo": "The current version is from %{newDate}, by %{newUpdatedBy}. You can view the current version following %{link}, or you can go back to the %{historyLink}",
     "thisLink": "this link",
     "listOfVersions": "list of all its versions",
     "more": "More…",

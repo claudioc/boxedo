@@ -162,6 +162,7 @@ export interface PageModel extends BaseModel {
   position: number;
   contentUpdated: boolean;
   author: string;
+  updatedBy: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -30,15 +30,17 @@ export const ReadPageVersion = ({
             <div class="card-title">
               {i18n.t('ReadPageVersion.oldVersion', {
                 version: version.split('-')[0],
-              })}
-            </div>
-            <p>
-              {i18n.t('ReadPageVersion.oldVersionInfo', {
+                updatedBy: item.updatedBy,
                 date: (
                   <strong>
                     {formatDate(item.updatedAt, ctx.prefs.siteLang)}
                   </strong>
                 ),
+              })}
+            </div>
+            <p>
+              {i18n.t('ReadPageVersion.oldVersionInfo', {
+                newUpdatedBy: page.updatedBy,
                 newDate: (
                   <strong>
                     {formatDate(page.updatedAt, ctx.prefs.siteLang)}

@@ -699,6 +699,7 @@ const router = async (app: FastifyInstance) => {
           pageContent: req.body.pageContent,
           pageSlug: newSlug,
           updatedAt: new Date().toISOString(),
+          updatedBy: req.user ? req.user.email : ANONYMOUS_AUTHOR_ID,
         })
       ).mapErr((feedback) => {
         throw new Error(feedback.message);
@@ -1225,6 +1226,7 @@ const router = async (app: FastifyInstance) => {
           updatedAt: now,
           createdAt: now,
           author: req.user?.email ?? ANONYMOUS_AUTHOR_ID,
+          updatedBy: req.user?.email ?? ANONYMOUS_AUTHOR_ID,
         })
       ).match(nop, (feedback) => {
         throw new Error(feedback.message);

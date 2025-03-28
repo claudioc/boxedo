@@ -93,7 +93,8 @@
     "lastUpdatedLabel": "Ultimo aggiornamento",
     "titleLabel": "Titolo",
     "actionsLabel": "Azioni",
-    "viewLabel": "Visualizza"
+    "viewLabel": "Visualizza",
+    "updatedByLabel": "Modificato / Creato da"
   },
 
   "PageMenu": {
@@ -108,8 +109,8 @@
   },
 
   "ReadPageVersion": {
-    "oldVersion": "Questa è una versione precedente (%{version}) della pagina",
-    "oldVersionInfo": "Questa versione è stata salvata il %{date} mentre la versione più recente è del %{newDate}. Puoi vedere la versione attuale seguendo %{link}, oppure puoi tornare alla %{historyLink}",
+    "oldVersion": "Stai leggendo una vecchia versione (numero %{version}, del %{date} da %{updatedBy}) ",
+    "oldVersionInfo": "La versione corrente è del %{newDate}, da %{newUpdatedBy}. Puoi accedere all'ultima versione usando %{link}, oppure puoi tornare alla %{historyLink}",
     "thisLink": "questo link",
     "listOfVersions": "lista di tutte le versioni",
     "more": "Altro…",

@@ -28,6 +28,7 @@ export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
             <tr>
               <th>{i18n.t('PageHistory.versionLabel')}</th>
               <th>{i18n.t('PageHistory.lastUpdatedLabel')}</th>
+              <th>{i18n.t('PageHistory.updatedByLabel')}</th>
               <th>{i18n.t('PageHistory.titleLabel')}</th>
               <th>{i18n.t('PageHistory.actionsLabel')}</th>
             </tr>
@@ -37,6 +38,7 @@ export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
               <tr>
                 <td>{item._rev?.split('-')[0]}</td>
                 <td>{formatDate(item.updatedAt, ctx.prefs.siteLang, 'N/A')}</td>
+                <td>{item.updatedBy}</td>
                 <td>{item.pageTitle}</td>
                 <td>
                   <a

@@ -26,6 +26,8 @@ const DEFAULT_PAGE_VALUES: Partial<PageModel> = {
   contentUpdated: false,
   // Added on 11 March 2025
   author: ANONYMOUS_AUTHOR_ID,
+  // Added on 28 March 2025
+  updatedBy: ANONYMOUS_AUTHOR_ID,
 } as const;
 
 const ensurePageDefaults = (page: PageModel): PageModel => ({
@@ -401,16 +403,20 @@ export class PageRepository extends BaseRepository {
         await Promise.all(
           (doc._revs_info as PouchDB.Core.RevisionInfo[]).map(async (rev) => {
             if (rev.status !== 'available') return null;
+            // Skip the current revision
             if (rev.rev === doc._rev) return null;
             const revisionDoc = ensurePageDefaults(
               await this.db.get(page._id, {
                 rev: rev.rev,
               })
             );
+            // Don't bother with versions that don't have updated content
             if (!revisionDoc.contentUpdated) return null;
             return {
               pageTitle: revisionDoc.pageTitle,
+              updatedBy: revisionDoc.updatedBy,
               updatedAt: revisionDoc.updatedAt,
+              author: revisionDoc.author,
               _rev: revisionDoc._rev,
             };
           })
@@ -433,14 +439,27 @@ export class PageRepository extends BaseRepository {
         rev: version,
       });
 
-      return ok(
-        ensurePageDefaults({
-          pageTitle: revisionDoc.pageTitle,
-          pageContent: revisionDoc.pageContent,
-          updatedAt: revisionDoc.updatedAt,
-          _rev: revisionDoc._rev,
-        } as PageModel)
-      );
+      // Note that the ensurePageDefaults works on the presence of the field's key
+      // not on the presence of its value. If you add a new field in here, it
+      // won't receive the default value. That's why we use a 2-step process to
+      // ensure the defaults.
+      const item: Partial<PageModel> = {
+        pageTitle: revisionDoc.pageTitle,
+        pageContent: revisionDoc.pageContent,
+        updatedAt: revisionDoc.updatedAt,
+        author: revisionDoc.author,
+        _rev: revisionDoc._rev,
+      };
+
+      if (revisionDoc.author !== undefined) {
+        item.author = revisionDoc.author;
+      }
+
+      if (revisionDoc.updatedBy !== undefined) {
+        item.updatedBy = revisionDoc.updatedBy;
+      }
+
+      return ok(ensurePageDefaults(item as PageModel));
     } catch (error) {
       this.logger.error('Error getting page history item:', error);
       return err(Feedbacks.E_INVALID_VERSION);

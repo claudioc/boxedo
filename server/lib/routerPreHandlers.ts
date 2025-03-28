@@ -26,6 +26,7 @@ export const createRequireAuth = (app: FastifyInstance) => {
           throw new Error(feedback.message);
         }
       );
+      app.i18n.switchTo(prefs.siteLang);
       req.preferences = prefs;
       return;
     }
@@ -68,6 +69,8 @@ export const createRequireAuth = (app: FastifyInstance) => {
         throw new Error(feedback.message);
       }
     );
+
+    app.i18n.switchTo(prefs.siteLang);
 
     req.preferences = prefs;
     req.user = user;
