@@ -45,7 +45,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
         <div class="flex justify-end">
           <button
             type="button"
-            class="btn btn-warning"
+            class="btn btn-warning btn-outline btn-sm"
             id="delete-page-button"
             x-on:click="$refs.dialog.showModal()"
           >

@@ -2,7 +2,9 @@
 @plugin "@tailwindcss/typography";
 @plugin "daisyui" {
   /* biome-ignore lint/correctness/noUnknownProperty: */
-  themes: dracula --default;
+  themes:
+    dracula --default, dracula --prefersdark, retro, light, dark,
+    valentine, synthwave, halloween, forest, aqua, luxury, black, autumn, business, dim;
 }
 
 .j-btn {

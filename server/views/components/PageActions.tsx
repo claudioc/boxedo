@@ -29,7 +29,7 @@ export const PageActions = ({
       <menu class="flex gap-3">
         {actions.includes('save') && (
           <button
-            class="btn btn-primary"
+            class="btn btn-primary btn-sm"
             type="submit"
             x-bind:disabled="$store.form.submitting"
             x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
@@ -45,7 +45,7 @@ export const PageActions = ({
         {actions.includes('cancel') && (
           <a
             href={cancelUrl}
-            class="btn"
+            class="btn btn-sm"
             x-bind:disabled="$store.form.submitting"
             x-on:click="window.onbeforeunload=null"
           >

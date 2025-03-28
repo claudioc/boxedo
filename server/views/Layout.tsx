@@ -42,7 +42,7 @@ export const Layout = ({
       : `/pages/create?parentPageId=${page._id}`;
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme={ctx.app.config.JNGL_THEME}>
       <Head title={title} withEditor={withEditor} withVendorScripts ctx={ctx} />
       <body x-data="" {...onKeypress}>
         <script src={getBundleFilename('app')} />
@@ -81,7 +81,7 @@ export const Layout = ({
               class="drawer-overlay"
             />
 
-            <div class=" min-w-60 max-w-72 bg-neutral min-h-screen">
+            <div class="min-w-60 max-w-72 bg-base-200 border-r border-base-300 min-h-screen">
               <div class="navbar">
                 <div class="uppercase flex-1">
                   <a href="/">{settings.siteTitle}</a>

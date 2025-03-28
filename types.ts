@@ -268,6 +268,10 @@ export const ConfigEnvSchema = {
       type: 'string',
       default: '{siteTitle} - {pageTitle}',
     },
+    JNGL_THEME: {
+      type: 'string',
+      default: 'dracula',
+    },
   },
   if: {
     properties: {
