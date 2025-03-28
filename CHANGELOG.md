@@ -1,5 +1,19 @@
 # Changelog
 
+## [minor] - 2025-03-28
+
+### Features
+
+- adds support for the updatedBy; closes #29
+
+### Bug Fixes
+
+- closes #37; title not updated
+
+### Other Changes
+
+- prefix to all the env vars. Closes #33
+
 ## [patch] - 2025-03-27
 
 ### Other Changes
