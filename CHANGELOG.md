@@ -4,6 +4,16 @@
 
 ### Features
 
+- adds support for theme switching; closes #27
+
+### Bug Fixes
+
+- fixes the release cli command
+
+## [minor] - 2025-03-28
+
+### Features
+
 - adds support for the updatedBy; closes #29
 
 ### Bug Fixes
