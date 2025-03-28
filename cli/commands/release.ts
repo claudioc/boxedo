@@ -21,6 +21,8 @@ interface CommitCategories {
 type VersionType = 'major' | 'minor' | 'patch';
 
 export default class ReleaseCommand extends Command {
+  protected changelogEntries: string = '';
+
   async run() {
     this.ui.createConsole();
 
@@ -45,8 +47,7 @@ You can still release manually from the github web interface.
         await this.ui.confirm(`Ready to create a release for GitHub. Proceed?`)
       ) {
         try {
-          const changelogContent = fs.readFileSync('CHANGELOG.md', 'utf8');
-          await this.createGitHubRelease(nextVersion, changelogContent);
+          await this.createGitHubRelease(nextVersion);
         } catch (error) {
           this.ui.console.error(
             'An error occurred while creating a release on GitHub. Please do it manually.',
@@ -256,15 +257,11 @@ You can still release manually from the github web interface.
     const changelogPath = 'CHANGELOG.md';
 
     let changelog = '# Changelog\n\n';
-    if (!this.isDryRun) {
-      if (!fs.existsSync(changelogPath)) {
-        fs.writeFileSync(changelogPath, changelog);
-      }
+    if (!fs.existsSync(changelogPath)) {
+      fs.writeFileSync(changelogPath, changelog);
     }
 
-    if (!this.isDryRun) {
-      changelog = fs.readFileSync(changelogPath, 'utf8');
-    }
+    changelog = fs.readFileSync(changelogPath, 'utf8');
     const date = new Date().toISOString().split('T')[0];
 
     let newEntries = `## [${newVersion}] - ${date}\n\n`;
@@ -330,11 +327,9 @@ You can still release manually from the github web interface.
       `# Changelog\n\n${newEntries}`
     );
 
-    if (!this.isDryRun) {
-      fs.writeFileSync(changelogPath, updatedChangelog);
-    } else {
-      this.ui.console.info(updatedChangelog);
-    }
+    this.changelogEntries = newEntries;
+
+    fs.writeFileSync(changelogPath, updatedChangelog);
   }
 
   /**
@@ -349,26 +344,15 @@ You can still release manually from the github web interface.
     }
   }
 
-  async createGitHubRelease(
-    version: string,
-    changelogContent: string
-  ): Promise<void> {
+  async createGitHubRelease(version: string): Promise<void> {
     try {
       this.ui.console.info('Creating GitHub release…');
 
-      // Extract the changelog section for just this version to use as release notes
-      const releaseNotesRegex = new RegExp(
-        `## \\[${version}\\][\\s\\S]*?(?=## \\[|$)`,
-        'm'
-      );
-      const match = changelogContent.match(releaseNotesRegex);
-      const releaseNotes = match ? match[0].trim() : `Release ${version}`;
-
       const tempFile = path.join(os.tmpdir(), `release-notes-${version}.md`);
-      fs.writeFileSync(tempFile, releaseNotes);
+      fs.writeFileSync(tempFile, this.changelogEntries);
 
       execSync(
-        `gh release create --draft v${version} --title "Release v${version}" --notes-file "${tempFile}"`
+        `gh release create v${version} --latest --draft --title "Release v${version}" --notes-file "${tempFile}"`
       );
 
       fs.unlinkSync(tempFile);
