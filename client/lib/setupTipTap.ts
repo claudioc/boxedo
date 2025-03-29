@@ -206,6 +206,7 @@ let uploadDialog: HTMLDialogElement;
 interface UploadFormFields {
   uploadUrl: string;
   uploadFile: File;
+  altText: string;
 }
 
 const addImageWithDialog = () => {
@@ -280,7 +281,11 @@ const addImageWithDialog = () => {
         : '');
 
     if (imageSrc) {
-      editor.chain().focus().setImage({ src: imageSrc }).run();
+      editor
+        .chain()
+        .focus()
+        .setImage({ src: imageSrc, alt: formFields.altText ?? '' })
+        .run();
       uploadDialog.close();
       form.reset();
     }

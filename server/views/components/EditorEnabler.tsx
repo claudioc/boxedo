@@ -157,6 +157,21 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
               </div>
             </fieldset>
 
+            <fieldset class="fieldset mb-5 w-full">
+              <legend class="fieldset-legend">
+                {i18n.t('ImageDialog.altText')}
+              </legend>
+              <input
+                name="altText"
+                id="altText"
+                class="input w-full"
+                type="text"
+              />
+              <div class="fieldset-label">
+                {i18n.t('ImageDialog.altTextHelp')}
+              </div>
+            </fieldset>
+
             <menu class="flex justify-end gap-3">
               <button
                 type="submit"

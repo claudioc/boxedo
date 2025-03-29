@@ -186,7 +186,9 @@
     "enterUrl": "URL dell'immagine",
     "enterUrlHelp": "URL dell'immagine da visualizzare, prefisso https:// incluso",
     "uploadFile": "Carica un file",
-    "uploadFileHelp": "Il file da caricare deve essere un'immagine (JPG, PNG, GIF, SVG) e non deve eccedere i 20MB"
+    "uploadFileHelp": "Il file da caricare deve essere un'immagine (JPG, PNG, GIF, SVG) e non deve eccedere i 20MB",
+    "altText": "Testo alternativo",
+    "altTextHelp": "Rappresenta una descrizione dell'immagine ad uso delle tecnologie assistive"
   },
 
   "Login": {
@@ -205,7 +207,7 @@
   "common": {
     "OK": "OK",
     "or": "oppure",
-    "cancel": "Cancella",
+    "cancel": "Annulla",
     "email": "Email",
     "homePage": "Home page"
   }

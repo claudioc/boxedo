@@ -187,7 +187,9 @@
     "enterUrl": "Enter an image URL",
     "enterUrlHelp": "The URL of the image to display, including the https:// prefix",
     "uploadFile": "Upload a file",
-    "uploadFileHelp": "The file to upload must be an image file (JPG, PNG, GIF, SVG) and must be less than 20MB"
+    "uploadFileHelp": "The file to upload must be an image file (JPG, PNG, GIF, SVG) and must be less than 20MB",
+    "altText": "Alternative text",
+    "altTextHelp": "Please provide a textual description of the image, primarily for accessibility purposes"
   },
 
   "Login": {
