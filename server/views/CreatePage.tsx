@@ -43,7 +43,7 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
           />
 
           <MainContent>
-            <div id="editor-placeholder" class="prose" />
+            <div id="js-editorPlaceholder" class="prose" />
           </MainContent>
 
           <PageData debug={ctx.app.is('development')} />

@@ -129,6 +129,7 @@ export const Layout = ({
 
                 {/* Need to impose a fixed width to avoid the sidebar from flickering */}
                 <aside
+                  id="js-mainNav"
                   class="mb-5 text-base-content w-60"
                   hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
                   hx-trigger="load once"

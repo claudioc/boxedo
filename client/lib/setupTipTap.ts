@@ -211,7 +211,9 @@ interface UploadFormFields {
 
 const addImageWithDialog = () => {
   if (!uploadDialog) {
-    uploadDialog = document.getElementById('uploadDialog') as HTMLDialogElement;
+    uploadDialog = document.getElementById(
+      'js-uploadDialog'
+    ) as HTMLDialogElement;
     if (!uploadDialog) {
       return;
     }
@@ -421,7 +423,7 @@ const addBubbleMenuHandlers = () => {
 };
 
 export const enableEditor = () => {
-  const placeHolder = document.getElementById('editor-placeholder');
+  const placeHolder = document.getElementById('js-editorPlaceholder');
   /* Debug info */
   const pageContent = document.querySelector(
     '[name="pageContent"]'

@@ -34,7 +34,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
             title={i18n.t('EditPage.title')}
           />
           <MainContent>
-            <div id="editor-placeholder" class="prose">
+            <div id="js-editorPlaceholder" class="prose">
               <h1>{page.pageTitle}</h1>
               {page.pageContent}
             </div>

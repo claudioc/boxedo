@@ -426,25 +426,23 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const { siteLang, textSize } = req.body;
       const { user } = req;
-      const preferencesRepo = app.repoFactory.getPreferencesRepository();
+      const prefRepo = app.repoFactory.getPreferencesRepository();
       const rs = redirectService(app, rep);
       const userId = user ? user._id : ANONYMOUS_AUTHOR_ID;
 
-      const preferences = (
-        await preferencesRepo.getPreferencesByUserId(userId)
-      ).match(
+      const prefs = (await prefRepo.getPreferencesByUserId(userId)).match(
         (preferences) => preferences,
         (feedback) => {
           throw new Error(feedback.message);
         }
       );
 
-      preferences.siteLang = siteLang;
-      preferences.textSize = textSize;
+      prefs.siteLang = siteLang;
+      prefs.textSize = textSize;
 
       app.i18n.switchTo(siteLang);
 
-      (await preferencesRepo.updatePreferences(userId, preferences)).match(
+      (await prefRepo.updatePreferences(userId, prefs)).match(
         nop,
         (feedback) => {
           throw new Error(feedback.message);

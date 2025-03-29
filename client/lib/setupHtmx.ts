@@ -160,6 +160,38 @@ const setupHtmx = () => {
     },
   });
 
+  // Tricky stuff: we want HTMX to not intercept the click on the
+  // navigation items when we use the ctrl or meta keys to open it
+  // in a new tab; instead of trying to cancel things after HTMX has
+  // started processing, we need to intercept the original click event
+  // before HTMX fully handles it, and only stop it from reaching HTMX
+  // if the modifier keys are pressed.
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('js-mainNav') as HTMLElement;
+
+    if (!nav) {
+      return;
+    }
+
+    nav.addEventListener(
+      'click',
+      (event: MouseEvent) => {
+        const targetElement = event.target as Element;
+        const linkElement = targetElement.closest('a[hx-get]');
+        if (!linkElement) {
+          return;
+        }
+
+        if (event.ctrlKey || event.metaKey) {
+          event.stopPropagation();
+          return;
+        }
+      },
+      true
+    );
+  });
+
   window.removeEventListener('pageshow', navigationHandlers);
   window.addEventListener('pageshow', navigationHandlers);
 };

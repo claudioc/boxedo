@@ -116,7 +116,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
       </div>
 
       <dialog
-        id="uploadDialog"
+        id="js-uploadDialog"
         data-context="uploading file"
         x-ref="uploadDialog"
         class="modal"
