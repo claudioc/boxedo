@@ -939,6 +939,7 @@ const router = async (app: FastifyInstance) => {
       const { pageId } = req.params;
       const rs = redirectService(app, rep);
       const pageRepo = app.repoFactory.getPageRepository();
+      const settingRepo = app.repoFactory.getSettingsRepository();
 
       const page = (await pageRepo.getPageById(pageId)).match(
         (page) => page,
@@ -954,6 +955,18 @@ const router = async (app: FastifyInstance) => {
       (await pageRepo.deletePage(page)).mapErr((feedback) => {
         throw new Error(feedback.message);
       });
+
+      // If the page is the landing page, reset the landing page
+      if (app.settings.landingPageId === pageId) {
+        const settingsResult = await settingRepo.getSettings();
+        if (!settingsResult.isErr()) {
+          const settings = settingsResult.value;
+          settings.landingPageId = null;
+          // We skip over potential errors here because there is
+          // nothing much we can do in that case.
+          await settingRepo.updateSettings(settings);
+        }
+      }
 
       app.cache.reset(NAVIGATION_CACHE_KEY);
 
