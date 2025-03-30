@@ -27,7 +27,10 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
           ctx={ctx}
           title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
           actions={['save', 'cancel']}
-          cancelUrl={slugUrl(page.pageSlug)}
+          cancelUrl={slugUrl(
+            page.pageSlug,
+            ctx.app.config.JNGL_BASE_EXTERNAL_URL
+          )}
         />
         <MainContent>
           <div x-data="{newParentId: '', newParentTitle: '', moveToTop: false}">

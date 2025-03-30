@@ -281,7 +281,7 @@ export class PageRepository extends BaseRepository {
         return children.map((page) => ({
           pageId: page._id,
           title: page.pageTitle,
-          link: slugUrl(page.pageSlug),
+          link: slugUrl(page.pageSlug, this.config.JNGL_BASE_EXTERNAL_URL),
           position: page.position,
           children: buildTree(page._id),
         }));

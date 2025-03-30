@@ -18,8 +18,8 @@ import {
 import { supportedLocales, type SupportedLocales } from '../locales/phrases';
 import { stopwords } from '../locales/stopwords.en';
 
-export const slugUrl = (slug: string) =>
-  slug === '/' || slug === '' ? '/' : `/view/${slug}`;
+export const slugUrl = (slug: string, baseUrl = '/') =>
+  urlify(slug === '/' || slug === '' ? '/' : `/view/${slug}`, baseUrl);
 
 export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   if (!feedback) {

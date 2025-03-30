@@ -41,7 +41,11 @@ export const redirectService = (app: FastifyInstance, rep: FastifyReply) => {
     },
 
     slug(slug: string, feedback: Feedback) {
-      this.path(slugUrl(slug), feedback, true);
+      this.path(
+        slugUrl(slug, app.config.JNGL_BASE_EXTERNAL_URL),
+        feedback,
+        true
+      );
     },
   };
 };

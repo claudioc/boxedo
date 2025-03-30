@@ -25,7 +25,14 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
               <li>
                 <div class="flex gap-2 items-center">
                   <DocumentIcon />
-                  <a href={slugUrl(result.pageSlug)}>{result.title}</a>
+                  <a
+                    href={slugUrl(
+                      result.pageSlug,
+                      ctx.app.config.JNGL_BASE_EXTERNAL_URL
+                    )}
+                  >
+                    {result.title}
+                  </a>
                 </div>
                 <blockquote class="mt-2 ml-6">{result.snippets}</blockquote>
               </li>

@@ -39,7 +39,10 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
             ctx={ctx}
             title={i18n.t(titleKey)}
             actions={['save', 'cancel']}
-            cancelUrl={slugUrl(parentPage?.pageSlug || '/')}
+            cancelUrl={slugUrl(
+              parentPage?.pageSlug || '/',
+              ctx.app.config.JNGL_BASE_EXTERNAL_URL
+            )}
           />
 
           <MainContent>

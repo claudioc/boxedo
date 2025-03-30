@@ -30,7 +30,10 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
           <PageActions
             ctx={ctx}
             actions={['save', 'cancel']}
-            cancelUrl={slugUrl(page.pageSlug)}
+            cancelUrl={slugUrl(
+              page.pageSlug,
+              ctx.app.config.JNGL_BASE_EXTERNAL_URL
+            )}
             title={i18n.t('EditPage.title')}
           />
           <MainContent>

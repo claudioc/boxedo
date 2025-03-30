@@ -47,7 +47,13 @@ export const ReadPageVersion = ({
                   </strong>
                 ),
                 link: (
-                  <a class="link" href={slugUrl(page.pageSlug)}>
+                  <a
+                    class="link"
+                    href={slugUrl(
+                      page.pageSlug,
+                      ctx.app.config.JNGL_BASE_EXTERNAL_URL
+                    )}
+                  >
                     {i18n.t('ReadPageVersion.thisLink')}
                   </a>
                 ),

@@ -40,6 +40,12 @@ describe('slugUrl', () => {
     expect(slugUrl('about')).toBe('/view/about');
     expect(slugUrl('some-page')).toBe('/view/some-page');
   });
+
+  it('returns /view/slug for normal slug with a base url', () => {
+    expect(slugUrl('about', 'http://go.com/pazienza')).toBe(
+      '/pazienza/view/about'
+    );
+  });
 });
 
 describe('pathWithFeedback', () => {
