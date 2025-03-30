@@ -172,7 +172,11 @@ const router = async (app: FastifyInstance) => {
         nop
       );
       if (!user) {
-        return rs.path('/auth/login', Feedbacks.E_USER_NOT_FOUND, true);
+        return rs.path(
+          urlify('/auth/login', app.config.JNGL_BASE_EXTERNAL_URL),
+          Feedbacks.E_USER_NOT_FOUND,
+          true
+        );
       }
 
       if (user.role === 'inactive') {
@@ -219,7 +223,11 @@ const router = async (app: FastifyInstance) => {
 
       app.emailService.sendEmail(emailMessage);
 
-      return rs.path('/auth/login', Feedbacks.S_MAGIC_LINK_SENT, true);
+      return rs.path(
+        urlify('/auth/login', app.config.JNGL_BASE_EXTERNAL_URL),
+        Feedbacks.S_MAGIC_LINK_SENT,
+        true
+      );
     }
   );
 
