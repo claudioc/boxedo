@@ -35,7 +35,7 @@ import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
 import { SettingsPage } from '~/views/SettingsPage';
 import { Feedbacks } from './feedbacks';
-import { generateIdFor, isHomePage, nop } from './helpers';
+import { generateIdFor, isHomePage, nop, urlify } from './helpers';
 import {
   createRequireAuth,
   createRequireCapability,
@@ -193,6 +193,12 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
+      const magicUrl = urlify(
+        `/auth/magic/${magicData._id}`,
+        config.JNGL_BASE_EXTERNAL_URL,
+        true
+      );
+
       const emailMessage = {
         from: {
           name: settings.siteTitle,
@@ -203,14 +209,12 @@ const router = async (app: FastifyInstance) => {
           siteTitle: settings.siteTitle,
         }),
         text: i18n.t('Login.emailMagicLinkText', {
-          magicLink: `${config.JNGL_BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`,
+          magicLink: magicUrl,
         }),
       };
 
       if (app.is('development')) {
-        app.log.info(
-          `${config.JNGL_BASE_EXTERNAL_URL}/auth/magic/${magicData._id}`
-        );
+        app.log.info(magicUrl);
       }
 
       app.emailService.sendEmail(emailMessage);

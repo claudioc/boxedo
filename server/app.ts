@@ -4,10 +4,6 @@ import { parseBaseUrl } from './lib/helpers';
 const app = bootstrap();
 
 const baseUrl = parseBaseUrl(app.config.JNGL_BASE_INTERNAL_URL);
-if (!baseUrl) {
-  app.log.error('The configured internal base url is incorrect.');
-  process.exit(1);
-}
 
 try {
   await app.listen({

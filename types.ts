@@ -327,6 +327,7 @@ export interface UrlParts {
   baseUrl: string;
   host: string;
   isLocalhost: boolean;
+  pathname: string;
 }
 
 export type SearchHitPosition = [number, number]; // [start, length]

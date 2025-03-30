@@ -28,6 +28,7 @@ import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
 import { phrases } from '../locales/phrases';
 import { AppContext } from './AppContext';
+import { validateConfig } from './config';
 import { ensurePathExists, getDefaultLanguage } from './helpers';
 import router from './router';
 
@@ -97,6 +98,12 @@ setInterval(async () => {
 }, 30000);
 
 await app.register(fastifyEnv, { schema: ConfigEnvSchema });
+
+const configErrors = validateConfig(app.config);
+if (configErrors.length > 0) {
+  configErrors.forEach((err) => app.log.error(err));
+  process.exit(1);
+}
 
 const emailService = EmailService.getInstance();
 
