@@ -38,7 +38,6 @@
     "@types/yargs": "^17.0.33",
     "cloc": "^2.2.0-cloc",
     "daisyui": "^5.0.0",
-    "dotenv": "^16.4.5",
     "esbuild": "0.25.0",
     "esbuild-plugin-inline-worker": "^0.1.1",
     "husky": "^9.1.7",

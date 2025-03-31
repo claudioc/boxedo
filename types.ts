@@ -273,25 +273,6 @@ export const ConfigEnvSchema = {
       default: 'dracula',
     },
   },
-  if: {
-    properties: {
-      JNGL_AUTHENTICATION_TYPE: {
-        not: { const: 'none' },
-      },
-    },
-  },
-  // biome-ignore lint/suspicious/noThenProperty:
-  then: {
-    properties: {
-      JNGL_EMAIL_PROVIDER: {
-        type: 'string',
-        not: {
-          enum: [''],
-        },
-      },
-    },
-    required: ['JNGL_EMAIL_PROVIDER'],
-  },
 } as const satisfies JSONSchema;
 
 export type ConfigEnv = FromSchema<typeof ConfigEnvSchema>;

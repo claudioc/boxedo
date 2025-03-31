@@ -31,5 +31,14 @@ export const validateConfig = (config: ConfigEnv): string[] => {
     );
   }
 
+  // If the authentication type is magiclink, the email provider must be provided
+  if (
+    config.JNGL_AUTHENTICATION_TYPE === 'magiclink' &&
+    config.JNGL_EMAIL_PROVIDER === ''
+  ) {
+    errors.push(
+      'The JNGL_AUTHENTICATION_TYPE "magiclink" needs an email provider.'
+    );
+  }
   return errors;
 };

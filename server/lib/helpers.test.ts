@@ -619,5 +619,12 @@ describe('urlify', () => {
 
     res = urlify('/bang/bandito/123', 'http://go.com/zoo/', false);
     expect(res).toBe('/zoo/bang/bandito/123');
+
+    res = urlify(
+      '/bang/bandito/123?panza=brutale&corsa=13',
+      'http://go.com/zoo/',
+      false
+    );
+    expect(res).toBe('/zoo/bang/bandito/123?panza=brutale&corsa=13');
   });
 });
