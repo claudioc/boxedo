@@ -16,7 +16,7 @@ export const PreferencesPage = ({
   preferences,
   token,
 }: PreferencesPageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
   const { siteLang } = preferences;
 
   return (
@@ -32,7 +32,7 @@ export const PreferencesPage = ({
           ctx={ctx}
           title={i18n.t('PreferencesPage.title')}
           actions={['save', 'cancel']}
-          cancelUrl="/"
+          cancelUrl={urlService.url('/')}
         />
 
         <MainContent>

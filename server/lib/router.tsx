@@ -35,7 +35,7 @@ import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
 import { SettingsPage } from '~/views/SettingsPage';
 import { Feedbacks } from './feedbacks';
-import { generateIdFor, isHomePage, nop, urlify } from './helpers';
+import { generateIdFor, isHomePage, nop } from './helpers';
 import {
   createRequireAuth,
   createRequireCapability,
@@ -165,7 +165,7 @@ const router = async (app: FastifyInstance) => {
       const { email } = req.body;
       const userRepo = app.repoFactory.getUserRepository();
       const magicRepo = app.repoFactory.getMagicRepository();
-      const { i18n, settings, config } = app;
+      const { i18n, settings, config, urlService } = app;
 
       const user = (await userRepo.getUserByEmail(email)).match(
         (user) => user,
@@ -173,7 +173,7 @@ const router = async (app: FastifyInstance) => {
       );
       if (!user) {
         return rs.path(
-          urlify('/auth/login', app.config.JNGL_BASE_EXTERNAL_URL),
+          urlService.url('/auth/login'),
           Feedbacks.E_USER_NOT_FOUND,
           true
         );
@@ -197,11 +197,7 @@ const router = async (app: FastifyInstance) => {
         }
       );
 
-      const magicUrl = urlify(
-        `/auth/magic/${magicData._id}`,
-        config.JNGL_BASE_EXTERNAL_URL,
-        true
-      );
+      const magicUrl = urlService.url(`/auth/magic/${magicData._id}`, true);
 
       const emailMessage = {
         from: {
@@ -224,7 +220,7 @@ const router = async (app: FastifyInstance) => {
       app.emailService.sendEmail(emailMessage);
 
       return rs.path(
-        urlify('/auth/login', app.config.JNGL_BASE_EXTERNAL_URL),
+        urlService.url('/auth/login'),
         Feedbacks.S_MAGIC_LINK_SENT,
         true
       );
@@ -245,7 +241,7 @@ const router = async (app: FastifyInstance) => {
       const sessionRepo = app.repoFactory.getSessionRepository();
       const magicRepo = app.repoFactory.getMagicRepository();
       const magicId = req.params.magicId;
-      const { i18n } = app;
+      const { i18n, urlService } = app;
 
       const email = (await magicRepo.validateMagic(magicId)).match(
         (email) => email,
@@ -284,7 +280,7 @@ const router = async (app: FastifyInstance) => {
 
       const error = i18n.t('Login.magicLinkInvalid', {
         aNewOne: (
-          <a class="is-link" href="/auth/login">
+          <a class="is-link" href={urlService.url('/auth/login')}>
             {i18n.t('Login.aNewOne')}
           </a>
         ),
@@ -494,7 +490,12 @@ const router = async (app: FastifyInstance) => {
         ? (await service.searchByTitle(q)).unwrapOr([])
         : [];
 
-      rep.html(<TitlesList titles={titles} i18n={app.i18n} />);
+      rep.html(
+        <TitlesList
+          titles={titles}
+          ctx={{ app, prefs: req.preferences, user: req.user }}
+        />
+      );
     }
   );
 
@@ -999,6 +1000,7 @@ const router = async (app: FastifyInstance) => {
     async (req, rep) => {
       const rs = redirectService(app, rep);
       const fileRepo = app.repoFactory.getFileRepository();
+      const { urlService } = app;
 
       if (!req.isMultipart()) {
         return rs.bail(400, 'Invalid file type. Please upload an image.');
@@ -1092,7 +1094,9 @@ const router = async (app: FastifyInstance) => {
         originalSize: buffer.length,
         processedSize: processedBuffer.length,
         wasResized: needsResize,
-        url: `/uploads/${fileId}/${encodeURIComponent(data.filename)}`,
+        url: urlService.url(
+          `/uploads/${fileId}/${encodeURIComponent(data.filename)}`
+        ),
       };
     }
   );

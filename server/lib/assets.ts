@@ -7,6 +7,9 @@ import {
 } from '~/constants';
 
 export const cssFile = `/${ASSETS_MOUNT_POINT}/css/global.css?_=${CACHE_BUSTER}`;
+export const htmxFile = `/${ASSETS_MOUNT_POINT}/vendor/htmx.min.js?_=${CACHE_BUSTER}`;
+export const sortableFile = `/${ASSETS_MOUNT_POINT}/vendor/Sortable.min.js?_=${CACHE_BUSTER}`;
+
 type Bundle = 'app' | 'editor' | 'appMini';
 
 const bundleNames: Record<Bundle, string> = {

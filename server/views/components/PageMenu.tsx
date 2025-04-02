@@ -1,13 +1,18 @@
 import type { PageModel, WithCtx } from '~/../types';
 import { AuthorizationService } from '~/services/AuthorizationService';
+import { CogIcon } from '../icons/CogIcon';
+import { EditIcon } from '../icons/EditIcon';
 import { EllipsisIcon } from '../icons/EllipsisIcon';
+import { HistoryIcon } from '../icons/HistoryIcon';
+import { LanguageIcon } from '../icons/Language';
+import { UpDownIcon } from '../icons/UpDownIcon';
 
 interface PageMenuProps extends WithCtx {
   page?: PageModel;
 }
 
 export const PageMenu = ({ ctx, page }: PageMenuProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   if (!page) {
     return null;
@@ -33,36 +38,54 @@ export const PageMenu = ({ ctx, page }: PageMenuProps) => {
       >
         {authService.hasCapability(ctx.user, 'pages:edit') && (
           <li>
-            <a href={`/pages/${page._id}/edit`} class="dropdown-item">
+            <a
+              href={urlService.url(`/pages/${page._id}/edit`)}
+              class="dropdown-item"
+            >
+              <EditIcon />
               {i18n.t('PageMenu.editThisPage')}
             </a>
           </li>
         )}
         {authService.hasCapability(ctx.user, 'pages:move') && (
           <li>
-            <a href={`/pages/${page._id}/move`} class="dropdown-item">
+            <a
+              href={urlService.url(`/pages/${page._id}/move`)}
+              class="dropdown-item"
+            >
+              <UpDownIcon />
               {i18n.t('PageMenu.moveThisPage')}
             </a>
           </li>
         )}
         {authService.hasCapability(ctx.user, 'pages:view_history') && (
-          <li class="disabled">
-            <a href={`/pages/${page._id}/history`} class="dropdown-item">
+          <li>
+            <a
+              href={urlService.url(`/pages/${page._id}/history`)}
+              class="dropdown-item"
+            >
+              <HistoryIcon />
               {i18n.t('PageMenu.pageHistory')}
             </a>
           </li>
         )}
-        <li class="disabled">
+        <li>
           <span class="divider" />
         </li>
         {authService.hasCapability(ctx.user, 'settings:edit') && (
           <li>
-            <a href="/settings">{i18n.t('Navigation.editSettings')}</a>
+            <a href={urlService.url('/settings')}>
+              <CogIcon />
+              {i18n.t('Navigation.editSettings')}
+            </a>
           </li>
         )}
         {authService.hasCapability(ctx.user, 'pref:edit') && (
           <li>
-            <a href="/preferences">{i18n.t('Navigation.editPreferences')}</a>
+            <a href={urlService.url('/preferences')}>
+              <LanguageIcon />
+              {i18n.t('Navigation.editPreferences')}
+            </a>
           </li>
         )}
       </ul>

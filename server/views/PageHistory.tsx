@@ -8,7 +8,7 @@ interface PageHistoryProps extends WithCtx {
 }
 
 export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
   const len = history.length;
 
   return (
@@ -42,7 +42,9 @@ export const PageHistory = ({ ctx, page, history }: PageHistoryProps) => {
                 <td>{item.pageTitle}</td>
                 <td>
                   <a
-                    href={`/pages/${page._id}/history/${item._rev}`}
+                    href={urlService.url(
+                      `/pages/${page._id}/history/${item._rev}`
+                    )}
                     class="btn btn-sm btn-outline"
                   >
                     {i18n.t('PageHistory.viewLabel')}

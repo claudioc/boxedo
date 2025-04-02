@@ -8,7 +8,7 @@ interface NotFoundProps extends WithCtx {
 }
 
 export const NotFound = ({ ctx, title }: NotFoundProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   return (
     <LayoutMini ctx={ctx} title={title}>
@@ -19,7 +19,7 @@ export const NotFound = ({ ctx, title }: NotFoundProps) => {
         </h2>
         <p>{i18n.t('NotFound.message')}</p>
         <p>
-          <a class="btn no-underline" href="/">
+          <a class="btn no-underline" href={urlService.url('/')}>
             <ArrowLeftIcon title={i18n.t('common.homePage')} />
             &nbsp;{i18n.t('common.homePage')}
           </a>

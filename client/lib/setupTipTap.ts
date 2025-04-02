@@ -22,6 +22,7 @@ import {
   TableCommands,
   tableCommands,
 } from './extensions/table-commands';
+import { joinPaths } from './helpers';
 
 // The one and only Editor instance
 let editor: Editor;
@@ -226,7 +227,7 @@ const addImageWithDialog = () => {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response = await fetch('/uploads', {
+    const response = await fetch(joinPaths(JNGL_BASE_PATH, '/uploads'), {
       method: 'POST',
       body: formData,
     });

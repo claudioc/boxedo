@@ -1,5 +1,4 @@
 import type { SearchResult, WithCtx } from '~/../types';
-import { slugUrl } from '~/lib/helpers';
 import { Layout } from './Layout';
 import { DocumentIcon } from './icons/DocumentIcon';
 
@@ -9,7 +8,7 @@ interface SearchResultsProps extends WithCtx {
 }
 
 export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
   const hasResults = results && results.length > 0;
 
   return (
@@ -25,12 +24,7 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
               <li>
                 <div class="flex gap-2 items-center">
                   <DocumentIcon />
-                  <a
-                    href={slugUrl(
-                      result.pageSlug,
-                      ctx.app.config.JNGL_BASE_EXTERNAL_URL
-                    )}
-                  >
+                  <a href={urlService.slugUrl(result.pageSlug)}>
                     {result.title}
                   </a>
                 </div>

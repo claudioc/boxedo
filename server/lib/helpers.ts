@@ -18,9 +18,6 @@ import {
 import { supportedLocales, type SupportedLocales } from '../locales/phrases';
 import { stopwords } from '../locales/stopwords.en';
 
-export const slugUrl = (slug: string, baseUrl = '/') =>
-  urlify(slug === '/' || slug === '' ? '/' : `/view/${slug}`, baseUrl);
-
 export const pathWithFeedback = (path: string, feedback?: Feedback) => {
   if (!feedback) {
     return path;
@@ -72,36 +69,6 @@ export const extractFileRefsFrom = (content: string) => {
   }
 
   return fileRefs;
-};
-
-export const parseBaseUrl = (baseUrl: string | undefined): UrlParts | null => {
-  const trimmed = baseUrl ? baseUrl.trim() : '';
-
-  try {
-    const url = new URL(trimmed);
-
-    return {
-      protocol: url.protocol.replace(':', ''),
-      hostname: url.hostname,
-      port: parsePort(url.port) ?? (url.protocol === 'https:' ? 443 : 80),
-      baseUrl: trimmed,
-      host: url.host,
-      isLocalhost: url.hostname === 'localhost' || url.hostname === '127.0.0.1',
-      pathname: url.pathname,
-    } as UrlParts;
-  } catch {
-    if (trimmed !== '') {
-      return null;
-    }
-  }
-
-  return null;
-};
-
-const parsePort = (input: string | undefined): number | undefined => {
-  if (!input?.trim()) return;
-  const port = Number.parseInt(input.trim(), 10);
-  return Number.isNaN(port) ? undefined : port;
 };
 
 export const ensureValidLanguage = (candidate: string) =>
@@ -341,75 +308,37 @@ export const compilePageTitle = (
 ): string =>
   pattern.replace('{siteTitle}', siteTitle).replace('{pageTitle}', title);
 
-// Receives a path and a base url and join them into an absolute url
-// including full hostname and schema if needed
-export const urlify = (
-  path: string,
-  // This is supposed to always be a valid URL with a hostname because is validated early on
-  baseUrl: string,
-  includeHostname = false
-): string => {
-  const npath = normalizePath(path);
-  if (!isValidUrl(baseUrl)) {
-    return npath;
-  }
+export const parseBaseUrl = (baseUrl: string | undefined): UrlParts | null => {
+  const trimmed = baseUrl ? baseUrl.trim() : '';
 
-  const nurl = parseBaseUrl(baseUrl);
+  try {
+    const url = new URL(trimmed);
 
-  if (!nurl) {
-    return npath;
-  }
-
-  if (!includeHostname) {
-    let res = `${normalizePath(nurl.pathname)}${npath}`.replace('//', '/');
-    if (res !== '/') {
-      res = res.replace(/\/+$/, '');
+    return {
+      protocol: url.protocol.replace(':', ''),
+      hostname: url.hostname,
+      port: parsePort(url.port) ?? (url.protocol === 'https:' ? 443 : 80),
+      baseUrl: trimmed,
+      host: url.host,
+      isLocalhost: url.hostname === 'localhost' || url.hostname === '127.0.0.1',
+      pathname: url.pathname,
+    } as UrlParts;
+  } catch {
+    if (trimmed !== '') {
+      return null;
     }
-    return res;
   }
 
-  let res = `${baseUrl}${npath}`.replace(/(?<!:)\/\//g, '/');
-  if (res !== '/') {
-    res = res.replace(/\/+$/, '');
-  }
-  return res;
+  return null;
 };
 
-/**
- * Normalizes a path by:
- * - Trimming leading/trailing whitespace
- * - Converting multiple consecutive slashes to a single slash
- * - Ensuring the path starts with a single slash
- * - Removing trailing slashes (except for root path "/")
- */
-export const normalizePath = (path: string): string => {
-  // Trim whitespace first
-  let normalized = path.trim();
-
-  if (normalized === '/') {
-    return normalized;
-  }
-
-  // Remove spaces that are adjacent to slashes (before or after)
-  normalized = normalized.replace(/\s*\/\s*/g, '/');
-
-  // Replace multiple consecutive slashes with a single slash
-  normalized = normalized.replace(/\/+/g, '/');
-
-  // Ensure the path starts with a slash
-  if (!normalized.startsWith('/')) {
-    normalized = `/${normalized}`;
-  }
-
-  // Remove trailing slash (unless the path is just "/")
-  if (normalized.length > 1 && normalized.endsWith('/')) {
-    normalized = normalized.slice(0, -1);
-  }
-
-  return normalized;
+export const parsePort = (input: string | undefined): number | undefined => {
+  if (!input?.trim()) return;
+  const port = Number.parseInt(input.trim(), 10);
+  return Number.isNaN(port) ? undefined : port;
 };
 
-export const isValidUrl = (url: string): boolean => {
+export const isValidUrl = (url: string) => {
   try {
     new URL(url);
   } catch {

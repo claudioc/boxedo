@@ -26,6 +26,7 @@ import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
 import type { RepositoryFactory } from '~/repositories/RepositoryFactory';
 import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
+import { UrlService } from '~/services/UrlService';
 import { phrases } from '../locales/phrases';
 import { AppContext } from './AppContext';
 import { validateConfig } from './config';
@@ -45,6 +46,7 @@ declare module 'fastify' {
     emailService: EmailService;
     repoFactory: RepositoryFactory;
     context: AppContext;
+    urlService: UrlService;
   }
   interface FastifyRequest {
     user: UserModel | null;
@@ -125,9 +127,13 @@ if (pathResult.isErr()) {
   process.exit(1);
 }
 
+UrlService.create(app.config);
+app.decorate('urlService', UrlService.getInstance());
+
 const contextResult = await AppContext.create({
   config: app.config,
   logger: app.log,
+  urlService: UrlService.getInstance(),
 });
 
 if (contextResult.isErr()) {

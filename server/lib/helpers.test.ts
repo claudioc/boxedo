@@ -11,8 +11,6 @@ import {
   parseBaseUrl,
   pathWithFeedback,
   prepareFTSQuery,
-  slugUrl,
-  urlify,
 } from './helpers';
 
 import { IdFormat } from './routerSchemas';
@@ -29,24 +27,6 @@ const stopwords = new Set([
   'to',
   'it',
 ]);
-
-describe('slugUrl', () => {
-  it('returns / for empty and root slug', () => {
-    expect(slugUrl('')).toBe('/');
-    expect(slugUrl('/')).toBe('/');
-  });
-
-  it('returns /view/slug for normal slug', () => {
-    expect(slugUrl('about')).toBe('/view/about');
-    expect(slugUrl('some-page')).toBe('/view/some-page');
-  });
-
-  it('returns /view/slug for normal slug with a base url', () => {
-    expect(slugUrl('about', 'http://go.com/pazienza')).toBe(
-      '/pazienza/view/about'
-    );
-  });
-});
 
 describe('pathWithFeedback', () => {
   it('returns original path when no feedback provided', () => {
@@ -552,79 +532,5 @@ describe('loadConfig', () => {
     expect(config.JNGL_EMAIL_PROVIDER).toBe('dummy');
     // @ts-ignore
     expect(config.UNKNOWN_KEY).toBe(undefined);
-  });
-});
-
-describe('urlify', () => {
-  it('handles empty parameters', () => {
-    let res = urlify('', '');
-    expect(res).toBe('/');
-    res = urlify('', '', true);
-    expect(res).toBe('/');
-  });
-
-  it('handles bad parameters', () => {
-    const res = urlify('/boom', 'flock32');
-    expect(res).toBe('/boom');
-  });
-
-  it('handles funny slashes', () => {
-    let res = urlify('////boom', 'flock32');
-    expect(res).toBe('/boom');
-    res = urlify('//     //boom//bazinga //', 'flock32');
-    expect(res).toBe('/boom/bazinga');
-    res = urlify('//     //boom is great//bazinga //', 'flock32');
-    expect(res).toBe('/boom is great/bazinga');
-    res = urlify('join//     //boom//bazinga //    ', 'flock32');
-    expect(res).toBe('/join/boom/bazinga');
-  });
-
-  it('handles a simple /', () => {
-    const res = urlify('/', '');
-    expect(res).toBe('/');
-  });
-
-  it('handles a simple base url', () => {
-    let res = urlify('/', 'http://go.com');
-    expect(res).toBe('/');
-    res = urlify('/', 'http://go.com/');
-    expect(res).toBe('/');
-    res = urlify('/', 'http://go.com/////');
-    expect(res).toBe('/');
-    res = urlify('/', 'http://go.com', true);
-    expect(res).toBe('http://go.com');
-  });
-
-  it('handles a base url with a path', () => {
-    let res = urlify('/', 'http://go.com/zoo');
-    expect(res).toBe('/zoo');
-
-    res = urlify('/', 'http://go.com/zoo', true);
-    expect(res).toBe('http://go.com/zoo');
-
-    res = urlify('/bang', 'http://go.com/zoo');
-    expect(res).toBe('/zoo/bang');
-
-    res = urlify('/bang', 'http://go.com/zoo', true);
-    expect(res).toBe('http://go.com/zoo/bang');
-
-    res = urlify('/bang', 'http://go.com/zoo/', false);
-    expect(res).toBe('/zoo/bang');
-
-    res = urlify('/bang/', 'http://go.com/zoo/', true);
-    expect(res).toBe('http://go.com/zoo/bang');
-
-    res = urlify('/bang/bandito/123', 'http://go.com/zoo/', true);
-    expect(res).toBe('http://go.com/zoo/bang/bandito/123');
-
-    res = urlify('/bang/bandito/123', 'http://go.com/zoo/', false);
-    expect(res).toBe('/zoo/bang/bandito/123');
-
-    res = urlify(
-      '/bang/bandito/123?panza=brutale&corsa=13',
-      'http://go.com/zoo/',
-      false
-    );
-    expect(res).toBe('/zoo/bang/bandito/123?panza=brutale&corsa=13');
   });
 });

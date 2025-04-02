@@ -8,7 +8,7 @@ interface LayoutMiniProps extends WithCtx {
 }
 
 export const LayoutMini = ({ ctx, title, children }: LayoutMiniProps) => {
-  const { settings } = ctx.app;
+  const { settings, urlService } = ctx.app;
 
   return (
     <html lang="en">
@@ -23,7 +23,11 @@ export const LayoutMini = ({ ctx, title, children }: LayoutMiniProps) => {
         <main class="min-h-screen flex flex-col">
           <header class="p-4 prose">
             <h1>
-              <a href="/" class="uppercase no-underline">
+              <a
+                href={urlService.url('/')}
+                title="/"
+                class="uppercase no-underline"
+              >
                 {settings.siteTitle}
               </a>
             </h1>

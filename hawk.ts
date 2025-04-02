@@ -7,7 +7,6 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { promisify } from 'node:util';
 import { parseBaseUrl } from './server/lib/helpers';
 import type { UrlParts } from './types';
-
 const execAsync = promisify(exec);
 
 interface SseClient {
@@ -21,10 +20,12 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
 
-const { JNGL_LIVERELOAD_URL, JNGL_BASE_INTERNAL_URL } = process.env;
+const { JNGL_LIVERELOAD_URL, JNGL_BASE_INTERNAL_URL, JNGL_BASE_EXTERNAL_URL } =
+  process.env;
 const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(JNGL_LIVERELOAD_URL);
 const hasLiveReload = liveReloadBaseUrl !== null;
 const apiServerBaseUrl: UrlParts | null = parseBaseUrl(JNGL_BASE_INTERNAL_URL);
+const baseExternalUrl: UrlParts | null = parseBaseUrl(JNGL_BASE_EXTERNAL_URL);
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
@@ -335,6 +336,7 @@ const buildClient: TaskFn = async (_) => {
       JNGL_LIVERELOAD_URL: JSON.stringify(
         JNGL_LIVERELOAD_URL ? `${JNGL_LIVERELOAD_URL}/updates` : ''
       ),
+      JNGL_BASE_PATH: JSON.stringify(baseExternalUrl?.pathname ?? ''),
     },
     platform: 'browser',
     entryNames: '[dir]/[name]-[hash]',

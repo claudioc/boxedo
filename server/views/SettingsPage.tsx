@@ -17,7 +17,7 @@ export const SettingsPage = ({
   landingPage,
   token,
 }: SettingsPageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   return (
     <Layout ctx={ctx} title={i18n.t('SettingsPage.title')}>
@@ -38,7 +38,7 @@ export const SettingsPage = ({
             ctx={ctx}
             title={i18n.t('SettingsPage.title')}
             actions={['save', 'cancel']}
-            cancelUrl="/"
+            cancelUrl={urlService.url('/')}
           />
 
           <MainContent>
@@ -82,7 +82,7 @@ export const SettingsPage = ({
                   id="search"
                   name="q"
                   placeholder={i18n.t('SettingsPage.startTyping')}
-                  hx-get="/parts/titles"
+                  hx-get={urlService.url('/parts/titles')}
                   hx-trigger="keyup changed delay:200ms"
                   hx-target="next div.results"
                 />

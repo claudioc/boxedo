@@ -1,5 +1,5 @@
 import type { WithCtx } from '~/../types';
-import { cssFile } from '~/lib/assets';
+import { cssFile, htmxFile, sortableFile } from '~/lib/assets';
 import { compilePageTitle } from '~/lib/helpers';
 
 interface HeadProps extends WithCtx {
@@ -14,7 +14,7 @@ export const Head = ({
   withEditor,
   withVendorScripts = true,
 }: HeadProps) => {
-  const { settings, config } = ctx.app;
+  const { settings, config, urlService } = ctx.app;
 
   return (
     <head>
@@ -31,11 +31,11 @@ export const Head = ({
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="description" content="Joongle is the ultimate CMS" />
       {withEditor && <meta http-equiv="Cache-Control" content="no-store" />}
-      <link rel="stylesheet" href={cssFile} />
+      <link rel="stylesheet" href={urlService.url(cssFile)} />
       {withVendorScripts && (
         <>
-          <script src="/a/vendor/htmx.min.js" />
-          <script src="/a/vendor/Sortable.min.js" />
+          <script src={urlService.url(htmxFile)} />
+          <script src={urlService.url(sortableFile)} />
         </>
       )}
     </head>

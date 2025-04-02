@@ -1,5 +1,4 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { slugUrl } from '~/lib/helpers';
 import { SearchIcon } from '~/views/icons/SearchIcon';
 import { Feedback, Feedbacks } from './components/Feedback';
 import { MainContent } from './components/MainContent';
@@ -13,7 +12,7 @@ export interface MovePageProps extends WithCtx {
 }
 
 export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   return (
     <Layout
@@ -27,10 +26,7 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
           ctx={ctx}
           title={i18n.t('MovePage.movingPage', { title: page.pageTitle })}
           actions={['save', 'cancel']}
-          cancelUrl={slugUrl(
-            page.pageSlug,
-            ctx.app.config.JNGL_BASE_EXTERNAL_URL
-          )}
+          cancelUrl={urlService.slugUrl(page.pageSlug)}
         />
         <MainContent>
           <div x-data="{newParentId: '', newParentTitle: '', moveToTop: false}">
@@ -85,7 +81,7 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
                     id="search"
                     name="q"
                     placeholder={i18n.t('MovePage.startTyping')}
-                    hx-get="/parts/titles"
+                    hx-get={urlService.url('/parts/titles')}
                     hx-trigger="keyup changed delay:200ms"
                     hx-target="next div.results"
                   />

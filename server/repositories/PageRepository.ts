@@ -10,7 +10,8 @@ import type {
 } from '~/../types';
 import { ANONYMOUS_AUTHOR_ID, POSITION_GAP_SIZE } from '~/constants';
 import { Feedbacks } from '~/lib/feedbacks';
-import { safeHtml, slugUrl } from '~/lib/helpers';
+import { safeHtml } from '~/lib/helpers';
+import type { UrlService } from '~/services/UrlService';
 import { BaseRepository } from './BaseRepository';
 
 // This values are only added on READ (not on WRITE)
@@ -39,9 +40,10 @@ export class PageRepository extends BaseRepository {
   constructor(
     protected db: PouchDB.Database<DocumentModel>,
     protected config: ConfigEnv,
-    protected logger: AnyLogger
+    protected logger: AnyLogger,
+    protected urlService: UrlService
   ) {
-    super(db, config, logger);
+    super(db, config, logger, urlService);
   }
 
   public async countPages(): Promise<Result<number, Feedback>> {
@@ -281,7 +283,7 @@ export class PageRepository extends BaseRepository {
         return children.map((page) => ({
           pageId: page._id,
           title: page.pageTitle,
-          link: slugUrl(page.pageSlug, this.config.JNGL_BASE_EXTERNAL_URL),
+          link: this.urlService.slugUrl(page.pageSlug),
           position: page.position,
           children: buildTree(page._id),
         }));

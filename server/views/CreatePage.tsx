@@ -1,5 +1,4 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { slugUrl } from '~/lib/helpers';
 import { EditorEnabler } from './components/EditorEnabler';
 import { MainContent } from './components/MainContent';
 import { PageActions } from './components/PageActions';
@@ -13,7 +12,7 @@ export interface CreatePageProps extends WithCtx {
 }
 
 export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   const titleKey = parentPage ? 'CreatePage.title' : 'CreatePage.titleTopLevel';
 
@@ -39,10 +38,7 @@ export const CreatePage = ({ ctx, parentPage, token }: CreatePageProps) => {
             ctx={ctx}
             title={i18n.t(titleKey)}
             actions={['save', 'cancel']}
-            cancelUrl={slugUrl(
-              parentPage?.pageSlug || '/',
-              ctx.app.config.JNGL_BASE_EXTERNAL_URL
-            )}
+            cancelUrl={urlService.slugUrl(parentPage?.pageSlug || '/')}
           />
 
           <MainContent>

@@ -15,7 +15,7 @@ export const ErrorPage = ({
   error,
   goHome = false,
 }: ErrorPageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
   return (
     <LayoutMini ctx={ctx} title={title}>
       <div class="prose">
@@ -29,7 +29,7 @@ export const ErrorPage = ({
         </p>
         {goHome ? (
           <p>
-            <a class="btn no-underline" href="/">
+            <a class="btn no-underline" href={urlService.url('/')}>
               <ArrowLeftIcon title={i18n.t('common.homePage')} />
               &nbsp;{i18n.t('common.homePage')}
             </a>

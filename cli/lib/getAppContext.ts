@@ -1,5 +1,6 @@
 import { AppContext } from '~/lib/AppContext';
 import { loadConfig } from '~/lib/helpers';
+import { UrlService } from '~/services/UrlService';
 import { AnyLogger } from '../../types';
 
 export const getAppContext = async (
@@ -7,9 +8,13 @@ export const getAppContext = async (
 ): Promise<AppContext | null> => {
   const config = loadConfig();
 
+  UrlService.create(config);
+  const urlService = UrlService.getInstance();
+
   const contextResult = await AppContext.create({
     config,
     logger,
+    urlService,
   });
 
   if (contextResult.isErr()) {

@@ -58,32 +58,3 @@ const cachePlugin: FastifyPluginCallback = async (fastify) => {
 export default fp(cachePlugin, {
   name: 'cache-manager',
 });
-
-// Usage example:
-/*
-// Register the plugin
-fastify.register(cachePlugin)
-
-// In your route handlers:
-fastify.get('/expensive-query', async (request, reply) => {
-  const cacheKey = 'expensive-query'
-
-  // Try to get from cache
-  const cached = fastify.cache.get<QueryResult>(cacheKey)
-  if (cached) {
-    return cached.data
-  }
-
-  // If not in cache, run query and cache result
-  const result = await db.runExpensiveQuery()
-  fastify.cache.set(cacheKey, result, 5 * 60 * 1000) // Cache for 5 minutes
-
-  return result
-})
-
-// Reset cache if needed
-fastify.post('/reset-cache', async (request, reply) => {
-  fastify.cache.reset()
-  return { success: true }
-})
-*/

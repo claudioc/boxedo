@@ -1,5 +1,5 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { formatDate, slugUrl } from '~/lib/helpers';
+import { formatDate } from '~/lib/helpers';
 import { MainContent } from './components/MainContent';
 import { PageBody } from './components/PageBody';
 import { Layout } from './Layout';
@@ -16,7 +16,7 @@ export const ReadPageVersion = ({
   item,
   version,
 }: ReadPageVersionProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   return (
     <Layout ctx={ctx} title={item.pageTitle} page={page}>
@@ -47,13 +47,7 @@ export const ReadPageVersion = ({
                   </strong>
                 ),
                 link: (
-                  <a
-                    class="link"
-                    href={slugUrl(
-                      page.pageSlug,
-                      ctx.app.config.JNGL_BASE_EXTERNAL_URL
-                    )}
-                  >
+                  <a class="link" href={urlService.slugUrl(page.pageSlug)}>
                     {i18n.t('ReadPageVersion.thisLink')}
                   </a>
                 ),

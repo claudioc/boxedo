@@ -1,11 +1,13 @@
 import { type Result, err, ok } from 'neverthrow';
 import type { AnyLogger, ConfigEnv } from '~/../types';
+import type { UrlService } from '~/services/UrlService';
 import { RepositoryFactory } from '../repositories/RepositoryFactory';
 import { DatabaseService } from '../services/DatabaseService';
 
 export interface AppContextParams {
   config: ConfigEnv;
   logger: AnyLogger;
+  urlService: UrlService;
 }
 
 /**
@@ -19,10 +21,12 @@ export class AppContext {
   private repositoryFactory: RepositoryFactory | null = null;
   private readonly logger: AnyLogger;
   private readonly config: ConfigEnv;
+  private readonly urlService: UrlService;
 
   private constructor(params: AppContextParams) {
     this.logger = params.logger;
     this.config = params.config;
+    this.urlService = params.urlService;
   }
 
   /**
@@ -31,7 +35,7 @@ export class AppContext {
   public static async create(
     params: AppContextParams
   ): Promise<Result<AppContext, Error>> {
-    const { config, logger } = params;
+    const { config, logger, urlService } = params;
 
     if (!AppContext.instance) {
       AppContext.instance = new AppContext(params);
@@ -50,6 +54,7 @@ export class AppContext {
             db: dbService.getDatabase(),
             config,
             logger,
+            urlService,
           });
 
           AppContext.instance.databaseService = dbService;
@@ -101,5 +106,9 @@ export class AppContext {
 
   public getConfig(): ConfigEnv {
     return this.config;
+  }
+
+  public getUrlService(): UrlService {
+    return this.urlService;
   }
 }

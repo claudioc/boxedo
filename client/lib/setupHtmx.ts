@@ -1,3 +1,5 @@
+import { joinPaths } from './helpers';
+
 const htmx = window.htmx;
 let controller: AbortController;
 // FIXME bad idea but we need to know if an error occurred since htmx
@@ -17,7 +19,10 @@ const updateCreateButton = (pageId = '') => {
   ) as HTMLElement;
 
   if (createButton) {
-    createButton.setAttribute('href', `/pages/create?parentPageId=${pageId}`);
+    createButton.setAttribute(
+      'href',
+      joinPaths(JNGL_BASE_PATH, `/pages/create?parentPageId=${pageId}`)
+    );
     // As we are moving away from the landing page, the button label must be updated accordingly
     createButton.textContent = createButton.dataset.labelnested ?? '';
   }

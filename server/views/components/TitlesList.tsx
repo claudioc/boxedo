@@ -1,14 +1,13 @@
-import type Polyglot from 'node-polyglot';
-import type { SearchTitlesResult } from '~/../types';
+import type { SearchTitlesResult, WithCtx } from '~/../types';
 import { DocumentIcon } from '../icons/DocumentIcon';
 
-interface TitlesListProps {
+interface TitlesListProps extends WithCtx {
   titles: SearchTitlesResult[];
-  // We receive the i18n object because we can't use the useApp hook here
-  i18n: Polyglot;
 }
 
-export const TitlesList = ({ titles, i18n }: TitlesListProps) => {
+export const TitlesList = ({ ctx, titles }: TitlesListProps) => {
+  const { i18n } = ctx.app;
+
   return (
     <>
       {titles.length > 0 && (

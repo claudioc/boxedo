@@ -1,4 +1,5 @@
 import type { AnyLogger, ConfigEnv, Db, DocumentModel } from '~/../types';
+import type { UrlService } from '~/services/UrlService';
 import { FileRepository } from './FileRepository';
 import { MagicRepository } from './MagicRepository';
 import { PageRepository } from './PageRepository';
@@ -11,6 +12,7 @@ interface RepositoryFactoryOptions {
   db: PouchDB.Database<DocumentModel>;
   config: ConfigEnv;
   logger: AnyLogger;
+  urlService: UrlService;
 }
 
 export class RepositoryFactory {
@@ -26,37 +28,32 @@ export class RepositoryFactory {
   private constructor(
     private db: Db,
     private config: ConfigEnv,
-    private logger: AnyLogger
+    private logger: AnyLogger,
+    private urlService: UrlService
   ) {
-    this.settingsRepository = new SettingsRepository(
-      this.db,
-      this.config,
-      this.logger
+    const repoParams = [this.db, this.config, this.logger] as const;
+
+    this.settingsRepository = new SettingsRepository(...repoParams);
+    this.pageRepository = new PageRepository(
+      ...([...repoParams, this.urlService] as const)
     );
-    this.pageRepository = new PageRepository(this.db, this.config, this.logger);
-    this.sessionRepository = new SessionRepository(
-      this.db,
-      this.config,
-      this.logger
-    );
-    this.fileRepository = new FileRepository(this.db, this.config, this.logger);
-    this.magicRepository = new MagicRepository(
-      this.db,
-      this.config,
-      this.logger
-    );
-    this.userRepository = new UserRepository(this.db, this.config, this.logger);
-    this.preferencesRepository = new PreferencesRepository(
-      this.db,
-      this.config,
-      this.logger
-    );
+    this.sessionRepository = new SessionRepository(...repoParams);
+    this.fileRepository = new FileRepository(...repoParams);
+    this.magicRepository = new MagicRepository(...repoParams);
+    this.userRepository = new UserRepository(...repoParams);
+    this.preferencesRepository = new PreferencesRepository(...repoParams);
   }
 
   static create(options: RepositoryFactoryOptions): RepositoryFactory {
-    const { db, config, logger } = options;
+    const { db, config, logger, urlService } = options;
+
     if (!RepositoryFactory.instance) {
-      RepositoryFactory.instance = new RepositoryFactory(db, config, logger);
+      RepositoryFactory.instance = new RepositoryFactory(
+        db,
+        config,
+        logger,
+        urlService
+      );
     }
 
     return RepositoryFactory.instance;

@@ -9,7 +9,7 @@ interface LoginPageProps extends WithCtx {
 }
 
 export const LoginPage = ({ ctx, token }: LoginPageProps) => {
-  const { i18n, settings, feedbackCode } = ctx.app;
+  const { i18n, settings, feedbackCode, urlService } = ctx.app;
 
   const feedback = getFeedbackByCode(feedbackCode);
 
@@ -29,7 +29,7 @@ export const LoginPage = ({ ctx, token }: LoginPageProps) => {
             {i18n.t('Login.allGood')}
           </p>
         ) : (
-          <form method="POST" action="/auth/login">
+          <form method="POST" action={urlService.url('/auth/login')}>
             <input type="hidden" name="_csrf" value={token} />
 
             <div>

@@ -28,7 +28,7 @@ export const Layout = ({
   withEditor = false,
   withCreateButton = true,
 }: LayoutProps) => {
-  const { feedbackCode, i18n, settings } = ctx.app;
+  const { feedbackCode, i18n, settings, urlService } = ctx.app;
   const user = ctx.user;
   const authService = AuthorizationService.getInstance();
 
@@ -36,17 +36,24 @@ export const Layout = ({
     '@keyup.escape': '$store.has.none()',
   };
 
-  const createButtonLink =
+  const createButtonLink = urlService.url(
     isLandingPage || !page
       ? '/pages/create'
-      : `/pages/create?parentPageId=${page._id}`;
+      : `/pages/create?parentPageId=${page._id}`
+  );
+
+  const navLink = urlService.url(
+    `/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`
+  );
 
   return (
     <html lang="en" data-theme={ctx.app.config.JNGL_THEME}>
       <Head title={title} withEditor={withEditor} withVendorScripts ctx={ctx} />
       <body x-data="" {...onKeypress}>
-        <script src={getBundleFilename('app')} />
-        {withEditor && <script src={getBundleFilename('editor')} />}
+        <script src={urlService.url(getBundleFilename('app'))} />
+        {withEditor && (
+          <script src={urlService.url(getBundleFilename('editor'))} />
+        )}
         {process.env.NODE_ENV === 'development' && (
           <script>App.livereload();</script>
         )}
@@ -84,13 +91,16 @@ export const Layout = ({
             <div class="min-w-60 max-w-72 bg-base-200 border-r border-base-300 min-h-screen">
               <div class="navbar">
                 <div class="uppercase flex-1">
-                  <a href="/">{settings.siteTitle}</a>
+                  <a href={urlService.url('/')}>{settings.siteTitle}</a>
                 </div>
                 <div class="flex-none">
                   <ul class="menu menu-xs menu-horizontal">
                     {user ? (
                       <li>
-                        <form method="post" action="/auth/logout">
+                        <form
+                          method="post"
+                          action={urlService.url('/auth/logout')}
+                        >
                           <button
                             type="submit"
                             aria-label={i18n.t('Login.logout')}
@@ -131,7 +141,7 @@ export const Layout = ({
                 <aside
                   id="js-mainNav"
                   class="mb-5 text-base-content w-60"
-                  hx-get={`/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`}
+                  hx-get={navLink}
                   hx-trigger="load once"
                 >
                   <div class="flex w-52 flex-col gap-4">

@@ -1,5 +1,4 @@
 import type { PageModel, WithCtx } from '~/../types';
-import { slugUrl } from '~/lib/helpers';
 import { EditorEnabler } from './components/EditorEnabler';
 import { MainContent } from './components/MainContent';
 import { PageActions } from './components/PageActions';
@@ -13,7 +12,7 @@ export interface EditPageProps extends WithCtx {
 }
 
 export const EditPage = ({ ctx, page, token }: EditPageProps) => {
-  const { i18n } = ctx.app;
+  const { i18n, urlService } = ctx.app;
 
   return (
     <Layout
@@ -30,10 +29,7 @@ export const EditPage = ({ ctx, page, token }: EditPageProps) => {
           <PageActions
             ctx={ctx}
             actions={['save', 'cancel']}
-            cancelUrl={slugUrl(
-              page.pageSlug,
-              ctx.app.config.JNGL_BASE_EXTERNAL_URL
-            )}
+            cancelUrl={urlService.slugUrl(page.pageSlug)}
             title={i18n.t('EditPage.title')}
           />
           <MainContent>

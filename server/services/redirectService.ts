@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type { Feedback } from '~/../types';
 import { ErrorWithFeedback } from '~/lib/errors';
-import { pathWithFeedback, slugUrl, urlify } from '~/lib/helpers';
+import { pathWithFeedback } from '~/lib/helpers';
 
 export const redirectService = (app: FastifyInstance, rep: FastifyReply) => {
   return {
@@ -37,7 +37,7 @@ export const redirectService = (app: FastifyInstance, rep: FastifyReply) => {
     },
 
     home(feedback?: Feedback) {
-      const root = urlify('/', app.config.JNGL_BASE_EXTERNAL_URL);
+      const root = app.urlService.url('/');
 
       if (!feedback) {
         return rep.redirect(root, 303);
@@ -46,11 +46,7 @@ export const redirectService = (app: FastifyInstance, rep: FastifyReply) => {
     },
 
     slug(slug: string, feedback: Feedback) {
-      this.path(
-        slugUrl(slug, app.config.JNGL_BASE_EXTERNAL_URL),
-        feedback,
-        true
-      );
+      this.path(app.urlService.slugUrl(slug), feedback, true);
     },
   };
 };
