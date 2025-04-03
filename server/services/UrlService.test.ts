@@ -99,3 +99,20 @@ describe('urlify', () => {
     expect(res).toBe('/zoo/bang/bandito/123?panza=brutale&corsa=13');
   });
 });
+
+describe('isHomePage', () => {
+  it('handles empty parameters', () => {
+    expect(urlService.isHomePage('http://go.com')).toBe(true);
+    expect(urlService.isHomePage('http://go.com/')).toBe(true);
+  });
+
+  it('handles bad parameters', () => {
+    expect(urlService.isHomePage('')).toBe(false);
+    expect(urlService.isHomePage('boo')).toBe(false);
+    expect(urlService.isHomePage('http://go.com?flock32')).toBe(true);
+  });
+
+  it('handles funny slashes', () => {
+    expect(urlService.isHomePage('http://go.com/bazinga?flock32')).toBe(false);
+  });
+});

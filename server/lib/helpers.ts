@@ -288,18 +288,6 @@ export const mapTextSize = (size: TextSize) => {
   }
 };
 
-export const isHomePage = (url: string) => {
-  try {
-    const parsedUrl = new URL(url);
-    const path = parsedUrl.pathname;
-    // Check if path is either '/' or empty
-    return path === '/' || path === '';
-  } catch {
-    // If URL parsing fails, return false
-    return false;
-  }
-};
-
 // This same function is duplicated in the client code's helpers.ts
 export const compilePageTitle = (
   siteTitle: string,

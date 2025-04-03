@@ -4,7 +4,8 @@ import { UrlService } from '~/services/UrlService';
 import { AnyLogger } from '../../types';
 
 export const getAppContext = async (
-  logger: AnyLogger = console
+  logger: AnyLogger = console,
+  withDb = true
 ): Promise<AppContext | null> => {
   const config = loadConfig();
 
@@ -15,6 +16,7 @@ export const getAppContext = async (
     config,
     logger,
     urlService,
+    withDb,
   });
 
   if (contextResult.isErr()) {

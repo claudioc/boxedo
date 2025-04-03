@@ -103,4 +103,15 @@ export class UrlService {
       baseUrl
     );
   }
+
+  // Note that this works only with full URLs
+  isHomePage(url: string) {
+    try {
+      const parsedUrl = new URL(url);
+      const path = parsedUrl.pathname;
+      return path === this.url('/') || path === '';
+    } catch {
+      return false;
+    }
+  }
 }

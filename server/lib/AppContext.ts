@@ -8,6 +8,7 @@ export interface AppContextParams {
   config: ConfigEnv;
   logger: AnyLogger;
   urlService: UrlService;
+  withDb?: boolean;
 }
 
 /**
@@ -35,10 +36,14 @@ export class AppContext {
   public static async create(
     params: AppContextParams
   ): Promise<Result<AppContext, Error>> {
-    const { config, logger, urlService } = params;
+    const { config, logger, urlService, withDb } = params;
 
     if (!AppContext.instance) {
       AppContext.instance = new AppContext(params);
+    }
+
+    if (withDb === false) {
+      return ok(AppContext.instance);
     }
 
     try {

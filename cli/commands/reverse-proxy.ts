@@ -2,17 +2,30 @@ import * as http from 'http';
 import { IncomingMessage, ServerResponse } from 'http'; // Use specific types
 import * as httpProxy from 'http-proxy';
 import { Command } from '../lib/Command';
+import { getAppContext } from '../lib/getAppContext';
 
-// Consider renaming the command class if it's just for this proxy
-export default class PipsProxyCommand extends Command {
+export default class ReverseProxyCommand extends Command {
   async run() {
-    const targetServer = 'http://localhost:3000'; // Your Fastify server
-    const proxyPort = 8080;
-    const proxyPathPrefix = '/pips'; // The prefix we want to listen for
+    this.context = await getAppContext(this.ui.createConsole(), false);
+    const config = this.context!.getConfig();
+    const targetServer = config.JNGL_BASE_INTERNAL_URL;
 
-    this.ui.console.info(`Setting up reverse proxy:`);
-    this.ui.console.info(`  Listening on: http://localhost:${proxyPort}`);
-    this.ui.console.info(`  Proxying path: ${proxyPathPrefix}/*`);
+    const answers = {
+      port: await this.ui.prompt('Port to listen to', {
+        default: '8080',
+        required: true,
+        validate: (val) => /\d/.test(val),
+      }),
+      path: await this.ui.prompt('The path to mounth onto', {
+        required: true,
+        default: '/joongle',
+        validate: (val) => val.startsWith('/'),
+      }),
+    };
+
+    this.ui.console.info('Setting up reverse proxy:');
+    this.ui.console.info(`  Listening on: http://localhost:${answers.port}`);
+    this.ui.console.info(`  Proxying path: ${answers.path}/*`);
     this.ui.console.info(`  Forwarding to: ${targetServer}`);
 
     const proxy = httpProxy.default.createProxyServer({
@@ -41,7 +54,7 @@ export default class PipsProxyCommand extends Command {
         // Store original URL for logging in case of error
         (req as any).originalUrl = req.url;
 
-        if (req.url && req.url.startsWith(proxyPathPrefix)) {
+        if (req.url && req.url.startsWith(answers.path)) {
           const originalUrl = req.url;
 
           // Rewrite the URL: Remove the prefix.
@@ -50,7 +63,7 @@ export default class PipsProxyCommand extends Command {
           // /pips/         -> /
           // /pips/users    -> /users
           // /pips/users?a=1 -> /users?a=1
-          req.url = req.url.substring(proxyPathPrefix.length);
+          req.url = req.url.substring(answers.path.length);
           // Ensure the rewritten path starts with a slash if it's not empty
           if (!req.url.startsWith('/')) {
             req.url = '/' + req.url;
@@ -70,9 +83,9 @@ export default class PipsProxyCommand extends Command {
     );
 
     // --- Start the Server and Handle Server Errors ---
-    server.listen(proxyPort, () => {
+    server.listen(answers.port, () => {
       this.ui.console.info(
-        `✅ Reverse proxy active on http://localhost:${proxyPort}`
+        `✅ Reverse proxy active on http://localhost:${answers.port}`
       );
     });
 
@@ -80,7 +93,7 @@ export default class PipsProxyCommand extends Command {
     server.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
         console.error(
-          `❌ Error: Port ${proxyPort} is already in use. Cannot start proxy.`
+          `❌ Error: Port ${answers.port} is already in use. Cannot start proxy.`
         );
       } else {
         console.error('❌ Server error:', err);
@@ -89,3 +102,6 @@ export default class PipsProxyCommand extends Command {
     });
   }
 }
+
+ReverseProxyCommand.description =
+  'Runs a local reverse proxy to test installing Joongle under a secondary path';

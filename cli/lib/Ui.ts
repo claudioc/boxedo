@@ -29,13 +29,18 @@ export class Ui {
 
   public async prompt(
     message: string,
-    options: { required: boolean; validate?: (val: string) => boolean } = {
+    options: {
+      default?: string;
+      required: boolean;
+      validate?: (val: string) => boolean;
+    } = {
       required: true,
     }
   ): Promise<string> {
     try {
       const answer = await input({
         message,
+        default: options.default,
         required: options.required,
         validate: options.validate,
       });
@@ -67,10 +72,12 @@ export class Ui {
         }
 
         // Insert a newline as the first argument if it's a string
-        if (args.length > 0 && typeof args[0] === 'string') {
-          args[0] = `\n${args[0]}`;
-        } else {
-          args.unshift('\n');
+        if (wasSpinning) {
+          if (args.length > 0 && typeof args[0] === 'string') {
+            args[0] = `\n${args[0]}`;
+          } else {
+            args.unshift('\n');
+          }
         }
 
         console[method](...args);

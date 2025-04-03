@@ -44,8 +44,10 @@ declare module 'fastify' {
     feedbackCode: number;
     cache: Cache;
     emailService: EmailService;
-    repoFactory: RepositoryFactory;
     context: AppContext;
+    // This object is also in the context but we keep a copy
+    // directly in app for convenience.
+    repoFactory: RepositoryFactory;
     urlService: UrlService;
   }
   interface FastifyRequest {
