@@ -1,5 +1,25 @@
 # Changelog
 
+## [minor] - 2025-04-03
+
+### Features
+
+- ability to mounth on subdirectory
+- adds the reverse proxy command
+- allow the base url to contain a path
+
+### Bug Fixes
+
+- fixes meta-click on the main nav menu
+- handle removing the landing page; closes #26
+- adds alt text to images; fixes #25
+
+### Other Changes
+
+- converts rs.path to base url
+- converts slugurl to base url
+- removes dotenv from tests and improve validation
+
 ## [minor] - 2025-03-28
 
 ### Features
