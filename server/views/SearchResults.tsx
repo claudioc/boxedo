@@ -12,6 +12,7 @@ export const SearchResults = ({ ctx, query, results }: SearchResultsProps) => {
   const hasResults = results && results.length > 0;
 
   return (
+    // We set the landing page so
     <Layout ctx={ctx} title="Search Results">
       <div class="prose">
         <h2>{i18n.t('SearchResults.title')}</h2>

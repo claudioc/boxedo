@@ -85,6 +85,7 @@ export const ReadPage = ({
       title={actualPage.pageTitle}
       page={showPage ? page : undefined}
       isLandingPage={isLandingPage}
+      withCreateButton
     >
       {content}
     </Layout>

@@ -26,7 +26,7 @@ export const Layout = ({
   context = 'none',
   isLandingPage = false,
   withEditor = false,
-  withCreateButton = true,
+  withCreateButton = false,
 }: LayoutProps) => {
   const { feedbackCode, i18n, settings, urlService } = ctx.app;
   const user = ctx.user;
@@ -41,6 +41,10 @@ export const Layout = ({
       ? '/pages/create'
       : `/pages/create?parentPageId=${page._id}`
   );
+
+  const createButtonLabel = isLandingPage
+    ? i18n.t('Navigation.createTopPage')
+    : i18n.t('Navigation.createNestedPage');
 
   const navLink = urlService.url(
     `/parts/nav/${page ? page._id : ''}?disabled=${context === 'editing page'}`
@@ -128,11 +132,10 @@ export const Layout = ({
                         class="j-btn"
                         data-ref="create-page-button"
                         href={createButtonLink}
+                        // This is only used by js to update the button after the ajax call
                         data-labelNested={i18n.t('Navigation.createNestedPage')}
                       >
-                        {isLandingPage
-                          ? i18n.t('Navigation.createTopPage')
-                          : i18n.t('Navigation.createNestedPage')}
+                        {createButtonLabel}
                       </a>
                     </div>
                   )}
