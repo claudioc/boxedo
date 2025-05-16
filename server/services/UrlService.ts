@@ -21,7 +21,7 @@ export class UrlService {
   url(path: string, includeHostname = false) {
     return this.urlify(
       path,
-      this.config.JNGL_BASE_EXTERNAL_URL,
+      this.config.BXD_BASE_EXTERNAL_URL,
       includeHostname
     );
   }
@@ -97,7 +97,7 @@ export class UrlService {
     return normalized;
   }
 
-  slugUrl(slug: string, baseUrl = this.config.JNGL_BASE_EXTERNAL_URL): string {
+  slugUrl(slug: string, baseUrl = this.config.BXD_BASE_EXTERNAL_URL): string {
     return this.urlify(
       slug === '/' || slug === '' ? '/' : `/view/${slug}`,
       baseUrl

@@ -8,7 +8,7 @@ export default class ReverseProxyCommand extends Command {
   async run() {
     this.context = await getAppContext(this.ui.createConsole(), false);
     const config = this.context!.getConfig();
-    const targetServer = config.JNGL_BASE_INTERNAL_URL;
+    const targetServer = config.BXD_BASE_INTERNAL_URL;
 
     const answers = {
       port: await this.ui.prompt('Port to listen to', {
@@ -16,9 +16,9 @@ export default class ReverseProxyCommand extends Command {
         required: true,
         validate: (val) => /\d/.test(val),
       }),
-      path: await this.ui.prompt('The path to mounth onto', {
+      path: await this.ui.prompt('The path to mount onto', {
         required: true,
-        default: '/joongle',
+        default: '/boxedo',
         validate: (val) => val.startsWith('/'),
       }),
     };
@@ -104,4 +104,4 @@ export default class ReverseProxyCommand extends Command {
 }
 
 ReverseProxyCommand.description =
-  'Runs a local reverse proxy to test installing Joongle under a secondary path';
+  'Runs a local reverse proxy to test installing Boxedo under a secondary path';

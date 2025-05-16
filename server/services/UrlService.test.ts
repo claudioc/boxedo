@@ -3,7 +3,7 @@ import type { ConfigEnv } from '~/../types';
 import { UrlService } from './UrlService';
 
 UrlService.create({
-  JNGL_BASE_EXTERNAL_URL: 'http://go.com',
+  BXD_BASE_EXTERNAL_URL: 'http://go.com',
 } as ConfigEnv);
 
 const urlService = UrlService.getInstance();

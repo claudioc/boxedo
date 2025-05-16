@@ -17,7 +17,7 @@ export const createRequireAuth = (app: FastifyInstance) => {
 
     req.user = null;
 
-    if (app.is('test') || config.JNGL_AUTHENTICATION_TYPE === 'none') {
+    if (app.is('test') || config.BXD_AUTHENTICATION_TYPE === 'none') {
       const prefs = (
         await preferencesRepo.getPreferencesByUserId(ANONYMOUS_AUTHOR_ID)
       ).match(

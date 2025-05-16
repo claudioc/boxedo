@@ -28,9 +28,9 @@ export class SettingsRepository extends BaseRepository {
           _id: 'settings',
           type: 'settings',
           landingPageId: null,
-          siteTitle: this.config ? (this.config.JNGL_SETTINGS_TITLE ?? '') : '',
+          siteTitle: this.config ? (this.config.BXD_SETTINGS_TITLE ?? '') : '',
           siteDescription: this.config
-            ? (this.config.JNGL_SETTINGS_DESCRIPTION ?? '')
+            ? (this.config.BXD_SETTINGS_DESCRIPTION ?? '')
             : '',
         };
 

@@ -22,7 +22,7 @@ export class AuthorizationService {
     }
 
     // Decision: If auth is disabled, grant all capabilities
-    if (!user && process.env.JNGL_AUTHENTICATION_TYPE === 'none') {
+    if (!user && process.env.BXD_AUTHENTICATION_TYPE === 'none') {
       return true;
     }
 

@@ -3,9 +3,9 @@
 npm run build
 
 # Check if the app is already running in PM2
-if pm2 list | grep -q "joongle"; then
+if pm2 list | grep -q "boxedo"; then
     echo "Application already exists in PM2, restarting..."
-    pm2 restart joongle
+    pm2 restart boxedo
     exit 0
 fi
 
@@ -34,7 +34,7 @@ fi
 
 # Start the Node.js application with PM2
 echo "Starting Node.js application with PM2..."
-if ! pm2 start npm --name "joongle" -- start; then
+if ! pm2 start npm --name "boxedo" -- start; then
     echo "Failed to start application with PM2"
     exit 1
 fi

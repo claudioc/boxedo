@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { bootstrap } from './lib/bootstrap';
 
-process.title = 'joongle';
+process.title = 'boxedo';
 
 const argv = process.argv.slice(2);
 
 if (argv.length === 0) {
-  console.error('No command specified. Run `joongle help` for usage');
+  console.error('No command specified. Run `boxedo help` for usage');
   process.exit(1);
 }
 

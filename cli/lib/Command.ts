@@ -3,10 +3,10 @@ import type { Argv as Yargs, Options as YargsOptions } from 'yargs';
 import { AppContext } from '~/lib/AppContext';
 import { Ui } from './Ui';
 
-const debug = createDebug('joongle-cli:bootstrap');
+const debug = createDebug('boxedo-cli:bootstrap');
 
 /**
- * Represents a command of the `joongle` CLI.
+ * Represents a command of the `boxedo` CLI.
  */
 export abstract class Command {
   /**

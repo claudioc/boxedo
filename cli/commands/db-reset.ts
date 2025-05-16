@@ -24,14 +24,14 @@ export default class DbResetCommand extends Command {
     const config = this.context.getConfig();
     if (
       !(await this.ui.confirm(
-        `Are you sure you want to reset the ${config.JNGL_DB_BACKEND} database? This will destroy all data in the current database!`
+        `Are you sure you want to reset the ${config.BXD_DB_BACKEND} database? This will destroy all data in the current database!`
       ))
     ) {
       this.ui.console.info('Aborted.');
       process.exit(0);
     }
 
-    switch (config.JNGL_DB_BACKEND) {
+    switch (config.BXD_DB_BACKEND) {
       case 'local':
         if (await this.destroyLocalDatabase()) {
           this.ui.console.info('Success.');
@@ -46,7 +46,7 @@ export default class DbResetCommand extends Command {
 
       default:
         this.ui.console.info(
-          `The backend "${config.JNGL_DB_BACKEND}" cannot be reset.`
+          `The backend "${config.BXD_DB_BACKEND}" cannot be reset.`
         );
         process.exit(1);
     }
@@ -55,11 +55,11 @@ export default class DbResetCommand extends Command {
   async destroyLocalDatabase(): Promise<boolean> {
     const config = this.context!.getConfig();
 
-    const dbLocalPath = config.JNGL_DB_LOCAL_PATH;
+    const dbLocalPath = config.BXD_DB_LOCAL_PATH;
 
     if (!dbLocalPath || dbLocalPath === '/' || dbLocalPath === '~') {
       this.ui.console.error(
-        `❌ Invalid JNGL_DB_LOCAL_PATH (${dbLocalPath}). Cannot reset database.`
+        `❌ Invalid BXD_DB_LOCAL_PATH (${dbLocalPath}). Cannot reset database.`
       );
       return false;
     }
@@ -71,9 +71,9 @@ export default class DbResetCommand extends Command {
       return false;
     }
 
-    if (!fs.existsSync(path.join(dbLocalPath, `${config.JNGL_DB_NAME}.db`))) {
+    if (!fs.existsSync(path.join(dbLocalPath, `${config.BXD_DB_NAME}.db`))) {
       this.ui.console.error(
-        `⚠️ Database file "${config.JNGL_DB_NAME}.db" does not exist in "${dbLocalPath}". Nothing to reset.`
+        `⚠️ Database file "${config.BXD_DB_NAME}.db" does not exist in "${dbLocalPath}". Nothing to reset.`
       );
       return false;
     }
@@ -139,8 +139,8 @@ Please make sure the CouchDB container is running before trying to reset the dat
       return false;
     }
 
-    if (!config.JNGL_DB_REMOTE_URL) {
-      this.ui.console.error('❌ JNGL_DB_REMOTE_URL not found in .env file');
+    if (!config.BXD_DB_REMOTE_URL) {
+      this.ui.console.error('❌ BXD_DB_REMOTE_URL not found in .env file');
       return false;
     }
 
@@ -217,7 +217,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
     const spinner = this.ui
       .spinner('Waiting for CouchDB to be available…')
       .start();
-    const serviceReady = await waitForService(config.JNGL_DB_REMOTE_URL);
+    const serviceReady = await waitForService(config.BXD_DB_REMOTE_URL);
     if (!serviceReady) {
       spinner.stop();
       this.ui.console.error('❌ Timeout waiting for CouchDB to be ready');
@@ -227,7 +227,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
     // Create _users database
     this.ui.console.info('Creating _users database…');
 
-    const url = `${config.JNGL_DB_REMOTE_URL}/_users`;
+    const url = `${config.BXD_DB_REMOTE_URL}/_users`;
 
     try {
       await fetch(url, {
@@ -236,7 +236,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
           Authorization:
             'Basic ' +
             Buffer.from(
-              `${config.JNGL_DB_REMOTE_USER}:${config.JNGL_DB_REMOTE_PASSWORD}`
+              `${config.BXD_DB_REMOTE_USER}:${config.BXD_DB_REMOTE_PASSWORD}`
             ).toString('base64'),
         },
       });

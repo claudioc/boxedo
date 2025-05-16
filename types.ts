@@ -37,7 +37,7 @@ export const languageLocaleMap: Record<SupportedLocales, string> = {
 
 export const dbBackends = ['local', 'remote', 'memory'] as const;
 export type DbBackend = (typeof dbBackends)[number];
-export const DEFAULT_JNGL_DB_BACKEND: DbBackend = 'local';
+export const DEFAULT_BXD_DB_BACKEND: DbBackend = 'local';
 
 export type Db = PouchDB.Database<DocumentModel>;
 
@@ -202,11 +202,11 @@ export const ConfigEnvSchema = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    JNGL_BASE_EXTERNAL_URL: {
+    BXD_BASE_EXTERNAL_URL: {
       type: 'string',
       default: 'http://localhost:3000',
     },
-    JNGL_BASE_INTERNAL_URL: {
+    BXD_BASE_INTERNAL_URL: {
       type: 'string',
       default: 'http://localhost:3000',
     },
@@ -215,60 +215,60 @@ export const ConfigEnvSchema = {
       default: 'development' satisfies NodeEnv,
       enum: nodeEnv,
     },
-    JNGL_DB_BACKEND: {
+    BXD_DB_BACKEND: {
       type: 'string',
       enum: dbBackends,
-      default: DEFAULT_JNGL_DB_BACKEND satisfies DbBackend,
+      default: DEFAULT_BXD_DB_BACKEND satisfies DbBackend,
     },
-    JNGL_DB_NAME: {
+    BXD_DB_NAME: {
       type: 'string',
-      default: 'joongle',
+      default: 'boxedo',
     },
-    JNGL_DB_REMOTE_URL: {
+    BXD_DB_REMOTE_URL: {
       type: 'string',
       default: 'http://localhost:5984',
     },
-    JNGL_DB_LOCAL_PATH: {
+    BXD_DB_LOCAL_PATH: {
       type: 'string',
       default: '.',
     },
-    JNGL_DB_REMOTE_USER: { type: 'string', default: '' },
-    JNGL_DB_REMOTE_PASSWORD: { type: 'string', default: '' },
-    JNGL_LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
-    JNGL_SETTINGS_LANGUAGE: {
+    BXD_DB_REMOTE_USER: { type: 'string', default: '' },
+    BXD_DB_REMOTE_PASSWORD: { type: 'string', default: '' },
+    BXD_LIVERELOAD_URL: { type: 'string', default: 'http://localhost:8007' },
+    BXD_SETTINGS_LANGUAGE: {
       type: 'string',
       default: DEFAULT_SUPPORTED_LOCALE satisfies SupportedLocales,
     },
-    JNGL_SETTINGS_DESCRIPTION: {
+    BXD_SETTINGS_DESCRIPTION: {
       type: 'string',
       default: 'Content management made easy',
     },
-    JNGL_SETTINGS_TITLE: { type: 'string', default: 'Joongle' },
+    BXD_SETTINGS_TITLE: { type: 'string', default: 'Boxedo' },
     SETTINGS_TEXT_SIZE: {
       type: 'string',
       enum: textSizes,
       default: DEFAULT_TEXT_SIZE satisfies TextSize,
     },
-    JNGL_AUTHENTICATION_TYPE: {
+    BXD_AUTHENTICATION_TYPE: {
       type: 'string',
       enum: authenticationTypes,
       default: 'none' satisfies AuthenticationType,
     },
-    JNGL_EMAIL_PROVIDER: {
+    BXD_EMAIL_PROVIDER: {
       type: 'string',
       enum: emailProviderNames,
       default: 'dummy' satisfies EmailProviderName,
     },
-    JNGL_EMAIL_API_KEY: { type: 'string' },
-    JNGL_EMAIL_DOMAIN: { type: 'string' },
+    BXD_EMAIL_API_KEY: { type: 'string' },
+    BXD_EMAIL_DOMAIN: { type: 'string' },
     EMAIL_HOST: { type: 'string' },
     EMAIL_PORT: { type: 'integer' },
     EMAIL_FROM_EMAIL: { type: 'string' },
-    JNGL_TITLE_PATTERN: {
+    BXD_TITLE_PATTERN: {
       type: 'string',
       default: '{siteTitle} - {pageTitle}',
     },
-    JNGL_THEME: {
+    BXD_THEME: {
       type: 'string',
       default: 'dracula',
     },

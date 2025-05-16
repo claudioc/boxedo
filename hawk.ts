@@ -20,12 +20,12 @@ type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 const sseClients: SseClient[] = [];
 
-const { JNGL_LIVERELOAD_URL, JNGL_BASE_INTERNAL_URL, JNGL_BASE_EXTERNAL_URL } =
+const { BXD_LIVERELOAD_URL, BXD_BASE_INTERNAL_URL, BXD_BASE_EXTERNAL_URL } =
   process.env;
-const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(JNGL_LIVERELOAD_URL);
+const liveReloadBaseUrl: UrlParts | null = parseBaseUrl(BXD_LIVERELOAD_URL);
 const hasLiveReload = liveReloadBaseUrl !== null;
-const apiServerBaseUrl: UrlParts | null = parseBaseUrl(JNGL_BASE_INTERNAL_URL);
-const baseExternalUrl: UrlParts | null = parseBaseUrl(JNGL_BASE_EXTERNAL_URL);
+const apiServerBaseUrl: UrlParts | null = parseBaseUrl(BXD_BASE_INTERNAL_URL);
+const baseExternalUrl: UrlParts | null = parseBaseUrl(BXD_BASE_EXTERNAL_URL);
 
 let apiServer: ChildProcess | null = null;
 let sseServer: Server | null = null;
@@ -333,10 +333,10 @@ const buildClient: TaskFn = async (_) => {
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',
     define: {
-      JNGL_LIVERELOAD_URL: JSON.stringify(
-        JNGL_LIVERELOAD_URL ? `${JNGL_LIVERELOAD_URL}/updates` : ''
+      BXD_LIVERELOAD_URL: JSON.stringify(
+        BXD_LIVERELOAD_URL ? `${BXD_LIVERELOAD_URL}/updates` : ''
       ),
-      JNGL_BASE_PATH: JSON.stringify(baseExternalUrl?.pathname ?? ''),
+      BXD_BASE_PATH: JSON.stringify(baseExternalUrl?.pathname ?? ''),
     },
     platform: 'browser',
     entryNames: '[dir]/[name]-[hash]',
@@ -420,7 +420,7 @@ const startSseServer: TaskFn = async () => {
   });
 
   sseServer.listen(liveReloadBaseUrl.port, liveReloadBaseUrl.hostname, () => {
-    console.log(`[Hawk] SSE server started on ${JNGL_LIVERELOAD_URL}`);
+    console.log(`[Hawk] SSE server started on ${BXD_LIVERELOAD_URL}`);
   });
 
   return true;

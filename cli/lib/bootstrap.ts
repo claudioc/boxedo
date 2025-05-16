@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { Argv as Yargs } from 'yargs';
 import yargs from 'yargs';
 
-const debug = createDebug('joongle-cli:bootstrap');
+const debug = createDebug('boxedo-cli:bootstrap');
 
 // Ensure if any promises aren't handled correctly then they get logged
 process.on('unhandledRejection', (reason, promise) => {
@@ -59,7 +59,7 @@ export const bootstrap = {
   },
 
   /**
-   * Kicks off the Joongle CLI.
+   * Kicks off the Boxedo CLI.
    */
   async run() {
     const argv = process.argv.slice(2);
@@ -67,9 +67,9 @@ export const bootstrap = {
 
     let argParser = yargs();
     argParser.usage(`
-Usage: joongle <command> [options]
+Usage: boxedo <command> [options]
 
-This is Joongle CLI.`);
+This is Boxedo CLI.`);
 
     const commands = bootstrap.discoverCommands({}, './cli');
 
@@ -94,13 +94,13 @@ This is Joongle CLI.`);
     } else {
       // Command not found :( Error and exit
       console.error(
-        `Unrecognized command: '${firstArg}'. Run \`joongle help\` for usage.`
+        `Unrecognized command: '${firstArg}'. Run \`boxedo help\` for usage.`
       );
       process.exit(1);
     }
 
     argParser
-      .scriptName('joongle')
+      .scriptName('boxedo')
       .wrap(Math.min(150, argParser.terminalWidth()))
       .epilogue('For more information, see our docs.')
       .group('help', 'Global Options:')

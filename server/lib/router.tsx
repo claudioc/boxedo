@@ -125,7 +125,7 @@ const router = async (app: FastifyInstance) => {
   app.get('/auth/login', async (req, rep) => {
     const rs = redirectService(app, rep);
 
-    if (app.config.JNGL_AUTHENTICATION_TYPE === 'none') {
+    if (app.config.BXD_AUTHENTICATION_TYPE === 'none') {
       // Redirecting to the home page may lead to an infinite loop
       rep
         .code(404)

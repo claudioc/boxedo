@@ -11,9 +11,9 @@ import {
 export default class DbBackupCommand extends Command {
   async run() {
     const config = loadConfig();
-    if (config.JNGL_DB_BACKEND !== 'remote') {
+    if (config.BXD_DB_BACKEND !== 'remote') {
       this.ui.console.info(
-        `"${config.JNGL_DB_BACKEND}" database cannot be backed up using the CLI.`
+        `"${config.BXD_DB_BACKEND}" database cannot be backed up using the CLI.`
       );
       return;
     }
@@ -24,7 +24,7 @@ export default class DbBackupCommand extends Command {
 This command only makes sense if you are using a CouchDb database running in a local Docker container.
 
 If your CouchDb database is not running in a Docker container, you have to backup it manually.
-If you are not using a CouchDb database (JNGL_DB_BACKEND is 'local'), then you just have to backup the database directory.
+If you are not using a CouchDb database (BXD_DB_BACKEND is 'local'), then you just have to backup the database directory.
 
 Please double check the project's README.md and https://docs.docker.com/get-docker/
 `);

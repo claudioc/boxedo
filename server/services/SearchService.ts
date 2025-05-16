@@ -55,7 +55,7 @@ export class SearchService {
 
     try {
       this.db = new Database(
-        `${this.config.JNGL_DB_LOCAL_PATH ?? '.'}/fts_index.db`,
+        `${this.config.BXD_DB_LOCAL_PATH ?? '.'}/fts_index.db`,
         {
           // verbose: console.log // Uncomment for SQL debugging
         }
@@ -94,7 +94,7 @@ export class SearchService {
     if (!SearchService.instance) {
       try {
         const pathResult = await ensurePathExists(
-          config.JNGL_DB_LOCAL_PATH,
+          config.BXD_DB_LOCAL_PATH,
           'database directory'
         );
         if (pathResult.isErr()) {

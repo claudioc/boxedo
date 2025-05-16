@@ -227,7 +227,7 @@ const addImageWithDialog = () => {
     const formData = new FormData();
     formData.append('image', file);
 
-    const response = await fetch(joinPaths(JNGL_BASE_PATH, '/uploads'), {
+    const response = await fetch(joinPaths(BXD_BASE_PATH, '/uploads'), {
       method: 'POST',
       body: formData,
     });

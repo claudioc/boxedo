@@ -83,7 +83,7 @@ export const getDefaultLanguage = (
     return DEFAULT_SUPPORTED_LOCALE;
   }
 
-  const candidate = config.JNGL_SETTINGS_LANGUAGE;
+  const candidate = config.BXD_SETTINGS_LANGUAGE;
 
   return ensureValidLanguage(candidate);
 };

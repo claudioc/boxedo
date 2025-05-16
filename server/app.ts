@@ -3,7 +3,7 @@ import { parseBaseUrl } from './lib/helpers';
 
 const app = bootstrap();
 
-const baseUrl = parseBaseUrl(app.config.JNGL_BASE_INTERNAL_URL);
+const baseUrl = parseBaseUrl(app.config.BXD_BASE_INTERNAL_URL);
 
 try {
   await app.listen({

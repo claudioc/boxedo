@@ -47,7 +47,7 @@ export const Layout = ({
   );
 
   return (
-    <html lang="en" data-theme={ctx.app.config.JNGL_THEME}>
+    <html lang="en" data-theme={ctx.app.config.BXD_THEME}>
       <Head title={title} withEditor={withEditor} withVendorScripts ctx={ctx} />
       <body x-data="" {...onKeypress}>
         <script src={urlService.url(getBundleFilename('app'))} />

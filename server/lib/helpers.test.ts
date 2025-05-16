@@ -199,7 +199,7 @@ describe('getDefaultLanguage', () => {
     expect(result).toBe('en');
   });
 
-  it('should return "en" when config has no JNGL_SETTINGS_LANGUAGE', () => {
+  it('should return "en" when config has no BXD_SETTINGS_LANGUAGE', () => {
     const config = {} as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
@@ -207,7 +207,7 @@ describe('getDefaultLanguage', () => {
 
   it('should return the configured language when it is supported', () => {
     const config = {
-      JNGL_SETTINGS_LANGUAGE: 'it',
+      BXD_SETTINGS_LANGUAGE: 'it',
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('it');
@@ -215,15 +215,15 @@ describe('getDefaultLanguage', () => {
 
   it('should return "en" when configured language is not supported', () => {
     const config = {
-      JNGL_SETTINGS_LANGUAGE: 'bazooka', // assuming 'fr' is not in supportedLocales
+      BXD_SETTINGS_LANGUAGE: 'bazooka', // assuming 'fr' is not in supportedLocales
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
   });
 
-  it('should return "en" when JNGL_SETTINGS_LANGUAGE is empty string', () => {
+  it('should return "en" when BXD_SETTINGS_LANGUAGE is empty string', () => {
     const config = {
-      JNGL_SETTINGS_LANGUAGE: '',
+      BXD_SETTINGS_LANGUAGE: '',
     } as ConfigEnv;
     const result = getDefaultLanguage(config);
     expect(result).toBe('en');
@@ -522,14 +522,14 @@ describe('highlightPhrase', () => {
 describe('loadConfig', () => {
   it('should load and validate a passed config', () => {
     const source = {
-      JNGL_AUTHENTICATION_TYPE: 'none',
-      JNGL_DB_BACKEND: 'remote',
+      BXD_AUTHENTICATION_TYPE: 'none',
+      BXD_DB_BACKEND: 'remote',
       UNKNOWN_KEY: 'value',
     };
     const config = loadConfig(source);
-    expect(config.JNGL_AUTHENTICATION_TYPE).toBe('none');
-    expect(config.JNGL_DB_BACKEND).toBe('remote');
-    expect(config.JNGL_EMAIL_PROVIDER).toBe('dummy');
+    expect(config.BXD_AUTHENTICATION_TYPE).toBe('none');
+    expect(config.BXD_DB_BACKEND).toBe('remote');
+    expect(config.BXD_EMAIL_PROVIDER).toBe('dummy');
     // @ts-ignore
     expect(config.UNKNOWN_KEY).toBe(undefined);
   });

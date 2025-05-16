@@ -112,16 +112,16 @@ if (configErrors.length > 0) {
 const emailService = EmailService.getInstance();
 
 await emailService.initialize({
-  type: app.config.JNGL_EMAIL_PROVIDER ?? '',
-  apiKey: app.config.JNGL_EMAIL_API_KEY ?? '',
-  domain: app.config.JNGL_EMAIL_DOMAIN ?? '',
+  type: app.config.BXD_EMAIL_PROVIDER ?? '',
+  apiKey: app.config.BXD_EMAIL_API_KEY ?? '',
+  domain: app.config.BXD_EMAIL_DOMAIN ?? '',
   host: app.config.EMAIL_HOST ?? '',
 });
 
 app.decorate('emailService', emailService);
 
 const pathResult = await ensurePathExists(
-  app.config.JNGL_DB_LOCAL_PATH,
+  app.config.BXD_DB_LOCAL_PATH,
   'database directory'
 );
 if (pathResult.isErr()) {

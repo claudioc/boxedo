@@ -110,7 +110,7 @@ describe('Settings', () => {
       _id: 'settings',
       type: 'settings',
       landingPageId: pageId,
-      siteTitle: 'Joongle',
+      siteTitle: 'Boxedo',
       siteDescription: '',
     };
 

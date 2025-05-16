@@ -2,8 +2,8 @@ import Alpine from 'alpinejs';
 
 Alpine.start();
 
-if (JNGL_LIVERELOAD_URL) {
-  new EventSource(JNGL_LIVERELOAD_URL).addEventListener('message', () =>
+if (BXD_LIVERELOAD_URL) {
+  new EventSource(BXD_LIVERELOAD_URL).addEventListener('message', () =>
     location.reload()
   );
 }

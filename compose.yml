@@ -1,6 +1,6 @@
 services:
   couchdb:
-    container_name: couchdb-joongle
+    container_name: couchdb-${BXD_DB_NAME:-boxedo}
     image: couchdb:latest
     # Changing the volume name has impact on the CLI commands
     volumes:
@@ -9,7 +9,7 @@ services:
     ports:
       - '5984:5984'
     environment:
-      - COUCHDB_USER=${JNGL_DB_REMOTE_USER}
-      - COUCHDB_PASSWORD=${JNGL_DB_REMOTE_PASSWORD}
+      - COUCHDB_USER=${BXD_DB_REMOTE_USER}
+      - COUCHDB_PASSWORD=${BXD_DB_REMOTE_PASSWORD}
 volumes:
   couchdb_data:

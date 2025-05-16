@@ -27,4 +27,4 @@ export default class UserListCommand extends Command {
   }
 }
 
-UserListCommand.description = 'List the users allowed to login to Joongle';
+UserListCommand.description = 'List the users allowed to login to Boxedo';

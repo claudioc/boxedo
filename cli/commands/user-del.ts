@@ -54,4 +54,4 @@ export default class UserDelCommand extends Command {
   }
 }
 
-UserDelCommand.description = 'Delete a user from Joongle database';
+UserDelCommand.description = 'Delete a user from Boxedo database';

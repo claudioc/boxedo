@@ -75,4 +75,4 @@ export default class UserAddCommand extends Command {
   }
 }
 
-UserAddCommand.description = 'Add a user to the Joongle database';
+UserAddCommand.description = 'Add a user to the Boxedo database';

@@ -8,7 +8,7 @@
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
-    "ignore": ["dist", "assets", "cli/joongle"]
+    "ignore": ["dist", "assets", "cli/boxedo"]
   },
   "json": {
     "formatter": {

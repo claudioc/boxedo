@@ -219,7 +219,7 @@ ${JSON.stringify(metadata, null, 2)}
   async exportPages(): Promise<boolean> {
     const settings = await this.settingsRepo.getSettings();
     if (settings.isErr()) {
-      this.logger.error('Cannot read Joongle settings');
+      this.logger.error('Cannot read Boxedo`s settings');
       return false;
     }
 

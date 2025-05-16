@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 // This directly referenced in the docker compose file
-export const DOCKER_IMAGE_NAME = 'couchdb-joongle';
+export const DOCKER_IMAGE_NAME = `couchdb-${process.env.BXD_DB_NAME}`;
 
 export const isDockerAvailable = (): boolean => {
   try {

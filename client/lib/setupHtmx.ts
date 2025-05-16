@@ -21,7 +21,7 @@ const updateCreateButton = (pageId = '') => {
   if (createButton) {
     createButton.setAttribute(
       'href',
-      joinPaths(JNGL_BASE_PATH, `/pages/create?parentPageId=${pageId}`)
+      joinPaths(BXD_BASE_PATH, `/pages/create?parentPageId=${pageId}`)
     );
     // As we are moving away from the landing page, the button label must be updated accordingly
     createButton.textContent = createButton.dataset.labelnested ?? '';
