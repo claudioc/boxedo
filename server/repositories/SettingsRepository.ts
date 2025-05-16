@@ -40,7 +40,7 @@ export class SettingsRepository extends BaseRepository {
         } catch {}
       }
 
-      this.logger.error('Error getting settings', error);
+      this.logger.error(`Error getting settings: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -54,7 +54,7 @@ export class SettingsRepository extends BaseRepository {
       await this.db.put(settings);
       return ok();
     } catch (error) {
-      this.logger.error('Error updating settings:', error);
+      this.logger.error(`Error updating settings: ${error}`);
       return err(Feedbacks.E_UPDATING_SETTINGS);
     }
   }

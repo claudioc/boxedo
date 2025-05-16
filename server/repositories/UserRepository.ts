@@ -45,7 +45,7 @@ export class UserRepository extends BaseRepository {
       }
       return ok(user);
     } catch (error) {
-      this.logger.error('Error getting user by email:', error);
+      this.logger.error(`Error getting user by email: ${error}`);
       return ok(null);
     }
   }
@@ -60,7 +60,7 @@ export class UserRepository extends BaseRepository {
 
       return ok(result.docs);
     } catch (error) {
-      this.logger.error('Error getting all users:', error);
+      this.logger.error(`Error getting all users: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -70,7 +70,7 @@ export class UserRepository extends BaseRepository {
       await this.db.put(user);
       return ok();
     } catch (error) {
-      this.logger.error('Error inserting a user', error);
+      this.logger.error(`Error inserting a user: ${error}`);
       return err(Feedbacks.E_CREATING_USER);
     }
   }
@@ -80,7 +80,7 @@ export class UserRepository extends BaseRepository {
       await this.db.put(user);
       return ok();
     } catch (error) {
-      this.logger.error('Error updating a user', error);
+      this.logger.error(`Error updating a user: ${error}`);
       return err(Feedbacks.E_UPDATING_USER);
     }
   }
@@ -97,7 +97,7 @@ export class UserRepository extends BaseRepository {
     } catch (error) {
       // If user doesn't exist (404) just ignore
       if ((error as PouchDB.Core.Error).status !== 404) {
-        this.logger.error('Error deleting a user', error);
+        this.logger.error(`Error deleting a user: ${error}`);
         return err(Feedbacks.E_DELETING_USER);
       }
       return ok();

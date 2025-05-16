@@ -51,6 +51,7 @@
       "arrowParentheses": "always",
       "bracketSpacing": true,
       "bracketSameLine": false,
+      "indentStyle": "space",
       "quoteStyle": "single",
       "attributePosition": "auto"
     }

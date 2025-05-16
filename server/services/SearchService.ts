@@ -81,7 +81,7 @@ export class SearchService {
         this.setupChangeListener();
       }
     } catch (err) {
-      logger.error('Failed to initialize SQLite database:', err);
+      logger.error(`Failed to initialize SQLite database: ${err}`);
       throw err;
     }
   }
@@ -103,7 +103,7 @@ export class SearchService {
         SearchService.instance = new SearchService(repoFactory, config, logger);
         await SearchService.instance.indexBuilt;
       } catch (error) {
-        logger.error('Failed to initialize search service:', error);
+        logger.error(`Failed to initialize search service: ${error}`);
         return err(error as Error);
       }
     }
@@ -139,12 +139,12 @@ export class SearchService {
               await this.updateDocument(change.doc);
             }
           } catch (error) {
-            this.logger.error('Failed to update search index:', error);
+            this.logger.error(`Failed to update search index: ${error}`);
           }
         }
       })
       .on('error', (err) => {
-        this.logger.error('Error in changes feed:', err);
+        this.logger.error(`Error in changes feed: ${err}`);
         // Maybe try to reconnect after a delay
         setTimeout(() => this.setupChangeListener(), 5000);
       });
@@ -230,7 +230,7 @@ export class SearchService {
       );
       this.resolveIndexBuilt();
     } catch (err) {
-      this.logger.error('Failed to build index:', err);
+      this.logger.error(`Failed to build index: ${err}`);
       throw err;
     }
   }
@@ -272,8 +272,7 @@ export class SearchService {
           (page) => page,
           (feedback) => {
             this.logger.error(
-              'Error getting a page while searching:',
-              feedback.message
+              `Error getting a page while searching: ${feedback.message}`
             );
             return null;
           }
@@ -291,7 +290,7 @@ export class SearchService {
 
       return ok(searchResults);
     } catch (error) {
-      this.logger.error('Search error:', error);
+      this.logger.error(`Search error: ${error}`);
       return ok([]);
     }
   }
@@ -322,7 +321,7 @@ export class SearchService {
           }))
       );
     } catch (error) {
-      this.logger.error('Title search error:', error);
+      this.logger.error(`Title search error: ${error}`);
       return ok([]);
     }
   }

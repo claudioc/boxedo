@@ -188,7 +188,7 @@ ${JSON.stringify(metadata, null, 2)}
         const urlPattern = new RegExp(`/uploads/${fileId}/[^"'\\s]+`, 'g');
         processedContent = processedContent.replace(urlPattern, localPath);
       } catch (error) {
-        this.logger.error(`Error processing file ${fileId}:`, error);
+        this.logger.error(`Error processing file ${fileId}: ${error}`);
       }
     }
 
@@ -259,7 +259,7 @@ ${JSON.stringify(metadata, null, 2)}
       this.logger.info('Export completed successfully!');
       return true;
     } catch (error) {
-      this.logger.error('Export failed:', error);
+      this.logger.error(`Export failed: ${error}`);
       return false;
     }
   }

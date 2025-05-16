@@ -61,7 +61,7 @@ export class PreferencesRepository extends BaseRepository {
         } catch {}
       }
 
-      this.logger.error('Error getting the user preferences:', error);
+      this.logger.error(`Error getting the user preferences: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -78,7 +78,7 @@ export class PreferencesRepository extends BaseRepository {
       await this.db.put(preferences);
       return ok();
     } catch (error) {
-      this.logger.error('Error updating user preferences:', error);
+      this.logger.error(`Error updating user preferences: ${error}`);
       return err(Feedbacks.E_UPDATING_PREFERENCES);
     }
   }

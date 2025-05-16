@@ -36,7 +36,7 @@ export const LoginPage = ({ ctx, token }: LoginPageProps) => {
               <label class="input">
                 {i18n.t('common.email')}
                 <input
-                  autofocus="true"
+                  autofocus
                   type="email"
                   class="grow"
                   name="email"

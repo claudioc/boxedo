@@ -51,7 +51,7 @@ export class PageRepository extends BaseRepository {
       const result = await this.db.query('pages/count', { reduce: true });
       return ok(result.rows[0]?.value || 0);
     } catch (error) {
-      this.logger.error('Error counting pages:', error);
+      this.logger.error(`Error counting pages: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -68,7 +68,7 @@ export class PageRepository extends BaseRepository {
         return ok(null);
       }
 
-      this.logger.error('Error getting a page by id:', error);
+      this.logger.error(`Error getting a page by id: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -95,7 +95,7 @@ export class PageRepository extends BaseRepository {
         return ok(null);
       }
 
-      this.logger.error('Error getting a page by slug:', error);
+      this.logger.error(`Error getting a page by slug: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -124,7 +124,7 @@ export class PageRepository extends BaseRepository {
         return ok(null);
       }
 
-      this.logger.error('Error looking up a page by slug:', error);
+      this.logger.error(`Error looking up a page by slug: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -158,7 +158,7 @@ export class PageRepository extends BaseRepository {
 
       return ok(slug);
     } catch (error) {
-      this.logger.error('Error generating unique slug:', error);
+      this.logger.error(`Error generating unique slug: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -204,7 +204,7 @@ export class PageRepository extends BaseRepository {
       const nextPosition = pages[targetIndex].position;
       return ok((prevPosition + nextPosition) / 2);
     } catch (error) {
-      this.logger.error('Error finding insert position:', error);
+      this.logger.error(`Error finding insert position: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -218,7 +218,7 @@ export class PageRepository extends BaseRepository {
       await this.db.put(page);
       return ok();
     } catch (error) {
-      this.logger.error('Error inserting a page', error);
+      this.logger.error(`Error inserting a page: ${error}`);
       return err(Feedbacks.E_CREATING_PAGE);
     }
   }
@@ -236,7 +236,7 @@ export class PageRepository extends BaseRepository {
 
       return ok(result.docs.map((doc) => ensurePageDefaults(doc)));
     } catch (error) {
-      this.logger.error('Error getting top level pages:', error);
+      this.logger.error(`Error getting top level pages: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -292,7 +292,7 @@ export class PageRepository extends BaseRepository {
       // Build the tree starting from the requested parent
       return ok(buildTree(parentId));
     } catch (error) {
-      this.logger.error('Error building menu tree:', error);
+      this.logger.error(`Error building menu tree: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -318,7 +318,7 @@ export class PageRepository extends BaseRepository {
       await this.db.put(updatedPage);
       return ok();
     } catch (error) {
-      this.logger.error('Error updating page content:', error);
+      this.logger.error(`Error updating page content: ${error}`);
       return err(Feedbacks.E_UPDATING_PAGE);
     }
   }
@@ -340,7 +340,7 @@ export class PageRepository extends BaseRepository {
 
       return ok();
     } catch (error) {
-      this.logger.error('Error changing page parent:', error);
+      this.logger.error(`Error changing page parent: ${error}`);
       return err(Feedbacks.E_UPDATING_PAGE);
     }
   }
@@ -357,7 +357,7 @@ export class PageRepository extends BaseRepository {
       });
       return ok();
     } catch (error) {
-      this.logger.error('Error updating page position:', error);
+      this.logger.error(`Error updating page position: ${error}`);
       return err(Feedbacks.E_UPDATING_PAGE);
     }
   }
@@ -386,7 +386,7 @@ export class PageRepository extends BaseRepository {
 
       return ok();
     } catch (error) {
-      this.logger.error('Error deleting page:', error);
+      this.logger.error(`Error deleting page: ${error}`);
       return err(Feedbacks.E_DELETING_PAGE);
     }
   }
@@ -427,7 +427,7 @@ export class PageRepository extends BaseRepository {
 
       return ok(history);
     } catch (error) {
-      this.logger.error('Error getting page history:', error);
+      this.logger.error(`Error getting page history: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -463,7 +463,7 @@ export class PageRepository extends BaseRepository {
 
       return ok(ensurePageDefaults(item as PageModel));
     } catch (error) {
-      this.logger.error('Error getting page history item:', error);
+      this.logger.error(`Error getting page history item: ${error}`);
       return err(Feedbacks.E_INVALID_VERSION);
     }
   }

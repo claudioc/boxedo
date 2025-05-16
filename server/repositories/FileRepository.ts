@@ -37,7 +37,7 @@ export class FileRepository extends BaseRepository {
     try {
       return ok(await this.db.put(file));
     } catch (error) {
-      this.logger.error('Error inserting a file', error);
+      this.logger.error(`Error inserting a file: ${error}`);
       return err(Feedbacks.E_CREATING_FILE);
     }
   }
@@ -67,7 +67,7 @@ export class FileRepository extends BaseRepository {
         )
       );
     } catch (error) {
-      this.logger.error('Error inserting a file attachment', error);
+      this.logger.error(`Error inserting a file attachment: ${error}`);
       return err(Feedbacks.E_CREATING_ATTACHMENT);
     }
   }
@@ -124,7 +124,7 @@ export class FileRepository extends BaseRepository {
 
       return ok(unusedFiles.length);
     } catch (error) {
-      this.logger.error('Error cleaning up orphaned files:', error);
+      this.logger.error(`Error cleaning up orphaned files: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -136,7 +136,7 @@ export class FileRepository extends BaseRepository {
       return ok(await this.db.get(fileId));
     } catch (error) {
       if ((error as PouchDB.Core.Error)?.status !== 404) {
-        this.logger.error('Error getting a file by id:', err);
+        this.logger.error(`Error getting a file by id: ${err}`);
         return err(Feedbacks.E_UNKNOWN_ERROR);
       }
       return ok(null);
@@ -151,7 +151,7 @@ export class FileRepository extends BaseRepository {
       return ok(await this.db.getAttachment(fileId, attachmentName));
     } catch (error) {
       if ((error as PouchDB.Core.Error).status !== 404) {
-        this.logger.error('Error getting a attachment by id:', error);
+        this.logger.error(`Error getting a attachment by id: ${error}`);
         return err(Feedbacks.E_UNKNOWN_ERROR);
       }
       return ok(null);

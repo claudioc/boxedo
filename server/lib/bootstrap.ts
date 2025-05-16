@@ -140,8 +140,7 @@ const contextResult = await AppContext.create({
 
 if (contextResult.isErr()) {
   app.log.error(
-    'Failed to initialize application context:',
-    contextResult.error
+    `Failed to initialize application context: ${contextResult.error}`
   );
   process.exit(1);
 }

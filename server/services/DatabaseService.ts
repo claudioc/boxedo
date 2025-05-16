@@ -97,7 +97,10 @@ export class DatabaseService {
           );
       }
     } catch (error) {
-      logger.error('Error connecting to the database', error);
+      logger.error(
+        // biome-ignore lint/suspicious/noExplicitAny:
+        `Error connecting to the database: ${(error as any)?.message}`
+      );
       return err(new Error('Error connecting to the database'));
     }
 

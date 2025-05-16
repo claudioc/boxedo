@@ -68,14 +68,14 @@ export class AppContext {
           return ok(AppContext.instance);
         },
         (error) => {
-          logger.error('Failed to initialize database:', error);
+          logger.error(`Failed to initialize database: ${error.message}`);
           return err(
             new Error(`Database initialization failed: ${error.message}`)
           );
         }
       );
     } catch (error) {
-      logger.error('Unexpected error during initialization:', error);
+      logger.error(`Unexpected error during initialization: ${error}`);
       return err(
         new Error(
           `Unexpected initialization error: ${error instanceof Error ? error.message : String(error)}`

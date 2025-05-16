@@ -39,7 +39,7 @@ export class MagicRepository extends BaseRepository {
       await this.db.put(data);
       return ok(data);
     } catch (error) {
-      this.logger.error('Error creating magic link:', error);
+      this.logger.error(`Error creating magic link: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
@@ -70,7 +70,7 @@ export class MagicRepository extends BaseRepository {
       await this.db.put(magic);
       return ok(magic.email);
     } catch (error) {
-      this.logger.error('Error validating magic link:', error);
+      this.logger.error(`Error validating magic link: ${error}`);
       return err(Feedbacks.E_UNKNOWN_ERROR);
     }
   }
