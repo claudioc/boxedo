@@ -1,0 +1,15 @@
+{
+  "name": "boxedo-cli",
+  "version": "0.9.0",
+  "description": "The CLI bits of boxedo",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/yargs": "^17.0.33"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "debug": "^4.4.0",
+    "yargs": "^17.7.2",
+    "http-proxy": "^1.18.1"
+  }
+}

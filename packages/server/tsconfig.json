@@ -1,0 +1,24 @@
+{
+  "extends": "../core/tsconfig.base.json",
+  "include": ["**/*.ts", "**/*.tsx", "../types.ts"],
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "target": "es2022",
+    "resolveJsonModule": true,
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "downlevelIteration": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@kitajs/html",
+    "plugins": [
+      {
+        "name": "@kitajs/ts-html-plugin"
+      }
+    ],
+    "types": ["@kitajs/html/alpine.d.ts"],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"]
+    }
+  }
+}

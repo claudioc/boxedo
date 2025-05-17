@@ -1,0 +1,6 @@
+{
+  "name": "boxedo-core",
+  "version": "0.9.0",
+  "description": "The common bits of boxedo",
+  "license": "MIT"
+}

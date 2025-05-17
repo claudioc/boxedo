@@ -1,0 +1,9 @@
+{
+  "extends": "../core/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["DOM", "ES2022", "DOM.Iterable"],
+    "outDir": "../dist/client"
+  }
+}
