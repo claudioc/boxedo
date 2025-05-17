@@ -1,5 +1,19 @@
 # Changelog
 
+## [minor] - 2025-05-17
+
+### Features
+
+- better errors
+
+### Bug Fixes
+
+- removes unnecessary create button
+
+### Other Changes
+
+- welcome boxedo, goodbye joongle
+
 ## [minor] - 2025-04-03
 
 ### Features
