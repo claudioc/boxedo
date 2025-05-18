@@ -1,4 +1,4 @@
-import { loadConfig } from '~/lib/helpers';
+import { loadConfig } from 'boxedo-server/lib/helpers';
 import { Command } from '../lib/Command';
 import { dockerComposeDown, isDockerAvailable } from '../lib/tools';
 

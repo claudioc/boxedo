@@ -1,9 +1,8 @@
-import { PageModel } from 'boxedo-core/types';
+import { generateIdFor, PageModel } from 'boxedo-core';
+import { AppContext } from 'boxedo-server/lib/AppContext';
 import { load } from 'cheerio';
 import fs from 'fs';
 import slugify from 'slugify';
-import { AppContext } from '~/lib/AppContext';
-import { generateIdFor } from '~/lib/helpers';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 
@@ -172,6 +171,7 @@ class BulkLoader {
         position,
         contentUpdated: true,
         author: 'Bulk loader',
+        updatedBy: 'Bulk loader',
       });
 
       this.existingPages.push({ _id: pageId, pageSlug: slug });

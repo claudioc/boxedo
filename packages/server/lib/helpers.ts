@@ -1,4 +1,3 @@
-import { createId } from '@paralleldrive/cuid2';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import {
@@ -12,7 +11,6 @@ import {
   languageLocaleMap,
   type ConfigEnv,
   type Feedback,
-  type ModelName,
   type TextSize,
 } from 'boxedo-core/types';
 import { err, ok, type Result } from 'neverthrow';
@@ -245,8 +243,6 @@ export const ensurePathExists = async (
   return ok();
 };
 
-export const nop = () => {};
-
 // https://github.com/apostrophecms/sanitize-html
 export const safeHtml = (str: string) =>
   sanitizeHtml(str, {
@@ -273,9 +269,6 @@ export const safeHtml = (str: string) =>
       td: ['class'],
     },
   });
-
-export const generateIdFor = (model: ModelName, id?: string) =>
-  `${model}:${id ? id : createId()}`;
 
 export const mapTextSize = (size: TextSize) => {
   switch (size) {

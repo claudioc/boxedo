@@ -1,12 +1,15 @@
 import { AnyLogger, PageModel, SettingsModel } from 'boxedo-core/types';
+import { AppContext } from 'boxedo-server/lib/AppContext';
+import {
+  ensurePathExists,
+  extractFileRefsFrom,
+} from 'boxedo-server/lib/helpers';
+import { FileRepository } from 'boxedo-server/repositories/FileRepository';
+import { RepositoryFactory } from 'boxedo-server/repositories/RepositoryFactory';
+import { SettingsRepository } from 'boxedo-server/repositories/SettingsRepository';
 import fs from 'fs/promises';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import { AppContext } from '~/lib/AppContext';
-import { ensurePathExists, extractFileRefsFrom } from '~/lib/helpers';
-import { FileRepository } from '~/repositories/FileRepository';
-import { RepositoryFactory } from '~/repositories/RepositoryFactory';
-import { SettingsRepository } from '~/repositories/SettingsRepository';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 
@@ -98,6 +101,7 @@ class PageExporter {
       createdAt: page.createdAt,
       updatedAt: page.updatedAt,
       author: page.author,
+      updatedBy: page.updatedBy,
     };
 
     return `<!--

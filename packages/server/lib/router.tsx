@@ -1,3 +1,4 @@
+import { generateIdFor, nop } from 'boxedo-core';
 import type {
   FileAttachmentModel,
   FileModel,
@@ -35,7 +36,6 @@ import { ReadPageVersion } from '~/views/ReadPageVersion';
 import { SearchResults } from '~/views/SearchResults';
 import { SettingsPage } from '~/views/SettingsPage';
 import { Feedbacks } from './feedbacks';
-import { generateIdFor, nop } from './helpers';
 import {
   createRequireAuth,
   createRequireCapability,

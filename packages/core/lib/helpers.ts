@@ -1,4 +1,5 @@
-import type { UrlParts } from '../types';
+import { createId } from '@paralleldrive/cuid2';
+import type { ModelName, UrlParts } from '../types';
 
 export const parsePort = (input: string | undefined): number | undefined => {
   if (!input?.trim()) return;
@@ -29,3 +30,8 @@ export const parseBaseUrl = (baseUrl: string | undefined): UrlParts | null => {
 
   return null;
 };
+
+export const generateIdFor = (model: ModelName, id?: string) =>
+  `${model}:${id ? id : createId()}`;
+
+export const nop = () => {};

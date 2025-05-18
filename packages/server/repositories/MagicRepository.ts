@@ -1,3 +1,4 @@
+import { generateIdFor } from 'boxedo-core';
 import type {
   AnyLogger,
   ConfigEnv,
@@ -7,7 +8,6 @@ import type {
 } from 'boxedo-core/types';
 import { err, ok, type Result } from 'neverthrow';
 import { Feedbacks } from '~/lib/feedbacks';
-import { generateIdFor } from '~/lib/helpers';
 import { BaseRepository } from './BaseRepository';
 
 export class MagicRepository extends BaseRepository {

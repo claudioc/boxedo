@@ -1,3 +1,4 @@
+import { generateIdFor } from 'boxedo-core';
 import {
   DEFAULT_TEXT_SIZE,
   type AnyLogger,
@@ -8,11 +9,7 @@ import {
 } from 'boxedo-core/types';
 import { err, ok, type Result } from 'neverthrow';
 import { Feedbacks } from '~/lib/feedbacks';
-import {
-  ensureValidLanguage,
-  generateIdFor,
-  getDefaultLanguage,
-} from '~/lib/helpers';
+import { ensureValidLanguage, getDefaultLanguage } from '~/lib/helpers';
 import { BaseRepository } from './BaseRepository';
 
 const DEFAULT_PREFERENCES_VALUES: Partial<PreferencesModel> = {

@@ -1,8 +1,8 @@
+import { generateIdFor } from 'boxedo-core';
 import { UserRole, userRoles } from 'boxedo-core/types';
-import { capitalize } from 'lib/tools';
-import { generateIdFor } from '~/lib/helpers';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
+import { capitalize } from '../lib/tools';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

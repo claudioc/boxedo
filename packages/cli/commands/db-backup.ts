@@ -1,5 +1,5 @@
+import { loadConfig } from 'boxedo-server/lib/helpers';
 import { execSync } from 'node:child_process';
-import { loadConfig } from '~/lib/helpers';
 import { Command } from '../lib/Command';
 import {
   DOCKER_IMAGE_NAME,

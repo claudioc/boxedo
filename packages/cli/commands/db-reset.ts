@@ -1,3 +1,8 @@
+import { execSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import path from 'node:path';
+import { Command } from '../lib/Command';
+import { getAppContext } from '../lib/getAppContext';
 import {
   DOCKER_IMAGE_NAME,
   dockerComposeDown,
@@ -5,12 +10,7 @@ import {
   isDockerAvailable,
   isDockerImageRunning,
   waitForService,
-} from 'lib/tools';
-import { execSync } from 'node:child_process';
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { Command } from '../lib/Command';
-import { getAppContext } from '../lib/getAppContext';
+} from '../lib/tools';
 
 export default class DbResetCommand extends Command {
   async run() {

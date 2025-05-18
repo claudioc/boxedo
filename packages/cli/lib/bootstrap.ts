@@ -71,7 +71,7 @@ Usage: boxedo <command> [options]
 
 This is Boxedo CLI.`);
 
-    const commands = bootstrap.discoverCommands({}, './cli');
+    const commands = bootstrap.discoverCommands({}, './packages/cli');
 
     debug(`Discovered commands: ${Object.keys(commands).join(', ')}`);
 
