@@ -7,3 +7,8 @@ tmp
 exported-pages
 database
 couchdb-backup*
+
+packages/server/assets/css/*.css
+packages/server/assets/js/*.js
+packages/server/assets/js/*.map
+packages/server/assets/vendor/*.js

@@ -1,12 +1,12 @@
-import { parseBaseUrl } from 'boxedo-core/lib/helpers';
-import type { UrlParts } from 'boxedo-core/types';
+import { parseBaseUrl, VENDOR_ASSETS, type UrlParts } from 'boxedo-core';
 import * as esbuild from 'esbuild';
-import { type ChildProcess, exec, fork, spawn } from 'node:child_process';
-import { rm, watch } from 'node:fs/promises';
+import { exec, fork, spawn, type ChildProcess } from 'node:child_process';
+import { cp, mkdir, rm, watch } from 'node:fs/promises';
 import { createServer, type Server, type ServerResponse } from 'node:http';
 import { createInterface } from 'node:readline';
 import { setTimeout as delay } from 'node:timers/promises';
 import { promisify } from 'node:util';
+
 const execAsync = promisify(exec);
 
 interface SseClient {
@@ -156,7 +156,9 @@ const clean: TaskFn = async (_, target = 'client') => {
 const setupFileWatchers: TaskFn = async (_) => {
   try {
     const watchAssets = async () => {
-      const assetsWatcher = watch('assets', { recursive: true });
+      const assetsWatcher = watch('packages/server/assets', {
+        recursive: true,
+      });
       for await (const event of assetsWatcher) {
         if (event.filename?.match(/global\.css$/)) {
           console.log(`[Hawk] Assets change: ${event.filename}`);
@@ -222,7 +224,9 @@ const setupFileWatchers: TaskFn = async (_) => {
       const rootWatcher = watch('.');
       for await (const event of rootWatcher) {
         if (
-          ['package.json', '.env', 'hawk.ts'].includes(event.filename as string)
+          ['package.json', '.env', 'packages/dev-tools/hawk.ts'].includes(
+            event.filename as string
+          )
         ) {
           // A graceful stop is not easy for some reason...
           // At this point if the configuration changes we just exit
@@ -267,7 +271,7 @@ const buildCss: TaskFn = async (_) => {
           '-i',
           './packages/server/views/styles/global.css',
           '-o',
-          './packages/server/dist/global.css',
+          './packages/server/assets/css/global.css',
         ],
         {
           stdio: 'inherit',
@@ -351,6 +355,43 @@ const buildClient: TaskFn = async (_) => {
   });
 
   return true;
+};
+
+const copyClientBuild: TaskFn = async (_) => {
+  try {
+    console.log('[Hawk] Copying client build to server assets');
+    const targetDir = 'packages/server/assets/js';
+    await mkdir(targetDir, { recursive: true });
+    await rm(targetDir, { recursive: true, force: true });
+    await cp('packages/client/dist', targetDir, {
+      recursive: true,
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[Hawk] Error copying client build:', error);
+    return false;
+  }
+};
+
+const copyClientVendor: TaskFn = async (_) => {
+  try {
+    console.log('[Hawk] Copying vendor assets to server');
+    const targetDir = 'packages/server/assets/vendor';
+    await mkdir(targetDir, { recursive: true });
+
+    VENDOR_ASSETS.forEach(async (asset) => {
+      await cp(
+        `./node_modules/${asset.packagePath}/${asset.file}`,
+        `${targetDir}/${asset.file}`
+      );
+    });
+
+    return true;
+  } catch (error) {
+    console.error('[Hawk] Error copying vendor assets:', error);
+    return false;
+  }
 };
 
 const buildServer: TaskFn = async (_) => {
@@ -562,6 +603,8 @@ taskManager.registerTask('ready', ready);
 taskManager.registerTask('notify-client-update', notifyUpdates, 'client');
 taskManager.registerTask('notify-server-update', notifyUpdates, 'server');
 taskManager.registerTask('build-css', buildCss, 'server');
+taskManager.registerTask('copy-client', copyClientBuild);
+taskManager.registerTask('copy-vendor', copyClientVendor);
 
 if (process.env.NODE_ENV === 'production') {
   taskManager.run(
@@ -569,6 +612,8 @@ if (process.env.NODE_ENV === 'production') {
       'clean-client',
       'clean-server',
       'build-client',
+      'copy-client',
+      'copy-vendor',
       'build-server',
       'build-css',
     ],
@@ -583,6 +628,8 @@ if (process.env.NODE_ENV === 'production') {
       'type-check-client',
       'lint-client',
       'build-client',
+      'copy-client',
+      'copy-vendor',
       'type-check-server',
       'lint-server',
       'build-server',

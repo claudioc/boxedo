@@ -1,5 +1,5 @@
 import type { WithCtx } from 'boxedo-core/types';
-import { cssFile, htmxFile, sortableFile } from '~/lib/assets';
+import { getCssFilePath, getVendorFilePaths } from '~/lib/assets';
 import { compilePageTitle } from '~/lib/helpers';
 
 interface HeadProps extends WithCtx {
@@ -31,13 +31,11 @@ export const Head = ({
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="description" content={settings.siteDescription} />
       {withEditor && <meta http-equiv="Cache-Control" content="no-store" />}
-      <link rel="stylesheet" href={urlService.url(cssFile)} />
-      {withVendorScripts && (
-        <>
-          <script src={urlService.url(htmxFile)} />
-          <script src={urlService.url(sortableFile)} />
-        </>
-      )}
+      <link rel="stylesheet" href={urlService.url(getCssFilePath())} />
+      {withVendorScripts &&
+        getVendorFilePaths().map((vendorFilePath) => (
+          <script src={urlService.url(vendorFilePath)} />
+        ))}
     </head>
   );
 };

@@ -6,7 +6,6 @@ import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import staticServe from '@fastify/static';
 import kitaHtmlPlugin from '@kitajs/fastify-html-plugin';
-import { phrases } from 'boxedo-core/locales/phrases';
 import {
   ConfigEnvSchema,
   type ConfigEnv,
@@ -14,13 +13,14 @@ import {
   type PreferencesModel,
   type SettingsModel,
   type UserModel,
-} from 'boxedo-core/types';
+} from 'boxedo-core';
+import { phrases } from 'boxedo-core/locales/phrases';
 import Fastify from 'fastify';
 import fastifyFavicon from 'fastify-favicon';
 import type { PinoLoggerOptions } from 'fastify/types/logger';
 import osUtils from 'node-os-utils';
 import path from 'node:path';
-import { ASSETS_MOUNT_POINT, ASSETS_PATH } from '~/constants';
+import { ASSETS_MOUNT_POINT } from '~/constants';
 import fastifyCache, { type Cache } from '~/lib/plugins/cache';
 import fastifyFeedback from '~/lib/plugins/feedback';
 import fastifyI18n, { type i18nExtended } from '~/lib/plugins/i18n';
@@ -29,6 +29,7 @@ import { EmailService } from '~/services/emailService';
 import { SearchService } from '~/services/SearchService';
 import { UrlService } from '~/services/UrlService';
 import { AppContext } from './AppContext';
+import { getAssetsFsPath } from './assets';
 import { validateConfig } from './config';
 import { ensurePathExists, getDefaultLanguage } from './helpers';
 import router from './router';
@@ -190,7 +191,7 @@ await app
   .register(multipart)
   .register(fastifyFeedback)
   .register(fastifyFavicon, {
-    path: './assets',
+    path: getAssetsFsPath(),
     name: 'favicon.ico',
     maxAge: 3600,
   })
@@ -217,7 +218,7 @@ await app
     hsts: app.config.NODE_ENV === 'production',
   })
   .register(staticServe, {
-    root: path.join(__dirname, ASSETS_PATH),
+    root: getAssetsFsPath(),
     prefix: `/${ASSETS_MOUNT_POINT}`,
   })
   .register(router)

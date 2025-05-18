@@ -4,6 +4,7 @@
   "description": "The CMS with an attitude",
   "author": "",
   "license": "MIT",
+  "type": "module",
   "workspaces": ["packages/*"],
   "engines": {
     "node": ">=20.6.0"
