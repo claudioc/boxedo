@@ -14,6 +14,21 @@ export default class UserRoleCommand extends Command {
       return;
     }
 
+    const result = await this.context
+      .getRepositoryFactory()
+      .getUserRepository()
+      .getAllUsers();
+
+    if (result.isErr()) {
+      this.ui.console.error(result.error.message);
+      return;
+    }
+
+    if (result.value.length === 0) {
+      this.ui.console.info('No users found');
+      return;
+    }
+
     while (await this.updateRole());
   }
 

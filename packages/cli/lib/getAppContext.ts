@@ -1,7 +1,7 @@
 import { AnyLogger } from 'boxedo-core/types';
-import { AppContext } from '~/lib/AppContext';
-import { loadConfig } from '~/lib/helpers';
-import { UrlService } from '~/services/UrlService';
+import { AppContext } from 'boxedo-server/lib/AppContext';
+import { loadConfig } from 'boxedo-server/lib/helpers';
+import { UrlService } from 'boxedo-server/services/UrlService';
 
 export const getAppContext = async (
   logger: AnyLogger = console,

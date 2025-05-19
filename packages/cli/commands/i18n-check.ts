@@ -9,8 +9,15 @@ interface TranslationObject {
 
 export default class I18nCheckCommand extends Command {
   async run() {
-    const projectDir = './server';
-    const translationsPath = './server/locales/en.json';
+    const projectDir = path.join(__dirname, '..', '..', 'server');
+    const translationsPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'core',
+      'locales',
+      'en.json'
+    );
 
     try {
       await this.validateTranslations(projectDir, translationsPath);

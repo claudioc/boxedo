@@ -54,7 +54,8 @@
     "invalidParameters": "I parametri della richiesta non sono validi",
     "unhandledError": "Internal server error",
     "pageNotFound": "Pagina non trovata",
-    "unauthorized": "Non autorizzato"
+    "unauthorized": "Non autorizzato",
+    "forbidden": "Accesso negato"
   },
 
   "MovePage": {

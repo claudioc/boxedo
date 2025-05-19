@@ -1,6 +1,6 @@
+import type { AppContext } from 'boxedo-server/lib/AppContext';
 import createDebug from 'debug';
 import type { Argv as Yargs, Options as YargsOptions } from 'yargs';
-import { AppContext } from '~/lib/AppContext';
 import { Ui } from './Ui';
 
 const debug = createDebug('boxedo-cli:bootstrap');

@@ -1,8 +1,9 @@
 import { promises as fs, type PathLike } from 'node:fs';
 import { basename, join } from 'node:path';
+import path from 'path';
 import { Command } from '../lib/Command';
 
-const localesDir = './server/locales';
+const localesDir = path.join(__dirname, '..', '..', 'core', 'locales');
 
 export default class I18nSyncCommand extends Command {
   async run() {
