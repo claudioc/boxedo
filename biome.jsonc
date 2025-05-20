@@ -8,7 +8,12 @@
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
-    "ignore": ["dist", "assets", "cli/boxedo"]
+    "ignore": [
+      "packages/client/dist",
+      "packages/server/dist",
+      "packages/server/build",
+      "packages/server/assets"
+    ]
   },
   "json": {
     "formatter": {
@@ -28,7 +33,13 @@
         "useJsxKeyInIterable": "off"
       }
     },
-    "ignore": ["dist", "tasks", "assets", "cli"]
+    "ignore": [
+      "packages/client/dist",
+      "packages/server/dist",
+      "packages/server/build",
+      "packages/server/assets",
+      "cli"
+    ]
   },
   "css": {
     "parser": {

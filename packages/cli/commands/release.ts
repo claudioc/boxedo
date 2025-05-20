@@ -104,28 +104,36 @@ You can still release manually from the github web interface.
           ? 'minor'
           : 'patch';
 
-      const answer = await this.ui.confirm(
-        `About to release a new ${nextVersion} version. Continue?`
-      );
-
       if (this.isDryRun) {
+        this.ui.console.info(
+          `This would release a new ${nextVersion} version.`
+        );
         this.ui.console.info('Dry run enabled. No changes will be made.');
         return null;
+      } else {
+        var answer = await this.ui.confirm(
+          `About to release a new ${nextVersion} version. Continue?`
+        );
       }
 
       if (answer) {
-        execSync(`npm version ${nextVersion} --no-git-tag-version`);
+        execSync(
+          `npm version ${nextVersion} --workspaces --include-workspace-root --no-git-tag-version`
+        );
         const currentVersion = this.getCurrentVersion();
 
         this.ui.console.info(
-          `Updated package.json version to ${currentVersion}`
+          `Updated package.json version to ${currentVersion} in all workspaces`
         );
 
         this.updateChangelog(categorizedCommits, nextVersion);
         this.ui.console.info('Updated CHANGELOG.md');
 
         try {
-          execSync('git add package.json package-lock.json CHANGELOG.md');
+          execSync('git add package-lock.json CHANGELOG.md');
+          execSync(
+            'git ls-files --modified --others --exclude-standard | grep "package.json" | xargs -r git add'
+          );
           execSync(`git commit -m "chore(release): ${currentVersion}"`);
           execSync(`git tag v${currentVersion}`);
           execSync(`git push`);
