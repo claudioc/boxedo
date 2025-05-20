@@ -1,32 +1,34 @@
-# Boxedo (codename)
+# Boxedo
 
 > [!CAUTION]
-> Although at this point the project is relatively stable in terms of MVP features, its quality is to be considered Alpha: don't install it on public facing internet website.
+> Although at this point the project is relatively stable in terms of MVP features, its quality is to be considered Beta: don't install it on public facing internet website.
 
 ---
 
 ## Project Status
 
-**Unreleased** (and unsupported).
+**(unsupported) Beta**
+
+Use at your own risk!
 
 ---
 
 ## Vision and Goals
 
-Boxedo's long term vision is to provide a nicer and more appealing alternative to tools like Atlassian Confluence, tailored for creating internal documentation in regulated environments requiring audit trails and robust access control (IAM). This doesn't mean that Boxedo doesn't work at a smaller scale, in fact it is also amazing as a simple, personal knowledge base engine, similar to Obsidian or Notion but installed on your own server. This is how I use it right now.
+Boxedo's long term vision is to provide a simpler, nicer and more appealing alternative to tools like Atlassian Confluence, tailored for creating internal documentation in regulated environments requiring audit trails and robust access control (IAM). This doesn't mean that Boxedo doesn't work at a smaller scale, in fact it is also amazing as a simple, personal knowledge base engine, similar to Obsidian or Notion but installed on your own server. This is how I use it right now.
 
 Some feature highlights:
 
 - **Hierarchical documentation organization** - pages are in a parent/child relationship to each others, with multiple roots. Single pages or even group of pages can be moved freely around
-- **Page history tracking** - using CouchDB's native support for revisions, it's always possible to see what changed over time in any document (but we don't offer "diff" representation at the moment)
-- **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile. The CSS framework [supports theming](https://daisyui.com/docs/themes/) out-of-the-box.
+- **Page history tracking** - using CouchDB's (or PouchDB's)native support for revisions, it's always possible to see what changed over time in any document (but we don't offer "diff" representation at the moment)
+- **Basic but functional design** - limited resources for aesthetics at the moment but things should look ok, both on desktop and on mobile. The CSS framework [supports theming](https://daisyui.com/docs/themes/) out-of-the-box, and a theme selection is possible via configuration file
 - **Advanced WYSIWYG editor** - Boxedo's content editor is based on a heavily customized [TipTap editor](https://tiptap.dev/) which I believe is at the state-of-the-art of this technology (based on ProseMirror)
 - **Multi-database backend** - at his core Boxedo uses a document model database and the flavour I chose is CouchDB. Boxedo uses [PouchDB](https://pouchdb.com/) though, which means that you don't necessarily need to install and run a docker image (or a separate server) to use Boxedo! With PouchDB, you can run Boxedo with a "local" database too - in which case, PouchDB will use LevelDB. There is also a convenient "memory" backend that it's used for test purposes
 - **Search capabilities** - a fulltext search capability is integrated in Boxedo by using [Sqlite FTS5](https://www.sqlite.org/fts5.html)
-- **Internationalization (i18n)** - only English is supported at the moment (also in terms of search stemming), but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
+- **Internationalization (i18n)** - only English and Italian are supported at the moment (but only English in terms of search stemming), but the codebase doesn't use hardcode sentences and can be easily translated in any language (it's just a json file to add)
 - **Developer-friendly** - Designed for easy hacking from the ground-up
-- **Image upload support** - images are also transparently saved in CouchDB. A support script exists to remove unused images
-- **Magic link authentication** - You can optionally use an authentication layer, but you don't have to maintain any credentials (see below for more details)
+- **Image upload support** - images are also transparently saved in CouchDB/PouchDB. A support script exists to remove unused images
+- **Magic link authentication** - You can optionally use an authentication layer (more on this later), but you don't have to maintain any credentials (see below for more details)
 - **Powerful CLI** - to manage the database, add accounts, export and more
 - **User roles** - users can be added to one of the pre-defined set of roles with different capabilities, to complete administration to inactive
 
@@ -47,12 +49,12 @@ A "magic link" is a link that is sent to a user via email. Following that link, 
 
 Configuring the magic link authentication takes a moment, though:
 - first, you can only use one of the supported email providers: sendgrid, mailgun or plain smtp. Sendgrid and Mailgun provide a fair amount of free emails that you can send with their services, but you have to "white list" all the emails you want to use beforehand (to avoid abusing their services). If you have a better option, please talk to me and I will add it as a supported provider.
-- second, you have to manage your users via the CLI (./cli/boxedo), using the commands `user-list`, `user-add`, `user-role` and `user-del`. Note that only a simple, formal validation is performed by the CLI (no email is sent at the moment of the user creation)
+- second, you have to manage your users via the Boxedo CLI, using the commands `user-list`, `user-add`, `user-role` and `user-del`. Note that only a simple, formal validation is performed by the CLI (no email is sent at the moment of the user creation)
 
 Something that is already planned for future releases includes:
 - OAuth2 support with a (small) selection of providers
 - maybe SAML for more corporate usages
-- ability to provision users with an API instead of a CLI
+- ability to provision users with an API instead of a CLI for corporate IAM integration
 
 ### User roles
 
@@ -73,11 +75,11 @@ When developing Boxedo, my primary focus was on creating a system that was both 
 
 Security was another paramount concern from the outset. The system needed to be straightforward to secure and present the smallest possible attack surface. This consideration was particularly important given that the final feature set was still evolving during development. The inherent uncertainty in the feature roadmap further reinforced the need for a flexible yet secure foundation.
 
-These factors led me to architect Boxedo as a server-side rendered application. However, I wanted to leverage the expressiveness and developer experience of JSX as my templating language, even in a server-side context. The combination of Fastify's flexibility and the Kitajs library made this possible while maintaining excellent performance. While this approach doesn't provide React's context and hooks (though they could be implemented with some additional work), the trade-off of some prop drilling was acceptable for the benefits gained. I also previously wrote a [starter kit application](https://github.com/claudioc/fastify-htmx-ts-starter-kit) for projects like these, should you like the idea.
+These factors led me to architect Boxedo as a server-side rendered application. However, I wanted to leverage the expressiveness and developer experience of JSX as my templating language, even in a server-side context. The combination of Fastify's flexibility and the Kitajs library made this possible while maintaining excellent performance. Even though this approach doesn't provide React's context and hooks (though they could be implemented with some additional work), the trade-off of some prop drilling was acceptable for the benefits gained. I also previously wrote a [starter kit application](https://github.com/claudioc/fastify-htmx-ts-starter-kit) for projects like these, should you like the idea.
 
 For client-side interactivity, including AJAX calls and progressive enhancement, I chose HTMX and Alpine.js instead of writing extensive custom JavaScript. These libraries provide much of the reactivity we've come to expect in modern frontend development, while maintaining a lightweight footprint. While this aspect of Boxedo's codebase currently represents its greatest opportunity for improvement and will likely undergo significant refactoring after the MVP release, it effectively serves the current needs of the project.
 
-### Why PouchDb and not XXX?
+### Why CouchDB/PouchDb and not XXX?
 PouchDb was chosen because of its built-in features, like document revisions and history tracking, make it ideal for this use case, despite being potentially overscaled for current needs. The project includes sample content from Project Gutenberg's [Fall of the Roman Empire](https://www.gutenberg.org/ebooks/890) for load testing.
 
 PouchDb (CouchDB) scales very well in case in the future we would like to see Boxedo exposed on website using many users and documents.
@@ -123,6 +125,16 @@ One of the aim of Boxedo is to offer a great user experience, and part of it is 
 
 ---
 
+## Repository structure
+Boxedo's repository is a monorepo composed by several semi-independent packages:
+- boxedo-cli: this is the code for the client JavaScript which runs in the browser, enhancing the UI
+- boxedo-core: a set on library and typings that are shared among the modules. Also contains the localization data
+- boxedo-cli: the code for the CLI, command line tools interface for administrative and maintenance tasks
+- boxedo-server: the Fastify server which renders the JSX and provides the API layer for the UI client to interface to
+- boxedo-dev-tools: hawk.ts is a special swiss-army-knife custom script built to address all the development workflow's task
+
+The relative simplicity of this architecture doesn't need any particular monorepo manager, so everything is under the control of the standard `npm`.
+
 ## Installation
 
 ### Prerequisites
@@ -134,6 +146,7 @@ One of the aim of Boxedo is to offer a great user experience, and part of it is 
 1. Clone the repository
 2. Copy environment config: `cp dot.env .env` and edit the values if you feel like
 3. Run `npm install`
+4. Keep reading…
 
 ### The database server
 If you decide to use a "local" database (that is, LevelDb), there is nothing else you have to do after you have configured it in the `.env` file. Just keep in mind that in that case, the "database" is not a server but it will just be a bunch of files.
@@ -145,7 +158,7 @@ If you prefer to use the "remote" option for a database (that is, CouchDb), then
 2. Launch the development server with `npm run dev`
 3. Access at http://localhost:3000
 
-For a final production environment, I use myself `pm2` to start and monitor the server. You can check the `pm2-start.sh` script in the root directory for inspiration.
+For a final production environment, I use `pm2` to start and monitor the server. You can check the `pm2-start.sh` script in the root directory for inspiration.
 
 For docker specific instructions, there is also a Docker.md in the docs/ directory where I have written some notes related to my own installation (in Ubuntu 24.04).
 
@@ -153,7 +166,7 @@ For docker specific instructions, there is also a Docker.md in the docs/ directo
 
 Boxedo provides its users and developers with a powerful CLI to perform all sort of tasks, from managing users, export pages, check translation and even releasing the project to Github (although this last one task is supposed to only be used by the core developers!).
 
-To run the CLI, just use the `./cli/boxedo help` command first from the root of the project. A list of the available commands will show. Please note that we will use npx as soon as [#32](https://github.com/claudioc/boxedo/issues/32) is closed.
+To run the CLI, just use the `./packages/cli/boxedo help` command first from the root of the project. A list of the available commands will show. Please note that we will use npx as soon as [#32](https://github.com/claudioc/boxedo/issues/32) is closed.
 
 To run the CLI in [debug](https://www.npmjs.com/package/debug) mode, use `DEBUG=boxedo-cli:* ./cli/boxedo help`.
 
