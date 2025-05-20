@@ -1,5 +1,21 @@
 # Changelog
 
+## [minor] - 2025-05-20
+
+### Features
+
+- moved to a monorepo structure
+
+### Other Changes
+
+- updates package-lock
+- updates the release command
+- better README
+- move more assets in server
+- move more assets in server
+- move assets in server
+- fixes all the commands
+
 ## [minor] - 2025-05-17
 
 ### Features
