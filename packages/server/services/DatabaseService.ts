@@ -1,9 +1,4 @@
-import type {
-  AnyLogger,
-  ConfigEnv,
-  Db,
-  DocumentModel,
-} from 'boxedo-core/types';
+import type { AnyLogger, ConfigEnv, Db, DocumentModel } from 'boxedo-core';
 import { type Result, err, ok } from 'neverthrow';
 import PouchHttp from 'pouchdb-adapter-http';
 import PouchDB from 'pouchdb-core';

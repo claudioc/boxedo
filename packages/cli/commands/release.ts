@@ -21,7 +21,7 @@ interface CommitCategories {
 type VersionType = 'major' | 'minor' | 'patch';
 
 export default class ReleaseCommand extends Command {
-  protected changelogEntries: string = '';
+  protected changelogEntries = '';
 
   async run() {
     this.ui.createConsole();
@@ -44,7 +44,7 @@ You can still release manually from the github web interface.
       }
 
       if (
-        await this.ui.confirm(`Ready to create a release for GitHub. Proceed?`)
+        await this.ui.confirm('Ready to create a release for GitHub. Proceed?')
       ) {
         try {
           await this.createGitHubRelease(nextVersion);
@@ -70,7 +70,7 @@ You can still release manually from the github web interface.
       const currentVersion = this.getCurrentVersion();
       this.ui.console.info(`Current version: ${currentVersion}`);
 
-      const commits = this.getCommitsSinceLastTag(currentVersion);
+      const commits = this.getCommitsSinceLastTag();
       this.ui.console.info(`Found ${commits.length} commits since last tag`);
 
       if (commits.length === 0) {
@@ -110,11 +110,11 @@ You can still release manually from the github web interface.
         );
         this.ui.console.info('Dry run enabled. No changes will be made.');
         return null;
-      } else {
-        var answer = await this.ui.confirm(
-          `About to release a new ${nextVersion} version. Continue?`
-        );
       }
+
+      const answer = await this.ui.confirm(
+        `About to release a new ${nextVersion} version. Continue?`
+      );
 
       if (answer) {
         execSync(
@@ -136,7 +136,7 @@ You can still release manually from the github web interface.
           );
           execSync(`git commit -m "chore(release): ${currentVersion}"`);
           execSync(`git tag v${currentVersion}`);
-          execSync(`git push`);
+          execSync('git push');
           execSync('git push --tags');
 
           this.ui.console.info(
@@ -171,17 +171,18 @@ You can still release manually from the github web interface.
   /**
    * Get all commits since the last tag
    */
-  getCommitsSinceLastTag(version: string): string[] {
+  getCommitsSinceLastTag(): string[] {
     try {
       // Try getting commits since the last tag
-      const command = `git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s`;
+      const command =
+        'git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:%s';
       return execSync(command).toString().split('\n').filter(Boolean);
-    } catch (error) {
+    } catch {
       this.ui.console.info(
         'No previous tag found or other Git error. Getting all commits.'
       );
       // If there's no tag yet, get all commits
-      const command = `git log --pretty=format:%s`;
+      const command = 'git log --pretty=format:%s';
       return execSync(command).toString().split('\n').filter(Boolean);
     }
   }
@@ -347,7 +348,7 @@ You can still release manually from the github web interface.
     try {
       execSync('gh --version', { stdio: 'ignore' });
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

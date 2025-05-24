@@ -1,7 +1,7 @@
-import { generateIdFor, PageModel } from 'boxedo-core';
-import { AppContext } from 'boxedo-server/lib/AppContext';
+import { generateIdFor, type PageModel } from 'boxedo-core';
+import type { AppContext } from 'boxedo-server/lib/AppContext';
 import { load } from 'cheerio';
-import fs from 'fs';
+import fs from 'node:fs';
 import slugify from 'slugify';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
@@ -123,6 +123,7 @@ class BulkLoader {
       })
         .map(
           () =>
+            // biome-ignore lint:
             '<p>' +
             $(this.getRandomElement(pElements))
               .text()
@@ -148,6 +149,7 @@ class BulkLoader {
         }
 
         parents.set(parentId, (parents.get(parentId) ?? 9999) + 1);
+        // biome-ignore lint:
         position = parents.get(parentId)!;
 
         slug = this.generateUniqueSlug(pageTitle);

@@ -1,6 +1,5 @@
 import { promises as fs, type PathLike } from 'node:fs';
-import { basename, join } from 'node:path';
-import path from 'path';
+import path, { basename, join } from 'node:path';
 import { Command } from '../lib/Command';
 
 const localesDir = path.join(__dirname, '..', '..', 'core', 'locales');
@@ -24,6 +23,7 @@ export default class I18nSyncCommand extends Command {
       for (const { path } of languageFiles) {
         await this.validateTranslations(enPath, path);
       }
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (error: any) {
       if (error.code === 'ENOENT') {
         this.ui.console.error('english translation file not found at', enPath);
@@ -39,12 +39,15 @@ export default class I18nSyncCommand extends Command {
     return JSON.parse(content);
   }
 
+  // biome-ignore lint:
   getAllKeys(obj: Record<string, any>, prefix = ''): string[] {
     return Object.entries(obj).reduce<string[]>((keys, [key, value]) => {
       const currentKey = prefix ? `${prefix}.${key}` : key;
       if (typeof value === 'object' && value !== null) {
+        // biome-ignore lint:
         return [...keys, ...this.getAllKeys(value, currentKey)];
       }
+      // biome-ignore lint:
       return [...keys, currentKey];
     }, []);
   }
@@ -97,6 +100,7 @@ export default class I18nSyncCommand extends Command {
       }
 
       return false;
+      // biome-ignore lint:
     } catch (error: any) {
       this.ui.console.error('Error during validation:', error.message);
       return false;

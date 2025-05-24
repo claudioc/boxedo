@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest --run --config=./vitest.config.ts",
-    "test:watch": "VITEST_WATCH=true vitest"
+    "test:watch": "VITEST_WATCH=true vitest",
+    "lint": "biome lint"
   },
   "devDependencies": {
     "@fastify/one-line-logger": "^2.0.1",

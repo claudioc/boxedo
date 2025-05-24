@@ -4,7 +4,8 @@
   "description": "The client bits of boxedo",
   "license": "MIT",
   "scripts": {
-    "test": ""
+    "test": "",
+    "lint": "biome lint"
   },
   "devDependencies": {
     "@tiptap/core": "^2.10.0",

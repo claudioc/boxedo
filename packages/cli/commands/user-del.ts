@@ -31,6 +31,7 @@ export default class UserDelCommand extends Command {
   }
 
   async delUser() {
+    // biome-ignore lint:
     const repo = await this.context!.getRepositoryFactory().getUserRepository();
 
     const answers = {

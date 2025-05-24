@@ -65,7 +65,7 @@ export const bootstrap = {
     const argv = process.argv.slice(2);
     debug('Starting bootstrap process');
 
-    let argParser = yargs();
+    const argParser = yargs();
     argParser.usage(`
 Usage: boxedo <command> [options]
 
@@ -86,10 +86,14 @@ This is Boxedo CLI.`);
         await bootstrap.loadCommand(commandName, commandPath, argParser);
       }
       argv.unshift('help');
+      // biome-ignore lint:
     } else if (commands[firstArg!]) {
+      // biome-ignore lint:
       const commandName = firstArg!;
+      // biome-ignore lint:
       const commandPath = commands[firstArg!];
       await bootstrap.loadCommand(commandName, commandPath, argParser);
+      // biome-ignore lint:
       argv.unshift(commandName!);
     } else {
       // Command not found :( Error and exit

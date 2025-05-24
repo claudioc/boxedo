@@ -37,8 +37,7 @@
       "packages/client/dist",
       "packages/server/dist",
       "packages/server/build",
-      "packages/server/assets",
-      "cli"
+      "packages/server/assets"
     ]
   },
   "css": {

@@ -1,6 +1,6 @@
 import { confirm, input, select } from '@inquirer/prompts';
-import { AnyLogger } from 'boxedo-core/types';
-import yoctoSpinner, { Spinner } from 'yocto-spinner';
+import type { AnyLogger } from 'boxedo-core';
+import yoctoSpinner, { type Spinner } from 'yocto-spinner';
 
 export class Ui {
   private _console!: AnyLogger;
@@ -65,8 +65,9 @@ export class Ui {
    */
   public createConsole(spinner?: Spinner): AnyLogger {
     const createConsoleMethod = (method: 'log' | 'info' | 'error' | 'warn') => {
+      // biome-ignore lint:
       return (...args: any[]) => {
-        const wasSpinning = spinner && spinner.isSpinning;
+        const wasSpinning = spinner?.isSpinning;
         if (wasSpinning) {
           spinner.stop();
         }
@@ -101,6 +102,7 @@ export class Ui {
     return this._console ?? console;
   }
 
+  // biome-ignore lint:
   private checkCtrlC(error: any): void {
     if (error instanceof Error && error.name === 'ExitPromptError') {
       console.log('👋 until next time!');

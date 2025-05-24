@@ -1,4 +1,4 @@
-import { loadConfig } from 'boxedo-server/lib/helpers';
+import { loadConfig } from 'boxedo-core';
 import { execSync } from 'node:child_process';
 import { Command } from '../lib/Command';
 import {
@@ -49,6 +49,7 @@ Please make sure the CouchDB container is running before trying to backup the da
       execSync(
         `docker cp ${DOCKER_IMAGE_NAME}:/tmp/couchdb-backup.tar.gz ./${localBackupFilename}`
       );
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (error: any) {
       this.ui.console.error(error.message || error);
       spinner.stop('❌ Failed to backup the couchdb database.');

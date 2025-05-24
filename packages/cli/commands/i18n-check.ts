@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import * as ts from 'typescript';
 import { Command } from '../lib/Command';
 
@@ -21,6 +21,7 @@ export default class I18nCheckCommand extends Command {
 
     try {
       await this.validateTranslations(projectDir, translationsPath);
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (error: any) {
       this.ui.console.error('Error:', error);
       process.exit(1);

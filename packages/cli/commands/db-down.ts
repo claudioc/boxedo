@@ -1,4 +1,4 @@
-import { loadConfig } from 'boxedo-server/lib/helpers';
+import { loadConfig } from 'boxedo-core';
 import { Command } from '../lib/Command';
 import { dockerComposeDown, isDockerAvailable } from '../lib/tools';
 
@@ -31,6 +31,7 @@ Please double check the project's README.md and https://docs.docker.com/get-dock
 
     try {
       dockerComposeDown();
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (error: any) {
       this.ui.console.error(error.message || error);
       spinner.stop('❌ Failed to stop the remote database.');

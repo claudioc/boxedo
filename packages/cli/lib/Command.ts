@@ -35,15 +35,19 @@ export abstract class Command {
 
   protected isDryRun = false;
 
+  // biome-ignore lint:
   public static async _run(argv: any): Promise<void> {
+    // biome-ignore lint:
     const command: Command = new (<any>this)();
     command.ui = new Ui();
     command.isDryRun = !!argv.dryRun;
 
+    // biome-ignore lint:
     debug(`invoking '${this.commandName}' command`);
     try {
       await command.run(argv);
     } catch (err) {
+      // biome-ignore lint:
       console.error(`"${this.commandName}" command failed`);
       throw err;
     }
@@ -54,7 +58,9 @@ export abstract class Command {
    */
   public static configure(commandName: string, yargs: Yargs): Yargs {
     let command = commandName;
+    // biome-ignore lint:
     if (this.params) {
+      // biome-ignore lint:
       command += ` ${this.params}`;
     }
 
@@ -62,11 +68,13 @@ export abstract class Command {
 
     return yargs.command(
       command,
+      // biome-ignore lint:
       this.description,
       () => {},
       (args) => {
+        // biome-ignore lint:
         this._run(args).catch((e) => {
-          let stack = e.stack;
+          const stack = e.stack;
           console.error(stack);
         });
       }
@@ -76,6 +84,7 @@ export abstract class Command {
   /**
    * Run the command. Can be omitted for pure-subcommand only
    */
+  // biome-ignore lint:
   public async run(argv: any): Promise<void> {
     /* noop */
   }

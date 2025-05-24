@@ -1,4 +1,4 @@
-import { UserRole, userRoles } from 'boxedo-core/types';
+import { type UserRole, userRoles } from 'boxedo-core';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 import { capitalize } from '../lib/tools';
@@ -33,6 +33,7 @@ export default class UserRoleCommand extends Command {
   }
 
   async updateRole() {
+    // biome-ignore lint:
     const repo = await this.context!.getRepositoryFactory().getUserRepository();
 
     const email = await this.ui.prompt('User email address', {

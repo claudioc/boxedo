@@ -37,12 +37,14 @@ export default class DbResetCommand extends Command {
           this.ui.console.info('Success.');
         }
         process.exit(0);
+        break;
 
       case 'remote':
         if (await this.destroyRemoteDatabase()) {
           this.ui.console.info('Success.');
         }
         process.exit(0);
+        break;
 
       default:
         this.ui.console.info(
@@ -53,6 +55,7 @@ export default class DbResetCommand extends Command {
   }
 
   async destroyLocalDatabase(): Promise<boolean> {
+    // biome-ignore lint:
     const config = this.context!.getConfig();
 
     const dbLocalPath = config.BXD_DB_LOCAL_PATH;
@@ -105,6 +108,7 @@ export default class DbResetCommand extends Command {
       } else {
         execSync(`rm -rf ${dbFullPath}`, { stdio: 'inherit' });
       }
+      // biome-ignore lint:
     } catch (error: any) {
       this.ui.console.error(error.message || error);
       this.ui.console.error(
@@ -117,6 +121,7 @@ export default class DbResetCommand extends Command {
   }
 
   async destroyRemoteDatabase(): Promise<boolean> {
+    // biome-ignore lint:
     const config = this.context!.getConfig();
 
     if (!isDockerAvailable()) {
@@ -192,6 +197,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
     this.ui.console.info('Stopping containers…');
     try {
       dockerComposeDown();
+      // biome-ignore lint:
     } catch (error) {
       this.ui.console.error('❌ Failed to stop containers');
       return false;
@@ -200,7 +206,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
     this.ui.console.info(`Removing volume ${fullVolumeName}…`);
     try {
       execSync(`docker volume rm "${fullVolumeName}"`, { stdio: 'inherit' });
-    } catch (error) {
+    } catch {
       this.ui.console.error('❌ Failed to remove volume');
       return false;
     }
@@ -208,7 +214,7 @@ Please make sure the CouchDB container is running before trying to reset the dat
     this.ui.console.info('Starting containers…');
     try {
       dockerComposeUp();
-    } catch (error) {
+    } catch {
       this.ui.console.error('Failed to start containers');
       return false;
     }
@@ -234,12 +240,14 @@ Please make sure the CouchDB container is running before trying to reset the dat
         method: 'PUT',
         headers: {
           Authorization:
+            // biome-ignore lint:
             'Basic ' +
             Buffer.from(
               `${config.BXD_DB_REMOTE_USER}:${config.BXD_DB_REMOTE_PASSWORD}`
             ).toString('base64'),
         },
       });
+      // biome-ignore lint:
     } catch (error: any) {
       this.ui.console.error(
         '❌ Failed to create CouchDb _users database',

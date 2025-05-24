@@ -5,9 +5,7 @@
   "author": "",
   "license": "MIT",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "engines": {
     "node": ">=20.6.0"
   },
@@ -21,7 +19,8 @@
     "clean:modules": "rimraf node_modules packages/*/node_modules package-lock.json",
     "clean:dist": "rimraf dist packages/*/dist",
     "clean:all": "npm run clean:dist && npm run clean:modules",
-    "reset": "npm run clean:all && npm install"
+    "reset": "npm run clean:all && npm install",
+    "lint": "npm run lint --workspaces"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",

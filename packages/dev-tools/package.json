@@ -3,7 +3,8 @@
   "version": "0.10.0",
   "private": true,
   "scripts": {
-    "test": ""
+    "test": "",
+    "lint": "biome lint"
   },
   "dependencies": {}
 }

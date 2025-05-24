@@ -1,4 +1,4 @@
-import { loadConfig } from 'boxedo-server/lib/helpers';
+import { loadConfig } from 'boxedo-core';
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import path, { basename } from 'node:path';
@@ -48,7 +48,7 @@ This operation cannot undone and the side-effects are unpredictable.
 Use it at your own risk and most importantly, use only if you are trying to restore over an empty database!
 `);
 
-    if (!(await this.ui.confirm(`Are you sure you want to continue?`))) {
+    if (!(await this.ui.confirm('Are you sure you want to continue?'))) {
       this.ui.console.info('Restore aborted.');
       process.exit(0);
     }
@@ -77,6 +77,7 @@ Use it at your own risk and most importantly, use only if you are trying to rest
       );
       dockerComposeDown();
       dockerComposeUp();
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (error: any) {
       this.ui.console.error(error.message || error);
       spinner.stop('❌ Failed to restore the couchdb database.');

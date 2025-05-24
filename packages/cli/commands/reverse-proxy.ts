@@ -1,12 +1,13 @@
-import * as http from 'http';
-import { IncomingMessage, ServerResponse } from 'http'; // Use specific types
 import * as httpProxy from 'http-proxy';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import * as http from 'node:http';
 import { Command } from '../lib/Command';
 import { getAppContext } from '../lib/getAppContext';
 
 export default class ReverseProxyCommand extends Command {
   async run() {
     this.context = await getAppContext(this.ui.createConsole(), false);
+    // biome-ignore lint:
     const config = this.context!.getConfig();
     const targetServer = config.BXD_BASE_INTERNAL_URL;
 
@@ -35,6 +36,7 @@ export default class ReverseProxyCommand extends Command {
 
     // --- IMPORTANT: Handle Proxy Errors ---
     // Listen for errors from the proxy connection (e.g., target server down)
+    // biome-ignore lint:
     proxy.on('error', (err, req: any, res: any) => {
       console.error(
         `Proxy error for ${req.method} ${req.originalUrl || req.url}:`,
@@ -52,9 +54,10 @@ export default class ReverseProxyCommand extends Command {
     const server = http.createServer(
       (req: IncomingMessage, res: ServerResponse) => {
         // Store original URL for logging in case of error
+        // biome-ignore lint:
         (req as any).originalUrl = req.url;
 
-        if (req.url && req.url.startsWith(answers.path)) {
+        if (req.url?.startsWith(answers.path)) {
           const originalUrl = req.url;
 
           // Rewrite the URL: Remove the prefix.
@@ -66,7 +69,7 @@ export default class ReverseProxyCommand extends Command {
           req.url = req.url.substring(answers.path.length);
           // Ensure the rewritten path starts with a slash if it's not empty
           if (!req.url.startsWith('/')) {
-            req.url = '/' + req.url;
+            req.url = `/${req.url}`;
           }
 
           this.ui.console.info(

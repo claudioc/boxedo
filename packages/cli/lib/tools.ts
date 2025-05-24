@@ -38,7 +38,7 @@ export const waitForService = async (
     try {
       await fetch(url);
       return true;
-    } catch (error) {
+    } catch {
       await delay(1000);
     }
   }

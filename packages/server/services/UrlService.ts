@@ -1,5 +1,4 @@
-import { parseBaseUrl } from 'boxedo-core/lib/helpers';
-import type { ConfigEnv } from 'boxedo-core/types';
+import { type ConfigEnv, parseBaseUrl } from 'boxedo-core';
 import { isValidUrl } from '~/lib/helpers';
 
 export class UrlService {

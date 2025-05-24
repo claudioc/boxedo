@@ -1,12 +1,9 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import {
   supportedLocales,
   type SupportedLocales,
 } from 'boxedo-core/locales/phrases';
 import { stopwords } from 'boxedo-core/locales/stopwords.en';
 import {
-  ConfigEnvSchema,
   DEFAULT_SUPPORTED_LOCALE,
   languageLocaleMap,
   type ConfigEnv,
@@ -86,42 +83,6 @@ export const getDefaultLanguage = (
   const candidate = config.BXD_SETTINGS_LANGUAGE;
 
   return ensureValidLanguage(candidate);
-};
-
-// This helper is for the tasks that need to validate and load the config
-// but don't have access to Fastify (which does it automatically via a plugin)
-export const loadConfig = (source = process.env): ConfigEnv => {
-  const ajv = new Ajv({
-    useDefaults: true,
-    removeAdditional: true, // or 'all' or 'failing'
-  });
-
-  addFormats(ajv);
-
-  const validate = ajv.compile(ConfigEnvSchema);
-  const input = { ...source };
-
-  if (!validate(input)) {
-    throw new Error(
-      `Config validation failed: ${JSON.stringify(validate.errors)}`
-    );
-  }
-
-  // Extract only the properties defined in the schema
-  const config: Partial<ConfigEnv> = {};
-  const properties = ConfigEnvSchema.properties;
-
-  for (const key in properties) {
-    const typedKey = key as keyof ConfigEnv;
-    if (typedKey in input) {
-      if (input[typedKey] !== undefined) {
-        // biome-ignore lint:
-        config[typedKey] = input[typedKey] as any;
-      }
-    }
-  }
-
-  return config as ConfigEnv;
 };
 
 export const compressTextForSearch = (
