@@ -154,6 +154,33 @@ const clean: TaskFn = async (_, target = 'client') => {
 };
 
 const setupFileWatchers: TaskFn = async (_) => {
+  const clientTasks = [
+    'type-check-client',
+    'lint-client',
+    'clean-client',
+    'build-client',
+    'copy-client',
+    'notify-client-update',
+  ];
+
+  const serverTasks = [
+    'type-check-server',
+    'lint-server',
+    'clean-server',
+    'build-server',
+    'build-css',
+    'start-api-server',
+    'notify-server-update',
+  ];
+
+  const serverTasksForJson = [
+    'clean-server',
+    'build-server',
+    'build-css',
+    'start-api-server',
+    'notify-server-update',
+  ];
+
   try {
     const watchAssets = async () => {
       const assetsWatcher = watch('packages/server/assets', {
@@ -172,13 +199,7 @@ const setupFileWatchers: TaskFn = async (_) => {
       for await (const event of clientWatcher) {
         if (event.filename?.match(/\.(ts|tsx)$/)) {
           console.log(`[Hawk] Client change: ${event.filename}`);
-          taskManager.run([
-            'type-check-client',
-            'lint-client',
-            'clean-client',
-            'build-client',
-            'notify-client-update',
-          ]);
+          taskManager.run(clientTasks);
         }
       }
     };
@@ -186,17 +207,13 @@ const setupFileWatchers: TaskFn = async (_) => {
     const watchServer = async () => {
       const serverWatcher = watch('packages/server', { recursive: true });
       for await (const event of serverWatcher) {
+        if (event.filename?.match(/^assets\//)) {
+          continue;
+        }
+
         if (event.filename?.match(/\.(ts|tsx)$/)) {
           console.log(`[Hawk] Server change: ${event.filename}`);
-          taskManager.run([
-            'type-check-server',
-            'lint-server',
-            'clean-server',
-            'build-server',
-            'build-css',
-            'start-api-server',
-            'notify-server-update',
-          ]);
+          taskManager.run(serverTasks);
         }
 
         if (event.filename?.match(/(global\.css)$/)) {
@@ -208,14 +225,8 @@ const setupFileWatchers: TaskFn = async (_) => {
 
         if (event.filename?.match(/\.(json)$/)) {
           console.log(`[Hawk] Server JSON change: ${event.filename}`);
-          // Translations: just avoid linting and type-checking
-          taskManager.run([
-            'clean-server',
-            'build-server',
-            'build-css',
-            'start-api-server',
-            'notify-server-update',
-          ]);
+          // Translations or package.json just avoid linting and type-checking
+          taskManager.run(serverTasksForJson);
         }
       }
     };
@@ -340,6 +351,8 @@ const buildClient: TaskFn = async (_) => {
       './packages/client/appMini.ts',
     ],
     bundle: true,
+    target: 'es2022',
+    format: 'esm',
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',
     define: {
@@ -380,7 +393,8 @@ const copyClientVendor: TaskFn = async (_) => {
     const targetDir = 'packages/server/assets/vendor';
     await mkdir(targetDir, { recursive: true });
 
-    VENDOR_ASSETS.forEach(async (asset) => {
+    // biome-ignore lint:
+    VENDOR_ASSETS.forEach(async (asset: any) => {
       await cp(
         `./node_modules/${asset.packagePath}/${asset.file}`,
         `${targetDir}/${asset.file}`
@@ -395,12 +409,14 @@ const copyClientVendor: TaskFn = async (_) => {
 };
 
 const buildServer: TaskFn = async (_) => {
-  await esbuild.build({
+  const result = await esbuild.build({
+    target: 'es2022',
+    format: 'esm',
+    packages: 'external',
     entryPoints: ['./packages/server/app.ts'],
     bundle: true,
     platform: 'node',
     sourcemap: process.env.NODE_ENV !== 'production',
-    format: 'esm',
     logLevel: 'info',
     outdir: './packages/server/dist',
     // This banner is required for a workaround in __dirname/__filename and fastify
@@ -415,6 +431,9 @@ const buildServer: TaskFn = async (_) => {
     },
     external: ['pouchdb-adapter-leveldb'],
   });
+
+  if (result?.metafile) console.log(esbuild.analyzeMetafile(result.metafile));
+
   return true;
 };
 

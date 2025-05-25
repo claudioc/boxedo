@@ -1,11 +1,6 @@
 {
   "extends": "../core/tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["es2022"],
-    "target": "es2022",
-    "resolveJsonModule": true,
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
     "paths": {
       "~/*": ["../server/*"]
     }
