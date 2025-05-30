@@ -6,4 +6,4 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-./node_modules/.bin/tsx --no-deprecation --tsconfig ./packages/cli/tsconfig.json --env-file=.env ./packages/cli/boxedo.ts "$@"
+node --no-deprecation --env-file=.env ./packages/cli/dist/boxedo.js "$@"

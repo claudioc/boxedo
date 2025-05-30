@@ -14,7 +14,7 @@ interface SseClient {
   response: ServerResponse;
 }
 
-type Target = 'client' | 'server';
+type Target = 'cli' | 'client' | 'server';
 type TaskFn = (name: string, arg?: Target) => Promise<boolean>;
 type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
@@ -155,23 +155,25 @@ const clean: TaskFn = async (_, target = 'client') => {
 
 const setupFileWatchers: TaskFn = async (_) => {
   const clientTasks = [
+    'clean-client',
     'type-check-client',
     'lint-client',
-    'clean-client',
     'build-client',
     'copy-client',
     'notify-client-update',
   ];
 
   const serverTasks = [
+    'clean-server',
     'type-check-server',
     'lint-server',
-    'clean-server',
     'build-server',
     'build-css',
     'start-api-server',
     'notify-server-update',
   ];
+
+  const cliTasks = ['clean-cli', 'type-check-cli', 'lint-cli', 'build-cli'];
 
   const serverTasksForJson = [
     'clean-server',
@@ -200,6 +202,16 @@ const setupFileWatchers: TaskFn = async (_) => {
         if (event.filename?.match(/\.(ts|tsx)$/)) {
           console.log(`[Hawk] Client change: ${event.filename}`);
           taskManager.run(clientTasks);
+        }
+      }
+    };
+
+    const watchCli = async () => {
+      const clientWatcher = watch('packages/cli', { recursive: true });
+      for await (const event of clientWatcher) {
+        if (event.filename?.match(/\.ts$/)) {
+          console.log(`[Hawk] Cli change: ${event.filename}`);
+          taskManager.run(cliTasks);
         }
       }
     };
@@ -257,6 +269,7 @@ const setupFileWatchers: TaskFn = async (_) => {
     Promise.all([
       watchAssets(),
       watchClient(),
+      watchCli(),
       watchServer(),
       watchRoot(),
     ]).catch((error) => {
@@ -412,7 +425,7 @@ const buildServer: TaskFn = async (_) => {
   const result = await esbuild.build({
     target: 'es2022',
     format: 'esm',
-    packages: 'external',
+    packages: process.env.NODE_ENV !== 'production' ? 'external' : 'bundle',
     entryPoints: ['./packages/server/app.ts'],
     bundle: true,
     platform: 'node',
@@ -430,6 +443,32 @@ const buildServer: TaskFn = async (_) => {
       const __dirname = dirname(__filename);`,
     },
     external: ['pouchdb-adapter-leveldb'],
+  });
+
+  if (result?.metafile) console.log(esbuild.analyzeMetafile(result.metafile));
+
+  return true;
+};
+
+const buildCli: TaskFn = async (_) => {
+  const result = await esbuild.build({
+    target: 'es2022',
+    format: 'esm',
+    packages: process.env.NODE_ENV !== 'production' ? 'external' : 'bundle',
+    banner: {
+      js: `
+      import { createRequire } from "module";
+      const require = createRequire(import.meta.url);
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);`,
+    },
+    external: ['pouchdb-adapter-leveldb'],
+    entryPoints: ['./packages/cli/boxedo.ts'],
+    bundle: true,
+    platform: 'node',
+    sourcemap: process.env.NODE_ENV !== 'production',
+    logLevel: 'info',
+    outdir: './packages/cli/dist',
   });
 
   if (result?.metafile) console.log(esbuild.analyzeMetafile(result.metafile));
@@ -607,14 +646,18 @@ class TaskManager {
 const taskManager = new TaskManager();
 
 taskManager.registerTask('clear-port', clearPort);
+taskManager.registerTask('clean-cli', clean, 'cli');
 taskManager.registerTask('clean-client', clean, 'client');
 taskManager.registerTask('clean-server', clean, 'server');
+taskManager.registerTask('type-check-cli', typeCheck, 'cli');
 taskManager.registerTask('type-check-client', typeCheck, 'client');
 taskManager.registerTask('type-check-server', typeCheck, 'server');
+taskManager.registerTask('lint-cli', lint, 'cli');
 taskManager.registerTask('lint-client', lint, 'client');
 taskManager.registerTask('lint-server', lint, 'server');
 taskManager.registerTask('build-client', buildClient);
 taskManager.registerTask('build-server', buildServer);
+taskManager.registerTask('build-cli', buildCli);
 taskManager.registerTask('start-sse-server', startSseServer);
 taskManager.registerTask('setup-file-watchers', setupFileWatchers);
 taskManager.registerTask('start-api-server', startApiServer);
@@ -628,12 +671,17 @@ taskManager.registerTask('copy-vendor', copyClientVendor);
 if (process.env.NODE_ENV === 'production') {
   taskManager.run(
     [
+      'clean-cli',
+      'build-cli',
+
       'clean-client',
-      'clean-server',
       'build-client',
+
+      'clean-server',
+      'build-server',
+
       'copy-client',
       'copy-vendor',
-      'build-server',
       'build-css',
     ],
     true
@@ -642,16 +690,24 @@ if (process.env.NODE_ENV === 'production') {
   taskManager.run(
     [
       'clear-port',
+
+      'clean-cli',
+      'type-check-cli',
+      'lint-cli',
+      'build-cli',
+
       'clean-client',
-      'clean-server',
       'type-check-client',
       'lint-client',
       'build-client',
-      'copy-client',
-      'copy-vendor',
+
+      'clean-server',
       'type-check-server',
       'lint-server',
       'build-server',
+
+      'copy-client',
+      'copy-vendor',
       'build-css',
       'start-sse-server',
       'setup-file-watchers',

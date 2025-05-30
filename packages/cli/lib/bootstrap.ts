@@ -1,8 +1,8 @@
 import createDebug from 'debug';
-import fs from 'node:fs';
-import path from 'node:path';
 import type { Argv as Yargs } from 'yargs';
 import yargs from 'yargs';
+
+import { commandMap } from '../commands';
 
 const debug = createDebug('boxedo-cli:bootstrap');
 
@@ -16,46 +16,10 @@ process.on('unhandledRejection', (reason, promise) => {
 
 export const bootstrap = {
   /**
-   * Discovers any commands inside of the commands folder
-   */
-  discoverCommands(
-    commands: Record<string, string>,
-    dir: string
-  ): Record<string, string> {
-    const commandsDir = path.join(dir, 'commands');
-
-    // No commands here if commands dir doesn't exist
-    if (!fs.existsSync(commandsDir)) {
-      return commands;
-    }
-
-    // Read the directory and find the commands
-    fs.readdirSync(commandsDir)
-      .filter(
-        (command) =>
-          path.extname(command) === '.ts' ||
-          fs.existsSync(path.join(commandsDir, command, `${command}.ts`))
-      )
-      .forEach((command) => {
-        const basename = path.basename(command, '.ts');
-        const commandName = basename;
-        commands[commandName] = path.resolve(commandsDir, basename);
-      });
-
-    return commands;
-  },
-
-  /**
    * Configure a single command
    */
-  async loadCommand(
-    commandName: string,
-    commandPath: string,
-    argParser: Yargs
-  ): Promise<void> {
-    const module = await import(commandPath);
-    const CommandClass = module.default || module;
-    CommandClass.configure(commandName, argParser);
+  async loadCommand(commandName: string, argParser: Yargs): Promise<void> {
+    commandMap[commandName].configure(commandName, argParser);
   },
 
   /**
@@ -71,10 +35,6 @@ Usage: boxedo <command> [options]
 
 This is Boxedo CLI.`);
 
-    const commands = bootstrap.discoverCommands({}, './packages/cli');
-
-    debug(`Discovered commands: ${Object.keys(commands).join(', ')}`);
-
     // Get the first argument so we can not load all the commands at once
     const firstArg = argv.shift();
 
@@ -82,17 +42,15 @@ This is Boxedo CLI.`);
     // for this one case
     if (firstArg === 'help' || firstArg === '--help') {
       debug('running help command, requiring and configuring every command');
-      for (const [commandName, commandPath] of Object.entries(commands)) {
-        await bootstrap.loadCommand(commandName, commandPath, argParser);
+      for (const [commandName, _] of Object.entries(commandMap)) {
+        await bootstrap.loadCommand(commandName, argParser);
       }
       argv.unshift('help');
       // biome-ignore lint:
-    } else if (commands[firstArg!]) {
+    } else if (commandMap[firstArg!]) {
       // biome-ignore lint:
       const commandName = firstArg!;
-      // biome-ignore lint:
-      const commandPath = commands[firstArg!];
-      await bootstrap.loadCommand(commandName, commandPath, argParser);
+      await bootstrap.loadCommand(commandName, argParser);
       // biome-ignore lint:
       argv.unshift(commandName!);
     } else {

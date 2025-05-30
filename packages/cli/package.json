@@ -3,6 +3,7 @@
   "version": "0.10.0",
   "description": "The CLI bits of boxedo",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "test": "",
     "lint": "biome lint"
