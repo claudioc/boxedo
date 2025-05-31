@@ -454,19 +454,23 @@ const buildCli: TaskFn = async (_) => {
   const result = await esbuild.build({
     target: 'es2022',
     format: 'esm',
-    packages: process.env.NODE_ENV !== 'production' ? 'external' : 'bundle',
+    // packages: process.env.NODE_ENV !== 'production' ? 'external' : 'bundle',
+    packages: 'bundle',
     banner: {
       js: `
       import { createRequire } from "module";
       const require = createRequire(import.meta.url);
+      import { fileURLToPath } from 'url';
       const __filename = fileURLToPath(import.meta.url);
+      import { dirname } from 'path';
       const __dirname = dirname(__filename);`,
     },
     external: ['pouchdb-adapter-leveldb'],
     entryPoints: ['./packages/cli/boxedo.ts'],
     bundle: true,
     platform: 'node',
-    sourcemap: process.env.NODE_ENV !== 'production',
+    minify: true,
+    sourcemap: false,
     logLevel: 'info',
     outdir: './packages/cli/dist',
   });

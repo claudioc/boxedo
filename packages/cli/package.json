@@ -4,6 +4,11 @@
   "description": "The CLI bits of boxedo",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "boxedo": "./boxedo",
+    "boxedo-cli": "./dist/boxedo.js"
+  },
+  "files": ["dist/", "README.md", "package.json", "boxedo"],
   "scripts": {
     "test": "",
     "lint": "biome lint"
