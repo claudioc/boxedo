@@ -5,8 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "boxedo": "./boxedo",
-    "boxedo-cli": "./dist/boxedo.js"
+    "boxedo-cli": "./boxedo"
   },
   "files": ["dist/", "README.md", "package.json", "boxedo"],
   "scripts": {

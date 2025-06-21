@@ -20,7 +20,8 @@
     "clean:dist": "rimraf dist packages/*/dist",
     "clean:all": "npm run clean:dist && npm run clean:modules",
     "reset": "npm run clean:all && npm install",
-    "lint": "npm run lint --workspaces"
+    "lint": "npm run lint --workspaces",
+    "postinstall": "npm run build"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.0",
@@ -34,6 +35,7 @@
     "typescript": "^5.7.0",
     "vite-tsconfig-paths": "^5.1.0",
     "vitest": "^3.0.7",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "boxedo-cli": "workspace:*"
   }
 }
