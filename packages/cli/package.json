@@ -1,13 +1,18 @@
 {
   "name": "boxedo-cli",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "The CLI bits of boxedo",
   "license": "MIT",
   "type": "module",
   "bin": {
     "boxedo-cli": "./boxedo"
   },
-  "files": ["dist/", "README.md", "package.json", "boxedo"],
+  "files": [
+    "dist/",
+    "README.md",
+    "package.json",
+    "boxedo"
+  ],
   "scripts": {
     "test": "",
     "lint": "biome lint"

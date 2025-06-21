@@ -1,5 +1,25 @@
 # Changelog
 
+## [minor] - 2025-06-21
+
+### Features
+
+- build the cli and run it with node
+- adds the version command
+
+### Bug Fixes
+
+- fixing cli bundling
+
+### Documentation
+
+- adds a README everywhere
+
+### Other Changes
+
+- better build scripts
+- moves loadConfig in core
+
 ## [minor] - 2025-05-20
 
 ### Features

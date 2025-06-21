@@ -1,6 +1,6 @@
 {
   "name": "boxedo-client",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "The client bits of boxedo",
   "license": "MIT",
   "scripts": {
