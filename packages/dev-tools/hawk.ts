@@ -365,7 +365,8 @@ const buildClient: TaskFn = async (_) => {
     ],
     bundle: true,
     target: 'es2022',
-    format: 'esm',
+    // The ESM format breaks Alpines and HTMX
+    // format: 'esm',
     sourcemap: process.env.NODE_ENV !== 'production',
     logLevel: 'info',
     define: {
