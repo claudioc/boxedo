@@ -1,5 +1,11 @@
 # Changelog
 
+## [patch] - 2025-07-21
+
+### Bug Fixes
+
+- fixes the client build
+
 ## [minor] - 2025-06-21
 
 ### Features
