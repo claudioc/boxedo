@@ -1,5 +1,15 @@
 # Changelog
 
+## [patch] - 2025-08-08
+
+### Bug Fixes
+
+- updates dependencies
+
+### Other Changes
+
+- renames the alpine stores
+
 ## [patch] - 2025-07-21
 
 ### Bug Fixes
