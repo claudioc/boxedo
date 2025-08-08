@@ -31,8 +31,8 @@ export const PageActions = ({
           <button
             class="btn btn-primary btn-sm"
             type="submit"
-            x-bind:disabled="$store.form.submitting"
-            x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
+            x-bind:disabled="$store.formState.submitting"
+            x-on:click="setTimeout(() => $store.formState.submitting = true, 1)"
           >
             <span class="hidden md:block">
               {i18n.t('PageActions.saveAndClose')}
@@ -46,7 +46,7 @@ export const PageActions = ({
           <a
             href={cancelUrl}
             class="btn btn-sm"
-            x-bind:disabled="$store.form.submitting"
+            x-bind:disabled="$store.formState.submitting"
             x-on:click="window.onbeforeunload=null"
           >
             <span class="hidden md:block">{i18n.t('PageActions.cancel')}</span>

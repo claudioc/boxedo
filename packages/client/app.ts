@@ -1,6 +1,6 @@
 import type { Context } from 'boxedo-core/types';
 import { compilePageTitle, isUrl, removeQueryParam } from './lib/helpers';
-import { store, storeForm } from './lib/setupAlpine';
+import { formState, pageState } from './lib/setupAlpine';
 import './lib/setupHtmx';
 import { destroySortable, enableSortable } from './lib/setupSortable';
 import type { TipTapEditor } from './lib/setupTipTap';
@@ -61,7 +61,9 @@ class App {
         if (preValidated.includes(key)) {
           continue;
         }
-        error[key] = (value as string).trim() === '';
+        // When editing a page, an "empty" content could just contain a "<p></p>"
+        const testValue = String(value).replace('<p></p>', '').trim();
+        error[key] = testValue === '';
       }
     }
 
@@ -90,7 +92,7 @@ class App {
       }
     }
 
-    store.error = error;
+    pageState.error = error;
 
     if (Object.values(error).some((v) => v)) {
       event.stopImmediatePropagation();
@@ -120,7 +122,7 @@ class App {
 
   resetForm() {
     setTimeout(() => {
-      storeForm.submitting = false;
+      formState.submitting = false;
     }, 5);
   }
 

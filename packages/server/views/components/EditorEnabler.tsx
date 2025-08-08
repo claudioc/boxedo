@@ -177,8 +177,8 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
                 type="submit"
                 class="btn btn-primary"
                 value="default"
-                x-bind:disabled="$store.form.submitting"
-                x-on:click="setTimeout(() => $store.form.submitting = true, 1)"
+                x-bind:disabled="$store.formState.submitting"
+                x-on:click="setTimeout(() => $store.formState.submitting = true, 1)"
               >
                 {i18n.t('ImageDialog.uploadAction')}
               </button>
@@ -186,7 +186,7 @@ export const EditorEnabler = ({ ctx }: EditorEnablerProps) => {
                 type="button"
                 class="btn"
                 value="cancel"
-                x-bind:disabled="$store.form.submitting"
+                x-bind:disabled="$store.formState.submitting"
                 x-on:click="$refs.uploadDialog.close()"
               >
                 {i18n.t('common.cancel')}

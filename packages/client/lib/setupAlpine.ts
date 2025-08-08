@@ -1,46 +1,50 @@
 import Alpine from 'alpinejs';
 
-interface AppStore {
+interface PageStateStore {
   pageId: string;
   error: Record<string, boolean>;
   info: boolean;
-  errorOn(key: string): boolean;
-  some(): boolean;
-  none(): void;
+  hasErrorOn(key: string): boolean;
+  hasFeedback(): boolean;
+  reset(): void;
 }
 
-interface FormStore {
+interface FormStateStore {
   submitting: boolean;
 }
 
-Alpine.store('has', {
+interface EditorStateStore {
+  isImage(): boolean;
+}
+
+Alpine.store('pageState', {
   pageId: '',
   error: {},
   info: true,
-  errorOn(key: string) {
+  hasErrorOn(key: string) {
     return !!this.error[key];
   },
-  some() {
+  hasFeedback() {
     return this.info || (this.error && Object.keys(this.error).length > 0);
   },
-  none() {
+  reset() {
     this.error = {};
     this.info = false;
   },
-} as AppStore);
+} as PageStateStore);
 
 Alpine.store('editorState', {
   isImage() {
     return !!window.App.getEditor()?.isActive('image');
   },
-});
+} as EditorStateStore);
 
-Alpine.store('form', {
+Alpine.store('formState', {
   submitting: false,
-} as FormStore);
+} as FormStateStore);
 
 Alpine.start();
 
-const store = Alpine.store('has') as AppStore;
-const storeForm = Alpine.store('form') as FormStore;
-export { store, storeForm };
+const pageState = Alpine.store('pageState') as PageStateStore;
+const formState = Alpine.store('formState') as FormStateStore;
+export { formState, pageState };

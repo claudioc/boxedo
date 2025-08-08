@@ -34,7 +34,7 @@ export const MovePage = ({ ctx, token, page, parent }: MovePageProps) => {
             <input type="hidden" name="newParentId" x-model="newParentId" />
             <input type="hidden" name="_csrf" value={token} />
 
-            <div x-show="$store.has.errorOn('newParentId')">
+            <div x-show="$store.pageState.hasErrorOn('newParentId')">
               <Feedback ctx={ctx} feedback={Feedbacks.E_INVALID_PARENT_PAGE} />
             </div>
 

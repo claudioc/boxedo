@@ -33,7 +33,7 @@ export const Layout = ({
   const authService = AuthorizationService.getInstance();
 
   const onKeypress = {
-    '@keyup.escape': '$store.has.none()',
+    '@keyup.escape': '$store.pageState.reset()',
   };
 
   const createButtonLink = urlService.url(
@@ -76,8 +76,8 @@ export const Layout = ({
               </label>
             </div>
             <div
-              x-show="$store.has.some()"
-              x-init="setTimeout(() => $store.has.none(), 3000)"
+              x-show="$store.pageState.hasFeedback()"
+              x-init="setTimeout(() => $store.pageState.reset(), 3000)"
             >
               <Feedback ctx={ctx} feedback={getFeedbackByCode(feedbackCode)} />
             </div>
